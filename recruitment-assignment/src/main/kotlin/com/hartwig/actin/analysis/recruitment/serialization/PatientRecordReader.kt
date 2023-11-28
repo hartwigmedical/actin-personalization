@@ -23,7 +23,7 @@ object PatientRecordReader {
             age = parts[fields["age"]!!].toInt(),
             ecog = parts[fields["ecog"]!!].toInt(),
             metastaticSites = toSet(parts[fields["metastaticSites"]!!]),
-            pretreatedWithPaclitaxel = parts[fields["pretreatedWithPaclitaxel"]!!] == "1",
+            pretreatedWithPaclitaxel = parts[fields["pretreatedWithPaclitaxel"]!!] == "Yes",
             psa = parts[fields["psa"]!!].toInt(),
             genesInactivated = toSet(parts[fields["genesInactivated"]!!]),
             treatmentChoice = parts[fields["treatmentChoice"]!!],

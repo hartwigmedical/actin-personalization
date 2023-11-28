@@ -1,0 +1,11 @@
+id	age	ecog	metastaticSites	pretreatedWithPaclitaxel	psa	genesInactivated	treatmentChoice	pfs
+1	65	0	Other	No	45	ATM	Olaparib	4
+2	58	1	Bone	No	58	BRCA2	Olaparib	10
+3	69	1	Bone+Visceral	Yes	140	ATM	Enzalutamide	3
+4	84	1	Bone	Yes	60	BRCA1	Enzalutamide	2
+5	63	0	Bone	No	38	BRCA1	Olaparib	11
+6	79	2	Bone+Visceral	Yes	110	RAD54L	Enzalutamide	3
+7	77	2	Bone+Visceral	No	150	ATM	Enzalutamide	4
+8	66	1	Visceral	Yes	110	BRCA2	Olaparib	12
+9	82	1	Other	No	70	CHEK2	Enzalutamide	5
+10	70	0	Other	Yes	90	BRCA1	Olaparib	10
