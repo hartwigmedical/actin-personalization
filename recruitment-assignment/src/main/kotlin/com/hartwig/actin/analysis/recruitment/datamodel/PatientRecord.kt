@@ -5,7 +5,7 @@ data class PatientRecord(
     val age : Int,
     val ecog : Int,
     val metastaticSites : Set<String>,
-    val pretreatedWithPaclitaxel : Boolean,
+    val pretreatedWithDocetaxel: Boolean,
     val psa : Int,
     val genesInactivated : Set<String>,
     val treatmentChoice : String,

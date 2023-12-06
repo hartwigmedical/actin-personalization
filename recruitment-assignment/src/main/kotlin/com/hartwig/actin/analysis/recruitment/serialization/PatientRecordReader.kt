@@ -3,7 +3,6 @@ package com.hartwig.actin.analysis.recruitment.serialization
 import com.hartwig.actin.analysis.recruitment.datamodel.PatientRecord
 import java.io.File
 import java.nio.file.Files
-import java.util.HashMap
 
 object PatientRecordReader {
 
@@ -23,7 +22,7 @@ object PatientRecordReader {
             age = parts[fields["age"]!!].toInt(),
             ecog = parts[fields["ecog"]!!].toInt(),
             metastaticSites = toSet(parts[fields["metastaticSites"]!!]),
-            pretreatedWithPaclitaxel = parts[fields["pretreatedWithPaclitaxel"]!!] == "Yes",
+            pretreatedWithDocetaxel = parts[fields["pretreatedWithDocetaxel"]!!] == "Yes",
             psa = parts[fields["psa"]!!].toInt(),
             genesInactivated = toSet(parts[fields["genesInactivated"]!!]),
             treatmentChoice = parts[fields["treatmentChoice"]!!],
