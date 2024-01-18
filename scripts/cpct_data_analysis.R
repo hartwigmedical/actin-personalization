@@ -95,6 +95,16 @@ cpct <- cpct %>%
   mutate(daysDeathDateAfterFirstResponseDate = ifelse(daysEndDateAfterFirstResponseDate < end_date_after_response_date_min, NA, daysDeathDateAfterFirstResponseDate)) %>%
   mutate(daysEndDateAfterFirstResponseDate = ifelse(daysEndDateAfterFirstResponseDate < end_date_after_response_date_min, NA, daysEndDateAfterFirstResponseDate))
 
+## Tumor details
+barchart(cpct$primaryTumorLocation)
+
+## Pre-treated details
+pie(table(cpct$hasSystemicPreTreatment), main="Has had systemic pretreatment?", col=c("red","blue"), labels=paste0(row.names(table(cpct$hasSystemicPreTreatment)), " (", round(prop.table(table(cpct$hasSystemicPreTreatment))*100,0), "%)", sep = ""))
+pie(table(cpct$hasRadiotherapyPreTreatment), main="Has had radiotherapy pretreatment?", col=c("red","blue"), labels=paste0(row.names(table(cpct$hasRadiotherapyPreTreatment)), " (", round(prop.table(table(cpct$hasRadiotherapyPreTreatment))*100,0), "%)", sep = ""))
+
+cpct <- add_column(cpct, hasBeenUntreated = (cpct$hasSystemicPreTreatment == "No" & cpct$hasRadiotherapyPreTreatment == "No"), .after = "hasRadiotherapyPreTreatment")
+pie(table(cpct$hasBeenUntreated.1), main="Has been untreated?", col=c("red","blue"), labels=paste0(row.names(table(cpct$hasBeenUntreated.1)), " (", round(prop.table(table(cpct$hasBeenUntreated.1))*100,0), "%)", sep = ""))
+
 # 1. CRC exploration---------------------------------------------
 cpctCrc <- subset(cpct, subset = (primaryTumorLocation == 'Colorectum'))
 n_distinct(cpctCrc$sampleId)
