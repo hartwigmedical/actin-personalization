@@ -106,6 +106,7 @@ cpct <- add_column(cpct, hasBeenUntreated = (cpct$hasSystemicPreTreatment == "No
 pie(table(cpct$hasBeenUntreated), main="Has been untreated?", col=c("red","blue"), labels=paste0(row.names(table(cpct$hasBeenUntreated)), " (", round(prop.table(table(cpct$hasBeenUntreated))*100,0), "%)", sep = ""))
 
 # 1. CRC exploration---------------------------------------------
+## General numbers & tumor types
 cpctCrc <- subset(cpct, subset = (primaryTumorLocation == 'Colorectum'))
 n_distinct(cpctCrc$sampleId)
 n_distinct(cpctCrc$patientId)
@@ -116,40 +117,53 @@ cpctCrc <- subset(cpctCrc, subset = (primaryTumorType %in% c('','Carcinoma')))
 n_distinct(cpctCrc$sampleId)
 n_distinct(cpctCrc$patientId)
 
+## Adding CRC driver information
 cpctCrc <- inner_join(cpctCrc, cpctCrcDrivers, by=c('sampleId'='sampleId'))
 
 ## MSI
 cpctCrc %>% group_by(msStatus) %>% summarise(count = n())
 qplot(cpctCrc$msStatus)
 
-cpctCrcMsi <- subset(cpctCrc, subset = (msStatus == 'MSI')) %>%
-add_column(immunotherapyAsPreTreatment = ifelse(is.na(str_detect(cpctCrcMsi$preTreatmentsType, "Immunotherapy")), FALSE, str_detect(cpctCrcMsi$preTreatmentsType, "Immuno")), .before = "treatmentGiven") %>%
-add_column(immunotherapyAsTreatment = ifelse(is.na(str_detect(cpctCrcMsi$concatenatedTreatmentType, "Immunotherapy")), FALSE, str_detect(cpctCrcMsi$concatenatedTreatmentType, "Immuno")), .before = "responseMeasured")
+cpctCrcMsi <- subset(cpctCrc, subset = (msStatus == 'MSI'))
+cpctCrcMsi <- add_column(cpctCrcMsi, immunotherapyAsPreTreatment = ifelse(is.na(str_detect(cpctCrcMsi$preTreatmentsType, "Immunotherapy")), FALSE, str_detect(cpctCrcMsi$preTreatmentsType, "Immuno")), .before = "treatmentGiven")
+cpctCrcMsi <- add_column(cpctCrcMsi, immunotherapyAsTreatment = ifelse(is.na(str_detect(cpctCrcMsi$concatenatedTreatmentType, "Immunotherapy")), FALSE, str_detect(cpctCrcMsi$concatenatedTreatmentType, "Immuno")), .before = "responseMeasured")
+
 qplot(cpctCrcMsi$immunotherapyAsPreTreatment)
 qplot(cpctCrcMsi$immunotherapyAsTreatment)
+
+cpctCrcImmunoInNonMSI <- cpctCrc %>% 
+  add_column(cpctCrc, immunotherapyAsTreatment = ifelse(is.na(str_detect(cpctCrc$concatenatedTreatmentType, "Immunotherapy")), FALSE, str_detect(cpctCrc$concatenatedTreatmentType, "Immuno")), .before = "treatmentGiven") %>%
+  subset(immunotherapyAsTreatment == 'TRUE') %>%
+  subset(msStatus == 'MSS')
 
 ## BRAF
 cpctCrc %>% group_by(brafV600EStatus) %>% summarise(count = n())
 qplot(cpctCrc$brafV600EStatus)
 
-cpctCrcBraf <- subset(cpctCrc, subset = (brafV600EStatus == 'positive')) %>%
-add_column(brafTreatmentAsPreTreatment = ifelse(is.na(str_detect(cpctCrcBraf$preTreatmentsMechanism, "BRAF")), FALSE, str_detect(cpctCrcBraf$preTreatmentsMechanism, "BRAF")), .before = "treatmentGiven") %>%
-add_column(brafTreatmentAsTreatment = ifelse(is.na(str_detect(cpctCrcBraf$concatenatedTreatmentMechanism, "BRAF")), FALSE, str_detect(cpctCrcBraf$concatenatedTreatmentMechanism, "BRAF")), .before = "responseMeasured")
+cpctCrcBraf <- subset(cpctCrc, subset = (brafV600EStatus == 'positive'))
+cpctCrcBraf <- add_column(cpctCrcBraf, brafTreatmentAsPreTreatment = ifelse(is.na(str_detect(cpctCrcBraf$preTreatmentsMechanism, "BRAF inhibitor")), FALSE, str_detect(cpctCrcBraf$preTreatmentsMechanism, "BRAF inhibitor")), .before = "treatmentGiven")
+cpctCrcBraf <- add_column(cpctCrcBraf, brafTreatmentAsTreatment = ifelse(is.na(str_detect(cpctCrcBraf$concatenatedTreatmentMechanism, "BRAF inhibitor")), FALSE, str_detect(cpctCrcBraf$concatenatedTreatmentMechanism, "BRAF inhibitor")), .before = "responseMeasured")
 qplot(cpctCrcBraf$brafTreatmentAsPreTreatment)
 qplot(cpctCrcBraf$brafTreatmentAsTreatment)
 
+cpctCrcBRAFInNonBRAF <- cpctCrc %>% 
+  add_column(brafTreatmentAsTreatment = ifelse(is.na(str_detect(cpctCrc$concatenatedTreatmentMechanism, "BRAF inhibitor")), FALSE, str_detect(cpctCrc$concatenatedTreatmentMechanism, "BRAF inhibitor")), .before = "responseMeasured") %>%
+  subset(brafTreatmentAsTreatment == 'TRUE') %>%
+  subset(brafV600EStatus == 'wildtype')
+
 ## RAS/BRAF WILDTYPE
 cpctCrc <- add_column(cpctCrc, rasBrafWildtype = (cpctCrc$krasStatus == "wildtype" & cpctCrc$nrasStatus == "wildtype" & cpctCrc$brafV600EStatus == "wildtype"))
+
 cpctCrc %>% group_by(rasBrafWildtype) %>% summarise(count = n())
 qplot(cpctCrc$rasBrafWildtype)
 
-cpctCrcRasRafWildtype <- subset(cpctCrc, subset = (rasBrafWildtype == 'TRUE')) %>%
-  add_column(egfrTreatmentAsPreTreatment = ifelse(is.na(str_detect(cpctCrcRasRafWildtype$preTreatmentsMechanism, "EGFR")), FALSE, str_detect(cpctCrcRasRafWildtype$preTreatmentsMechanism, "EGFR")), .before = "treatmentGiven") %>%
-  add_column(egfrTreatmentAsTreatment = ifelse(is.na(str_detect(cpctCrcRasRafWildtype$concatenatedTreatmentMechanism, "EGFR")), FALSE, str_detect(cpctCrcRasRafWildtype$concatenatedTreatmentMechanism, "EGFR")), .before = "responseMeasured") %>%
-  add_column(cetuximabAsPreTreatment = ifelse(is.na(str_detect(cpctCrcRasRafWildtype$preTreatments, "Cetuximab")), FALSE, str_detect(cpctCrcRasRafWildtype$preTreatments, "Cetuximab")), .before = "treatmentGiven") %>%
-  add_column(panitumumabAsPreTreatment = ifelse(is.na(str_detect(cpctCrcRasRafWildtype$preTreatments, "Panitumumab")), FALSE, str_detect(cpctCrcRasRafWildtype$preTreatments, "Panitumumab")), .before = "treatmentGiven") %>%
-  add_column(cetuximabAsTreatment = ifelse(is.na(str_detect(cpctCrcRasRafWildtype$treatment, "Cetuximab")), FALSE, str_detect(cpctCrcRasRafWildtype$treatment, "Cetuximab")), .before = "responseMeasured") %>%
-  add_column(panitumumabAsTreatment = ifelse(is.na(str_detect(cpctCrcRasRafWildtype$treatment, "Panitumumab")), FALSE, str_detect(cpctCrcRasRafWildtype$treatment, "Panitumumab")), .before = "responseMeasured")
+cpctCrcRasRafWildtype <- subset(cpctCrc, subset = (rasBrafWildtype == 'TRUE'))
+cpctCrcRasRafWildtype <- add_column(cpctCrcRasRafWildtype, egfrTreatmentAsPreTreatment = ifelse(is.na(str_detect(cpctCrcRasRafWildtype$preTreatmentsMechanism, "EGFR")), FALSE, str_detect(cpctCrcRasRafWildtype$preTreatmentsMechanism, "EGFR")), .before = "treatmentGiven")
+cpctCrcRasRafWildtype <- add_column(cpctCrcRasRafWildtype, egfrTreatmentAsTreatment = ifelse(is.na(str_detect(cpctCrcRasRafWildtype$concatenatedTreatmentMechanism, "EGFR")), FALSE, str_detect(cpctCrcRasRafWildtype$concatenatedTreatmentMechanism, "EGFR")), .before = "responseMeasured")
+cpctCrcRasRafWildtype <- add_column(cpctCrcRasRafWildtype, cetuximabAsPreTreatment = ifelse(is.na(str_detect(cpctCrcRasRafWildtype$preTreatments, "Cetuximab")), FALSE, str_detect(cpctCrcRasRafWildtype$preTreatments, "Cetuximab")), .before = "treatmentGiven")
+cpctCrcRasRafWildtype <- add_column(cpctCrcRasRafWildtype, panitumumabAsPreTreatment = ifelse(is.na(str_detect(cpctCrcRasRafWildtype$preTreatments, "Panitumumab")), FALSE, str_detect(cpctCrcRasRafWildtype$preTreatments, "Panitumumab")), .before = "treatmentGiven")
+cpctCrcRasRafWildtype <- add_column(cpctCrcRasRafWildtype, cetuximabAsTreatment = ifelse(is.na(str_detect(cpctCrcRasRafWildtype$treatment, "Cetuximab")), FALSE, str_detect(cpctCrcRasRafWildtype$treatment, "Cetuximab")), .before = "responseMeasured")
+cpctCrcRasRafWildtype <- add_column(cpctCrcRasRafWildtype, panitumumabAsTreatment = ifelse(is.na(str_detect(cpctCrcRasRafWildtype$treatment, "Panitumumab")), FALSE, str_detect(cpctCrcRasRafWildtype$treatment, "Panitumumab")), .before = "responseMeasured")
 
 qplot(cpctCrcRasRafWildtype$egfrTreatmentAsPreTreatment)
 qplot(cpctCrcRasRafWildtype$egfrTreatmentAsTreatment)
@@ -161,9 +175,17 @@ cpctCrcRasRafWildtype %>% group_by(panitumumabAsPreTreatment) %>% summarise(coun
 cpctCrcRasRafWildtype %>% group_by(cetuximabAsTreatment) %>% summarise(count = n())
 cpctCrcRasRafWildtype %>% group_by(panitumumabAsTreatment) %>% summarise(count = n())
 
-## WIP
-cpctCrcPanitumumabWT <- subset(cpctCrcRasRafWildtype, subset = (panitumumabAsTreatment == 'TRUE'))
-cpctCrcPanitumumab <- cpctCrc %>% add_column(panitumumabAsTreatment = ifelse(is.na(str_detect(cpctCrc$treatment, "Panitumumab")), FALSE, str_detect(cpctCrc$treatment, "Panitumumab")), .before = "responseMeasured") %>% subset(subset = (panitumumabAsTreatment == 'TRUE'))
+cpctCrcPanitumumabInWT <- subset(cpctCrcRasRafWildtype, subset = (panitumumabAsTreatment == 'TRUE'))
+cpctCrcPanitumumabInNonWT <- cpctCrc %>% 
+  add_column(panitumumabAsTreatment = ifelse(is.na(str_detect(cpctCrc$treatment, "Panitumumab")), FALSE, str_detect(cpctCrc$treatment, "Panitumumab")), .before = "responseMeasured") %>%
+  subset(panitumumabAsTreatment == 'TRUE') %>%
+  subset(rasBrafWildtype == 'FALSE')
+
+cpctCrcCetuximabInWT <- subset(cpctCrcRasRafWildtype, subset = (cetuximabAsTreatment == 'TRUE'))
+cpctCrcCetuximabInNonWT <- cpctCrc %>% 
+  add_column(cetuximabAsTreatment = ifelse(is.na(str_detect(cpctCrc$treatment, "Cetuximab")), FALSE, str_detect(cpctCrc$treatment, "Cetuximab")), .before = "responseMeasured") %>%
+  subset(cetuximabAsTreatment == 'TRUE') %>%
+  subset(rasBrafWildtype == 'FALSE')
 
 # 2. All Investigate relationship between age at start treatment & treatment duration ------------------------------------------------------------------
 categoriesTherapy = c("Immunotherapy", "Hormonal therapy", "Chemotherapy", "Targeted therapy")
