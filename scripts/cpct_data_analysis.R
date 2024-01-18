@@ -47,42 +47,53 @@ cpctCrcDrivers <- dbGetQuery(dbProd, queryCPCTCrcDrivers)
 dbDisconnect(dbProd)
 
 # General data cleanup/exploration ------------------------------------------------------------------
-## Age at registration
+## Age at registration, start date after registration date
 cpct <- add_column(cpct, registrationYear = as.integer(format(as.Date(cpct$registrationDate), "%Y")), .before = "registrationDate")
 cpct <- add_column(cpct, ageAtRegistration = cpct$registrationYear-cpct$birthYear, .before = "registrationDate")
 hist(cpct$ageAtRegistration)
 min(cpct$ageAtRegistration)
 max(cpct$ageAtRegistration)
 
-## Start/end dates
+cpct <- add_column(cpct, daysStartDateAfterRegistration = round(difftime(cpct$treatmentStartDate, cpct$registrationDate, units="days"),0), .after = "treatmentStartDate")
+min(cpct$daysStartDateAfterRegistration, na.rm=T)
+table(cpct$daysStartDateAfterRegistration<0)
+
+## Start/end dates, treatment duration
 min(cpct$treatmentStartDate, na.rm=T)
 max(cpct$treatmentStartDate, na.rm=T)
 min(cpct$treatmentEndDate, na.rm=T)
 cpct$treatmentEndDate[cpct$treatmentEndDate == '1900-01-01'] <- NA
 max(cpct$treatmentEndDate, na.rm=T)
 
-## Treatment duration
 cpct <- add_column(cpct, treatmentDuration = as.integer(round(difftime(cpct$treatmentEndDate,cpct$treatmentStartDate, units="days")),0), .after = "treatmentEndDate")
 min(cpct$treatmentDuration, na.rm=T)
-hist(cpct$treatmentDuration)
+hist(cpct$treatmentDuration, breaks=100)
+hist(cpct$treatmentDuration, breaks=500, xlim=c(0,500))
 
 cpct <- add_column(cpct, daysDeathDateAfterEndDate = round(difftime(cpct$deathDate, cpct$treatmentEndDate, units="days"),0), .after = "treatmentDuration")
+min(cpct$daysDeathDateAfterEndDate, na.rm=T)
 
 ## Response dates
-cpct <- add_column(cpct, daysDeathDateAfterFirstResponseDate = round(difftime(cpct$deathDate, cpct$responseDate, units="days"),0), .after = "responseDate")
-min(cpct$daysDeathDateAfterFirstResponseDate, na.rm=T)
-max(cpct$daysDeathDateAfterFirstResponseDate, na.rm=T)
-
 cpct <- add_column(cpct, daysResponseAfterTreatmentStartDate = round(difftime(cpct$responseDate, cpct$treatmentStartDate, units="days"),0), .after = "responseDate")
+cpct <- add_column(cpct, daysDeathDateAfterFirstResponseDate = round(difftime(cpct$deathDate, cpct$responseDate, units="days"),0), .after = "responseDate")
 cpct <- add_column(cpct, daysEndDateAfterFirstResponseDate = round(difftime(cpct$treatmentEndDate, cpct$responseDate, units="days"),0), .after = "daysResponseAfterTreatmentStartDate")
+
 min(cpct$daysResponseAfterTreatmentStartDate, na.rm=T)
 max(cpct$daysResponseAfterTreatmentStartDate, na.rm=T)
+min(cpct$daysDeathDateAfterFirstResponseDate, na.rm=T)
+max(cpct$daysDeathDateAfterFirstResponseDate, na.rm=T)
 min(cpct$daysEndDateAfterFirstResponseDate, na.rm=T)
 max(cpct$daysEndDateAfterFirstResponseDate, na.rm=T)
 
-## Other
-cpct <- add_column(cpct, daysStartDateAfterRegistration = round(difftime(cpct$treatmentStartDate, cpct$registrationDate, units="days"),0), .after = "treatmentStartDate")
-cpct <- add_column(cpct, ageAtStartTreatment = as.integer(format(as.Date(cpct$treatmentStartDate), "%Y")) - cpct$birthYear, .before = "treatmentStartDate")
+## Response dates cleanup
+end_date_after_response_date_min = -30
+cpct <- cpct %>% 
+  mutate(responseDate = ifelse(daysEndDateAfterFirstResponseDate < end_date_after_response_date_min, NA, responseDate)) %>% 
+  mutate(responseMeasured = ifelse(daysEndDateAfterFirstResponseDate < end_date_after_response_date_min, NA, responseMeasured)) %>%
+  mutate(firstResponse = ifelse(daysEndDateAfterFirstResponseDate < end_date_after_response_date_min, NA, firstResponse)) %>%
+  mutate(daysResponseAfterTreatmentStartDate = ifelse(daysEndDateAfterFirstResponseDate < end_date_after_response_date_min, NA, daysResponseAfterTreatmentStartDate)) %>%
+  mutate(daysDeathDateAfterFirstResponseDate = ifelse(daysEndDateAfterFirstResponseDate < end_date_after_response_date_min, NA, daysDeathDateAfterFirstResponseDate)) %>%
+  mutate(daysEndDateAfterFirstResponseDate = ifelse(daysEndDateAfterFirstResponseDate < end_date_after_response_date_min, NA, daysEndDateAfterFirstResponseDate))
 
 # 1. CRC exploration---------------------------------------------
 cpctCrc <- subset(cpct, subset = (primaryTumorLocation == 'Colorectum'))
