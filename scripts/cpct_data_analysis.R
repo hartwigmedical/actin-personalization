@@ -103,7 +103,7 @@ pie(table(cpct$hasSystemicPreTreatment), main="Has had systemic pretreatment?", 
 pie(table(cpct$hasRadiotherapyPreTreatment), main="Has had radiotherapy pretreatment?", col=c("red","blue"), labels=paste0(row.names(table(cpct$hasRadiotherapyPreTreatment)), " (", round(prop.table(table(cpct$hasRadiotherapyPreTreatment))*100,0), "%)", sep = ""))
 
 cpct <- add_column(cpct, hasBeenUntreated = (cpct$hasSystemicPreTreatment == "No" & cpct$hasRadiotherapyPreTreatment == "No"), .after = "hasRadiotherapyPreTreatment")
-pie(table(cpct$hasBeenUntreated.1), main="Has been untreated?", col=c("red","blue"), labels=paste0(row.names(table(cpct$hasBeenUntreated.1)), " (", round(prop.table(table(cpct$hasBeenUntreated.1))*100,0), "%)", sep = ""))
+pie(table(cpct$hasBeenUntreated), main="Has been untreated?", col=c("red","blue"), labels=paste0(row.names(table(cpct$hasBeenUntreated)), " (", round(prop.table(table(cpct$hasBeenUntreated))*100,0), "%)", sep = ""))
 
 # 1. CRC exploration---------------------------------------------
 cpctCrc <- subset(cpct, subset = (primaryTumorLocation == 'Colorectum'))
