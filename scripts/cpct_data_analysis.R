@@ -62,22 +62,27 @@ cpct <- add_column(cpct, daysStartDateAfterRegistration = round(difftime(cpct$tr
 min(cpct$daysStartDateAfterRegistration, na.rm=T)
 table(cpct$daysStartDateAfterRegistration<0)
 
-## Start/end dates, treatment duration
+## Start/end dates, treatment duration, death date
 min(cpct$treatmentStartDate, na.rm=T)
 max(cpct$treatmentStartDate, na.rm=T)
+paste0("Treatment start date missing in ", round(sum(is.na(cpct$treatmentStartDate))/length(cpct$treatmentStartDate)*100,0), "%")
+
 min(cpct$treatmentEndDate, na.rm=T)
 cpct$treatmentEndDate[cpct$treatmentEndDate == '1900-01-01'] <- NA
 max(cpct$treatmentEndDate, na.rm=T)
+paste0("Treatment end date missing in ", round(sum(is.na(cpct$treatmentEndDate))/length(cpct$treatmentEndDate)*100,0), "%")
 
 cpct <- add_column(cpct, treatmentDuration = as.integer(round(difftime(cpct$treatmentEndDate,cpct$treatmentStartDate, units="days")),0), .after = "treatmentEndDate")
 min(cpct$treatmentDuration, na.rm=T)
 hist(cpct$treatmentDuration, breaks=100)
 hist(cpct$treatmentDuration, breaks=500, xlim=c(0,500))
 
+paste0("Death date missing in ", round(sum(is.na(cpct$deathDate))/length(cpct$deathDate)*100,0), "%")
 cpct <- add_column(cpct, daysDeathDateAfterEndDate = round(difftime(cpct$deathDate, cpct$treatmentEndDate, units="days"),0), .after = "treatmentDuration")
 min(cpct$daysDeathDateAfterEndDate, na.rm=T)
 
 cpct <- add_column(cpct, daysDeathDateAfterStartDate = round(difftime(cpct$deathDate, cpct$treatmentStartDate, units="days"),0), .after = "daysStartDateAfterRegistration")
+paste0("Duration start date - death date missing in ", round(sum(is.na(cpct$daysDeathDateAfterStartDate))/length(cpct$daysDeathDateAfterStartDate)*100,0), "%")
 
 ## Response dates
 cpct <- add_column(cpct, daysResponseAfterTreatmentStartDate = round(difftime(cpct$responseDate, cpct$treatmentStartDate, units="days"),0), .after = "responseDate")
@@ -110,6 +115,32 @@ pie(table(cpct$hasRadiotherapyPreTreatment), main="Has had radiotherapy pretreat
 
 cpct <- add_column(cpct, hasBeenUntreated = (cpct$hasSystemicPreTreatment == "No" & cpct$hasRadiotherapyPreTreatment == "No"), .after = "hasRadiotherapyPreTreatment")
 pie(table(cpct$hasBeenUntreated), main="Has been untreated?", col=c("red","blue"), labels=paste0(row.names(table(cpct$hasBeenUntreated)), " (", round(prop.table(table(cpct$hasBeenUntreated))*100,0), "%)", sep = ""))
+
+## Survival plots for for untreated patients for gender, tumor location, first response
+## Consider censoring
+survival <- cpct %>% dplyr::filter(hasBeenUntreated=='TRUE') %>% subset(select = c(daysDeathDateAfterStartDate, gender, primaryTumorLocation, firstResponse))
+survival$status <- ifelse(!is.na(survival$daysDeathDateAfterStartDate), 1, 0)
+paste0("Nr of uncensored patients ", sum(survival$status == 1))
+
+survGender <- survfit(Surv(survival$daysDeathDateAfterStartDate, survival$status) ~ survival$gender, data = survival)
+autoplot(survGender) + 
+  labs(title="Overall survival from start treatment (in untreated patients)", y="Proportion", x="Time (days)", color="Gender", fill = "Gender")
+survdiff(Surv(survival$daysDeathDateAfterStartDate, survival$status) ~ survival$gender, data = survival)
+
+survivalTumorLocation <- survival %>% dplyr::filter(primaryTumorLocation %in% c('Breast','Colorectum','Lung'))
+paste0("Nr of uncensored patients ", sum(survivalTumorLocation$status == 1))
+survTumorLocation <- survfit(Surv(survivalTumorLocation$daysDeathDateAfterStartDate, survivalTumorLocation$status) ~ survivalTumorLocation$primaryTumorLocation, data = survivalTumorLocation)
+autoplot(survTumorLocation) + 
+  labs(title="Overall survival from start treatment (in untreated patients)", y="Proportion", x="Time (days)", color="Tumor location", fill = "Tumor location")
+survdiff(Surv(survivalTumorLocation$daysDeathDateAfterStartDate, survivalTumorLocation$status) ~ survivalTumorLocation$primaryTumorLocation, data = survivalTumorLocation)
+
+survivalFirstResponse <- survival %>% dplyr::filter(firstResponse %in% c('PD','PR','SD'))
+paste0("Nr of uncensored patients ", sum(survivalFirstResponse$status == 1))
+survFirstResponse <- survfit(Surv(survivalFirstResponse$daysDeathDateAfterStartDate, survivalFirstResponse$status) ~ survivalFirstResponse$firstResponse, data = survivalFirstResponse)
+autoplot(survFirstResponse) + 
+  labs(title="Overall survival from start treatment (in untreated patients)", y="Proportion", x="Time (days)", color="First response", fill = "First response")
+survdiff(Surv(survivalFirstResponse$daysDeathDateAfterStartDate, survivalFirstResponse$status) ~ survivalFirstResponse$firstResponse, data = survivalFirstResponse)
+
 
 # 1.1 CRC exploration---------------------------------------------
 ## General numbers & tumor types
@@ -193,13 +224,11 @@ cpctCrcCetuximabInNonWT <- cpctCrc %>%
   subset(cetuximabAsTreatment == 'TRUE') %>%
   subset(rasBrafWildtype == 'FALSE')
 
-# 1.2 CRC survival plots from treatment start
-survivalCrc <- cpctCrc %>% subset(select = c(daysDeathDateAfterStartDate, gender, hasSystemicPreTreatment, hasRadiotherapyPreTreatment, hasBeenUntreated)) %>% na.omit
-survivalCrc$status <- 1
-
-survGender <- survfit(Surv(survivalCrc$daysDeathDateAfterStartDate, survivalCrc$status) ~ survivalCrc$gender, data = survivalCrc)
-autoplot(survGender) + 
-  labs(title="Overall survival from start treatment", y="Proportion", x="Time (days)", color="Gender", fill = "Gender")
+# 1.2 CRC survival plots 
+## CRC survival plots from treatment start (in treated and untreated patients)
+## censoring must be taken into account
+survivalCrc <- cpctCrc %>% subset(select = c(daysDeathDateAfterStartDate, gender, hasSystemicPreTreatment, hasRadiotherapyPreTreatment, hasBeenUntreated, firstResponse, msStatus))
+survivalCrc$status <- ifelse(!is.na(survivalCrc$daysDeathDateAfterStartDate), 1, 0)
 
 survSystemicTreatment <- survfit(Surv(survivalCrc$daysDeathDateAfterStartDate, survivalCrc$status) ~ survivalCrc$hasSystemicPreTreatment, data = survivalCrc)
 autoplot(survSystemicTreatment) + 
@@ -212,6 +241,19 @@ autoplot(survRadioTreatment) +
 survUntreated <- survfit(Surv(survivalCrc$daysDeathDateAfterStartDate, survivalCrc$status) ~ survivalCrc$hasBeenUntreated, data = survivalCrc)
 autoplot(survUntreated) + 
   labs(title="Overall survival from start treatment", y="Proportion", x="Time (days)", color="Has been untreated?", fill = "Has been untreated?")
+
+survMSI <- survfit(Surv(survivalCrc$daysDeathDateAfterStartDate, survivalCrc$status) ~ survivalCrc$msStatus, data = survivalCrc)
+autoplot(survMSI) + 
+  labs(title="Overall survival from start treatment", y="Proportion", x="Time (days)", color="MS status", fill = "MS status")
+
+## CRC survival plots from treatment start (only include untreated patients)
+survivalCrcUntreated <- survivalCrc %>% dplyr::filter(hasBeenUntreated == 'TRUE')
+
+survivalCrcUntreatedResponse <- survivalCrcUntreated %>% dplyr::filter(firstResponse %in% c('PD','PR','CR','SD'))
+survFirstResponse <- survfit(Surv(survivalCrcUntreatedResponse$daysDeathDateAfterStartDate, survivalCrcUntreatedResponse$status) ~ survivalCrcUntreatedResponse$firstResponse, data = survivalCrcUntreatedResponse)
+autoplot(survFirstResponse) + 
+  labs(title="Overall survival from start treatment (untreated patients)", y="Proportion", x="Time (days)", color="First response", fill = "First response")
+paste0("Nr of uncensored patients ", sum(survivalCrcUntreatedResponse$status == 1))
 
 # 2. All Investigate relationship between age at start treatment & treatment duration ------------------------------------------------------------------
 categoriesTherapy = c("Immunotherapy", "Hormonal therapy", "Chemotherapy", "Targeted therapy")
