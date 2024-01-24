@@ -1,3 +1,4 @@
+library(Rmisc)
 library(dplyr)
 library(tidyr)
 library(grid)
@@ -11,6 +12,9 @@ library(plotrix)
 library(ggrepel)
 library(tidyverse)
 library(tibble)
+library(survival)
+library(knitr)
+library(ggfortify)
 
 # Set working dir to tmp ------------------------------------------------------------------
  wd <- paste0(Sys.getenv("HOME"), "/hmf/tmp/")
@@ -73,6 +77,8 @@ hist(cpct$treatmentDuration, breaks=500, xlim=c(0,500))
 cpct <- add_column(cpct, daysDeathDateAfterEndDate = round(difftime(cpct$deathDate, cpct$treatmentEndDate, units="days"),0), .after = "treatmentDuration")
 min(cpct$daysDeathDateAfterEndDate, na.rm=T)
 
+cpct <- add_column(cpct, daysDeathDateAfterStartDate = round(difftime(cpct$deathDate, cpct$treatmentStartDate, units="days"),0), .after = "daysStartDateAfterRegistration")
+
 ## Response dates
 cpct <- add_column(cpct, daysResponseAfterTreatmentStartDate = round(difftime(cpct$responseDate, cpct$treatmentStartDate, units="days"),0), .after = "responseDate")
 cpct <- add_column(cpct, daysDeathDateAfterFirstResponseDate = round(difftime(cpct$deathDate, cpct$responseDate, units="days"),0), .after = "responseDate")
@@ -105,7 +111,7 @@ pie(table(cpct$hasRadiotherapyPreTreatment), main="Has had radiotherapy pretreat
 cpct <- add_column(cpct, hasBeenUntreated = (cpct$hasSystemicPreTreatment == "No" & cpct$hasRadiotherapyPreTreatment == "No"), .after = "hasRadiotherapyPreTreatment")
 pie(table(cpct$hasBeenUntreated), main="Has been untreated?", col=c("red","blue"), labels=paste0(row.names(table(cpct$hasBeenUntreated)), " (", round(prop.table(table(cpct$hasBeenUntreated))*100,0), "%)", sep = ""))
 
-# 1. CRC exploration---------------------------------------------
+# 1.1 CRC exploration---------------------------------------------
 ## General numbers & tumor types
 cpctCrc <- subset(cpct, subset = (primaryTumorLocation == 'Colorectum'))
 n_distinct(cpctCrc$sampleId)
@@ -186,6 +192,26 @@ cpctCrcCetuximabInNonWT <- cpctCrc %>%
   add_column(cetuximabAsTreatment = ifelse(is.na(str_detect(cpctCrc$treatment, "Cetuximab")), FALSE, str_detect(cpctCrc$treatment, "Cetuximab")), .before = "responseMeasured") %>%
   subset(cetuximabAsTreatment == 'TRUE') %>%
   subset(rasBrafWildtype == 'FALSE')
+
+# 1.2 CRC survival plots from treatment start
+survivalCrc <- cpctCrc %>% subset(select = c(daysDeathDateAfterStartDate, gender, hasSystemicPreTreatment, hasRadiotherapyPreTreatment, hasBeenUntreated)) %>% na.omit
+survivalCrc$status <- 1
+
+survGender <- survfit(Surv(survivalCrc$daysDeathDateAfterStartDate, survivalCrc$status) ~ survivalCrc$gender, data = survivalCrc)
+autoplot(survGender) + 
+  labs(title="Overall survival from start treatment", y="Proportion", x="Time (days)", color="Gender", fill = "Gender")
+
+survSystemicTreatment <- survfit(Surv(survivalCrc$daysDeathDateAfterStartDate, survivalCrc$status) ~ survivalCrc$hasSystemicPreTreatment, data = survivalCrc)
+autoplot(survSystemicTreatment) + 
+  labs(title="Overall survival from start treatment", y="Proportion", x="Time (days)", color="Has had systemic treatment?", fill = "Has had systemic treatment?")
+
+survRadioTreatment <- survfit(Surv(survivalCrc$daysDeathDateAfterStartDate, survivalCrc$status) ~ survivalCrc$hasRadiotherapyPreTreatment, data = survivalCrc)
+autoplot(survRadioTreatment) + 
+  labs(title="Overall survival from start treatment", y="Proportion", x="Time (days)", color="Has had radio treatment?", fill = "Has had radio treatment?")
+
+survUntreated <- survfit(Surv(survivalCrc$daysDeathDateAfterStartDate, survivalCrc$status) ~ survivalCrc$hasBeenUntreated, data = survivalCrc)
+autoplot(survUntreated) + 
+  labs(title="Overall survival from start treatment", y="Proportion", x="Time (days)", color="Has been untreated?", fill = "Has been untreated?")
 
 # 2. All Investigate relationship between age at start treatment & treatment duration ------------------------------------------------------------------
 categoriesTherapy = c("Immunotherapy", "Hormonal therapy", "Chemotherapy", "Targeted therapy")
