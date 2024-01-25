@@ -23,9 +23,26 @@ library(ggfortify)
 # Retrieve data ------------------------------------------------------------------
 dbProd <- dbConnect(MySQL(), dbname='hmfpatients', groups="RAnalysis")
 
-queryCPCT <-"select sampleId, patientId, gender, birthYear, registrationDate, deathDate, primaryTumorLocation, primaryTumorSubLocation, primaryTumorType, primaryTumorSubType, hasSystemicPreTreatment, hasRadiotherapyPreTreatment, preTreatments, preTreatmentsType, preTreatmentsMechanism, treatmentGiven, radiotherapyGiven, treatmentStartDate, treatmentEndDate, treatment, consolidatedTreatmentType, concatenatedTreatmentType, consolidatedTreatmentMechanism, concatenatedTreatmentMechanism, responseMeasured, firstResponse, responseDate
-from datarequest
-where sampleId like 'CPCT%' order by registrationDate;"
+queryCPCT <-"select d.sampleId, d.patientId, gender, birthYear, registrationDate, deathDate, primaryTumorLocation, primaryTumorSubLocation, primaryTumorType, primaryTumorSubType, hasSystemicPreTreatment, hasRadiotherapyPreTreatment, preTreatments, preTreatmentsType, preTreatmentsMechanism, d.treatmentGiven, d.radiotherapyGiven, treatmentStartDate, treatmentEndDate, treatment, consolidatedTreatmentType, concatenatedTreatmentType, consolidatedTreatmentMechanism, concatenatedTreatmentMechanism, responseMeasured, firstResponse, d.responseDate, firstMatchedPDResponse.response as firstResponsePD, firstMatchedPDResponse.responseDate as firstResponsePDDate
+from sample s
+inner join datarequest d on d.sampleId=s.sampleId
+left join biopsy on biopsy.sampleId = s.sampleId
+left join treatment on treatment.biopsyId = biopsy.id
+left join ( select *
+            from
+            treatmentResponse as tr
+            where response = 'PD' and
+            not exists (
+              select *
+              from treatmentResponse as tr1
+              where tr1.treatmentId = tr.treatmentId
+              and tr1.responseDate <= tr.responseDate
+              and tr1.id != tr.id
+              and tr1.response = tr.response)
+            and not(isnull(treatmentId))
+) as firstMatchedPDResponse
+on treatment.id = firstMatchedPDResponse.treatmentId
+where d.sampleId like 'CPCT%' order by registrationDate;"
 
 queryCPCTResponse <- "select dr.patientId, t.responseDate, t.response
 from treatmentResponse t
@@ -84,6 +101,9 @@ min(cpct$daysDeathDateAfterEndDate, na.rm=T)
 cpct <- add_column(cpct, daysDeathDateAfterStartDate = round(difftime(cpct$deathDate, cpct$treatmentStartDate, units="days"),0), .after = "daysStartDateAfterRegistration")
 paste0("Duration start date - death date missing in ", round(sum(is.na(cpct$daysDeathDateAfterStartDate))/length(cpct$daysDeathDateAfterStartDate)*100,0), "%")
 
+cpct <- add_column(cpct, pfs = round(difftime(cpct$firstResponsePDDate, cpct$treatmentStartDate, units="days"),0), .after = "firstResponsePD")
+paste0("PFS missing in ", round(sum(is.na(cpct$pfs))/length(cpct$pfs)*100,0), "%")
+
 ## Response dates
 cpct <- add_column(cpct, daysResponseAfterTreatmentStartDate = round(difftime(cpct$responseDate, cpct$treatmentStartDate, units="days"),0), .after = "responseDate")
 cpct <- add_column(cpct, daysDeathDateAfterFirstResponseDate = round(difftime(cpct$deathDate, cpct$responseDate, units="days"),0), .after = "responseDate")
@@ -116,7 +136,7 @@ pie(table(cpct$hasRadiotherapyPreTreatment), main="Has had radiotherapy pretreat
 cpct <- add_column(cpct, hasBeenUntreated = (cpct$hasSystemicPreTreatment == "No" & cpct$hasRadiotherapyPreTreatment == "No"), .after = "hasRadiotherapyPreTreatment")
 pie(table(cpct$hasBeenUntreated), main="Has been untreated?", col=c("red","blue"), labels=paste0(row.names(table(cpct$hasBeenUntreated)), " (", round(prop.table(table(cpct$hasBeenUntreated))*100,0), "%)", sep = ""))
 
-## Survival plots for for untreated patients for gender, tumor location, first response
+## OS Survival plots for for untreated patients for gender, tumor location, first response
 ## Consider censoring
 survival <- cpct %>% dplyr::filter(hasBeenUntreated=='TRUE') %>% subset(select = c(daysDeathDateAfterStartDate, gender, primaryTumorLocation, firstResponse))
 survival$status <- ifelse(!is.na(survival$daysDeathDateAfterStartDate), 1, 0)
@@ -140,7 +160,6 @@ survFirstResponse <- survfit(Surv(survivalFirstResponse$daysDeathDateAfterStartD
 autoplot(survFirstResponse) + 
   labs(title="Overall survival from start treatment (in untreated patients)", y="Proportion", x="Time (days)", color="First response", fill = "First response")
 survdiff(Surv(survivalFirstResponse$daysDeathDateAfterStartDate, survivalFirstResponse$status) ~ survivalFirstResponse$firstResponse, data = survivalFirstResponse)
-
 
 # 1.1 CRC exploration---------------------------------------------
 ## General numbers & tumor types
