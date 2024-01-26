@@ -142,23 +142,27 @@ survival <- cpct %>% dplyr::filter(hasBeenUntreated=='TRUE') %>% subset(select =
 survival$status <- ifelse(!is.na(survival$daysDeathDateAfterStartDate), 1, 0)
 paste0("Nr of uncensored patients ", sum(survival$status == 1))
 
+## General survival plot labels
+y_lab_surv = "Proportion"
+x_lab_surv = "Time (days)"
+
 survGender <- survfit(Surv(survival$daysDeathDateAfterStartDate, survival$status) ~ survival$gender, data = survival)
 autoplot(survGender) + 
-  labs(title="Overall survival from start treatment (in untreated patients)", y="Proportion", x="Time (days)", color="Gender", fill = "Gender")
+  labs(title="Overall survival from start treatment (in untreated patients)", y=y_lab_surv, x=x_lab_surv, color="Gender", fill = "Gender")
 survdiff(Surv(survival$daysDeathDateAfterStartDate, survival$status) ~ survival$gender, data = survival)
 
 survivalTumorLocation <- survival %>% dplyr::filter(primaryTumorLocation %in% c('Breast','Colorectum','Lung'))
 paste0("Nr of uncensored patients ", sum(survivalTumorLocation$status == 1))
 survTumorLocation <- survfit(Surv(survivalTumorLocation$daysDeathDateAfterStartDate, survivalTumorLocation$status) ~ survivalTumorLocation$primaryTumorLocation, data = survivalTumorLocation)
 autoplot(survTumorLocation) + 
-  labs(title="Overall survival from start treatment (in untreated patients)", y="Proportion", x="Time (days)", color="Tumor location", fill = "Tumor location")
+  labs(title="Overall survival from start treatment (in untreated patients)", y=y_lab_surv, x=x_lab_surv, color="Tumor location", fill = "Tumor location")
 survdiff(Surv(survivalTumorLocation$daysDeathDateAfterStartDate, survivalTumorLocation$status) ~ survivalTumorLocation$primaryTumorLocation, data = survivalTumorLocation)
 
 survivalFirstResponse <- survival %>% dplyr::filter(firstResponse %in% c('PD','PR','SD'))
 paste0("Nr of uncensored patients ", sum(survivalFirstResponse$status == 1))
 survFirstResponse <- survfit(Surv(survivalFirstResponse$daysDeathDateAfterStartDate, survivalFirstResponse$status) ~ survivalFirstResponse$firstResponse, data = survivalFirstResponse)
 autoplot(survFirstResponse) + 
-  labs(title="Overall survival from start treatment (in untreated patients)", y="Proportion", x="Time (days)", color="First response", fill = "First response")
+  labs(title="Overall survival from start treatment (in untreated patients)", y=y_lab_surv, x=x_lab_surv, color="First response", fill = "First response")
 survdiff(Surv(survivalFirstResponse$daysDeathDateAfterStartDate, survivalFirstResponse$status) ~ survivalFirstResponse$firstResponse, data = survivalFirstResponse)
 
 ## PFS plots for for untreated patients for gender, tumor location, first response
@@ -169,21 +173,21 @@ paste0("Nr of uncensored patients ", sum(survival$status == 1))
 
 survGender <- survfit(Surv(survival$pfs, survival$status) ~ survival$gender, data = survival)
 autoplot(survGender) + 
-  labs(title="PFS (in untreated patients)", y="Proportion", x="Time (days)", color="Gender", fill = "Gender")
+  labs(title="PFS (in untreated patients)", y=y_lab_surv, x=x_lab_surv, color="Gender", fill = "Gender")
 survdiff(Surv(survival$pfs, survival$status) ~ survival$gender, data = survival)
 
 survivalTumorLocation <- survival %>% dplyr::filter(primaryTumorLocation %in% c('Breast','Colorectum','Lung'))
 paste0("Nr of uncensored patients ", sum(survivalTumorLocation$status == 1))
 survTumorLocation <- survfit(Surv(survivalTumorLocation$pfs, survivalTumorLocation$status) ~ survivalTumorLocation$primaryTumorLocation, data = survivalTumorLocation)
 autoplot(survTumorLocation) + 
-  labs(title="PFS (in untreated patients)", y="Proportion", x="Time (days)", color="Tumor location", fill = "Tumor location")
+  labs(title="PFS (in untreated patients)", y=y_lab_surv, x=x_lab_surv, color="Tumor location", fill = "Tumor location")
 survdiff(Surv(survivalTumorLocation$pfs, survivalTumorLocation$status) ~ survivalTumorLocation$primaryTumorLocation, data = survivalTumorLocation)
 
 survivalFirstResponse <- survival %>% dplyr::filter(firstResponse %in% c('PD','PR','SD'))
 paste0("Nr of uncensored patients ", sum(survivalFirstResponse$status == 1))
 survFirstResponse <- survfit(Surv(survivalFirstResponse$pfs, survivalFirstResponse$status) ~ survivalFirstResponse$firstResponse, data = survivalFirstResponse)
 autoplot(survFirstResponse) + 
-  labs(title="PFS (in untreated patients)", y="Proportion", x="Time (days)", color="First response", fill = "First response")
+  labs(title="PFS (in untreated patients)", y=y_lab_surv, x=x_lab_surv, color="First response", fill = "First response")
 survdiff(Surv(survivalFirstResponse$daysDeathDateAfterStartDate, survivalFirstResponse$status) ~ survivalFirstResponse$firstResponse, data = survivalFirstResponse)
 
 # 1.1 CRC exploration---------------------------------------------
@@ -276,19 +280,19 @@ survivalCrc$status <- ifelse(!is.na(survivalCrc$daysDeathDateAfterStartDate), 1,
 
 survSystemicTreatment <- survfit(Surv(survivalCrc$daysDeathDateAfterStartDate, survivalCrc$status) ~ survivalCrc$hasSystemicPreTreatment, data = survivalCrc)
 autoplot(survSystemicTreatment) + 
-  labs(title="Overall survival from start treatment", y="Proportion", x="Time (days)", color="Has had systemic treatment?", fill = "Has had systemic treatment?")
+  labs(title="Overall survival from start treatment", y=y_lab_surv, x=x_lab_surv, color="Has had systemic treatment?", fill = "Has had systemic treatment?")
 
 survRadioTreatment <- survfit(Surv(survivalCrc$daysDeathDateAfterStartDate, survivalCrc$status) ~ survivalCrc$hasRadiotherapyPreTreatment, data = survivalCrc)
 autoplot(survRadioTreatment) + 
-  labs(title="Overall survival from start treatment", y="Proportion", x="Time (days)", color="Has had radio treatment?", fill = "Has had radio treatment?")
+  labs(title="Overall survival from start treatment", y=y_lab_surv, x=x_lab_surv, color="Has had radio treatment?", fill = "Has had radio treatment?")
 
 survUntreated <- survfit(Surv(survivalCrc$daysDeathDateAfterStartDate, survivalCrc$status) ~ survivalCrc$hasBeenUntreated, data = survivalCrc)
 autoplot(survUntreated) + 
-  labs(title="Overall survival from start treatment", y="Proportion", x="Time (days)", color="Has been untreated?", fill = "Has been untreated?")
+  labs(title="Overall survival from start treatment", y=y_lab_surv, x=x_lab_surv, color="Has been untreated?", fill = "Has been untreated?")
 
 survMSI <- survfit(Surv(survivalCrc$daysDeathDateAfterStartDate, survivalCrc$status) ~ survivalCrc$msStatus, data = survivalCrc)
 autoplot(survMSI) + 
-  labs(title="Overall survival from start treatment", y="Proportion", x="Time (days)", color="MS status", fill = "MS status")
+  labs(title="Overall survival from start treatment", y=y_lab_surv, x=x_lab_surv, color="MS status", fill = "MS status")
 
 ## CRC OS survival plots from treatment start (only include untreated patients)
 survivalCrcUntreated <- survivalCrc %>% dplyr::filter(hasBeenUntreated == 'TRUE')
@@ -296,7 +300,7 @@ survivalCrcUntreated <- survivalCrc %>% dplyr::filter(hasBeenUntreated == 'TRUE'
 survivalCrcUntreatedResponse <- survivalCrcUntreated %>% dplyr::filter(firstResponse %in% c('PD','PR','CR','SD'))
 survFirstResponse <- survfit(Surv(survivalCrcUntreatedResponse$daysDeathDateAfterStartDate, survivalCrcUntreatedResponse$status) ~ survivalCrcUntreatedResponse$firstResponse, data = survivalCrcUntreatedResponse)
 autoplot(survFirstResponse) + 
-  labs(title="Overall survival from start treatment (untreated patients)", y="Proportion", x="Time (days)", color="First response", fill = "First response")
+  labs(title="Overall survival from start treatment (untreated patients)", y=y_lab_surv, x=x_lab_surv, color="First response", fill = "First response")
 paste0("Nr of uncensored patients ", sum(survivalCrcUntreatedResponse$status == 1))
 
 ## CRC PFS plots for gender, tumor location, first response
@@ -308,15 +312,15 @@ paste0("PFS missing in ", round(sum(is.na(survivalCrc$pfs))/length(survivalCrc$p
 
 survSystemicTreatment <- survfit(Surv(survivalCrc$pfs, survivalCrc$status) ~ survivalCrc$hasSystemicPreTreatment, data = survivalCrc)
 autoplot(survSystemicTreatment) + 
-  labs(title="PFS", y="Proportion", x="Time (days)", color="Has had systemic treatment?", fill = "Has had systemic treatment?")
+  labs(title="PFS", y=y_lab_surv, x=x_lab_surv, color="Has had systemic treatment?", fill = "Has had systemic treatment?")
 
 survUntreated <- survfit(Surv(survivalCrc$pfs, survivalCrc$status) ~ survivalCrc$hasBeenUntreated, data = survivalCrc)
 autoplot(survUntreated) + 
-  labs(title="PFS", y="Proportion", x="Time (days)", color="Has been untreated?", fill = "Has been untreated?")
+  labs(title="PFS", y=y_lab_surv, x=x_lab_surv, color="Has been untreated?", fill = "Has been untreated?")
 
 survMSI <- survfit(Surv(survivalCrc$pfs, survivalCrc$status) ~ survivalCrc$msStatus, data = survivalCrc)
 autoplot(survMSI) + 
-  labs(title="PFS", y="Proportion", x="Time (days)", color="MS status", fill = "MS status")
+  labs(title="PFS", y=y_lab_surv, x=x_lab_surv, color="MS status", fill = "MS status")
 
 # 2. All Investigate relationship between age at start treatment & treatment duration ------------------------------------------------------------------
 categoriesTherapy = c("Immunotherapy", "Hormonal therapy", "Chemotherapy", "Targeted therapy")
