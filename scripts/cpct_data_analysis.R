@@ -283,6 +283,14 @@ cpctCrc <- mutate(cpctCrc, treatmentCurated = ifelse((grepl("Tipiracil", cpctCrc
 length(which(cpctCrc$treatmentCurated == "Trifluridine"))
 length(which(cpctCrc$treatmentCurated == "CAPOX-B"))
 
+## Testing df
+trifluridine <- cpctCrc %>% subset(select = c(sampleId, preTreatments, krasStatus, krasG12Status, krasG13Status, firstResponse, pfs, os)) %>%
+  dplyr::filter(cpctCrc$treatmentCurated == 'Trifluridine') %>%
+  mutate(firstResponse = ifelse(grepl("Clinical progression", firstResponse), NA, firstResponse))
+
+capoxb <- cpctCrc %>% subset(select = c(sampleId, preTreatments, krasStatus, krasG12Status, krasG13Status, firstResponse, pfs, os)) %>%
+  dplyr::filter(cpctCrc$treatmentCurated == 'CAPOX-B')
+
 # 1.2 CRC survival plots 
 ## CRC OS survival plots from treatment start (in treated and untreated patients)
 ## censoring must be taken into account
