@@ -52,12 +52,16 @@ where dr.patientId like 'CPCT%' and response not in ('ND','NE') and response is 
 
 queryCPCTCrcDrivers <- "select a.sampleId,
 if(krasStatus='positive','positive','wildtype') as krasStatus,
+if(krasG12Status='positive','positive','wildtype') as krasG12Status,
+if(krasG13Status='positive','positive','wildtype') as krasG13Status,
 if(nrasStatus='positive','positive','wildtype') as nrasStatus,
 if(brafV600EStatus='positive','positive','wildtype') as brafV600EStatus,
 msStatus
 from
 (select sampleId from datarequest where sampleId like 'CPCT%' and primaryTumorLocation='Colorectum') as a
-left join (select sampleId, 'positive' as krasStatus from driverCatalog where driverLikelihood>0.8 and gene='KRAS' and driver='MUTATION') as b on a.sampleId=b.sampleId
+left join (select sampleId, 'positive' as krasStatus from driverCatalog where driverLikelihood>0.8 and gene='KRAS' and driver='MUTATION') as b1 on a.sampleId=b1.sampleId
+left join (select sampleId, 'positive' as krasG12Status from somaticVariant where reported and gene='KRAS' and canonicalHgvsProteinImpact like 'p.Gly12%') as b2 on a.sampleId=b2.sampleId
+left join (select sampleId, 'positive' as krasG13Status from somaticVariant where reported and gene='KRAS' and canonicalHgvsProteinImpact like 'p.Gly13%') as b3 on a.sampleId=b3.sampleId
 left join (select sampleId, 'positive' as nrasStatus from driverCatalog where driverLikelihood>0.8 and gene='NRAS' and driver='MUTATION') as c on a.sampleId=c.sampleId
 left join (select sampleId, 'positive' as brafV600EStatus from somaticVariant where gene='BRAF' and reported and canonicalHgvsProteinImpact='p.Val600Glu') as d on a.sampleId=d.sampleId
 left join (select sampleId, msStatus from purity) as e on a.sampleId=e.sampleId;"
@@ -271,6 +275,13 @@ cpctCrcCetuximabInNonWT <- cpctCrc %>%
   add_column(cetuximabAsTreatment = ifelse(is.na(str_detect(cpctCrc$treatment, "Cetuximab")), FALSE, str_detect(cpctCrc$treatment, "Cetuximab")), .before = "responseMeasured") %>%
   subset(cetuximabAsTreatment == 'TRUE') %>%
   subset(rasBrafWildtype == 'FALSE')
+
+## Treatment curation
+cpctCrc <- add_column(cpctCrc, treatmentCurated = ifelse((grepl("Oxaliplatin", cpctCrc$treatment) & grepl("Bevacizumab", cpctCrc$treatment) & grepl("Capecitabine", cpctCrc$treatment) &! grepl("Fluorouracil", cpctCrc$treatment) &! grepl("Irinotecan", cpctCrc$treatment)), "CAPOX-B", cpctCrc$treatment), .after = "treatment")
+cpctCrc <- mutate(cpctCrc, treatmentCurated = ifelse((grepl("Tipiracil", cpctCrc$treatmentCurated) | grepl("Trifluridine/Trifluridine", cpctCrc$treatmentCurated)), "Trifluridine", cpctCrc$treatmentCurated))
+
+length(which(cpctCrc$treatmentCurated == "Trifluridine"))
+length(which(cpctCrc$treatmentCurated == "CAPOX-B"))
 
 # 1.2 CRC survival plots 
 ## CRC OS survival plots from treatment start (in treated and untreated patients)
