@@ -194,6 +194,15 @@ autoplot(survFirstResponse) +
   labs(title="PFS (in untreated patients)", y=y_lab_surv, x=x_lab_surv, color="First response", fill = "First response")
 survdiff(Surv(survivalFirstResponse$os, survivalFirstResponse$status) ~ survivalFirstResponse$firstResponse, data = survivalFirstResponse)
 
+## Treatment curation
+cpct <- add_column(cpct, treatmentCurated = ifelse((grepl("Oxaliplatin", cpct$treatment) & grepl("Bevacizumab", cpct$treatment) & grepl("Capecitabine", cpct$treatment) &! grepl("Fluorouracil", cpct$treatment) &! grepl("Irinotecan", cpct$treatment)), "CAPOX-B", cpct$treatment), .after = "treatment")
+cpct <- mutate(cpct, treatmentCurated = ifelse((grepl("Tipiracil", cpct$treatmentCurated) | grepl("Trifluridine/Trifluridine", cpct$treatmentCurated)), "Trifluridine", cpct$treatmentCurated))
+cpct <- mutate(cpct, treatmentCurated = ifelse(grepl("Pembrolizumab/Pembrolizumab", cpct$treatmentCurated), "Pembrolizumab", cpct$treatmentCurated))
+
+length(which(cpct$treatmentCurated == "Trifluridine"))
+length(which(cpct$treatmentCurated == "CAPOX-B"))
+length(which(cpct$treatmentCurated == "Pembrolizumab"))
+
 # 1.1 CRC exploration---------------------------------------------
 ## General numbers & tumor types
 cpctCrc <- subset(cpct, subset = (primaryTumorLocation == 'Colorectum'))
@@ -276,20 +285,16 @@ cpctCrcCetuximabInNonWT <- cpctCrc %>%
   subset(cetuximabAsTreatment == 'TRUE') %>%
   subset(rasBrafWildtype == 'FALSE')
 
-## Treatment curation
-cpctCrc <- add_column(cpctCrc, treatmentCurated = ifelse((grepl("Oxaliplatin", cpctCrc$treatment) & grepl("Bevacizumab", cpctCrc$treatment) & grepl("Capecitabine", cpctCrc$treatment) &! grepl("Fluorouracil", cpctCrc$treatment) &! grepl("Irinotecan", cpctCrc$treatment)), "CAPOX-B", cpctCrc$treatment), .after = "treatment")
-cpctCrc <- mutate(cpctCrc, treatmentCurated = ifelse((grepl("Tipiracil", cpctCrc$treatmentCurated) | grepl("Trifluridine/Trifluridine", cpctCrc$treatmentCurated)), "Trifluridine", cpctCrc$treatmentCurated))
-
-length(which(cpctCrc$treatmentCurated == "Trifluridine"))
-length(which(cpctCrc$treatmentCurated == "CAPOX-B"))
-
-## Testing df
-trifluridine <- cpctCrc %>% subset(select = c(sampleId, preTreatments, krasStatus, krasG12Status, krasG13Status, firstResponse, pfs, os)) %>%
+# 1.1.1 Testing df
+trifluridineCrc <- cpctCrc %>% subset(select = c(sampleId, treatmentCurated, preTreatments, krasStatus, krasG12Status, krasG13Status, firstResponse, pfs, os)) %>%
   dplyr::filter(cpctCrc$treatmentCurated == 'Trifluridine') %>%
   mutate(firstResponse = ifelse(grepl("Clinical progression", firstResponse), NA, firstResponse))
 
-capoxb <- cpctCrc %>% subset(select = c(sampleId, preTreatments, krasStatus, krasG12Status, krasG13Status, firstResponse, pfs, os)) %>%
+capoxbCrc <- cpctCrc %>% subset(select = c(sampleId, treatmentCurated, preTreatments, krasStatus, krasG12Status, krasG13Status, firstResponse, pfs, os)) %>%
   dplyr::filter(cpctCrc$treatmentCurated == 'CAPOX-B')
+
+pembrolizumab <- cpct %>% subset(select = c(sampleId, treatmentCurated, birthYear, gender, preTreatments, primaryTumorLocation, firstResponse, pfs, os)) %>%
+  dplyr::filter(cpct$treatmentCurated == 'Pembrolizumab' & cpct$primaryTumorLocation %in% c('Urothelial tract','Lung','Skin'))
 
 # 1.2 CRC survival plots 
 ## CRC OS survival plots from treatment start (in treated and untreated patients)
