@@ -44,12 +44,6 @@ left join ( select *
 on treatment.id = firstMatchedPDResponse.treatmentId
 where d.sampleId like 'CPCT%' order by registrationDate;"
 
-queryCPCTResponse <- "select dr.patientId, t.responseDate, t.response
-from treatmentResponse t
-inner join patient p on p.id=t.patientId
-inner join datarequest dr on dr.patientId=p.patientIdentifier
-where dr.patientId like 'CPCT%' and response not in ('ND','NE') and response is not null;"
-
 queryCPCTCrcDrivers <- "select a.sampleId,
 if(krasStatus='positive','positive','wildtype') as krasStatus,
 if(krasG12Status='positive','positive','wildtype') as krasG12Status,
@@ -67,7 +61,6 @@ left join (select sampleId, 'positive' as brafV600EStatus from somaticVariant wh
 left join (select sampleId, msStatus from purity) as e on a.sampleId=e.sampleId;"
 
 cpct <- dbGetQuery(dbProd, queryCPCT)
-cpctResponse <- dbGetQuery(dbProd, queryCPCTResponse)
 cpctCrcDrivers <- dbGetQuery(dbProd, queryCPCTCrcDrivers)
 dbDisconnect(dbProd)
 
@@ -78,10 +71,22 @@ cpct <- add_column(cpct, ageAtRegistration = cpct$registrationYear-cpct$birthYea
 hist(cpct$ageAtRegistration)
 min(cpct$ageAtRegistration)
 max(cpct$ageAtRegistration)
+min(cpct$registrationDate)
+max(cpct$registrationDate)
 
 cpct <- add_column(cpct, daysStartDateAfterRegistration = round(difftime(cpct$treatmentStartDate, cpct$registrationDate, units="days"),0), .after = "treatmentStartDate")
 min(cpct$daysStartDateAfterRegistration, na.rm=T)
 table(cpct$daysStartDateAfterRegistration<0)
+
+## Tumor details
+barchart(cpct$primaryTumorLocation)
+
+## Pre-treated details
+pie(table(cpct$hasSystemicPreTreatment), main="Has had systemic pretreatment?", col=c("red","blue"), labels=paste0(row.names(table(cpct$hasSystemicPreTreatment)), " (", round(prop.table(table(cpct$hasSystemicPreTreatment))*100,0), "%)", sep = ""))
+pie(table(cpct$hasRadiotherapyPreTreatment), main="Has had radiotherapy pretreatment?", col=c("red","blue"), labels=paste0(row.names(table(cpct$hasRadiotherapyPreTreatment)), " (", round(prop.table(table(cpct$hasRadiotherapyPreTreatment))*100,0), "%)", sep = ""))
+
+cpct <- add_column(cpct, hasBeenUntreated = (cpct$hasSystemicPreTreatment == "No" & cpct$hasRadiotherapyPreTreatment == "No"), .after = "hasRadiotherapyPreTreatment")
+pie(table(cpct$hasBeenUntreated), main="Has been untreated?", col=c("red","blue"), labels=paste0(row.names(table(cpct$hasBeenUntreated)), " (", round(prop.table(table(cpct$hasBeenUntreated))*100,0), "%)", sep = ""))
 
 ## Start/end dates, treatment duration, death date
 min(cpct$treatmentStartDate, na.rm=T)
@@ -120,7 +125,7 @@ max(cpct$daysDeathDateAfterFirstResponseDate, na.rm=T)
 min(cpct$daysEndDateAfterFirstResponseDate, na.rm=T)
 max(cpct$daysEndDateAfterFirstResponseDate, na.rm=T)
 
-## Response dates cleanup
+## Response dates cleanup in case difference with treatment end date too large
 end_date_after_response_date_min = -30
 cpct <- cpct %>% 
   mutate(responseDate = ifelse(daysEndDateAfterFirstResponseDate < end_date_after_response_date_min, NA, responseDate)) %>% 
@@ -130,21 +135,11 @@ cpct <- cpct %>%
   mutate(daysDeathDateAfterFirstResponseDate = ifelse(daysEndDateAfterFirstResponseDate < end_date_after_response_date_min, NA, daysDeathDateAfterFirstResponseDate)) %>%
   mutate(daysEndDateAfterFirstResponseDate = ifelse(daysEndDateAfterFirstResponseDate < end_date_after_response_date_min, NA, daysEndDateAfterFirstResponseDate))
 
-## Tumor details
-barchart(cpct$primaryTumorLocation)
-
-## Pre-treated details
-pie(table(cpct$hasSystemicPreTreatment), main="Has had systemic pretreatment?", col=c("red","blue"), labels=paste0(row.names(table(cpct$hasSystemicPreTreatment)), " (", round(prop.table(table(cpct$hasSystemicPreTreatment))*100,0), "%)", sep = ""))
-pie(table(cpct$hasRadiotherapyPreTreatment), main="Has had radiotherapy pretreatment?", col=c("red","blue"), labels=paste0(row.names(table(cpct$hasRadiotherapyPreTreatment)), " (", round(prop.table(table(cpct$hasRadiotherapyPreTreatment))*100,0), "%)", sep = ""))
-
-cpct <- add_column(cpct, hasBeenUntreated = (cpct$hasSystemicPreTreatment == "No" & cpct$hasRadiotherapyPreTreatment == "No"), .after = "hasRadiotherapyPreTreatment")
-pie(table(cpct$hasBeenUntreated), main="Has been untreated?", col=c("red","blue"), labels=paste0(row.names(table(cpct$hasBeenUntreated)), " (", round(prop.table(table(cpct$hasBeenUntreated))*100,0), "%)", sep = ""))
-
 ## OS survival plots for for untreated patients for gender, tumor location, first response
 ## Consider censoring
 survival <- cpct %>% dplyr::filter(hasBeenUntreated=='TRUE') %>% subset(select = c(os, gender, primaryTumorLocation, firstResponse))
 survival$status <- ifelse(!is.na(survival$os), 1, 0)
-paste0("Nr of uncensored patients ", sum(survival$status == 1))
+paste0("Nr of uncensored (included) patients: ", sum(survival$status == 1))
 
 ## General survival plot labels
 y_lab_surv = "Proportion"
@@ -156,14 +151,14 @@ autoplot(survGender) +
 survdiff(Surv(survival$os, survival$status) ~ survival$gender, data = survival)
 
 survivalTumorLocation <- survival %>% dplyr::filter(primaryTumorLocation %in% c('Breast','Colorectum','Lung'))
-paste0("Nr of uncensored patients ", sum(survivalTumorLocation$status == 1))
+paste0("Nr of uncensored (included) patients: ", sum(survivalTumorLocation$status == 1))
 survTumorLocation <- survfit(Surv(survivalTumorLocation$os, survivalTumorLocation$status) ~ survivalTumorLocation$primaryTumorLocation, data = survivalTumorLocation)
 autoplot(survTumorLocation) + 
   labs(title="Overall survival from start treatment (in untreated patients)", y=y_lab_surv, x=x_lab_surv, color="Tumor location", fill = "Tumor location")
 survdiff(Surv(survivalTumorLocation$os, survivalTumorLocation$status) ~ survivalTumorLocation$primaryTumorLocation, data = survivalTumorLocation)
 
 survivalFirstResponse <- survival %>% dplyr::filter(firstResponse %in% c('PD','PR','SD'))
-paste0("Nr of uncensored patients ", sum(survivalFirstResponse$status == 1))
+paste0("Nr of uncensored  (included) patients: ", sum(survivalFirstResponse$status == 1))
 survFirstResponse <- survfit(Surv(survivalFirstResponse$os, survivalFirstResponse$status) ~ survivalFirstResponse$firstResponse, data = survivalFirstResponse)
 autoplot(survFirstResponse) + 
   labs(title="Overall survival from start treatment (in untreated patients)", y=y_lab_surv, x=x_lab_surv, color="First response", fill = "First response")
@@ -226,13 +221,17 @@ cpctCrcMsi <- subset(cpctCrc, subset = (msStatus == 'MSI'))
 cpctCrcMsi <- add_column(cpctCrcMsi, immunotherapyAsPreTreatment = ifelse(is.na(str_detect(cpctCrcMsi$preTreatmentsType, "Immunotherapy")), FALSE, str_detect(cpctCrcMsi$preTreatmentsType, "Immuno")), .before = "treatmentGiven")
 cpctCrcMsi <- add_column(cpctCrcMsi, immunotherapyAsTreatment = ifelse(is.na(str_detect(cpctCrcMsi$concatenatedTreatmentType, "Immunotherapy")), FALSE, str_detect(cpctCrcMsi$concatenatedTreatmentType, "Immuno")), .before = "responseMeasured")
 
-qplot(cpctCrcMsi$immunotherapyAsPreTreatment)
-qplot(cpctCrcMsi$immunotherapyAsTreatment)
+table(cpctCrcMsi$immunotherapyAsPreTreatment)
+table(cpctCrcMsi$immunotherapyAsTreatment)
 
 cpctCrcImmunoInNonMSI <- cpctCrc %>% 
-  add_column(cpctCrc, immunotherapyAsTreatment = ifelse(is.na(str_detect(cpctCrc$concatenatedTreatmentType, "Immunotherapy")), FALSE, str_detect(cpctCrc$concatenatedTreatmentType, "Immuno")), .before = "treatmentGiven") %>%
-  subset(immunotherapyAsTreatment == 'TRUE') %>%
+  add_column(immunotherapyAsPreTreatment = ifelse(is.na(str_detect(cpctCrc$preTreatmentsType, "Immunotherapy")), FALSE, str_detect(cpctCrc$preTreatmentsType, "Immuno")), .before = "treatmentGiven") %>%
+  add_column(immunotherapyAsTreatment = ifelse(is.na(str_detect(cpctCrc$concatenatedTreatmentType, "Immunotherapy")), FALSE, str_detect(cpctCrc$concatenatedTreatmentType, "Immuno")), .before = "responseMeasured") %>%
+  subset(immunotherapyAsTreatment == 'TRUE' | immunotherapyAsPreTreatment == 'TRUE') %>%
   subset(msStatus == 'MSS')
+
+table(cpctCrcImmunoInNonMSI$immunotherapyAsPreTreatment)
+table(cpctCrcImmunoInNonMSI$immunotherapyAsTreatment)
 
 ## BRAF
 cpctCrc %>% group_by(brafV600EStatus) %>% summarise(count = n())
@@ -245,9 +244,13 @@ qplot(cpctCrcBraf$brafTreatmentAsPreTreatment)
 qplot(cpctCrcBraf$brafTreatmentAsTreatment)
 
 cpctCrcBRAFInNonBRAF <- cpctCrc %>% 
+  add_column(brafTreatmentAsPreTreatment = ifelse(is.na(str_detect(cpctCrc$preTreatmentsMechanism, "BRAF inhibitor")), FALSE, str_detect(cpctCrc$preTreatmentsMechanism, "BRAF inhibitor")), .before = "treatmentGiven") %>%
   add_column(brafTreatmentAsTreatment = ifelse(is.na(str_detect(cpctCrc$concatenatedTreatmentMechanism, "BRAF inhibitor")), FALSE, str_detect(cpctCrc$concatenatedTreatmentMechanism, "BRAF inhibitor")), .before = "responseMeasured") %>%
-  subset(brafTreatmentAsTreatment == 'TRUE') %>%
+  subset(brafTreatmentAsTreatment == 'TRUE' | brafTreatmentAsPreTreatment == 'TRUE') %>%
   subset(brafV600EStatus == 'wildtype')
+
+table(cpctCrcBRAFInNonBRAF$brafTreatmentAsPreTreatment)
+table(cpctCrcBRAFInNonBRAF$brafTreatmentAsTreatment)
 
 ## RAS/BRAF WILDTYPE
 cpctCrc <- add_column(cpctCrc, rasBrafWildtype = (cpctCrc$krasStatus == "wildtype" & cpctCrc$nrasStatus == "wildtype" & cpctCrc$brafV600EStatus == "wildtype"))
@@ -284,6 +287,11 @@ cpctCrcCetuximabInNonWT <- cpctCrc %>%
   add_column(cetuximabAsTreatment = ifelse(is.na(str_detect(cpctCrc$treatment, "Cetuximab")), FALSE, str_detect(cpctCrc$treatment, "Cetuximab")), .before = "responseMeasured") %>%
   subset(cetuximabAsTreatment == 'TRUE') %>%
   subset(rasBrafWildtype == 'FALSE')
+
+## TRIFLURIDINE
+cpctCrcTrifluridine <-  subset(cpctCrc, subset = (treatmentCurated == 'Trifluridine'))
+
+table(cpctCrcTrifluridine$hasBeenUntreated)
 
 # 1.1.1 Testing df
 trifluridineCrc <- cpctCrc %>% subset(select = c(sampleId, treatmentCurated, preTreatments, krasStatus, krasG12Status, krasG13Status, firstResponse, pfs, os)) %>%
