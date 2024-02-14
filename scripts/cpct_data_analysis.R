@@ -364,8 +364,8 @@ corValueTumor <- data.frame()
 i <- 1
 par(mfrow = c(2, 2))
 for (x in categoriesTherapy) {
-  corValueTherapy[1,i] <- cor(cpct[cpct$consolidatedTreatmentType == x,]$treatmentDuration, cpct[cpct$consolidatedTreatmentType == x,]$ageAtStartTreatment, use='complete.obs')
-  plot(treatmentDuration ~ ageAtStartTreatment, data=subset(cpct, consolidatedTreatmentType == x), main = paste0(x, " cc = ", round(corValueTherapy[i],4)))
+  corValueTherapy[1,i] <- cor(cpct[cpct$consolidatedTreatmentType == x,]$treatmentDuration, cpct[cpct$consolidatedTreatmentType == x,]$ageAtRegistration, use='complete.obs')
+  plot(treatmentDuration ~ ageAtRegistration, data=subset(cpct, consolidatedTreatmentType == x), main = paste0(x, " cc = ", round(corValueTherapy[i],4)))
   i <- i+1
 }
 
@@ -374,8 +374,8 @@ colnames(corValueTherapy) <- categoriesTherapy
 i <- 1
 par(mfrow = c(2, 2))
 for (x in categoriesTumor) {
-  corValueTumor[1,i] <- cor(cpct[cpct$primaryTumorLocation == x,]$treatmentDuration, cpct[cpct$primaryTumorLocation == x,]$ageAtStartTreatment, use='complete.obs')
-  plot(treatmentDuration ~ ageAtStartTreatment, data=subset(cpct, primaryTumorLocation == x), main = paste0(x, " cc = ", round(corValueTumor[i],4)))
+  corValueTumor[1,i] <- cor(cpct[cpct$primaryTumorLocation == x,]$treatmentDuration, cpct[cpct$primaryTumorLocation == x,]$ageAtRegistration, use='complete.obs')
+  plot(treatmentDuration ~ ageAtRegistration, data=subset(cpct, primaryTumorLocation == x), main = paste0(x, " cc = ", round(corValueTumor[i],4)))
   i <- i+1
 }
 
@@ -396,12 +396,12 @@ responseDetailsPerAgeBucket <- data.frame()
 i<-1
 
 for (x in ageBuckets) {
-  responseDetailsPerAgeBucket[1, i] <- nrow(cpct[cpct$ageAtStartTreatment <= x[2] & cpct$ageAtStartTreatment >= x[1] & !is.na(cpct$ageAtStartTreatment) & !is.na(cpct$firstResponse) & cpct$firstResponse != "ND" & cpct$firstResponse != "Non-CR/Non-PD" & cpct$firstResponse != "Clinical progression", ])
-  responseDetailsPerAgeBucket[2, i] <- nrow(cpct[cpct$ageAtStartTreatment <= x[2] & cpct$ageAtStartTreatment >= x[1] & !is.na(cpct$ageAtStartTreatment) & !is.na(cpct$firstResponse) & cpct$firstResponse == "PD", ])
+  responseDetailsPerAgeBucket[1, i] <- nrow(cpct[cpct$ageAtRegistration <= x[2] & cpct$ageAtRegistration >= x[1] & !is.na(cpct$ageAtRegistration) & !is.na(cpct$firstResponse) & cpct$firstResponse != "ND" & cpct$firstResponse != "Non-CR/Non-PD" & cpct$firstResponse != "Clinical progression", ])
+  responseDetailsPerAgeBucket[2, i] <- nrow(cpct[cpct$ageAtRegistration <= x[2] & cpct$ageAtRegistration >= x[1] & !is.na(cpct$ageAtRegistration) & !is.na(cpct$firstResponse) & cpct$firstResponse == "PD", ])
   responseDetailsPerAgeBucket[3, i] <- responseDetailsPerAgeBucket[2,i]/responseDetailsPerAgeBucket[1,i]
-  responseDetailsPerAgeBucket[4, i] <- nrow(cpct[cpct$ageAtStartTreatment <= x[2] & cpct$ageAtStartTreatment >= x[1] & !is.na(cpct$ageAtStartTreatment) & !is.na(cpct$firstResponse) & (cpct$firstResponse == "PR" | cpct$firstResponse =="CR"), ])
+  responseDetailsPerAgeBucket[4, i] <- nrow(cpct[cpct$ageAtRegistration <= x[2] & cpct$ageAtRegistration >= x[1] & !is.na(cpct$ageAtRegistration) & !is.na(cpct$firstResponse) & (cpct$firstResponse == "PR" | cpct$firstResponse =="CR"), ])
   responseDetailsPerAgeBucket[5, i] <- responseDetailsPerAgeBucket[4,i]/responseDetailsPerAgeBucket[1,i]
-  responseDetailsPerAgeBucket[6, i] <- nrow(cpct[cpct$ageAtStartTreatment <= x[2] & cpct$ageAtStartTreatment >= x[1] & !is.na(cpct$ageAtStartTreatment) & !is.na(cpct$firstResponse) & cpct$firstResponse == "SD", ])
+  responseDetailsPerAgeBucket[6, i] <- nrow(cpct[cpct$ageAtRegistration <= x[2] & cpct$ageAtRegistration >= x[1] & !is.na(cpct$ageAtRegistration) & !is.na(cpct$firstResponse) & cpct$firstResponse == "SD", ])
   responseDetailsPerAgeBucket[7, i] <- responseDetailsPerAgeBucket[6,i]/responseDetailsPerAgeBucket[1,i]
   i <- i+1
 }
@@ -418,7 +418,7 @@ progressiveDiseaseFractionPerAge <- data.frame()
 i<-1
 
 for (x in adultAge) {
-  tmp <- cpct[cpct$ageAtStartTreatment == x & !is.na(cpct$ageAtStartTreatment) & !is.na(cpct$firstResponse) & cpct$firstResponse != "ND" & cpct$firstResponse != "Non-CR/Non-PD", ]
+  tmp <- cpct[cpct$ageAtRegistration == x & !is.na(cpct$ageAtRegistration) & !is.na(cpct$firstResponse) & cpct$firstResponse != "ND" & cpct$firstResponse != "Non-CR/Non-PD", ]
   tmp2 <- nrow(tmp[(tmp$firstResponse == "PD" | tmp$firstResponse == "Clinical progression"), ])
 
   if (is.null(tmp2) == TRUE) {
