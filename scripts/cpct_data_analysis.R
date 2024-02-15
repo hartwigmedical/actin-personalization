@@ -15,6 +15,8 @@ library(tibble)
 library(survival)
 library(knitr)
 library(ggfortify)
+library(class)
+library(tidymodels) 
 
 # Set working dir to tmp ------------------------------------------------------------------
  wd <- paste0(Sys.getenv("HOME"), "/hmf/tmp/")
@@ -92,6 +94,8 @@ pie(table(cpct$hasBeenUntreated), main="Has been untreated?", col=c("red","blue"
 min(cpct$treatmentStartDate, na.rm=T)
 max(cpct$treatmentStartDate, na.rm=T)
 paste0("Treatment start date missing in ", round(sum(is.na(cpct$treatmentStartDate))/length(cpct$treatmentStartDate)*100,0), "%")
+cpct <- add_column(cpct, treatmentStartYear = as.integer(format(as.Date(cpct$treatmentStartDate), "%Y")), .before = "treatmentStartDate")
+cpct <- add_column(cpct, ageAtTreatmentStart = cpct$treatmentStartYear-cpct$birthYear, .before = "treatmentStartYear")
 
 min(cpct$treatmentEndDate, na.rm=T)
 cpct$treatmentEndDate[cpct$treatmentEndDate == '1900-01-01'] <- NA
@@ -187,7 +191,7 @@ paste0("Nr of uncensored patients ", sum(survivalFirstResponse$status == 1))
 survFirstResponse <- survfit(Surv(survivalFirstResponse$pfs, survivalFirstResponse$status) ~ survivalFirstResponse$firstResponse, data = survivalFirstResponse)
 autoplot(survFirstResponse) + 
   labs(title="PFS (in untreated patients)", y=y_lab_surv, x=x_lab_surv, color="First response", fill = "First response")
-survdiff(Surv(survivalFirstResponse$os, survivalFirstResponse$status) ~ survivalFirstResponse$firstResponse, data = survivalFirstResponse)
+survdiff(Surv(survivalFirstResponse$pfs, survivalFirstResponse$status) ~ survivalFirstResponse$firstResponse, data = survivalFirstResponse)
 
 ## Treatment curation
 cpct <- add_column(cpct, treatmentCurated = ifelse((grepl("Oxaliplatin", cpct$treatment) & grepl("Bevacizumab", cpct$treatment) & grepl("Capecitabine", cpct$treatment) &! grepl("Fluorouracil", cpct$treatment) &! grepl("Irinotecan", cpct$treatment)), "CAPOX-B", cpct$treatment), .after = "treatment")
@@ -209,6 +213,8 @@ qplot(cpctCrc$primaryTumorType)
 cpctCrc <- subset(cpctCrc, subset = (primaryTumorType %in% c('','Carcinoma')))
 n_distinct(cpctCrc$sampleId)
 n_distinct(cpctCrc$patientId)
+
+table(cpctCrc$hasBeenUntreated)
 
 ## Adding CRC driver information
 cpctCrc <- inner_join(cpctCrc, cpctCrcDrivers, by=c('sampleId'='sampleId'))
@@ -301,7 +307,7 @@ trifluridineCrc <- cpctCrc %>% subset(select = c(sampleId, treatmentCurated, pre
 capoxbCrc <- cpctCrc %>% subset(select = c(sampleId, treatmentCurated, preTreatments, krasStatus, krasG12Status, krasG13Status, firstResponse, pfs, os)) %>%
   dplyr::filter(cpctCrc$treatmentCurated == 'CAPOX-B')
 
-pembrolizumab <- cpct %>% subset(select = c(sampleId, treatmentCurated, birthYear, gender, preTreatments, primaryTumorLocation, firstResponse, pfs, os)) %>%
+pembrolizumab <- cpct %>% subset(select = c(sampleId, treatmentCurated, ageAtTreatmentStart, gender, preTreatments, primaryTumorLocation, firstResponse, pfs, os)) %>%
   dplyr::filter(cpct$treatmentCurated == 'Pembrolizumab' & cpct$primaryTumorLocation %in% c('Urothelial tract','Lung','Skin'))
 
 # 1.2 CRC survival plots 
@@ -354,7 +360,47 @@ survMSI <- survfit(Surv(survivalCrc$pfs, survivalCrc$status) ~ survivalCrc$msSta
 autoplot(survMSI) + 
   labs(title="PFS", y=y_lab_surv, x=x_lab_surv, color="MS status", fill = "MS status")
 
-# 2. All Investigate relationship between age at start treatment & treatment duration ------------------------------------------------------------------
+# 2. (WIP) Implement KNN on testing data frames
+## 2.1 Goal: Use PFS and ageAtTreatmentStart to predict OS
+summary(pembrolizumab)
+pembrolizumab$pfs <- as.numeric(pembrolizumab$pfs)
+pembrolizumab$os <- as.numeric(pembrolizumab$os)
+summary(pembrolizumab)
+
+## Normalization, removal of instances with missing data (NaN), subset data
+pembrolizumab <- add_column(pembrolizumab, pfs_norm = (pembrolizumab$pfs - min(pembrolizumab$pfs, na.rm=true)) / (max(pembrolizumab$pfs, na.rm=true)-min(pembrolizumab$pfs, na.rm=true)), .after = "pfs")
+pembrolizumab <- add_column(pembrolizumab, os_norm = (pembrolizumab$os - min(pembrolizumab$os, na.rm=true)) / (max(pembrolizumab$os, na.rm=true)-min(pembrolizumab$os, na.rm=true)), .after = "os")
+pembrolizumab <- add_column(pembrolizumab, ageAtTreatmentStart_norm = (pembrolizumab$ageAtTreatmentStart - min(pembrolizumab$ageAtTreatmentStart, na.rm=true)) / (max(pembrolizumab$ageAtTreatmentStart, na.rm=true)-min(pembrolizumab$ageAtTreatmentStart, na.rm=true)), .after = "ageAtTreatmentStart")
+pembrolizumabSub <- pembrolizumab %>% subset(select = c(ageAtTreatmentStart, pfs, os)) %>% na.omit()
+pembrolizumabSubNorm <- pembrolizumab %>% subset(select = c(ageAtTreatmentStart_norm, pfs_norm, os_norm)) %>% na.omit()
+
+## Non-normalized set: Split in training and test data set
+set.seed(15039)
+pembrolizumabSub$classification <- sample(2, nrow(pembrolizumabSub), replace=TRUE, prob=c(0.8, 0.2))
+pembrolizumabSubTrain <- pembrolizumabSub %>% dplyr::filter(classification == "1")
+pembrolizumabSubTest <- pembrolizumabSub %>% dplyr::filter(classification == "2")
+set.seed(NULL)
+
+## KNN (WIP): Start with 2 attributes and calculate optimal k
+pembroSub_recipe <- recipe(pfs ~ os, data = pembrolizumabSubTrain) %>%
+  step_scale(all_predictors()) %>%
+  step_center(all_predictors())
+pembroSub_spec <- nearest_neighbor(weight_func = "rectangular", neighbors = tune()) %>%
+  set_engine("kknn") %>%
+  set_mode ("regression")
+pembroSub_vfold <- vfold_cv(pembrolizumabSubTrain, v=5, strata = os)
+pembroSub_wkflw <- workflow() %>%
+  add_recipe(pembroSub_recipe) %>%
+  add_model(pembroSub_spec)
+pembroSub_wkflw
+set_mode("regression")
+
+gridvals <- tibble(neighbors = seq(from = 1, to = 50, by = 3))
+pembroSub_results <- pembroSub_wkflw %>% 
+  tune_grid(resamples=pembroSub_vfold, grid=gridvals) %>%
+  collect_metrics() %>% dplyr::filter(.metric=="rmse")
+
+# 3. All Investigate relationship between age at start treatment & treatment duration ------------------------------------------------------------------
 categoriesTherapy = c("Immunotherapy", "Hormonal therapy", "Chemotherapy", "Targeted therapy")
 categoriesTumor = c("Lung", "Breast", "Prostate", "Skin")
 
@@ -381,8 +427,8 @@ for (x in categoriesTumor) {
 
 colnames(corValueTumor) <- categoriesTumor
 
-# 3. All Investigate relationship between age at start treatment & treatment response ------------------------------------------------------------------
-## 3.1 Matrix of response based on bucketed age at start treatment
+# 4. All Investigate relationship between age at start treatment & treatment response ------------------------------------------------------------------
+## 4.1 Matrix of response based on bucketed age at start treatment
 
 bucket_20_40 <- c(20, 40)
 bucket_40_50 <- c(40, 50)
@@ -410,7 +456,7 @@ colnames(responseDetailsPerAgeBucket) <- c("20-40y", "40-50y", "50-60y", "60-70y
 rownames(responseDetailsPerAgeBucket) <- c("n","n with PD first response","fraction PD first response","n with PR/CR first response","fraction PR/CR first response", "n with SD first response","fraction SD first response")
 
 
-## 3.2. Plot progressive-disease fraction per age at start treatment
+## 4.2. Plot progressive-disease fraction per age at start treatment
 
 adultAge = c(18:100)
 
