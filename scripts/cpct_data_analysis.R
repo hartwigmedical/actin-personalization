@@ -452,11 +452,9 @@ ggplot(os, aes(x = pfs, y = os)) +
 
 ## 2.2: Use PFS and ageAtTreatmentStart to predict OS
 ggplot(os,aes(x=ageAtTreatmentStart, y=os)) + geom_point(alpha=0.4)
-ggplot(os,aes(x=ageAtTreatmentStart, y=pfs)) + geom_point(alpha=0.4)
 
 os_recipe <- recipe(os ~ pfs + ageAtTreatmentStart, data = os_train) %>%
   step_normalize(all_predictors()) 
-os_recipe
 
 os_spec <- nearest_neighbor(weight_func = "rectangular", neighbors = tune()) %>%
   set_engine("kknn") %>%
@@ -464,6 +462,7 @@ os_spec <- nearest_neighbor(weight_func = "rectangular", neighbors = tune()) %>%
 
 gridvals <- tibble(neighbors = seq(from = 1, to = 100, by = 2))
 
+## Cross validation to find optimal K
 os_cross_results_multi <- workflow() %>%
   add_recipe(os_recipe) %>%
   add_model(os_spec) %>%
@@ -472,16 +471,16 @@ os_cross_results_multi <- workflow() %>%
   dplyr::filter(.metric == "rmse")
 
 os_cross_results_multi_min <- os_cross_results_multi %>% dplyr::filter(mean==min(mean))
-os_cross_results_multi_k <- os_cross_results_multi_min %>% pull(neighbors)
+os_cross_results_multi_min_k <- os_cross_results_multi_min %>% pull(neighbors)
 
-## Testing our model on the test set
-os_spec <- nearest_neighbor(weight_func ="rectangular", neighbors = os_cross_results_multi_k) %>%
+## Testing our multivariable KNN model with optimal K on the test set
+os_multi_spec <- nearest_neighbor(weight_func ="rectangular", neighbors = os_cross_results_multi_min_k) %>%
   set_engine("kknn") %>%
   set_mode ("regression")
 
 os_multi_fit <- workflow() %>%
   add_recipe(os_recipe) %>%
-  add_model(os_spec) %>%
+  add_model(os_multi_spec) %>%
   fit(data = os_train)
 
 os_multi_preds <- os_multi_fit %>%
