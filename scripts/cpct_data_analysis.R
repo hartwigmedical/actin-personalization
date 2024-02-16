@@ -360,45 +360,138 @@ survMSI <- survfit(Surv(survivalCrc$pfs, survivalCrc$status) ~ survivalCrc$msSta
 autoplot(survMSI) + 
   labs(title="PFS", y=y_lab_surv, x=x_lab_surv, color="MS status", fill = "MS status")
 
-# 2. (WIP) Implement KNN on testing data frames
-## 2.1 Goal: Use PFS and ageAtTreatmentStart to predict OS
-summary(pembrolizumab)
-pembrolizumab$pfs <- as.numeric(pembrolizumab$pfs)
-pembrolizumab$os <- as.numeric(pembrolizumab$os)
-summary(pembrolizumab)
 
-## Normalization, removal of instances with missing data (NaN), subset data
-pembrolizumab <- add_column(pembrolizumab, pfs_norm = (pembrolizumab$pfs - min(pembrolizumab$pfs, na.rm=true)) / (max(pembrolizumab$pfs, na.rm=true)-min(pembrolizumab$pfs, na.rm=true)), .after = "pfs")
-pembrolizumab <- add_column(pembrolizumab, os_norm = (pembrolizumab$os - min(pembrolizumab$os, na.rm=true)) / (max(pembrolizumab$os, na.rm=true)-min(pembrolizumab$os, na.rm=true)), .after = "os")
-pembrolizumab <- add_column(pembrolizumab, ageAtTreatmentStart_norm = (pembrolizumab$ageAtTreatmentStart - min(pembrolizumab$ageAtTreatmentStart, na.rm=true)) / (max(pembrolizumab$ageAtTreatmentStart, na.rm=true)-min(pembrolizumab$ageAtTreatmentStart, na.rm=true)), .after = "ageAtTreatmentStart")
-pembrolizumabSub <- pembrolizumab %>% subset(select = c(ageAtTreatmentStart, pfs, os)) %>% na.omit()
-pembrolizumabSubNorm <- pembrolizumab %>% subset(select = c(ageAtTreatmentStart_norm, pfs_norm, os_norm)) %>% na.omit()
+# 2. Implement KNN
+summary(cpct)
+cpct$pfs <- as.numeric(cpct$pfs)
+cpct$os <- as.numeric(cpct$os)
+summary(cpct)
 
-## Non-normalized set: Split in training and test data set
+## Removal of instances with missing data (NaN), subset data
+os <- cpct %>% subset(select = c(ageAtTreatmentStart, pfs, os)) %>% na.omit()
+
+## Split in training and test data set
 set.seed(15039)
-pembrolizumabSub$classification <- sample(2, nrow(pembrolizumabSub), replace=TRUE, prob=c(0.8, 0.2))
-pembrolizumabSubTrain <- pembrolizumabSub %>% dplyr::filter(classification == "1")
-pembrolizumabSubTest <- pembrolizumabSub %>% dplyr::filter(classification == "2")
+os_split <- initial_split(os, prop=0.8, strata=os)
+os_train <- training(os_split)
+os_test <- testing(os_split)
 set.seed(NULL)
 
-## KNN (WIP): Start with 2 attributes and calculate optimal k
-pembroSub_recipe <- recipe(pfs ~ os, data = pembrolizumabSubTrain) %>%
-  step_scale(all_predictors()) %>%
-  step_center(all_predictors())
-pembroSub_spec <- nearest_neighbor(weight_func = "rectangular", neighbors = tune()) %>%
+## 2.1 Goal: Use PFS to predict OS
+ggplot(os,aes(x=pfs, y=os)) + geom_point(alpha=0.4)
+
+## Standardization to mean of 0 and SD of 1
+os_recipe <- recipe(os ~ pfs, data = os_train) %>%
+  step_normalize(all_predictors()) 
+os_recipe
+
+os_spec <- nearest_neighbor(weight_func = "rectangular", neighbors = tune()) %>%
   set_engine("kknn") %>%
   set_mode ("regression")
-pembroSub_vfold <- vfold_cv(pembrolizumabSubTrain, v=5, strata = os)
-pembroSub_wkflw <- workflow() %>%
-  add_recipe(pembroSub_recipe) %>%
-  add_model(pembroSub_spec)
-pembroSub_wkflw
-set_mode("regression")
 
-gridvals <- tibble(neighbors = seq(from = 1, to = 50, by = 3))
-pembroSub_results <- pembroSub_wkflw %>% 
-  tune_grid(resamples=pembroSub_vfold, grid=gridvals) %>%
-  collect_metrics() %>% dplyr::filter(.metric=="rmse")
+os_wkflw <- workflow() %>%
+  add_recipe(os_recipe) %>%
+  add_model(os_spec)
+
+os_wkflw
+
+## Cross-validation to find optimal K
+os_vfold <- vfold_cv(os_train, v=5)
+#os_vfold <- vfold_cv(os_train, v=5, strata = os)
+gridvals <- tibble(neighbors = seq(from = 1, to = 100, by = 2))
+
+os_cross_results <- os_wkflw %>% 
+  tune_grid(resamples = os_vfold, grid = gridvals) %>%
+  collect_metrics() %>%
+  dplyr::filter(.metric == "rmse") %>%
+  dplyr::arrange(mean)
+
+ggplot(os_cross_results, aes(x=neighbors, y=mean)) + geom_point(alpha=0.4)
+os_cross_results_min <- os_cross_results %>% dplyr::filter(mean == min(mean))
+os_cross_results_min_k <- os_cross_results_min %>% pull(neighbors)
+
+## Test model with optimal K on the test set
+os_spec <- nearest_neighbor(weight_func ="rectangular", neighbors = os_cross_results_min_k) %>%
+  set_engine("kknn") %>%
+  set_mode ("regression")
+
+os_fit <- workflow() %>%
+  add_recipe(os_recipe) %>%
+  add_model(os_spec) %>%
+  fit(data = os_train)
+
+os_summary <- os_fit %>% 
+  predict(os_test) %>%
+  bind_cols(os_test) %>%
+  metrics(truth=os, estimate=.pred) %>%
+  dplyr::filter(.metric=='rmse')
+
+os_summary
+
+## Visualize final result
+pfs_prediction_grid <- tibble(
+  pfs = seq(
+    from = os %>% select(pfs) %>% min(),
+    to = os %>% select(pfs) %>% max(),
+    by=10
+  )
+)
+
+os_preds <- os_fit %>%
+  predict(pfs_prediction_grid) %>%
+  bind_cols(pfs_prediction_grid)
+
+ggplot(os, aes(x = pfs, y = os)) +
+  geom_point(alpha = 0.4) +
+  geom_line(data = os_preds,
+            mapping = aes(x = pfs, y = .pred),
+            color = "steelblue",
+            linewidth = 1) +
+  ggtitle(paste0("K = ", os_cross_results_min_k)) +
+  theme(text = element_text(size = 12))
+
+## 2.2: Use PFS and ageAtTreatmentStart to predict OS
+ggplot(os,aes(x=ageAtTreatmentStart, y=os)) + geom_point(alpha=0.4)
+ggplot(os,aes(x=ageAtTreatmentStart, y=pfs)) + geom_point(alpha=0.4)
+
+os_recipe <- recipe(os ~ pfs + ageAtTreatmentStart, data = os_train) %>%
+  step_normalize(all_predictors()) 
+os_recipe
+
+os_spec <- nearest_neighbor(weight_func = "rectangular", neighbors = tune()) %>%
+  set_engine("kknn") %>%
+  set_mode ("regression")
+
+gridvals <- tibble(neighbors = seq(from = 1, to = 100, by = 2))
+
+os_cross_results_multi <- workflow() %>%
+  add_recipe(os_recipe) %>%
+  add_model(os_spec) %>%
+  tune_grid(os_vfold, grid=gridvals) %>%
+  collect_metrics() %>%
+  dplyr::filter(.metric == "rmse")
+
+os_cross_results_multi_min <- os_cross_results_multi %>% dplyr::filter(mean==min(mean))
+os_cross_results_multi_k <- os_cross_results_multi_min %>% pull(neighbors)
+
+## Testing our model on the test set
+os_spec <- nearest_neighbor(weight_func ="rectangular", neighbors = os_cross_results_multi_k) %>%
+  set_engine("kknn") %>%
+  set_mode ("regression")
+
+os_multi_fit <- workflow() %>%
+  add_recipe(os_recipe) %>%
+  add_model(os_spec) %>%
+  fit(data = os_train)
+
+os_multi_preds <- os_multi_fit %>%
+  predict(os_test) %>%
+  bind_cols(os_test)
+
+os_multi_mets <- metrics(os_multi_preds, truth = os, estimate = .pred) %>%
+  dplyr::filter(.metric == 'rmse')
+
+os_multi_mets
 
 # 3. All Investigate relationship between age at start treatment & treatment duration ------------------------------------------------------------------
 categoriesTherapy = c("Immunotherapy", "Hormonal therapy", "Chemotherapy", "Targeted therapy")
