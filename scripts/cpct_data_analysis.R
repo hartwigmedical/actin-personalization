@@ -22,6 +22,9 @@ library(tidymodels)
  wd <- paste0(Sys.getenv("HOME"), "/hmf/tmp/")
  setwd(wd)
 
+# Get access to functions
+source(paste0(Sys.getenv("HOME"), "/hmf/repos/actin-analysis/scripts/cpct_data_analysis_functions.R"))
+ 
 # Retrieve data ------------------------------------------------------------------
 dbProd <- dbConnect(MySQL(), dbname='hmfpatients', groups="RAnalysis")
 
@@ -361,7 +364,7 @@ autoplot(survMSI) +
   labs(title="PFS", y=y_lab_surv, x=x_lab_surv, color="MS status", fill = "MS status")
 
 
-# 2. Implement KNN
+# 2.1 Implement KNN regression (single-variable and multivariable)
 summary(cpct)
 cpct$pfs <- as.numeric(cpct$pfs)
 cpct$os <- as.numeric(cpct$os)
@@ -387,7 +390,7 @@ os_recipe
 
 os_spec <- nearest_neighbor(weight_func = "rectangular", neighbors = tune()) %>%
   set_engine("kknn") %>%
-  set_mode ("regression")
+  set_mode("regression")
 
 os_wkflw <- workflow() %>%
   add_recipe(os_recipe) %>%
@@ -405,6 +408,7 @@ os_cross_results <- os_wkflw %>%
   collect_metrics() %>%
   dplyr::filter(.metric == "rmse") %>%
   dplyr::arrange(mean)
+
 
 ggplot(os_cross_results, aes(x=neighbors, y=mean)) + geom_point(alpha=0.4)
 os_cross_results_min <- os_cross_results %>% dplyr::filter(mean == min(mean))
@@ -450,6 +454,13 @@ ggplot(os, aes(x = pfs, y = os)) +
   ggtitle(paste0("K = ", os_cross_results_min_k)) +
   theme(text = element_text(size = 12))
 
+## Use functions
+output <- knn_cross_validation(os_train, "os", "pfs", 5)
+recipe <- output[[1]]
+results <- output[[2]]
+min_k <- knn_cross_validation_optimal_k(results)
+knn_run_on_test_set(os_train, os_test, min_k, recipe, "os")
+
 ## 2.2: Use PFS and ageAtTreatmentStart to predict OS
 ggplot(os,aes(x=ageAtTreatmentStart, y=os)) + geom_point(alpha=0.4)
 
@@ -491,6 +502,10 @@ os_multi_mets <- metrics(os_multi_preds, truth = os, estimate = .pred) %>%
   dplyr::filter(.metric == 'rmse')
 
 os_multi_mets
+
+# 2.3 Implement KNN regression with categorical variables
+
+
 
 # 3. All Investigate relationship between age at start treatment & treatment duration ------------------------------------------------------------------
 categoriesTherapy = c("Immunotherapy", "Hormonal therapy", "Chemotherapy", "Targeted therapy")
