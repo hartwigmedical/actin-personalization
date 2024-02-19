@@ -380,59 +380,23 @@ os_train <- training(os_split)
 os_test <- testing(os_split)
 set.seed(NULL)
 
-## 2.1 Goal: Use PFS to predict OS
-ggplot(os,aes(x=pfs, y=os)) + geom_point(alpha=0.4)
+## 2.1 Use PFS to predict OS using knn
+ggplot(os, aes(x=pfs, y=os)) + geom_point(alpha=0.4)
 
-## Standardization to mean of 0 and SD of 1
-os_recipe <- recipe(os ~ pfs, data = os_train) %>%
-  step_normalize(all_predictors()) 
-os_recipe
+output <- knn_cross_validation(os_train, c("os"), c("pfs"), 5, "os")
+recipe <- output[[1]]
+results <- output[[2]]
+optimal_k <- knn_cross_validation_optimal_k(results)
 
-os_spec <- nearest_neighbor(weight_func = "rectangular", neighbors = tune()) %>%
-  set_engine("kknn") %>%
-  set_mode("regression")
+ggplot(results, aes(x=neighbors, y=mean)) +
+  geom_point(alpha=0.4) +
+  geom_point(data=subset(results, neighbors == optimal_k), colour="blue")
 
-os_wkflw <- workflow() %>%
-  add_recipe(os_recipe) %>%
-  add_model(os_spec)
+output <- knn_run_on_test_set(os_train, os_test, optimal_k, recipe, "os")
+fit <- output[[1]]
+summary <- output[[2]]
 
-os_wkflw
-
-## Cross-validation to find optimal K
-os_vfold <- vfold_cv(os_train, v=5)
-#os_vfold <- vfold_cv(os_train, v=5, strata = os)
-gridvals <- tibble(neighbors = seq(from = 1, to = 100, by = 2))
-
-os_cross_results <- os_wkflw %>% 
-  tune_grid(resamples = os_vfold, grid = gridvals) %>%
-  collect_metrics() %>%
-  dplyr::filter(.metric == "rmse") %>%
-  dplyr::arrange(mean)
-
-
-ggplot(os_cross_results, aes(x=neighbors, y=mean)) + geom_point(alpha=0.4)
-os_cross_results_min <- os_cross_results %>% dplyr::filter(mean == min(mean))
-os_cross_results_min_k <- os_cross_results_min %>% pull(neighbors)
-
-## Test model with optimal K on the test set
-os_spec <- nearest_neighbor(weight_func ="rectangular", neighbors = os_cross_results_min_k) %>%
-  set_engine("kknn") %>%
-  set_mode ("regression")
-
-os_fit <- workflow() %>%
-  add_recipe(os_recipe) %>%
-  add_model(os_spec) %>%
-  fit(data = os_train)
-
-os_summary <- os_fit %>% 
-  predict(os_test) %>%
-  bind_cols(os_test) %>%
-  metrics(truth=os, estimate=.pred) %>%
-  dplyr::filter(.metric=='rmse')
-
-os_summary
-
-## Visualize final result
+## Visualize output
 pfs_prediction_grid <- tibble(
   pfs = seq(
     from = os %>% select(pfs) %>% min(),
@@ -441,7 +405,7 @@ pfs_prediction_grid <- tibble(
   )
 )
 
-os_preds <- os_fit %>%
+preds <- fit %>%
   predict(pfs_prediction_grid) %>%
   bind_cols(pfs_prediction_grid)
 
@@ -451,57 +415,26 @@ ggplot(os, aes(x = pfs, y = os)) +
             mapping = aes(x = pfs, y = .pred),
             color = "steelblue",
             linewidth = 1) +
-  ggtitle(paste0("K = ", os_cross_results_min_k)) +
+  ggtitle(paste0("K = ", optimal_k)) +
   theme(text = element_text(size = 12))
 
-## Use functions
-output <- knn_cross_validation(os_train, "os", "pfs", 5)
-recipe <- output[[1]]
-results <- output[[2]]
-min_k <- knn_cross_validation_optimal_k(results)
-knn_run_on_test_set(os_train, os_test, min_k, recipe, "os")
-
-## 2.2: Use PFS and ageAtTreatmentStart to predict OS
+## 2.2: Use PFS & ageAtTreatmentStart to predict OS using knn
 ggplot(os,aes(x=ageAtTreatmentStart, y=os)) + geom_point(alpha=0.4)
 
-os_recipe <- recipe(os ~ pfs + ageAtTreatmentStart, data = os_train) %>%
-  step_normalize(all_predictors()) 
+outcome_var <- c("os")
+predictor_vars <- c("pfs","ageAtTreatmentStart")
+output <- knn_cross_validation(os_train, outcome_var, predictor_vars, 5, "os")
+recipe <- output[[1]]
+results <- output[[2]]
+optimal_k <- knn_cross_validation_optimal_k(results)
 
-os_spec <- nearest_neighbor(weight_func = "rectangular", neighbors = tune()) %>%
-  set_engine("kknn") %>%
-  set_mode ("regression")
+ggplot(results, aes(x=neighbors, y=mean)) +
+  geom_point(alpha=0.4) +
+  geom_point(data=subset(results, neighbors == optimal_k), colour="blue")
 
-gridvals <- tibble(neighbors = seq(from = 1, to = 100, by = 2))
-
-## Cross validation to find optimal K
-os_cross_results_multi <- workflow() %>%
-  add_recipe(os_recipe) %>%
-  add_model(os_spec) %>%
-  tune_grid(os_vfold, grid=gridvals) %>%
-  collect_metrics() %>%
-  dplyr::filter(.metric == "rmse")
-
-os_cross_results_multi_min <- os_cross_results_multi %>% dplyr::filter(mean==min(mean))
-os_cross_results_multi_min_k <- os_cross_results_multi_min %>% pull(neighbors)
-
-## Testing our multivariable KNN model with optimal K on the test set
-os_multi_spec <- nearest_neighbor(weight_func ="rectangular", neighbors = os_cross_results_multi_min_k) %>%
-  set_engine("kknn") %>%
-  set_mode ("regression")
-
-os_multi_fit <- workflow() %>%
-  add_recipe(os_recipe) %>%
-  add_model(os_multi_spec) %>%
-  fit(data = os_train)
-
-os_multi_preds <- os_multi_fit %>%
-  predict(os_test) %>%
-  bind_cols(os_test)
-
-os_multi_mets <- metrics(os_multi_preds, truth = os, estimate = .pred) %>%
-  dplyr::filter(.metric == 'rmse')
-
-os_multi_mets
+output <- knn_run_on_test_set(os_train, os_test, optimal_k, recipe, "os")
+fit <- output[[1]]
+summary <- output[[2]]
 
 # 2.3 Implement KNN regression with categorical variables
 
