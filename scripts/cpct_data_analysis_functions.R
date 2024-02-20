@@ -1,4 +1,4 @@
-knn_cross_validation <- function(training_set, outcome_var, predictor_vars, vfold, strata) {
+knn_cross_validation <- function(training_set, outcome_var, predictor_vars, vfold, strata, kmax) {
   
   training_set_processed <- training_set %>% subset(select=c(outcome_var,  predictor_vars))
   
@@ -20,13 +20,17 @@ knn_cross_validation <- function(training_set, outcome_var, predictor_vars, vfol
     add_model(knn_spec)
  
   if (missing(strata)) {
-    v_fold <- vfold_cv(training_set_processed, vfold)
+    v_fold <- vfold_cv(data=training_set_processed, v=vfold)
   } else {
-    v_fold <- vfold_cv(training_set_processed, vfold, strata = strata)
+    v_fold <- vfold_cv(data=training_set_processed, v=vfold, strata=strata)
   }
   
-  gridvals <- tibble(neighbors = seq(from = 1, to = 300, by = 2))
-
+  if (missing(kmax)) {
+    gridvals <- tibble(neighbors = seq(from = 1, to = 200, by = 2))
+  } else {
+    gridvals <- tibble(neighbors = seq(from = 1, to = kmax, by = 2))
+  }
+  
   knn_cross_results <- knn_wkflw %>% 
       tune_grid(resamples = v_fold, grid = gridvals) %>%
       collect_metrics() %>%

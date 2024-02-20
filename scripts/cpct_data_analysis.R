@@ -383,16 +383,16 @@ set.seed(NULL)
 ## 2.1.1 Use PFS to predict OS using knn
 ggplot(os, aes(x=pfs, y=os)) + geom_point(alpha=0.4)
 
-output <- knn_cross_validation(os_train, c("os"), c("pfs"), 5, "os")
+output <- knn_cross_validation(training_set=os_train, outcome_var=c("os"), predictor_vars=c("pfs"), vfold=5, strata="os", kmax=250)
 recipe <- output[[1]]
 results <- output[[2]]
-optimal_k <- knn_cross_validation_optimal_k(results)
+optimal_k <- knn_cross_validation_optimal_k(knn_cross_results=results)
 
 ggplot(results, aes(x=neighbors, y=mean)) +
   geom_point(alpha=0.4) +
   geom_point(data=subset(results, neighbors == optimal_k), colour="blue")
 
-output <- knn_run_on_test_set(os_train, os_test, optimal_k, recipe, "os")
+output <- knn_run_on_test_set(training_set=os_train, test_set=os_test, k=optimal_k, recipe=recipe, truth_var=c("os"))
 fit <- output[[1]]
 summary <- output[[2]]
 
@@ -423,16 +423,16 @@ ggplot(os,aes(x=ageAtTreatmentStart, y=os)) + geom_point(alpha=0.4)
 
 outcome_var <- c("os")
 predictor_vars <- c("pfs","ageAtTreatmentStart")
-output <- knn_cross_validation(os_train, outcome_var, predictor_vars, 5, "os")
+output <- knn_cross_validation(training_set=os_train, outcome_var=outcome_var, predictor_vars=predictor_vars, vfold=5, strata="os")
 recipe <- output[[1]]
 results <- output[[2]]
-optimal_k <- knn_cross_validation_optimal_k(results)
+optimal_k <- knn_cross_validation_optimal_k(knn_cross_results=results)
 
 ggplot(results, aes(x=neighbors, y=mean)) +
   geom_point(alpha=0.4) +
   geom_point(data=subset(results, neighbors == optimal_k), colour="blue")
 
-output <- knn_run_on_test_set(os_train, os_test, optimal_k, recipe, "os")
+output <- knn_run_on_test_set(training_set=os_train, test_set=os_test, k=optimal_k, recipe=recipe, truth_var=c("os"))
 fit <- output[[1]]
 summary <- output[[2]]
 
