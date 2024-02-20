@@ -380,7 +380,7 @@ os_train <- training(os_split)
 os_test <- testing(os_split)
 set.seed(NULL)
 
-## 2.1 Use PFS to predict OS using knn
+## 2.1.1 Use PFS to predict OS using knn
 ggplot(os, aes(x=pfs, y=os)) + geom_point(alpha=0.4)
 
 output <- knn_cross_validation(os_train, c("os"), c("pfs"), 5, "os")
@@ -411,14 +411,14 @@ preds <- fit %>%
 
 ggplot(os, aes(x = pfs, y = os)) +
   geom_point(alpha = 0.4) +
-  geom_line(data = os_preds,
+  geom_line(data = preds,
             mapping = aes(x = pfs, y = .pred),
             color = "steelblue",
             linewidth = 1) +
   ggtitle(paste0("K = ", optimal_k)) +
   theme(text = element_text(size = 12))
 
-## 2.2: Use PFS & ageAtTreatmentStart to predict OS using knn
+## 2.1.2: Use PFS & ageAtTreatmentStart to predict OS using knn
 ggplot(os,aes(x=ageAtTreatmentStart, y=os)) + geom_point(alpha=0.4)
 
 outcome_var <- c("os")
@@ -436,7 +436,7 @@ output <- knn_run_on_test_set(os_train, os_test, optimal_k, recipe, "os")
 fit <- output[[1]]
 summary <- output[[2]]
 
-# 2.3 Implement KNN regression with categorical variables
+# 2.2 Implement KNN regression with categorical variables
 
 
 

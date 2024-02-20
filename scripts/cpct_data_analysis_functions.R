@@ -3,11 +3,14 @@ knn_cross_validation <- function(training_set, outcome_var, predictor_vars, vfol
   training_set_processed <- training_set %>% subset(select=c(outcome_var,  predictor_vars))
   
   knn_recipe <- recipe(training_set_processed) %>%
-    update_role(outcome_var, new_role = "outcome") %>%
-    for (i in length(predictor_vars)) { 
-    update_role(predictor_vars[i], new_role = "predictor") %>% }
-    step_normalize(all_predictors()) 
+    update_role(outcome_var, new_role = "outcome")
   
+  for (i in 1:length(predictor_vars)) {
+  knn_recipe <- knn_recipe %>% update_role(predictor_vars[i], new_role = "predictor")
+  }
+
+  knn_recipe <- knn_recipe %>% step_normalize(all_predictors()) 
+
   knn_spec <- nearest_neighbor(weight_func = "rectangular", neighbors = tune()) %>%
     set_engine("kknn") %>%
     set_mode("regression")
