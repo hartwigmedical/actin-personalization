@@ -65,8 +65,15 @@ left join (select sampleId, 'positive' as nrasStatus from driverCatalog where dr
 left join (select sampleId, 'positive' as brafV600EStatus from somaticVariant where gene='BRAF' and reported and canonicalHgvsProteinImpact='p.Val600Glu') as d on a.sampleId=d.sampleId
 left join (select sampleId, msStatus from purity) as e on a.sampleId=e.sampleId;"
 
+queryCPCTDrivers <- "select a.sampleId,
+if(krasStatus='positive','positive','wildtype') as krasStatus
+from
+(select sampleId from datarequest where sampleId like 'CPCT%') as a
+left join (select sampleId, 'positive' as krasStatus from driverCatalog where driverLikelihood>0.8 and gene='KRAS' and driver='MUTATION') as b1 on a.sampleId=b1.sampleId;"
+
 cpct <- dbGetQuery(dbProd, queryCPCT)
 cpctCrcDrivers <- dbGetQuery(dbProd, queryCPCTCrcDrivers)
+cpctDrivers <- dbGetQuery(dbProd, queryCPCTDrivers)
 dbDisconnect(dbProd)
 
 # General data cleanup/exploration ------------------------------------------------------------------
@@ -365,13 +372,18 @@ autoplot(survMSI) +
 
 # 2 Implement various data mining algorithms
 # 2.0 General data preparation
+
+## Adding cpct driver information
+cpct <- inner_join(cpct, cpctDrivers, by=c('sampleId'='sampleId'))
+
 summary(cpct)
 cpct$pfs <- as.numeric(cpct$pfs)
 cpct$os <- as.numeric(cpct$os)
+cpct$krasStatusBoolean <- ifelse(cpct$krasStatus=="positive",1,0) %>% as.integer()
 summary(cpct)
 
 ## Removal of instances with missing data (NaN), subset data
-os <- cpct %>% subset(select = c(ageAtTreatmentStart, pfs, os)) %>% na.omit()
+os <- cpct %>% subset(select = c(ageAtTreatmentStart, pfs, os, krasStatusBoolean)) %>% na.omit()
 
 ## Split in training and test data set
 set.seed(15039)
@@ -382,7 +394,9 @@ set.seed(NULL)
 
 # 2.1 Linear regression model
 # 2.1.1 Use PFS to predict OS
-results <- linear_regression_model(training_set=os_train, test_set=os_test, outcome_var=c("os"), predictor_vars=c("pfs"), truth_var=c("os"))
+outcome_var=c("os")
+predictor_var=c("pfs")
+results <- linear_regression_model(training_set=os_train, test_set=os_test, outcome_var=outcome_var, predictor_vars=predictor_var, truth_var=c("os"))
 lm_fit <- results[[1]]
 lm_test_results <- results[[2]]
 
@@ -404,18 +418,18 @@ ggplot(os, aes(x = pfs, y = os)) +
             mapping = aes(x = pfs, y = .pred),
             color = "steelblue",
             linewidth = 1) +
-  xlab("PFS") +
-  ylab("OS") +
+  xlab(predictor_var) +
+  ylab(outcome_var) +
   scale_y_continuous(labels = dollar_format()) +
   theme(text = element_text(size = 12))
 
-# 2.1.1 Use PFS & ageAtTreatmentStart to predict OS
+# 2.1.2 Use PFS & ageAtTreatmentStart to predict OS
 results <- linear_regression_model(training_set=os_train, test_set=os_test, outcome_var=c("os"), predictor_vars=c("ageAtTreatmentStart","pfs"), truth_var=c("os"))
 lm_fit <- results[[1]]
 lm_test_results <- results[[2]]
 
 # 2.2 KNN regression (single-variable and multivariable)
-## 2.1.1 Use PFS to predict OS using knn
+## 2.2.1 Use PFS to predict OS using knn
 ggplot(os, aes(x=pfs, y=os)) + geom_point(alpha=0.4)
 
 output <- knn_cross_validation(training_set=os_train, outcome_var=c("os"), predictor_vars=c("pfs"), vfold=5, strata="os", kmax=250)
@@ -453,25 +467,36 @@ ggplot(os, aes(x = pfs, y = os)) +
   ggtitle(paste0("K = ", optimal_k)) +
   theme(text = element_text(size = 12))
 
-## 2.1.2: Use PFS & ageAtTreatmentStart to predict OS using knn
+## 2.2.2: Use PFS & ageAtTreatmentStart +/- a boolean of krasStatus to predict OS using knn
 ggplot(os,aes(x=ageAtTreatmentStart, y=os)) + geom_point(alpha=0.4)
+ggplot(os,aes(x=krasStatusBoolean, y=os)) + geom_point(alpha=0.4)
 
 outcome_var <- c("os")
 predictor_vars <- c("pfs","ageAtTreatmentStart")
+predictor_vars_2 <- c("pfs","ageAtTreatmentStart","krasStatusBoolean")
+
 output <- knn_cross_validation(training_set=os_train, outcome_var=outcome_var, predictor_vars=predictor_vars, vfold=5, strata="os")
 recipe <- output[[1]]
 results <- output[[2]]
+output_2 <- knn_cross_validation(training_set=os_train, outcome_var=outcome_var, predictor_vars=predictor_vars_2, vfold=5, strata="os")
+recipe_2 <- output_2[[1]]
+results_2 <- output_2[[2]]
+
 optimal_k <- knn_cross_validation_optimal_k(knn_cross_results=results)
+optimal_k_2 <- knn_cross_validation_optimal_k(knn_cross_results=results_2)
 
 ggplot(results, aes(x=neighbors, y=mean)) +
   geom_point(alpha=0.4) +
   geom_point(data=subset(results, neighbors == optimal_k), colour="blue")
 
 output <- knn_run_on_test_set(training_set=os_train, test_set=os_test, k=optimal_k, recipe=recipe, truth_var=c("os"))
+output_2 <- knn_run_on_test_set(training_set=os_train, test_set=os_test, k=optimal_k_2, recipe=recipe_2, truth_var=c("os"))
 fit <- output[[1]]
 summary <- output[[2]]
+fit_2 <- output_2[[1]]
+summary_2 <- output_2[[2]]
 
-# 2.2 Implement KNN regression with categorical variables
+# 2.3 Implement KNN regression with categorical variables
 
 
 
