@@ -1,3 +1,6 @@
+## VARIOUS FUNCTIONS FOR ACTIN CPCT DATA ANALYSIS---------------------------------------------
+
+# K-NEAREST NEIGHBOURS------------------------------------------------------------------
 knn_cross_validation <- function(training_set, outcome_var, predictor_vars, vfold, strata, kmax) {
   
   training_set_processed <- training_set %>% subset(select=c(outcome_var,  predictor_vars))
@@ -38,6 +41,7 @@ knn_cross_validation <- function(training_set, outcome_var, predictor_vars, vfol
       dplyr::arrange(mean)
 
   outcome_list <- list(knn_recipe, knn_cross_results)
+  names(outcome_list) <- c("knn cv recipe", "knn cv results")
   return(outcome_list)
 }
 
@@ -66,5 +70,37 @@ knn_run_on_test_set <- function(training_set, test_set, k, recipe, truth_var) {
     dplyr::filter(.metric=='rmse')
   
   outcome_list <- list(knn_fit, knn_summary)
+  names(outcome_list) <- c("knn fit", "knn fit summary")
+  return(outcome_list)
+}
+
+# LINEAR REGRESSION MODEL ------------------------------------------------------------------
+linear_regression_model <- function(training_set, test_set, outcome_var, predictor_vars, truth_var) {
+  
+  training_set_processed <- training_set %>% subset(select=c(outcome_var,  predictor_vars))
+  
+  lm_recipe <- recipe(training_set_processed) %>%
+    update_role(outcome_var, new_role = "outcome")
+  
+    for (i in 1:length(predictor_vars)) {
+      lm_recipe <- lm_recipe %>% update_role(predictor_vars[i], new_role = "predictor")
+    }
+  
+  lm_spec <- linear_reg() %>%
+    set_engine("lm") %>%
+    set_mode("regression")
+  
+  lm_fit <- workflow() %>%
+    add_recipe(lm_recipe) %>%
+    add_model(lm_spec) %>%
+    fit(data = training_set)
+  
+  lm_test_results <- lm_fit %>%
+    predict(test_set) %>%
+    bind_cols(test_set) %>%
+    metrics(truth = truth_var, estimate = .pred)
+  
+  outcome_list <- list(lm_fit, lm_test_results)
+  names(outcome_list) <- c("lm fit", "lm test results")
   return(outcome_list)
 }

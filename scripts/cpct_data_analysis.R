@@ -363,8 +363,8 @@ survMSI <- survfit(Surv(survivalCrc$pfs, survivalCrc$status) ~ survivalCrc$msSta
 autoplot(survMSI) + 
   labs(title="PFS", y=y_lab_surv, x=x_lab_surv, color="MS status", fill = "MS status")
 
-
-# 2.1 Implement KNN regression (single-variable and multivariable)
+# 2 Implement various data mining algorithms
+# 2.0 General data preparation
 summary(cpct)
 cpct$pfs <- as.numeric(cpct$pfs)
 cpct$os <- as.numeric(cpct$os)
@@ -380,6 +380,41 @@ os_train <- training(os_split)
 os_test <- testing(os_split)
 set.seed(NULL)
 
+# 2.1 Linear regression model
+# 2.1.1 Use PFS to predict OS
+results <- linear_regression_model(training_set=os_train, test_set=os_test, outcome_var=c("os"), predictor_vars=c("pfs"), truth_var=c("os"))
+lm_fit <- results[[1]]
+lm_test_results <- results[[2]]
+
+## Visualize output
+pfs_prediction_grid <- tibble(
+  pfs = c(
+    os %>% select(pfs) %>% min(),
+    os %>% select(pfs) %>% max()
+  )
+)
+
+os_preds <- lm_fit %>%
+  predict(pfs_prediction_grid) %>%
+  bind_cols(pfs_prediction_grid)
+
+ggplot(os, aes(x = pfs, y = os)) +
+  geom_point(alpha = 0.4) +
+  geom_line(data = os_preds,
+            mapping = aes(x = pfs, y = .pred),
+            color = "steelblue",
+            linewidth = 1) +
+  xlab("PFS") +
+  ylab("OS") +
+  scale_y_continuous(labels = dollar_format()) +
+  theme(text = element_text(size = 12))
+
+# 2.1.1 Use PFS & ageAtTreatmentStart to predict OS
+results <- linear_regression_model(training_set=os_train, test_set=os_test, outcome_var=c("os"), predictor_vars=c("ageAtTreatmentStart","pfs"), truth_var=c("os"))
+lm_fit <- results[[1]]
+lm_test_results <- results[[2]]
+
+# 2.2 KNN regression (single-variable and multivariable)
 ## 2.1.1 Use PFS to predict OS using knn
 ggplot(os, aes(x=pfs, y=os)) + geom_point(alpha=0.4)
 
