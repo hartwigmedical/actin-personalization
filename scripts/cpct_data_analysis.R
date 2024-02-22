@@ -28,11 +28,27 @@ source(paste0(Sys.getenv("HOME"), "/hmf/repos/actin-analysis/scripts/cpct_data_a
 # Retrieve data ------------------------------------------------------------------
 dbProd <- dbConnect(MySQL(), dbname='hmfpatients', groups="RAnalysis")
 
-queryCPCT <-"select d.sampleId, d.patientId, gender, birthYear, registrationDate, deathDate, primaryTumorLocation, primaryTumorSubLocation, primaryTumorType, primaryTumorSubType, hasSystemicPreTreatment, hasRadiotherapyPreTreatment, preTreatments, preTreatmentsType, preTreatmentsMechanism, d.treatmentGiven, d.radiotherapyGiven, treatmentStartDate, treatmentEndDate, treatment, consolidatedTreatmentType, concatenatedTreatmentType, consolidatedTreatmentMechanism, concatenatedTreatmentMechanism, responseMeasured, firstResponse, d.responseDate, firstMatchedPDResponse.response as firstResponsePD, firstMatchedPDResponse.responseDate as firstResponsePDDate
+queryCPCT <-"select d.sampleId, d.patientId, gender, birthYear, registrationDate, deathDate, primaryTumorLocation, primaryTumorSubLocation, primaryTumorType, primaryTumorSubType, hasSystemicPreTreatment, hasRadiotherapyPreTreatment, preTreatments, preTreatmentsType, preTreatmentsMechanism, d.treatmentGiven, d.radiotherapyGiven, treatmentStartDate, treatmentEndDate, treatment, consolidatedTreatmentType, concatenatedTreatmentType, consolidatedTreatmentMechanism, concatenatedTreatmentMechanism, d.firstResponse as firstResponseOrig, d.responseDate as firstResponseDateOrig, firstMatchedResponse.response as firstResponse, firstMatchedResponse.responseDate as firstResponseDate, firstMatchedPDResponse.response as firstResponsePD, firstMatchedPDResponse.responseDate as firstResponsePDDate, bestResponse
 from sample s
 inner join datarequest d on d.sampleId=s.sampleId
 left join biopsy on biopsy.sampleId = s.sampleId
 left join treatment on treatment.biopsyId = biopsy.id
+left join (select * 
+          from
+          treatmentResponse as tr
+          where measurementDone='Yes' and response not in ('ND','NE') and
+          not exists ( 
+            select * 
+            from treatmentResponse as tr1
+            where tr1.measurementDone='Yes'
+            and tr1.treatmentId = tr.treatmentId
+		        and tr1.responseDate <= tr.responseDate
+            and tr1.id != tr.id
+            and tr1.response = tr.response
+        )
+        and not(isnull(treatmentId))
+) as firstMatchedResponse
+on treatment.id = firstMatchedResponse.treatmentId
 left join ( select *
             from
             treatmentResponse as tr
@@ -43,10 +59,27 @@ left join ( select *
               where tr1.treatmentId = tr.treatmentId
               and tr1.responseDate <= tr.responseDate
               and tr1.id != tr.id
-              and tr1.response = tr.response)
-            and not(isnull(treatmentId))
+              and tr1.response = tr.response
+          )
+          and not(isnull(treatmentId))
 ) as firstMatchedPDResponse
 on treatment.id = firstMatchedPDResponse.treatmentId
+left join (select treatmentId, case when (group_concat(response) like '%CR%') then 'CR' when (group_concat(response) like '%PR%') then 'PR' when (group_concat(response) like '%SD%') then 'SD' when (group_concat(response) like '%PD%') then 'PD' else group_concat(response) end as bestResponse
+            from
+            treatmentResponse as tr
+            where measurementDone= 'Yes' and response not in ('Non-CR/Non-PD', 'Clinical progression', 'ND', 'NE') and
+            not exists (
+              select *
+              from treatmentResponse as tr1
+              where tr1.treatmentId = tr.treatmentId
+              and tr1.responseDate <= tr.responseDate
+              and tr1.id != tr.id
+              and tr1.response = tr.response
+            )
+            and not(isnull(treatmentId)) 
+            group by 1
+) as bestResponse
+on treatment.id = bestResponse.treatmentId
 where d.sampleId like 'CPCT%' order by registrationDate;"
 
 queryCPCTCrcDrivers <- "select a.sampleId,
