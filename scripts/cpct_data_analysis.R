@@ -40,11 +40,10 @@ left join (select *
           not exists ( 
             select * 
             from treatmentResponse as tr1
-            where tr1.measurementDone='Yes'
+            where tr1.measurementDone='Yes' and tr1.response not in ('ND','NE') 
             and tr1.treatmentId = tr.treatmentId
 		        and tr1.responseDate <= tr.responseDate
             and tr1.id != tr.id
-            and tr1.response = tr.response
         )
         and not(isnull(treatmentId))
 ) as firstMatchedResponse
@@ -99,10 +98,16 @@ left join (select sampleId, 'positive' as brafV600EStatus from somaticVariant wh
 left join (select sampleId, msStatus from purity) as e on a.sampleId=e.sampleId;"
 
 queryCPCTDrivers <- "select a.sampleId,
-if(krasStatus='positive','positive','wildtype') as krasStatus
+if(krasStatus='positive', 0, 1) as isKrasWildtype,
+if(b2mStatus='positive', 0, 1) as isB2MWildtype,
+if(msStatus='MSI',1,0) as hasMsi,
+tml as tumorMutationalLoad
 from
 (select sampleId from datarequest where sampleId like 'CPCT%') as a
-left join (select sampleId, 'positive' as krasStatus from driverCatalog where driverLikelihood>0.8 and gene='KRAS' and driver='MUTATION') as b1 on a.sampleId=b1.sampleId;"
+left join (select sampleId, 'positive' as krasStatus from driverCatalog where driverLikelihood>0.8 and gene='KRAS') as b1 on a.sampleId=b1.sampleId
+left join (select sampleId, 'positive' as b2mStatus from driverCatalog where driverLikelihood>0.8 and gene='B2M') as b2 on a.sampleId=b2.sampleId
+left join (select sampleId, msStatus, tml from purity) as e on a.sampleId=e.sampleId
+;"
 
 cpct <- dbGetQuery(dbProd, queryCPCT)
 cpctCrcDrivers <- dbGetQuery(dbProd, queryCPCTCrcDrivers)
@@ -161,9 +166,9 @@ cpct <- add_column(cpct, pfs = round(difftime(cpct$firstResponsePDDate, cpct$tre
 paste0("PFS missing in ", round(sum(is.na(cpct$pfs))/length(cpct$pfs)*100,0), "%")
 
 ## Response dates
-cpct <- add_column(cpct, daysResponseAfterTreatmentStartDate = round(difftime(cpct$responseDate, cpct$treatmentStartDate, units="days"),0), .after = "responseDate")
-cpct <- add_column(cpct, daysDeathDateAfterFirstResponseDate = round(difftime(cpct$deathDate, cpct$responseDate, units="days"),0), .after = "responseDate")
-cpct <- add_column(cpct, daysEndDateAfterFirstResponseDate = round(difftime(cpct$treatmentEndDate, cpct$responseDate, units="days"),0), .after = "daysResponseAfterTreatmentStartDate")
+cpct <- add_column(cpct, daysResponseAfterTreatmentStartDate = round(difftime(cpct$firstResponseDate, cpct$treatmentStartDate, units="days"),0), .after = "firstResponseDate")
+cpct <- add_column(cpct, daysDeathDateAfterFirstResponseDate = round(difftime(cpct$deathDate, cpct$firstResponseDate, units="days"),0), .after = "firstResponseDate")
+cpct <- add_column(cpct, daysEndDateAfterFirstResponseDate = round(difftime(cpct$treatmentEndDate, cpct$firstResponseDate, units="days"),0), .after = "daysResponseAfterTreatmentStartDate")
 
 min(cpct$daysResponseAfterTreatmentStartDate, na.rm=T)
 max(cpct$daysResponseAfterTreatmentStartDate, na.rm=T)
@@ -175,8 +180,7 @@ max(cpct$daysEndDateAfterFirstResponseDate, na.rm=T)
 ## Response dates cleanup in case difference with treatment end date too large
 end_date_after_response_date_min <- -30
 cpct <- cpct %>% 
-  mutate(responseDate = ifelse(daysEndDateAfterFirstResponseDate < end_date_after_response_date_min, NA, responseDate)) %>% 
-  mutate(responseMeasured = ifelse(daysEndDateAfterFirstResponseDate < end_date_after_response_date_min, NA, responseMeasured)) %>%
+  mutate(firstResponseDate = ifelse(daysEndDateAfterFirstResponseDate < end_date_after_response_date_min, NA, firstResponseDate)) %>% 
   mutate(firstResponse = ifelse(daysEndDateAfterFirstResponseDate < end_date_after_response_date_min, NA, firstResponse)) %>%
   mutate(daysResponseAfterTreatmentStartDate = ifelse(daysEndDateAfterFirstResponseDate < end_date_after_response_date_min, NA, daysResponseAfterTreatmentStartDate)) %>%
   mutate(daysDeathDateAfterFirstResponseDate = ifelse(daysEndDateAfterFirstResponseDate < end_date_after_response_date_min, NA, daysDeathDateAfterFirstResponseDate)) %>%
@@ -350,8 +354,22 @@ trifluridineCrc <- cpctCrc %>% subset(select = c(sampleId, treatmentCurated, pre
 capoxbCrc <- cpctCrc %>% subset(select = c(sampleId, treatmentCurated, preTreatments, krasStatus, krasG12Status, krasG13Status, firstResponse, pfs, os)) %>%
   dplyr::filter(cpctCrc$treatmentCurated == 'CAPOX-B')
 
-pembrolizumab <- cpct %>% subset(select = c(sampleId, treatmentCurated, ageAtTreatmentStart, gender, preTreatments, primaryTumorLocation, firstResponse, pfs, os)) %>%
-  dplyr::filter(cpct$treatmentCurated == 'Pembrolizumab' & cpct$primaryTumorLocation %in% c('Urothelial tract','Lung','Skin'))
+cpct <- inner_join(cpct, cpctDrivers, by=c('sampleId'='sampleId'))
+cpct <- add_column(cpct, treatmentCurated = ifelse((grepl("Oxaliplatin", cpct$treatment) & grepl("Bevacizumab", cpct$treatment) & grepl("Capecitabine", cpct$treatment) &! grepl("Fluorouracil", cpct$treatment) &! grepl("Irinotecan", cpct$treatment)), "CAPOX-B", cpct$treatment), .after = "treatment")
+
+## PEMBROLIZUMAB
+cpct <- add_column(cpct, hasImmunoPreTreatment = ifelse(grepl("Immunotherapy", cpct$preTreatmentsType), 1, 0), .after = "preTreatmentsType")
+pembrolizumab <- cpct %>% 
+  subset(select = c(sampleId, gender, ageAtTreatmentStart, treatmentCurated, hasSystemicPreTreatment, hasImmunoPreTreatment, primaryTumorLocation, isKrasWildtype, isB2MWildtype, hasMsi, tumorMutationalLoad, bestResponse, pfs, os)) %>%
+  dplyr::filter(cpct$treatmentCurated == 'Pembrolizumab' & cpct$primaryTumorLocation %in% c('Urothelial tract','Lung','Skin','Prostate','Mesothelium'))
+
+pembrolizumab$hasMsi <- as.logical(pembrolizumab$hasMsi)
+pembrolizumab$isKrasWildtype <- as.logical(pembrolizumab$isKrasWildtype)
+pembrolizumab$isB2MWildtype <- as.logical(pembrolizumab$isB2MWildtype)
+pembrolizumab$hasSystemicPreTreatment <- ifelse(pembrolizumab$hasSystemicPreTreatment == "Yes", 1,0) %>% as.logical()
+pembrolizumab$hasImmunoPreTreatment <- as.logical(pembrolizumab$hasImmunoPreTreatment)
+pembrolizumab$pfs <- as.numeric(pembrolizumab$pfs)
+pembrolizumab$os <- as.numeric(pembrolizumab$os)
 
 # 1.2 CRC survival plots 
 ## CRC OS survival plots from treatment start (in treated and untreated patients)
@@ -407,7 +425,6 @@ autoplot(survMSI) +
 # 2.0 General data preparation
 
 ## Adding cpct driver information
-cpct <- inner_join(cpct, cpctDrivers, by=c('sampleId'='sampleId'))
 
 summary(cpct)
 cpct$pfs <- as.numeric(cpct$pfs)
