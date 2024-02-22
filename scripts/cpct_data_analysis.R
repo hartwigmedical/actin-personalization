@@ -89,7 +89,7 @@ if(nrasStatus='positive', 0,1) as isNrasWildtype,
 if(brafV600EStatus='positive', 0,1) as isBrafV600EWildtype,
 if(erbb2AmpStatus='positive', 1,0) as hasErbb2Amp,
 if(msStatus='MSI',1,0) as hasMsi,
-tml
+tml as tumorMutationalLoad
 from
 (select sampleId from datarequest where sampleId like 'CPCT%' and primaryTumorLocation='Colorectum') as a
 left join (select sampleId, 'positive' as krasStatus from driverCatalog where driverLikelihood>0.8 and gene='KRAS') as b1 on a.sampleId=b1.sampleId
@@ -157,7 +157,7 @@ cpctCrc$isBrafV600EWildtype <- as.logical(cpctCrc$isBrafV600EWildtype)
 cpctCrc$hasErbb2Amp <- as.logical(cpctCrc$hasErbb2Amp)
 
 colorectal <- cpctCrc %>%
-  subset(select = c(sampleId, isFemale, ageAtTreatmentStart, hasSystemicPreTreatment, primaryTumorLocation, isKrasWildtype, isKrasG12Wildtype, isKrasG13Wildtype, isNrasWildtype, isBrafV600EWildtype, hasErbb2Amp, hasMsi, tml, treatment, bestResponse, pfs, os))
+  subset(select = c(sampleId, isFemale, ageAtTreatmentStart, hasSystemicPreTreatment, primaryTumorLocation, isKrasWildtype, isKrasG12Wildtype, isKrasG13Wildtype, isNrasWildtype, isBrafV600EWildtype, hasErbb2Amp, hasMsi, tumorMutationalLoad, treatment, bestResponse, pfs, os))
 #### Note: TotalDriverCount to add
 
 # General data cleanup/exploration ------------------------------------------------------------------
