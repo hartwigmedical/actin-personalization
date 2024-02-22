@@ -36,7 +36,7 @@ left join treatment on treatment.biopsyId = biopsy.id
 left join ( select *
             from
             treatmentResponse as tr
-            where response = 'PD' and measurementDone= 'Yes'
+            where response = 'PD' and measurementDone= 'Yes' and
             not exists (
               select *
               from treatmentResponse as tr1
