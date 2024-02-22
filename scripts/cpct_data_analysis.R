@@ -140,7 +140,7 @@ min(cpct$daysEndDateAfterFirstResponseDate, na.rm=T)
 max(cpct$daysEndDateAfterFirstResponseDate, na.rm=T)
 
 ## Response dates cleanup in case difference with treatment end date too large
-end_date_after_response_date_min = -30
+end_date_after_response_date_min <- -30
 cpct <- cpct %>% 
   mutate(responseDate = ifelse(daysEndDateAfterFirstResponseDate < end_date_after_response_date_min, NA, responseDate)) %>% 
   mutate(responseMeasured = ifelse(daysEndDateAfterFirstResponseDate < end_date_after_response_date_min, NA, responseMeasured)) %>%
@@ -156,8 +156,8 @@ survival$status <- ifelse(!is.na(survival$os), 1, 0)
 paste0("Nr of uncensored (included) patients: ", sum(survival$status == 1))
 
 ## General survival plot labels
-y_lab_surv = "Proportion"
-x_lab_surv = "Time (days)"
+y_lab_surv <- "Proportion"
+x_lab_surv <- "Time (days)"
 
 survGender <- survfit(Surv(survival$os, survival$status) ~ survival$gender, data = survival)
 autoplot(survGender) + 
@@ -394,8 +394,8 @@ set.seed(NULL)
 
 # 2.1 Linear regression model
 # 2.1.1 Use PFS to predict OS
-outcome_var=c("os")
-predictor_var=c("pfs")
+outcome_var <- c("os")
+predictor_var <- c("pfs")
 results <- linear_regression_model(training_set=os_train, test_set=os_test, outcome_var=outcome_var, predictor_vars=predictor_var, truth_var=c("os"))
 lm_fit <- results[[1]]
 lm_test_results <- results[[2]]
@@ -501,8 +501,8 @@ summary_2 <- output_2[[2]]
 
 
 # 3. All Investigate relationship between age at start treatment & treatment duration ------------------------------------------------------------------
-categoriesTherapy = c("Immunotherapy", "Hormonal therapy", "Chemotherapy", "Targeted therapy")
-categoriesTumor = c("Lung", "Breast", "Prostate", "Skin")
+categoriesTherapy <- c("Immunotherapy", "Hormonal therapy", "Chemotherapy", "Targeted therapy")
+categoriesTumor <- c("Lung", "Breast", "Prostate", "Skin")
 
 corValueTherapy <- data.frame()
 corValueTumor <- data.frame()
@@ -558,7 +558,7 @@ rownames(responseDetailsPerAgeBucket) <- c("n","n with PD first response","fract
 
 ## 4.2. Plot progressive-disease fraction per age at start treatment
 
-adultAge = c(18:100)
+adultAge <- c(18:100)
 
 progressiveDiseaseFractionPerAge <- data.frame()
 i<-1
