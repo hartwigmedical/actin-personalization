@@ -134,10 +134,12 @@ cpct <- add_column(cpct, isBRAFV600EWildtype = as.logical(ifelse(is.na(cpct$braf
 cpct <- add_column(cpct, os = as.numeric(round(difftime(cpct$deathDate, cpct$treatmentStartDate, units="days"),0), .after = "deathDate"))
 cpct <- add_column(cpct, pfs = as.numeric(round(difftime(cpct$firstResponsePDDate, cpct$treatmentStartDate, units="days"),0), .after = "firstResponsePD"))
 
+cpct$hasSystemicPreTreatment <- as.logical(ifelse(cpct$hasSystemicPreTreatment == "Yes", 1, 0))
 cpct$hasMsi <- as.logical(cpct$hasMsi)
-cpctCrc$isKrasWildtype <- as.logical(cpctCrc$isKrasWildtype)
-cpctCrc$isNrasWildtype <- as.logical(cpctCrc$isNrasWildtype)
-cpctCrc$hasErbb2Amp <- as.logical(cpctCrc$hasErbb2Amp)
+cpct$isKrasWildtype <- as.logical(cpct$isKrasWildtype)
+cpct$isNrasWildtype <- as.logical(cpct$isNrasWildtype)
+cpct$isB2MWildtype <- as.logical(cpct$isB2MWildtype)
+cpct$hasErbb2Amp <- as.logical(cpct$hasErbb2Amp)
 
 ## Pembrolizumab df
 pembrolizumab <- cpct %>% 
