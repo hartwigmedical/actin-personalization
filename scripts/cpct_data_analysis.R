@@ -114,7 +114,7 @@ cpctDr <- dbGetQuery(dbProd, queryCPCTDr)
 
 dbDisconnect(dbProd)
 
-# 1. Generate testing data frames (WIP) ------------------------------------------------------------------
+# 1. Generate testing data frames ------------------------------------------------------------------
 cpctVariants <- cpctDr %>%
   left_join(krasG12, by=c('sampleId'='sampleId')) %>%
   left_join(krasG13, by=c('sampleId'='sampleId')) %>%
@@ -152,7 +152,7 @@ colorectal <- cpct %>%
   dplyr::filter(primaryTumorLocation == 'Colorectum') %>%
   subset(select = c(sampleId, isFemale, ageAtTreatmentStart, hasSystemicPreTreatment, primaryTumorLocation, isKrasWildtype, isKrasG12Wildtype, isKrasG13Wildtype, isNrasWildtype, isBRAFV600EWildtype, hasErbb2Amp, hasMsi, tumorMutationalLoad, totalDriverCount, treatment, bestResponse, pfs, os))
 
-# General data cleanup/exploration ------------------------------------------------------------------
+# General data cleanup/exploration (TO BE MADE CONSISTENT WITH DF CHANGES ABOVE)------------------------------------------------------------------
 ## Age at registration, start date after registration date
 cpct <- add_column(cpct, registrationYear = as.integer(format(as.Date(cpct$registrationDate), "%Y")), .before = "registrationDate")
 cpct <- add_column(cpct, ageAtRegistration = cpct$registrationYear-cpct$birthYear, .before = "registrationDate")
