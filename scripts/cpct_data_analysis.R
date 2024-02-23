@@ -81,84 +81,74 @@ left join (select treatmentId, case when (group_concat(response) like '%CR%') th
 on treatment.id = bestResponse.treatmentId
 where d.sampleId like 'CPCT%' order by registrationDate;"
 
-queryCPCTCrcDrivers <- "select a.sampleId,
+queryCPCTDrivers <- "select a.sampleId,
 if(krasStatus='positive', 0,1) as isKrasWildtype,
-if(krasG12Status='positive', 0,1) as isKrasG12Wildtype,
-if(krasG13Status='positive', 0,1) as isKrasG13Wildtype,
 if(nrasStatus='positive', 0,1) as isNrasWildtype,
-if(brafV600EStatus='positive', 0,1) as isBrafV600EWildtype,
+if(b2mStatus='positive', 0, 1) as isB2MWildtype,
 if(erbb2AmpStatus='positive', 1,0) as hasErbb2Amp,
 if(msStatus='MSI',1,0) as hasMsi,
-tml as tumorMutationalLoad
-from
-(select sampleId from datarequest where sampleId like 'CPCT%' and primaryTumorLocation='Colorectum') as a
-left join (select sampleId, 'positive' as krasStatus from driverCatalog where driverLikelihood>0.8 and gene='KRAS') as b1 on a.sampleId=b1.sampleId
-left join (select sampleId, 'positive' as krasG12Status from somaticVariant where reported and gene='KRAS' and canonicalHgvsProteinImpact like 'p.Gly12%') as b2 on a.sampleId=b2.sampleId
-left join (select sampleId, 'positive' as krasG13Status from somaticVariant where reported and gene='KRAS' and canonicalHgvsProteinImpact like 'p.Gly13%') as b3 on a.sampleId=b3.sampleId
-left join (select sampleId, 'positive' as nrasStatus from driverCatalog where driverLikelihood>0.8 and gene='NRAS' and driver='MUTATION') as c on a.sampleId=c.sampleId
-left join (select sampleId, 'positive' as brafV600EStatus from somaticVariant where gene='BRAF' and reported and canonicalHgvsProteinImpact='p.Val600Glu') as d on a.sampleId=d.sampleId
-left join (select sampleId, msStatus, tml from purity) as e on a.sampleId=e.sampleId
-left join (select sampleId, 'positive' as erbb2AmpStatus from driverCatalog where gene='ERBB2' and likelihoodMethod='AMP') as f on a.sampleId=f.sampleId
-;"
-
-queryCPCTDrivers <- "select a.sampleId,
-if(krasStatus='positive', 0, 1) as isKrasWildtype,
-if(b2mStatus='positive', 0, 1) as isB2MWildtype,
-if(msStatus='MSI',1,0) as hasMsi,
-tml as tumorMutationalLoad
+tml as tumorMutationalLoad,
+if(driverCount is null, 0, driverCount) + if(fusionCount is null, 0, fusionCount) as totalDriverCount
 from
 (select sampleId from datarequest where sampleId like 'CPCT%') as a
 left join (select sampleId, 'positive' as krasStatus from driverCatalog where driverLikelihood>0.8 and gene='KRAS') as b1 on a.sampleId=b1.sampleId
-left join (select sampleId, 'positive' as b2mStatus from driverCatalog where driverLikelihood>0.8 and gene='B2M') as b2 on a.sampleId=b2.sampleId
-left join (select sampleId, msStatus, tml from purity) as e on a.sampleId=e.sampleId
+left join (select sampleId, 'positive' as nrasStatus from driverCatalog where driverLikelihood>0.8 and gene='NRAS' and driver='MUTATION') as c on a.sampleId=c.sampleId
+left join (select sampleId, 'positive' as b2mStatus from driverCatalog where driverLikelihood>0.8 and gene='B2M') as d on a.sampleId=d.sampleId
+left join (select sampleId, msStatus, tml from purity) as f on a.sampleId=f.sampleId
+left join (select sampleId, 'positive' as erbb2AmpStatus from driverCatalog where gene='ERBB2' and likelihoodMethod='AMP') as g on a.sampleId=g.sampleId
+left join (select sampleId, count(*) as driverCount from driverCatalog where driverLikelihood>0.8 group by 1) as h on a.sampleId=h.sampleId
+left join (select sampleId, count(*) as fusionCount from svFusion where reported group by 1) as i on a.sampleId=i.sampleId
 ;"
 
-cpct <- dbGetQuery(dbProd, queryCPCT)
-cpctCrcDrivers <- dbGetQuery(dbProd, queryCPCTCrcDrivers)
+queryKrasG12 <- "select distinct sampleId, 1 as krasG12Status from somaticVariant where reported and gene='KRAS' and canonicalHgvsProteinImpact like 'p.Gly12%';"
+queryKrasG13 <- "select distinct sampleId, 1 as krasG13Status from somaticVariant where reported and gene='KRAS' and canonicalHgvsProteinImpact like 'p.Gly13%';"
+queryBRAFV600E <- "select distinct sampleId, 1 as brafV600EStatus from somaticVariant where gene='BRAF' and reported and canonicalHgvsProteinImpact='p.Val600Glu';"
+queryCPCTDr <- "select sampleId from datarequest where sampleId like 'CPCT%';"
+
+cpctOrig <- dbGetQuery(dbProd, queryCPCT)
 cpctDrivers <- dbGetQuery(dbProd, queryCPCTDrivers)
+krasG12 <- dbGetQuery(dbProd, queryKrasG12)
+krasG13 <- dbGetQuery(dbProd, queryKrasG13)
+brafV600E <- dbGetQuery(dbProd, queryBRAFV600E)
+cpctDr <- dbGetQuery(dbProd, queryCPCTDr)
+
 dbDisconnect(dbProd)
 
 # 1. Generate testing data frames (WIP) ------------------------------------------------------------------
-cpct <- add_column(cpct, isFemale = ifelse(cpct$gender == "female", 1,0), .after = "gender")
+cpctVariants <- cpctDr %>%
+  left_join(krasG12, by=c('sampleId'='sampleId')) %>%
+  left_join(krasG13, by=c('sampleId'='sampleId')) %>%
+  left_join(brafV600E, by=c('sampleId'='sampleId'))
+
+cpct <- cpctOrig %>% 
+  inner_join(cpctDrivers, by=c('sampleId'='sampleId')) %>%
+  inner_join(cpctVariants, by=c('sampleId'='sampleId')) 
+
+cpct <- add_column(cpct, isFemale = as.logical(ifelse(cpct$gender == "female", 1,0), .after = "gender"))
 cpct <- add_column(cpct, treatmentStartYear = as.integer(format(as.Date(cpct$treatmentStartDate), "%Y")), .before = "treatmentStartDate")
-cpct <- add_column(cpct, ageAtTreatmentStart = cpct$treatmentStartYear-cpct$birthYear, .before = "treatmentStartYear")
-cpct <- add_column(cpct, hasImmunoPreTreatment = ifelse(grepl("Immunotherapy", cpct$preTreatmentsType), 1, 0), .after = "preTreatmentsType")
-cpct <- add_column(cpct, os = round(difftime(cpct$deathDate, cpct$treatmentStartDate, units="days"),0), .after = "deathDate")
-cpct <- add_column(cpct, pfs = round(difftime(cpct$firstResponsePDDate, cpct$treatmentStartDate, units="days"),0), .after = "firstResponsePD")
+cpct <- add_column(cpct, ageAtTreatmentStart = as.integer(cpct$treatmentStartYear-cpct$birthYear, .before = "treatmentStartYear"))
+cpct <- add_column(cpct, hasImmunoPreTreatment = as.logical(ifelse(grepl("Immunotherapy", cpct$preTreatmentsType), 1, 0), .after = "preTreatmentsType"))
+cpct <- add_column(cpct, isKrasG12Wildtype = as.logical(ifelse(is.na(cpct$krasG12Status), 0, 1), .after = "krasG12Status"))
+cpct <- add_column(cpct, isKrasG13Wildtype = as.logical(ifelse(is.na(cpct$krasG13Status), 0, 1), .after = "krasG13Status"))
+cpct <- add_column(cpct, isBRAFV600EWildtype = as.logical(ifelse(is.na(cpct$brafV600EStatus), 0, 1), .after = "brafV600EStatus"))
+cpct <- add_column(cpct, os = as.numeric(round(difftime(cpct$deathDate, cpct$treatmentStartDate, units="days"),0), .after = "deathDate"))
+cpct <- add_column(cpct, pfs = as.numeric(round(difftime(cpct$firstResponsePDDate, cpct$treatmentStartDate, units="days"),0), .after = "firstResponsePD"))
 
-cpct$isFemale <- as.logical(cpct$isFemale)
-cpct$hasSystemicPreTreatment <- ifelse(cpct$hasSystemicPreTreatment == "Yes", 1, 0) %>% as.logical()
-cpct$hasImmunoPreTreatment <- as.logical(cpct$hasImmunoPreTreatment)
-cpct$pfs <- as.numeric(cpct$pfs)
-cpct$os <- as.numeric(cpct$os)
-
-## Pembrolizumab
-cpctPem <- cpct %>% dplyr::filter(cpct$treatment == 'Pembrolizumab' | cpct$treatment == 'Pembrolizumab/Pembrolizumab')
-cpctPem <- inner_join(cpctPem, cpctDrivers, by=c('sampleId'='sampleId'))
-
-cpctPem$hasMsi <- as.logical(cpctPem$hasMsi)
-cpctPem$isKrasWildtype <- as.logical(cpctPem$isKrasWildtype)
-cpctPem$isB2MWildtype <- as.logical(cpctPem$isB2MWildtype)
-
-pembrolizumab <- cpctPem %>% 
-  subset(select = c(sampleId, isFemale, ageAtTreatmentStart, treatment, hasSystemicPreTreatment, hasImmunoPreTreatment, primaryTumorLocation, isKrasWildtype, isB2MWildtype, hasMsi, tumorMutationalLoad, bestResponse, pfs, os)) %>%
-  dplyr::filter(cpctPem$primaryTumorLocation %in% c('Urothelial tract','Lung','Skin','Prostate','Mesothelium'))
-
-## Colorectal
-cpctCrc <- subset(cpct, subset = (primaryTumorLocation == 'Colorectum'))
-cpctCrc <- inner_join(cpctCrc, cpctCrcDrivers, by=c('sampleId'='sampleId'))
-
-cpctCrc$hasMsi <- as.logical(cpctCrc$hasMsi)
+cpct$hasMsi <- as.logical(cpct$hasMsi)
 cpctCrc$isKrasWildtype <- as.logical(cpctCrc$isKrasWildtype)
-cpctCrc$isKrasG12Wildtype <- as.logical(cpctCrc$isKrasG12Wildtype)
-cpctCrc$isKrasG13Wildtype <- as.logical(cpctCrc$isKrasG13Wildtype)
 cpctCrc$isNrasWildtype <- as.logical(cpctCrc$isNrasWildtype)
-cpctCrc$isBrafV600EWildtype <- as.logical(cpctCrc$isBrafV600EWildtype)
 cpctCrc$hasErbb2Amp <- as.logical(cpctCrc$hasErbb2Amp)
 
-colorectal <- cpctCrc %>%
-  subset(select = c(sampleId, isFemale, ageAtTreatmentStart, hasSystemicPreTreatment, primaryTumorLocation, isKrasWildtype, isKrasG12Wildtype, isKrasG13Wildtype, isNrasWildtype, isBrafV600EWildtype, hasErbb2Amp, hasMsi, tumorMutationalLoad, treatment, bestResponse, pfs, os))
-#### Note: TotalDriverCount to add
+## Pembrolizumab df
+pembrolizumab <- cpct %>% 
+  dplyr::filter(treatment == 'Pembrolizumab' | cpct$treatment == 'Pembrolizumab/Pembrolizumab') %>%
+  subset(select = c(sampleId, isFemale, ageAtTreatmentStart, treatment, hasSystemicPreTreatment, hasImmunoPreTreatment, primaryTumorLocation, isKrasWildtype, isB2MWildtype, hasMsi, tumorMutationalLoad, bestResponse, pfs, os)) %>%
+  dplyr::filter(primaryTumorLocation %in% c('Urothelial tract','Lung','Skin','Prostate','Mesothelium'))
+
+## Colorectal df
+colorectal <- cpct %>% 
+  dplyr::filter(primaryTumorLocation == 'Colorectum') %>%
+  subset(select = c(sampleId, isFemale, ageAtTreatmentStart, hasSystemicPreTreatment, primaryTumorLocation, isKrasWildtype, isKrasG12Wildtype, isKrasG13Wildtype, isNrasWildtype, isBRAFV600EWildtype, hasErbb2Amp, hasMsi, tumorMutationalLoad, totalDriverCount, treatment, bestResponse, pfs, os))
 
 # General data cleanup/exploration ------------------------------------------------------------------
 ## Age at registration, start date after registration date
