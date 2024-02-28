@@ -126,7 +126,7 @@ generate_survival_plot <- function(data_set, survival_var, censor_status_var, sp
   } else {
     surv_fit_results <- survfit(Surv(as.numeric(survival_var), as.numeric(censor_status_var)) ~ split_var, data = data_set)
     surv_fit_sig <- survdiff(Surv(survival_var, censor_status_var) ~ split_var, data = data_set)
-    surv_plot <- autoplot(surv_fit_results) + labs(title=paste0("Survival plot (",type,")"), y=y_lab_surv, x=x_lab_surv, color=split_var, fill=split_var)
+    surv_plot <- autoplot(surv_fit_results) + labs(title=paste0("Survival plot (",type,"), p=",round(surv_fit_sig$pvalue,3)), y=y_lab_surv, x=x_lab_surv, color=split_var, fill=split_var)
     
     outcome_list <- list(surv_fit_results, surv_fit_sig, surv_plot)
     names(outcome_list) <- c("surv_fit_results", "surv_fit_sig", "surv_plot")
