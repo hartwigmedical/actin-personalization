@@ -177,24 +177,24 @@ osKrasG12vsNonG12Fit <- output[[1]]
 osKrasG12vsNonG12FitSig <- output[[2]]
 osKrasG12vsNonG12FitPlot <- output[[3]]
 
-output <- generate_survival_plot(data_set=survivalTri, survival_var=colorectalTri$os, censor_status_var=colorectalTri$statusOs, split_var = colorectalTri$krasG12G13vsNonG12G13, type = "OS")
+output <- generate_survival_plot(data_set=colorectalTri, survival_var=colorectalTri$os, censor_status_var=colorectalTri$statusOs, split_var = colorectalTri$krasG12G13vsNonG12G13, type = "OS")
 osKrasG12G13vsNonG12G13Fit <- output[[1]]
 osKrasG12G13vsNonG12G13FitSig <- output[[2]]
-osKkrasG12G13vsNonG12G13FitPlot <- output[[3]]
+osKrasG12G13vsNonG12G13FitPlot <- output[[3]]
 
-output <- generate_survival_plot(data_set=survivalTri, survival_var=colorectalTri$pfs, censor_status_var=colorectalTri$statusPfs, split_var = colorectalTri$krasG12vsNonG12, type = "PFS")
-pfsKrasG12G13vsNonG12G13Fit <- output[[1]]
-pfsKrasG12G13vsNonG12G13FitSig <- output[[2]]
-pfsKrasG12G13vsNonG12G13FitPlot <- output[[3]]
+output <- generate_survival_plot(data_set=colorectalTri, survival_var=colorectalTri$pfs, censor_status_var=colorectalTri$statusPfs, split_var = colorectalTri$krasG12vsNonG12, type = "PFS")
+pfsKrasG12vsNonG12Fit <- output[[1]]
+pfsKrasG12vsNonG12FitSig <- output[[2]]
+pfsKrasG12vsNonG12FitPlot <- output[[3]]
 
-output <- generate_survival_plot(data_set=survivalTri, survival_var=colorectalTri$pfs, censor_status_var=colorectalTri$statusPfs, split_var = colorectalTri$krasG12G13vsNonG12G13, type = "PFS")
+output <- generate_survival_plot(data_set=colorectalTri, survival_var=colorectalTri$pfs, censor_status_var=colorectalTri$statusPfs, split_var = colorectalTri$krasG12G13vsNonG12G13, type = "PFS")
 pfsKrasG12G13vsNonG12G13Fit <- output[[1]]
 pfsKrasG12G13vsNonG12G13FitSig <- output[[2]]
 pfsKrasG12G13vsNonG12G13FitPlot <- output[[3]]
 
 osKrasG12vsNonG12FitPlot
 osKrasG12G13vsNonG12G13FitPlot
-pfsKrasG12G13vsNonG12G13FitPlot
+pfsKrasG12vsNonG12FitPlot
 pfsKrasG12G13vsNonG12G13FitPlot
 
 # 2 General data exploration ------------------------------------------------------------------
