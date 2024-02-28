@@ -104,3 +104,33 @@ linear_regression_model <- function(training_set, test_set, outcome_var, predict
   names(outcome_list) <- c("lm fit", "lm test results")
   return(outcome_list)
 }
+
+# SURVIVAL PLOTS ------------------------------------------------------------------
+generate_survival_plot <- function(data_set, survival_var, censor_status_var, split_var, type) {
+  
+  y_lab_surv <- "Proportion"
+  x_lab_surv <- "Time (days)"
+  
+  if(missing(type)) {
+    type = "?"
+  }
+  
+  if (missing(split_var)) {
+    surv_fit_results <- survfit(Surv(as.numeric(survival_var), as.numeric(censor_status_var)) ~ 1, data = data_set)
+    surv_plot <- autoplot(surv_fit_results) + labs(title=paste0("Survival plot (",type,")"), y=y_lab_surv, x=x_lab_surv)
+    
+    outcome_list <- list(surv_fit_results, surv_plot)
+    names(outcome_list) <- c("surv_fit_results", "surv_plot")
+    return(outcome_list)
+    
+  } else {
+    surv_fit_results <- survfit(Surv(as.numeric(survival_var), as.numeric(censor_status_var)) ~ split_var, data = data_set)
+    surv_fit_sig <- survdiff(Surv(survival_var, censor_status_var) ~ split_var, data = data_set)
+    surv_plot <- autoplot(surv_fit_results) + labs(title=paste0("Survival plot (",type,")"), y=y_lab_surv, x=x_lab_surv, color=split_var, fill=split_var)
+    
+    outcome_list <- list(surv_fit_results, surv_fit_sig, surv_plot)
+    names(outcome_list) <- c("surv_fit_results", "surv_fit_sig", "surv_plot")
+    return(outcome_list)
+    
+  }
+}

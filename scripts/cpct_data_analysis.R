@@ -28,7 +28,7 @@ source(paste0(Sys.getenv("HOME"), "/hmf/repos/actin-analysis/scripts/cpct_data_a
 # Retrieve data ------------------------------------------------------------------
 dbProd <- dbConnect(MySQL(), dbname='hmfpatients', groups="RAnalysis")
 
-queryCPCT <-"select d.sampleId, d.patientId, gender, birthYear, registrationDate, deathDate, primaryTumorLocation, primaryTumorSubLocation, primaryTumorType, primaryTumorSubType, hasSystemicPreTreatment, hasRadiotherapyPreTreatment, preTreatments, preTreatmentsType, preTreatmentsMechanism, d.treatmentGiven, d.radiotherapyGiven, treatmentStartDate, treatmentEndDate, treatment, consolidatedTreatmentType, concatenatedTreatmentType, consolidatedTreatmentMechanism, concatenatedTreatmentMechanism, d.firstResponse as firstResponseOrig, d.responseDate as firstResponseDateOrig, firstMatchedResponse.response as firstResponse, firstMatchedResponse.responseDate as firstResponseDate, firstMatchedPDResponse.response as firstResponsePD, firstMatchedPDResponse.responseDate as firstResponsePDDate, bestResponse
+queryCPCT <-"select d.sampleId, biopsy.patientId, gender, birthYear, registrationDate, deathDate, primaryTumorLocation, primaryTumorSubLocation, primaryTumorType, primaryTumorSubType, hasSystemicPreTreatment, hasRadiotherapyPreTreatment, preTreatments, preTreatmentsType, preTreatmentsMechanism, d.treatmentGiven, d.radiotherapyGiven, treatmentStartDate, treatmentEndDate, treatment, consolidatedTreatmentType, concatenatedTreatmentType, consolidatedTreatmentMechanism, concatenatedTreatmentMechanism, d.firstResponse as firstResponseOrig, d.responseDate as firstResponseDateOrig, firstMatchedResponse.response as firstResponse, firstMatchedResponse.responseDate as firstResponseDate, firstMatchedPDResponse.response as firstResponsePD, firstMatchedPDResponse.responseDate as firstResponsePDDate, bestResponse
 from sample s
 inner join datarequest d on d.sampleId=s.sampleId
 left join biopsy on biopsy.sampleId = s.sampleId
@@ -102,6 +102,7 @@ left join (select sampleId, count(*) as fusionCount from svFusion where reported
 
 queryKrasG12 <- "select distinct sampleId, 1 as krasG12Status from somaticVariant where reported and gene='KRAS' and canonicalHgvsProteinImpact like 'p.Gly12%';"
 queryKrasG13 <- "select distinct sampleId, 1 as krasG13Status from somaticVariant where reported and gene='KRAS' and canonicalHgvsProteinImpact like 'p.Gly13%';"
+queryKrasNonG12G13 <- "select distinct sampleId, 1 as krasNonG12G13Status from somaticVariant where reported and gene='KRAS' and canonicalHgvsProteinImpact not like 'p.Gly12%' and canonicalHgvsProteinImpact not like 'p.Gly13%';"
 queryBRAFV600E <- "select distinct sampleId, 1 as brafV600EStatus from somaticVariant where gene='BRAF' and reported and canonicalHgvsProteinImpact='p.Val600Glu';"
 queryCPCTDr <- "select sampleId from datarequest where sampleId like 'CPCT%';"
 
@@ -109,15 +110,17 @@ cpctOrig <- dbGetQuery(dbProd, queryCPCT)
 cpctDrivers <- dbGetQuery(dbProd, queryCPCTDrivers)
 krasG12 <- dbGetQuery(dbProd, queryKrasG12)
 krasG13 <- dbGetQuery(dbProd, queryKrasG13)
+krasNonG12G13 <- dbGetQuery(dbProd, queryKrasNonG12G13)
 brafV600E <- dbGetQuery(dbProd, queryBRAFV600E)
 cpctDr <- dbGetQuery(dbProd, queryCPCTDr)
 
 dbDisconnect(dbProd)
 
-# 1. Generate testing data frames ------------------------------------------------------------------
+# 1. Generate general testing data frames ------------------------------------------------------------------
 cpctVariants <- cpctDr %>%
   left_join(krasG12, by=c('sampleId'='sampleId')) %>%
   left_join(krasG13, by=c('sampleId'='sampleId')) %>%
+  left_join(krasNonG12G13, by=c('sampleId'='sampleId')) %>%
   left_join(brafV600E, by=c('sampleId'='sampleId'))
 
 cpct <- cpctOrig %>% 
@@ -128,8 +131,9 @@ cpct <- add_column(cpct, isFemale = as.logical(ifelse(cpct$gender == "female", 1
 cpct <- add_column(cpct, treatmentStartYear = as.integer(format(as.Date(cpct$treatmentStartDate), "%Y")), .before = "treatmentStartDate")
 cpct <- add_column(cpct, ageAtTreatmentStart = as.integer(cpct$treatmentStartYear-cpct$birthYear, .before = "treatmentStartYear"))
 cpct <- add_column(cpct, hasImmunoPreTreatment = as.logical(ifelse(grepl("Immunotherapy", cpct$preTreatmentsType), 1, 0), .after = "preTreatmentsType"))
-cpct <- add_column(cpct, isKrasG12Wildtype = as.logical(ifelse(is.na(cpct$krasG12Status), 0, 1), .after = "krasG12Status"))
-cpct <- add_column(cpct, isKrasG13Wildtype = as.logical(ifelse(is.na(cpct$krasG13Status), 0, 1), .after = "krasG13Status"))
+cpct <- add_column(cpct, hasKrasG12Mut = as.logical(ifelse(is.na(cpct$krasG12Status), 0, 1), .after = "krasG12Status"))
+cpct <- add_column(cpct, hasKrasG13Mut = as.logical(ifelse(is.na(cpct$krasG13Status), 0, 1), .after = "krasG13Status"))
+cpct <- add_column(cpct, hasKrasNonG12G13Mut = as.logical(ifelse(is.na(cpct$krasNonG12G13Status), 0, 1), .after = "hasKrasG13Mut"))
 cpct <- add_column(cpct, isBRAFV600EWildtype = as.logical(ifelse(is.na(cpct$brafV600EStatus), 0, 1), .after = "brafV600EStatus"))
 cpct <- add_column(cpct, os = as.numeric(round(difftime(cpct$deathDate, cpct$treatmentStartDate, units="days"),0), .after = "deathDate"))
 cpct <- add_column(cpct, pfs = as.numeric(round(difftime(cpct$firstResponsePDDate, cpct$treatmentStartDate, units="days"),0), .after = "firstResponsePD"))
@@ -144,15 +148,56 @@ cpct$hasErbb2Amp <- as.logical(cpct$hasErbb2Amp)
 ## Pembrolizumab df
 pembrolizumab <- cpct %>% 
   dplyr::filter(treatment == 'Pembrolizumab' | cpct$treatment == 'Pembrolizumab/Pembrolizumab') %>%
-  subset(select = c(sampleId, isFemale, ageAtTreatmentStart, treatment, hasSystemicPreTreatment, hasImmunoPreTreatment, primaryTumorLocation, isKrasWildtype, isB2MWildtype, hasMsi, tumorMutationalLoad, bestResponse, pfs, os)) %>%
+  subset(select = c(sampleId, patientId, isFemale, ageAtTreatmentStart, treatment, hasSystemicPreTreatment, hasImmunoPreTreatment, primaryTumorLocation, isKrasWildtype, isB2MWildtype, hasMsi, tumorMutationalLoad, bestResponse, pfs, os)) %>%
   dplyr::filter(primaryTumorLocation %in% c('Urothelial tract','Lung','Skin','Prostate','Mesothelium'))
 
 ## Colorectal df
 colorectal <- cpct %>% 
   dplyr::filter(primaryTumorLocation == 'Colorectum') %>%
-  subset(select = c(sampleId, isFemale, ageAtTreatmentStart, hasSystemicPreTreatment, primaryTumorLocation, isKrasWildtype, isKrasG12Wildtype, isKrasG13Wildtype, isNrasWildtype, isBRAFV600EWildtype, hasErbb2Amp, hasMsi, tumorMutationalLoad, totalDriverCount, treatment, bestResponse, pfs, os))
+  subset(select = c(sampleId, patientId, isFemale, ageAtTreatmentStart, hasSystemicPreTreatment, primaryTumorLocation, isKrasWildtype, hasKrasG12Mut, hasKrasG13Mut, hasKrasNonG12G13Mut, isNrasWildtype, isBRAFV600EWildtype, hasErbb2Amp, hasMsi, tumorMutationalLoad, totalDriverCount, treatment, bestResponse, pfs, os))
 
-# General data cleanup/exploration (TO BE MADE CONSISTENT WITH DF CHANGES ABOVE)------------------------------------------------------------------
+
+# 1.1 Trifluridine in CRC
+colorectalTri <- colorectal %>% 
+  dplyr::filter(treatment == 'Tipiracil' | treatment == 'Trifluridine/Trifluridine' | treatment == 'Trifluridine')
+
+## 1.1.1 Generate OS/PFS plots based on KRAS status
+colorectalTri <- colorectalTri %>%
+  add_column(krasG12vsNonG12 = ifelse((colorectalTri$hasKrasG12Mut == TRUE), "hasKrasG12", "krasG12Wildtype")) %>%
+  add_column(krasG12G13vsNonG12G13 = ifelse((colorectalTri$hasKrasG12Mut == TRUE | colorectalTri$hasKrasG13Mut == TRUE), "hasKrasG12G13", "krasG12G13Wildtype"))
+
+colorectalTri$statusOs <- ifelse(!is.na(colorectalTri$os), 1, 0)
+colorectalTri$statusPfs <- ifelse(!is.na(colorectalTri$pfs), 1, 0)
+
+paste0("Nr of uncensored (included) patients for OS: ", sum(colorectalTri$statusOs == 1))
+paste0("Nr of uncensored (included) patients for PFS: ", sum(colorectalTri$statusPfs == 1))
+
+output <- generate_survival_plot(data_set=colorectalTri, survival_var=colorectalTri$os, censor_status_var=colorectalTri$statusOs, split_var = colorectalTri$krasG12vsNonG12, type = "OS")
+osKrasG12vsNonG12Fit <- output[[1]]
+osKrasG12vsNonG12FitSig <- output[[2]]
+osKrasG12vsNonG12FitPlot <- output[[3]]
+
+output <- generate_survival_plot(data_set=survivalTri, survival_var=colorectalTri$os, censor_status_var=colorectalTri$statusOs, split_var = colorectalTri$krasG12G13vsNonG12G13, type = "OS")
+osKrasG12G13vsNonG12G13Fit <- output[[1]]
+osKrasG12G13vsNonG12G13FitSig <- output[[2]]
+osKkrasG12G13vsNonG12G13FitPlot <- output[[3]]
+
+output <- generate_survival_plot(data_set=survivalTri, survival_var=colorectalTri$pfs, censor_status_var=colorectalTri$statusPfs, split_var = colorectalTri$krasG12vsNonG12, type = "PFS")
+pfsKrasG12G13vsNonG12G13Fit <- output[[1]]
+pfsKrasG12G13vsNonG12G13FitSig <- output[[2]]
+pfsKrasG12G13vsNonG12G13FitPlot <- output[[3]]
+
+output <- generate_survival_plot(data_set=survivalTri, survival_var=colorectalTri$pfs, censor_status_var=colorectalTri$statusPfs, split_var = colorectalTri$krasG12G13vsNonG12G13, type = "PFS")
+pfsKrasG12G13vsNonG12G13Fit <- output[[1]]
+pfsKrasG12G13vsNonG12G13FitSig <- output[[2]]
+pfsKrasG12G13vsNonG12G13FitPlot <- output[[3]]
+
+osKrasG12vsNonG12FitPlot
+osKrasG12G13vsNonG12G13FitPlot
+pfsKrasG12G13vsNonG12G13FitPlot
+pfsKrasG12G13vsNonG12G13FitPlot
+
+# 2 General data exploration ------------------------------------------------------------------
 ## Age at registration, start date after registration date
 cpct <- add_column(cpct, registrationYear = as.integer(format(as.Date(cpct$registrationDate), "%Y")), .before = "registrationDate")
 cpct <- add_column(cpct, ageAtRegistration = cpct$registrationYear-cpct$birthYear, .before = "registrationDate")
@@ -171,17 +216,17 @@ barchart(cpct$primaryTumorLocation)
 
 ## Pre-treated details
 pie(table(cpct$hasSystemicPreTreatment), main="Has had systemic pretreatment?", col=c("red","blue"), labels=paste0(row.names(table(cpct$hasSystemicPreTreatment)), " (", round(prop.table(table(cpct$hasSystemicPreTreatment))*100,0), "%)", sep = ""))
+
+cpct$hasRadiotherapyPreTreatment <- as.logical(ifelse(cpct$hasRadiotherapyPreTreatment == "Yes", 1, 0))
 pie(table(cpct$hasRadiotherapyPreTreatment), main="Has had radiotherapy pretreatment?", col=c("red","blue"), labels=paste0(row.names(table(cpct$hasRadiotherapyPreTreatment)), " (", round(prop.table(table(cpct$hasRadiotherapyPreTreatment))*100,0), "%)", sep = ""))
 
-cpct <- add_column(cpct, hasBeenUntreated = (cpct$hasSystemicPreTreatment == "No" & cpct$hasRadiotherapyPreTreatment == "No"), .after = "hasRadiotherapyPreTreatment")
+cpct <- add_column(cpct, hasBeenUntreated = (cpct$hasSystemicPreTreatment == "FALSE" & cpct$hasRadiotherapyPreTreatment == "FALSE"), .after = "hasRadiotherapyPreTreatment")
 pie(table(cpct$hasBeenUntreated), main="Has been untreated?", col=c("red","blue"), labels=paste0(row.names(table(cpct$hasBeenUntreated)), " (", round(prop.table(table(cpct$hasBeenUntreated))*100,0), "%)", sep = ""))
 
 ## Start/end dates, treatment duration, death date
 min(cpct$treatmentStartDate, na.rm=T)
 max(cpct$treatmentStartDate, na.rm=T)
 paste0("Treatment start date missing in ", round(sum(is.na(cpct$treatmentStartDate))/length(cpct$treatmentStartDate)*100,0), "%")
-cpct <- add_column(cpct, treatmentStartYear = as.integer(format(as.Date(cpct$treatmentStartDate), "%Y")), .before = "treatmentStartDate")
-cpct <- add_column(cpct, ageAtTreatmentStart = cpct$treatmentStartYear-cpct$birthYear, .before = "treatmentStartYear")
 
 min(cpct$treatmentEndDate, na.rm=T)
 cpct$treatmentEndDate[cpct$treatmentEndDate == '1900-01-01'] <- NA
@@ -224,70 +269,7 @@ cpct <- cpct %>%
   mutate(daysDeathDateAfterFirstResponseDate = ifelse(daysEndDateAfterFirstResponseDate < end_date_after_response_date_min, NA, daysDeathDateAfterFirstResponseDate)) %>%
   mutate(daysEndDateAfterFirstResponseDate = ifelse(daysEndDateAfterFirstResponseDate < end_date_after_response_date_min, NA, daysEndDateAfterFirstResponseDate))
 
-## OS survival plots for for untreated patients for gender, tumor location, first response
-## Consider censoring
-survival <- cpct %>% dplyr::filter(hasBeenUntreated=='TRUE') %>% subset(select = c(os, gender, primaryTumorLocation, firstResponse))
-survival$status <- ifelse(!is.na(survival$os), 1, 0)
-paste0("Nr of uncensored (included) patients: ", sum(survival$status == 1))
-
-## General survival plot labels
-y_lab_surv <- "Proportion"
-x_lab_surv <- "Time (days)"
-
-survGender <- survfit(Surv(survival$os, survival$status) ~ survival$gender, data = survival)
-autoplot(survGender) + 
-  labs(title="Overall survival from start treatment (in untreated patients)", y=y_lab_surv, x=x_lab_surv, color="Gender", fill = "Gender")
-survdiff(Surv(survival$os, survival$status) ~ survival$gender, data = survival)
-
-survivalTumorLocation <- survival %>% dplyr::filter(primaryTumorLocation %in% c('Breast','Colorectum','Lung'))
-paste0("Nr of uncensored (included) patients: ", sum(survivalTumorLocation$status == 1))
-survTumorLocation <- survfit(Surv(survivalTumorLocation$os, survivalTumorLocation$status) ~ survivalTumorLocation$primaryTumorLocation, data = survivalTumorLocation)
-autoplot(survTumorLocation) + 
-  labs(title="Overall survival from start treatment (in untreated patients)", y=y_lab_surv, x=x_lab_surv, color="Tumor location", fill = "Tumor location")
-survdiff(Surv(survivalTumorLocation$os, survivalTumorLocation$status) ~ survivalTumorLocation$primaryTumorLocation, data = survivalTumorLocation)
-
-survivalFirstResponse <- survival %>% dplyr::filter(firstResponse %in% c('PD','PR','SD'))
-paste0("Nr of uncensored  (included) patients: ", sum(survivalFirstResponse$status == 1))
-survFirstResponse <- survfit(Surv(survivalFirstResponse$os, survivalFirstResponse$status) ~ survivalFirstResponse$firstResponse, data = survivalFirstResponse)
-autoplot(survFirstResponse) + 
-  labs(title="Overall survival from start treatment (in untreated patients)", y=y_lab_surv, x=x_lab_surv, color="First response", fill = "First response")
-survdiff(Surv(survivalFirstResponse$os, survivalFirstResponse$status) ~ survivalFirstResponse$firstResponse, data = survivalFirstResponse)
-
-## PFS plots for for untreated patients for gender, tumor location, first response
-## Consider censoring
-survival <- cpct %>% dplyr::filter(hasBeenUntreated=='TRUE') %>% subset(select = c(pfs, gender, primaryTumorLocation, firstResponse))
-survival$status <- ifelse(!is.na(survival$pfs), 1, 0)
-paste0("Nr of uncensored patients ", sum(survival$status == 1))
-
-survGender <- survfit(Surv(survival$pfs, survival$status) ~ survival$gender, data = survival)
-autoplot(survGender) + 
-  labs(title="PFS (in untreated patients)", y=y_lab_surv, x=x_lab_surv, color="Gender", fill = "Gender")
-survdiff(Surv(survival$pfs, survival$status) ~ survival$gender, data = survival)
-
-survivalTumorLocation <- survival %>% dplyr::filter(primaryTumorLocation %in% c('Breast','Colorectum','Lung'))
-paste0("Nr of uncensored patients ", sum(survivalTumorLocation$status == 1))
-survTumorLocation <- survfit(Surv(survivalTumorLocation$pfs, survivalTumorLocation$status) ~ survivalTumorLocation$primaryTumorLocation, data = survivalTumorLocation)
-autoplot(survTumorLocation) + 
-  labs(title="PFS (in untreated patients)", y=y_lab_surv, x=x_lab_surv, color="Tumor location", fill = "Tumor location")
-survdiff(Surv(survivalTumorLocation$pfs, survivalTumorLocation$status) ~ survivalTumorLocation$primaryTumorLocation, data = survivalTumorLocation)
-
-survivalFirstResponse <- survival %>% dplyr::filter(firstResponse %in% c('PD','PR','SD'))
-paste0("Nr of uncensored patients ", sum(survivalFirstResponse$status == 1))
-survFirstResponse <- survfit(Surv(survivalFirstResponse$pfs, survivalFirstResponse$status) ~ survivalFirstResponse$firstResponse, data = survivalFirstResponse)
-autoplot(survFirstResponse) + 
-  labs(title="PFS (in untreated patients)", y=y_lab_surv, x=x_lab_surv, color="First response", fill = "First response")
-survdiff(Surv(survivalFirstResponse$pfs, survivalFirstResponse$status) ~ survivalFirstResponse$firstResponse, data = survivalFirstResponse)
-
-## Treatment curation
-cpct <- add_column(cpct, treatmentCurated = ifelse((grepl("Oxaliplatin", cpct$treatment) & grepl("Bevacizumab", cpct$treatment) & grepl("Capecitabine", cpct$treatment) &! grepl("Fluorouracil", cpct$treatment) &! grepl("Irinotecan", cpct$treatment)), "CAPOX-B", cpct$treatment), .after = "treatment")
-cpct <- mutate(cpct, treatmentCurated = ifelse((grepl("Tipiracil", cpct$treatmentCurated) | grepl("Trifluridine/Trifluridine", cpct$treatmentCurated)), "Trifluridine", cpct$treatmentCurated))
-cpct <- mutate(cpct, treatmentCurated = ifelse(grepl("Pembrolizumab/Pembrolizumab", cpct$treatmentCurated), "Pembrolizumab", cpct$treatmentCurated))
-
-length(which(cpct$treatmentCurated == "Trifluridine"))
-length(which(cpct$treatmentCurated == "CAPOX-B"))
-length(which(cpct$treatmentCurated == "Pembrolizumab"))
-
-# 1.1 CRC exploration---------------------------------------------
+# 2.1 CRC exploration---------------------------------------------
 ## General numbers & tumor types
 cpctCrc <- subset(cpct, subset = (primaryTumorLocation == 'Colorectum'))
 n_distinct(cpctCrc$sampleId)
@@ -381,63 +363,11 @@ cpctCrcCetuximabInNonWT <- cpctCrc %>%
 
 ## TRIFLURIDINE
 cpctCrcTrifluridine <-  subset(cpctCrc, subset = (treatmentCurated == 'Trifluridine'))
-
 table(cpctCrcTrifluridine$hasBeenUntreated)
 
-# 1.2 CRC survival plots 
-## CRC OS survival plots from treatment start (in treated and untreated patients)
-## censoring must be taken into account
-survivalCrc <- cpctCrc %>% subset(select = c(os, gender, hasSystemicPreTreatment, hasRadiotherapyPreTreatment, hasBeenUntreated, firstResponse, msStatus))
-survivalCrc$status <- ifelse(!is.na(survivalCrc$os), 1, 0)
 
-survSystemicTreatment <- survfit(Surv(survivalCrc$os, survivalCrc$status) ~ survivalCrc$hasSystemicPreTreatment, data = survivalCrc)
-autoplot(survSystemicTreatment) + 
-  labs(title="Overall survival from start treatment", y=y_lab_surv, x=x_lab_surv, color="Has had systemic treatment?", fill = "Has had systemic treatment?")
-
-survRadioTreatment <- survfit(Surv(survivalCrc$os, survivalCrc$status) ~ survivalCrc$hasRadiotherapyPreTreatment, data = survivalCrc)
-autoplot(survRadioTreatment) + 
-  labs(title="Overall survival from start treatment", y=y_lab_surv, x=x_lab_surv, color="Has had radio treatment?", fill = "Has had radio treatment?")
-
-survUntreated <- survfit(Surv(survivalCrc$os, survivalCrc$status) ~ survivalCrc$hasBeenUntreated, data = survivalCrc)
-autoplot(survUntreated) + 
-  labs(title="Overall survival from start treatment", y=y_lab_surv, x=x_lab_surv, color="Has been untreated?", fill = "Has been untreated?")
-
-survMSI <- survfit(Surv(survivalCrc$os, survivalCrc$status) ~ survivalCrc$msStatus, data = survivalCrc)
-autoplot(survMSI) + 
-  labs(title="Overall survival from start treatment", y=y_lab_surv, x=x_lab_surv, color="MS status", fill = "MS status")
-
-## CRC OS survival plots from treatment start (only include untreated patients)
-survivalCrcUntreated <- survivalCrc %>% dplyr::filter(hasBeenUntreated == 'TRUE')
-
-survivalCrcUntreatedResponse <- survivalCrcUntreated %>% dplyr::filter(firstResponse %in% c('PD','PR','CR','SD'))
-survFirstResponse <- survfit(Surv(survivalCrcUntreatedResponse$os, survivalCrcUntreatedResponse$status) ~ survivalCrcUntreatedResponse$firstResponse, data = survivalCrcUntreatedResponse)
-autoplot(survFirstResponse) + 
-  labs(title="Overall survival from start treatment (untreated patients)", y=y_lab_surv, x=x_lab_surv, color="First response", fill = "First response")
-paste0("Nr of uncensored patients ", sum(survivalCrcUntreatedResponse$status == 1))
-
-## CRC PFS plots for gender, tumor location, first response
-## Consider censoring
-survivalCrc <- cpctCrc %>% 
-  subset(select = c(pfs, gender, hasSystemicPreTreatment, hasRadiotherapyPreTreatment, hasBeenUntreated, firstResponse, msStatus))
-survivalCrc$status <- ifelse(!is.na(survivalCrc$pfs), 1, 0)
-paste0("PFS missing in ", round(sum(is.na(survivalCrc$pfs))/length(survivalCrc$pfs)*100,0), "%, or available in ", sum(!is.na(survivalCrc$pfs)), " patients")
-
-survSystemicTreatment <- survfit(Surv(survivalCrc$pfs, survivalCrc$status) ~ survivalCrc$hasSystemicPreTreatment, data = survivalCrc)
-autoplot(survSystemicTreatment) + 
-  labs(title="PFS", y=y_lab_surv, x=x_lab_surv, color="Has had systemic treatment?", fill = "Has had systemic treatment?")
-
-survUntreated <- survfit(Surv(survivalCrc$pfs, survivalCrc$status) ~ survivalCrc$hasBeenUntreated, data = survivalCrc)
-autoplot(survUntreated) + 
-  labs(title="PFS", y=y_lab_surv, x=x_lab_surv, color="Has been untreated?", fill = "Has been untreated?")
-
-survMSI <- survfit(Surv(survivalCrc$pfs, survivalCrc$status) ~ survivalCrc$msStatus, data = survivalCrc)
-autoplot(survMSI) + 
-  labs(title="PFS", y=y_lab_surv, x=x_lab_surv, color="MS status", fill = "MS status")
-
-# 2 Implement various data mining algorithms
-# 2.0 General data preparation
-
-## Adding cpct driver information
+# 3 Implement various data mining algorithms
+# 3.0 General data preparation
 
 summary(cpct)
 cpct$pfs <- as.numeric(cpct$pfs)
@@ -561,6 +491,61 @@ summary_2 <- output_2[[2]]
 
 # 2.3 Implement KNN regression with categorical variables
 
+
+# 2.4 Play around with survival plots
+## OS survival plots for for untreated patients for gender, tumor location, first response
+## Consider censoring
+survival <- cpct %>% dplyr::filter(hasBeenUntreated=='TRUE') %>% subset(select = c(os, gender, primaryTumorLocation, firstResponse))
+survival$status <- ifelse(!is.na(survival$os), 1, 0)
+paste0("Nr of uncensored (included) patients: ", sum(survival$status == 1))
+
+## General survival plot labels
+y_lab_surv <- "Proportion"
+x_lab_surv <- "Time (days)"
+
+survGender <- survfit(Surv(survival$os, survival$status) ~ survival$gender, data = survival)
+autoplot(survGender) + 
+  labs(title="Overall survival from start treatment (in untreated patients)", y=y_lab_surv, x=x_lab_surv, color="Gender", fill = "Gender")
+survdiff(Surv(survival$os, survival$status) ~ survival$gender, data = survival)
+
+survivalTumorLocation <- survival %>% dplyr::filter(primaryTumorLocation %in% c('Breast','Colorectum','Lung'))
+paste0("Nr of uncensored (included) patients: ", sum(survivalTumorLocation$status == 1))
+survTumorLocation <- survfit(Surv(survivalTumorLocation$os, survivalTumorLocation$status) ~ survivalTumorLocation$primaryTumorLocation, data = survivalTumorLocation)
+autoplot(survTumorLocation) + 
+  labs(title="Overall survival from start treatment (in untreated patients)", y=y_lab_surv, x=x_lab_surv, color="Tumor location", fill = "Tumor location")
+survdiff(Surv(survivalTumorLocation$os, survivalTumorLocation$status) ~ survivalTumorLocation$primaryTumorLocation, data = survivalTumorLocation)
+
+survivalFirstResponse <- survival %>% dplyr::filter(firstResponse %in% c('PD','PR','SD'))
+paste0("Nr of uncensored  (included) patients: ", sum(survivalFirstResponse$status == 1))
+survFirstResponse <- survfit(Surv(survivalFirstResponse$os, survivalFirstResponse$status) ~ survivalFirstResponse$firstResponse, data = survivalFirstResponse)
+autoplot(survFirstResponse) + 
+  labs(title="Overall survival from start treatment (in untreated patients)", y=y_lab_surv, x=x_lab_surv, color="First response", fill = "First response")
+survdiff(Surv(survivalFirstResponse$os, survivalFirstResponse$status) ~ survivalFirstResponse$firstResponse, data = survivalFirstResponse)
+
+## PFS plots for for untreated patients for gender, tumor location, first response
+## Consider censoring
+survival <- cpct %>% dplyr::filter(hasBeenUntreated=='TRUE') %>% subset(select = c(pfs, gender, primaryTumorLocation, firstResponse))
+survival$status <- ifelse(!is.na(survival$pfs), 1, 0)
+paste0("Nr of uncensored patients ", sum(survival$status == 1))
+
+survGender <- survfit(Surv(survival$pfs, survival$status) ~ survival$gender, data = survival)
+autoplot(survGender) + 
+  labs(title="PFS (in untreated patients)", y=y_lab_surv, x=x_lab_surv, color="Gender", fill = "Gender")
+survdiff(Surv(survival$pfs, survival$status) ~ survival$gender, data = survival)
+
+survivalTumorLocation <- survival %>% dplyr::filter(primaryTumorLocation %in% c('Breast','Colorectum','Lung'))
+paste0("Nr of uncensored patients ", sum(survivalTumorLocation$status == 1))
+survTumorLocation <- survfit(Surv(survivalTumorLocation$pfs, survivalTumorLocation$status) ~ survivalTumorLocation$primaryTumorLocation, data = survivalTumorLocation)
+autoplot(survTumorLocation) + 
+  labs(title="PFS (in untreated patients)", y=y_lab_surv, x=x_lab_surv, color="Tumor location", fill = "Tumor location")
+survdiff(Surv(survivalTumorLocation$pfs, survivalTumorLocation$status) ~ survivalTumorLocation$primaryTumorLocation, data = survivalTumorLocation)
+
+survivalFirstResponse <- survival %>% dplyr::filter(firstResponse %in% c('PD','PR','SD'))
+paste0("Nr of uncensored patients ", sum(survivalFirstResponse$status == 1))
+survFirstResponse <- survfit(Surv(survivalFirstResponse$pfs, survivalFirstResponse$status) ~ survivalFirstResponse$firstResponse, data = survivalFirstResponse)
+autoplot(survFirstResponse) + 
+  labs(title="PFS (in untreated patients)", y=y_lab_surv, x=x_lab_surv, color="First response", fill = "First response")
+survdiff(Surv(survivalFirstResponse$pfs, survivalFirstResponse$status) ~ survivalFirstResponse$firstResponse, data = survivalFirstResponse)
 
 
 # 3. All Investigate relationship between age at start treatment & treatment duration ------------------------------------------------------------------
