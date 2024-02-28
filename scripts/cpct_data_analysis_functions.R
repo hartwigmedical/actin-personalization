@@ -12,7 +12,7 @@ knn_cross_validation <- function(training_set, outcome_var, predictor_vars, vfol
   knn_recipe <- knn_recipe %>% update_role(predictor_vars[i], new_role = "predictor")
   }
 
-  knn_recipe <- knn_recipe %>% step_normalize(all_predictors()) 
+  knn_recipe <- knn_recipe %>% step_normalize(all_numeric_predictors()) 
 
   knn_spec <- nearest_neighbor(weight_func = "rectangular", neighbors = tune()) %>%
     set_engine("kknn") %>%
