@@ -203,8 +203,11 @@ colorectalTriKnn_os <- colorectalTri %>% subset(select = c(ageAtTreatmentStart, 
 colorectalTriKnn_pfs <- colorectalTri %>% subset(select = c(ageAtTreatmentStart, hasKrasG12Mut, hasKrasG13Mut, hasKrasNonG12G13Mut, tumorMutationalLoad, pfs)) %>% na.omit()
 
 outcomes <- c("os","pfs")
+predictor_vectors <- data.frame(c("ageAtTreatmentStart", "hasKrasG12Mut", "hasKrasG13Mut", "hasKrasNonG12G13Mut", "tumorMutationalLoad"), 
+                                c("ageAtTreatmentStart", NA, NA, NA, NA))
 
 for (i in 1:length(outcomes)) {
+  for (j in 1:length(predictor_vectors)) {
   
 set.seed(15039)
 split <- initial_split(get(paste0("colorectalTriKnn_",outcomes[i])), prop=0.8)
@@ -212,21 +215,21 @@ train <- training(split)
 test <- testing(split)
 set.seed(NULL)
 
-output <- knn_cross_validation(training_set=train, outcome_var=c(outcomes[i]), predictor_vars=c("ageAtTreatmentStart", "hasKrasG12Mut", "hasKrasG13Mut", "hasKrasNonG12G13Mut", "tumorMutationalLoad"), vfold=5, kmax=20)
+predictor_vars=c(unname(unlist(drop_na(predictor_vectors[j]))))
+output <- knn_cross_validation(training_set=train, outcome_var=c(outcomes[i]), predictor_vars=predictor_vars, vfold=5, kmax=20)
 recipe <- output[[1]]
-assign(paste0("colorectalTriKnn_cross_recipe_",outcomes[i]), output[[1]])
-
 results <- output[[2]]
-assign(paste0("colorectalTriKnn_cross_results_",outcomes[i]), output[[2]])
+assign(paste0("colorectalTriKnn_cross_recipe_",outcomes[i],"_",j), output[[1]])
+assign(paste0("colorectalTriKnn_cross_results_",outcomes[i],"_",j), output[[2]])
 
 optimal_k <- knn_cross_validation_optimal_k(knn_cross_results=results)
-assign(paste0("colorectalTriKnn_cross_results_optimal_k_",outcomes[i]), optimal_k)
+assign(paste0("colorectalTriKnn_cross_results_optimal_k_",outcomes[i],"_",j), optimal_k)
 
 output <- knn_run_on_test_set(training_set=train, test_set=test, k=optimal_k, recipe=recipe, truth_var=c(outcomes[i]))
+assign(paste0("colorectalTriKnn_results_fit_",outcomes[i],"_",j), output[[1]])
+assign(paste0("colorectalTriKnn_results_summary_",outcomes[i],"_",j), output[[2]])
 
-assign(paste0("colorectalTriKnn_fit_",outcomes[i]), output[[1]])
-assign(paste0("colorectalTriKnn_summary_",outcomes[i]), output[[2]])
-
+  }
 }
 
 # 2 General data exploration ------------------------------------------------------------------
