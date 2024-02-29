@@ -122,7 +122,7 @@ generate_survival_plot <- function(data_set, survival_var, censor_status_var, sp
       ggsurvfit() + labs(
         x = x_lab_surv,
         y = y_lab_surv
-      ) + add_confidence_interval() + add_risktable() + ggtitle(paste0("Survival plot (",type,"), p=",round(surv_fit_sig$pvalue,3)))
+      ) + add_confidence_interval() + add_risktable() + ggtitle(paste0("Survival plot (",type,"), p=",round(surv_fit_sig$pvalue,4)))
     
     if(!missing(event_at_time)) {
       surv_fit_event_at_time <- summary(survfit(Surv(survival_var, censor_status_var) ~ 1, data = data_set), times = event_at_time)

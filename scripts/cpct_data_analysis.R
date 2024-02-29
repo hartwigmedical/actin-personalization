@@ -18,6 +18,7 @@ library(ggfortify)
 library(class)
 library(tidymodels) 
 library(ggsurvfit)
+#library(gtsummary)
 
 # Set working dir to tmp ------------------------------------------------------------------
  wd <- paste0(Sys.getenv("HOME"), "/hmf/tmp/")
@@ -161,6 +162,7 @@ colorectal <- cpct %>%
 colorectalTri <- colorectal %>% 
   dplyr::filter(treatment == 'Tipiracil' | treatment == 'Trifluridine/Trifluridine' | treatment == 'Trifluridine')
 
+## 1.1.0 Additional cleaning (none)
 ## 1.1.1 Generate OS/PFS plots based on KRAS status
 colorectalTri <- colorectalTri %>%
   add_column(krasG12vsNonG12 = ifelse((colorectalTri$hasKrasG12Mut == TRUE), "hasKrasG12", "krasG12Wildtype")) %>%
@@ -179,25 +181,28 @@ output <- generate_survival_plot(data_set=colorectalTri, survival_var=colorectal
 osKrasG12vsNonG12Fit <- output[[1]]
 osKrasG12vsNonG12FitSig <- output[[2]]
 osKrasG12vsNonG12FitPlot <- output[[3]]
-osKrasG12vsNonG12FitOneYear <- output[[4]]
+osKrasG12vsNonG12FitTimeEvent <- output[[4]]
 
 output <- generate_survival_plot(data_set=colorectalTri, survival_var=colorectalTri$os, censor_status_var=colorectalTri$statusOs, split_var = colorectalTri$krasG12G13vsNonG12G13, type = "OS", event_at_time=event_at_time_os)
 osKrasG12G13vsNonG12G13Fit <- output[[1]]
 osKrasG12G13vsNonG12G13FitSig <- output[[2]]
 osKrasG12G13vsNonG12G13FitPlot <- output[[3]]
-osKrasG12G13vsNonG12G13FitOneYear <- output[[4]]
+osKrasG12G13vsNonG12G13FitTimeEvent <- output[[4]]
 
 output <- generate_survival_plot(data_set=colorectalTri, survival_var=colorectalTri$pfs, censor_status_var=colorectalTri$statusPfs, split_var = colorectalTri$krasG12vsNonG12, type = "PFS", event_at_time=event_at_time_pfs)
 pfsKrasG12vsNonG12Fit <- output[[1]]
 pfsKrasG12vsNonG12FitSig <- output[[2]]
 pfsKrasG12vsNonG12FitPlot <- output[[3]]
-pfsKrasG12vsNonG12FitOneYear <- output[[4]]
+pfsKrasG12vsNonG12FitTimeEvent <- output[[4]]
 
 output <- generate_survival_plot(data_set=colorectalTri, survival_var=colorectalTri$pfs, censor_status_var=colorectalTri$statusPfs, split_var = colorectalTri$krasG12G13vsNonG12G13, type = "PFS", event_at_time=event_at_time_pfs)
 pfsKrasG12G13vsNonG12G13Fit <- output[[1]]
 pfsKrasG12G13vsNonG12G13FitSig <- output[[2]]
 pfsKrasG12G13vsNonG12G13FitPlot <- output[[3]]
-pfsKrasG12G13vsNonG12G13FitOneYear <- output[[4]]
+pfsKrasG12G13vsNonG12G13FitTimeEvent <- output[[4]]
+
+coxph(Surv(colorectalTri$os, colorectalTri$statusOs) ~ colorectalTri$krasG12G13vsNonG12G13, data=colorectalTri) 
+#%>% tbl_regression(exp = TRUE) 
 
 osKrasG12vsNonG12FitPlot
 osKrasG12G13vsNonG12G13FitPlot
@@ -239,6 +244,53 @@ assign(paste0("colorectalTriKnn_results_summary_",outcomes[i],"_",names(predicto
 
   }
 }
+
+
+# 1.2 ANALYSIS - CAPOX/CAPOX-B in CRC untreated patients ---------------------------------------------------------------
+colorectal <- add_column(colorectal, treatmentCurated = ifelse((grepl("Oxaliplatin", colorectal$treatment) & grepl("Bevacizumab", colorectal$treatment) & grepl("Capecitabine", colorectal$treatment) &! grepl("Fluorouracil", colorectal$treatment) &! grepl("Irinotecan", colorectal$treatment)), "CAPOX-B", colorectal$treatment), .after = "treatment")
+colorectal <- mutate(colorectal, treatmentCurated = ifelse((grepl("Oxaliplatin", colorectal$treatmentCurated) &! grepl("Bevacizumab", colorectal$treatmentCurated) & grepl("Capecitabine", colorectal$treatmentCurated) &! grepl("Fluorouracil", colorectal$treatmentCurated) &! grepl("Irinotecan", colorectal$treatmentCurated)), "CAPOX", colorectal$treatmentCurated))
+
+colorectalCapox <- colorectal %>% 
+  dplyr::filter(treatmentCurated == 'CAPOX' | treatmentCurated == 'CAPOX-B') %>%
+  dplyr::filter(hasSystemicPreTreatment == 'FALSE')
+
+colorectalCapox <- colorectalCapox %>%
+  add_column(krasG12vsNonG12 = ifelse((colorectalCapox$hasKrasG12Mut == TRUE), "hasKrasG12", "krasG12Wildtype")) %>%
+  add_column(krasG12G13vsNonG12G13 = ifelse((colorectalCapox$hasKrasG12Mut == TRUE | colorectalCapox$hasKrasG13Mut == TRUE), "hasKrasG12G13", "krasG12G13Wildtype"))
+
+colorectalCapox$statusOs <- ifelse(!is.na(colorectalCapox$os), 1, 0)
+colorectalCapox$statusPfs <- ifelse(!is.na(colorectalCapox$pfs), 1, 0)
+
+paste0("Nr of uncensored (included) patients for OS: ", sum(colorectalCapox$statusOs == 1))
+paste0("Nr of uncensored (included) patients for PFS: ", sum(colorectalCapox$statusPfs == 1))
+
+event_at_time_os = 365.25 #Year
+event_at_time_pfs = event_at_time_os/4 #3months
+
+split_vars=c("krasG12vsNonG12", "treatmentCurated", "isFemale", )
+
+for (i in 1:length(split_vars)) {
+  output <- generate_survival_plot(data_set=colorectalCapox, survival_var=colorectalCapox$os, censor_status_var=colorectalCapox$statusOs, split_var = unlist(select(colorectalCapox, split_vars[i])), type = "OS", event_at_time=event_at_time_os)
+  assign(paste0("os_capox_fit_",split_vars[i]), output[[1]])
+  assign(paste0("os_capox_sig_",split_vars[i]), output[[2]])
+  assign(paste0("os_capox_plot_",split_vars[i]), output[[3]])
+  assign(paste0("os_capox_timeEvent_",split_vars[i]), output[[4]])
+}
+
+for (i in 1:length(split_vars)) {
+  output <- generate_survival_plot(data_set=colorectalCapox, survival_var=colorectalCapox$pfs, censor_status_var=colorectalCapox$statusPfs, split_var = unlist(select(colorectalCapox, split_vars[i])), type = "PFS", event_at_time=event_at_time_pfs)
+  assign(paste0("pfs_capox_fit_",split_vars[i]), output[[1]])
+  assign(paste0("pfs_capox_sig_",split_vars[i]), output[[2]])
+  assign(paste0("pfs_capox_plot_",split_vars[i]), output[[3]])
+  assign(paste0("pfs_capox_timeEvent_",split_vars[i]), output[[4]])
+}
+
+plot(os_capox_plot_isFemale)
+plot(os_capox_plot_krasG12vsNonG12)
+plot(os_capox_plot_treatmentCurated)
+plot(pfs_capox_plot_isFemale)
+plot(pfs_capox_plot_krasG12vsNonG12)
+plot(pfs_capox_plot_treatmentCurated)
 
 # 2 General data exploration ------------------------------------------------------------------
 ## Age at registration, start date after registration date
