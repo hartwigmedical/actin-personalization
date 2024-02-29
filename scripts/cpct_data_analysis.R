@@ -267,7 +267,7 @@ paste0("Nr of uncensored (included) patients for PFS: ", sum(colorectalCapox$sta
 event_at_time_os = 365.25 #Year
 event_at_time_pfs = event_at_time_os/4 #3months
 
-split_vars=c("krasG12vsNonG12", "treatmentCurated", "isFemale", )
+split_vars=c("krasG12vsNonG12", "treatmentCurated", "isFemale")
 
 for (i in 1:length(split_vars)) {
   output <- generate_survival_plot(data_set=colorectalCapox, survival_var=colorectalCapox$os, censor_status_var=colorectalCapox$statusOs, split_var = unlist(select(colorectalCapox, split_vars[i])), type = "OS", event_at_time=event_at_time_os)
