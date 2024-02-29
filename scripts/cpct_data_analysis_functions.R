@@ -106,18 +106,30 @@ linear_regression_model <- function(training_set, test_set, outcome_var, predict
 }
 
 # SURVIVAL PLOTS ------------------------------------------------------------------
-generate_survival_plot <- function(data_set, survival_var, censor_status_var, split_var, type) {
+generate_survival_plot <- function(data_set, survival_var, censor_status_var, split_var, type, event_at_time) {
   
-  y_lab_surv <- "Proportion"
   x_lab_surv <- "Time (days)"
-  
+  y_lab_surv <- "Proportion"
+
   if(missing(type)) {
     type = "?"
   }
   
   if (missing(split_var)) {
     surv_fit_results <- survfit(Surv(as.numeric(survival_var), as.numeric(censor_status_var)) ~ 1, data = data_set)
-    surv_plot <- autoplot(surv_fit_results) + labs(title=paste0("Survival plot (",type,")"), y=y_lab_surv, x=x_lab_surv)
+    
+    surv_plot <- survfit2(Surv(survival_var, censor_status_var) ~ 1, data = data_set) %>% 
+      ggsurvfit() + labs(
+        x = x_lab_surv,
+        y = y_lab_surv
+      ) + add_confidence_interval() + add_risktable() + ggtitle(paste0("Survival plot (",type,"), p=",round(surv_fit_sig$pvalue,3)))
+    
+    if(!missing(event_at_time)) {
+      surv_fit_event_at_time <- summary(survfit(Surv(survival_var, censor_status_var) ~ 1, data = data_set), times = event_at_time)
+      outcome_list <- list(surv_fit_results, surv_plot, surv_fit_event_at_time)
+      names(outcome_list) <- c("surv_fit_results", "surv_plot", "surv_fit_event_at_time")
+      return(outcome_list)
+    }
     
     outcome_list <- list(surv_fit_results, surv_plot)
     names(outcome_list) <- c("surv_fit_results", "surv_plot")
@@ -126,11 +138,23 @@ generate_survival_plot <- function(data_set, survival_var, censor_status_var, sp
   } else {
     surv_fit_results <- survfit(Surv(as.numeric(survival_var), as.numeric(censor_status_var)) ~ split_var, data = data_set)
     surv_fit_sig <- survdiff(Surv(survival_var, censor_status_var) ~ split_var, data = data_set)
-    surv_plot <- autoplot(surv_fit_results) + labs(title=paste0("Survival plot (",type,"), p=",round(surv_fit_sig$pvalue,3)), y=y_lab_surv, x=x_lab_surv, color=split_var, fill=split_var)
+    
+    surv_plot <- survfit2(Surv(survival_var, censor_status_var) ~ split_var, data = data_set) %>% 
+      ggsurvfit() + labs(
+        x = x_lab_surv,
+        y = y_lab_surv
+      ) + add_confidence_interval() + add_risktable() + ggtitle(paste0("Survival plot (",type,"), p=",round(surv_fit_sig$pvalue,3)))
+    
+    if(!missing(event_at_time)) {
+      surv_fit_event_at_time <- summary(survfit(Surv(survival_var, censor_status_var) ~ split_var, data = data_set), times = event_at_time)
+      
+      outcome_list <- list(surv_fit_results, surv_fit_sig, surv_plot, surv_fit_event_at_time)
+      names(outcome_list) <- c("surv_fit_results", "surv_fit_sig", "surv_plot", "surv_fit_event_at_time")
+      return(outcome_list)
+      }
     
     outcome_list <- list(surv_fit_results, surv_fit_sig, surv_plot)
     names(outcome_list) <- c("surv_fit_results", "surv_fit_sig", "surv_plot")
     return(outcome_list)
-    
   }
 }

@@ -17,12 +17,13 @@ library(knitr)
 library(ggfortify)
 library(class)
 library(tidymodels) 
+library(ggsurvfit)
 
 # Set working dir to tmp ------------------------------------------------------------------
  wd <- paste0(Sys.getenv("HOME"), "/hmf/tmp/")
  setwd(wd)
 
-# Get access to functions
+# Get access to functions ---------------------------------------------------------------
 source(paste0(Sys.getenv("HOME"), "/hmf/repos/actin-analysis/scripts/cpct_data_analysis_functions.R"))
  
 # Retrieve data ------------------------------------------------------------------
@@ -156,8 +157,7 @@ colorectal <- cpct %>%
   dplyr::filter(primaryTumorLocation == 'Colorectum') %>%
   subset(select = c(sampleId, patientId, isFemale, ageAtTreatmentStart, hasSystemicPreTreatment, primaryTumorLocation, isKrasWildtype, hasKrasG12Mut, hasKrasG13Mut, hasKrasNonG12G13Mut, isNrasWildtype, isBRAFV600EWildtype, hasErbb2Amp, hasMsi, tumorMutationalLoad, totalDriverCount, treatment, bestResponse, pfs, os))
 
-
-# 1.1 Trifluridine in CRC
+# 1.1 ANALYSIS - Trifluridine/Tipiracil in CRC ---------------------------------------------------------------
 colorectalTri <- colorectal %>% 
   dplyr::filter(treatment == 'Tipiracil' | treatment == 'Trifluridine/Trifluridine' | treatment == 'Trifluridine')
 
@@ -172,32 +172,39 @@ colorectalTri$statusPfs <- ifelse(!is.na(colorectalTri$pfs), 1, 0)
 paste0("Nr of uncensored (included) patients for OS: ", sum(colorectalTri$statusOs == 1))
 paste0("Nr of uncensored (included) patients for PFS: ", sum(colorectalTri$statusPfs == 1))
 
-output <- generate_survival_plot(data_set=colorectalTri, survival_var=colorectalTri$os, censor_status_var=colorectalTri$statusOs, split_var = colorectalTri$krasG12vsNonG12, type = "OS")
+event_at_time_os = 365.25 #Year
+event_at_time_pfs = event_at_time_os/4 #3months
+
+output <- generate_survival_plot(data_set=colorectalTri, survival_var=colorectalTri$os, censor_status_var=colorectalTri$statusOs, split_var = colorectalTri$krasG12vsNonG12, type = "OS", event_at_time=event_at_time_os)
 osKrasG12vsNonG12Fit <- output[[1]]
 osKrasG12vsNonG12FitSig <- output[[2]]
 osKrasG12vsNonG12FitPlot <- output[[3]]
+osKrasG12vsNonG12FitOneYear <- output[[4]]
 
-output <- generate_survival_plot(data_set=colorectalTri, survival_var=colorectalTri$os, censor_status_var=colorectalTri$statusOs, split_var = colorectalTri$krasG12G13vsNonG12G13, type = "OS")
+output <- generate_survival_plot(data_set=colorectalTri, survival_var=colorectalTri$os, censor_status_var=colorectalTri$statusOs, split_var = colorectalTri$krasG12G13vsNonG12G13, type = "OS", event_at_time=event_at_time_os)
 osKrasG12G13vsNonG12G13Fit <- output[[1]]
 osKrasG12G13vsNonG12G13FitSig <- output[[2]]
 osKrasG12G13vsNonG12G13FitPlot <- output[[3]]
+osKrasG12G13vsNonG12G13FitOneYear <- output[[4]]
 
-output <- generate_survival_plot(data_set=colorectalTri, survival_var=colorectalTri$pfs, censor_status_var=colorectalTri$statusPfs, split_var = colorectalTri$krasG12vsNonG12, type = "PFS")
+output <- generate_survival_plot(data_set=colorectalTri, survival_var=colorectalTri$pfs, censor_status_var=colorectalTri$statusPfs, split_var = colorectalTri$krasG12vsNonG12, type = "PFS", event_at_time=event_at_time_pfs)
 pfsKrasG12vsNonG12Fit <- output[[1]]
 pfsKrasG12vsNonG12FitSig <- output[[2]]
 pfsKrasG12vsNonG12FitPlot <- output[[3]]
+pfsKrasG12vsNonG12FitOneYear <- output[[4]]
 
-output <- generate_survival_plot(data_set=colorectalTri, survival_var=colorectalTri$pfs, censor_status_var=colorectalTri$statusPfs, split_var = colorectalTri$krasG12G13vsNonG12G13, type = "PFS")
+output <- generate_survival_plot(data_set=colorectalTri, survival_var=colorectalTri$pfs, censor_status_var=colorectalTri$statusPfs, split_var = colorectalTri$krasG12G13vsNonG12G13, type = "PFS", event_at_time=event_at_time_pfs)
 pfsKrasG12G13vsNonG12G13Fit <- output[[1]]
 pfsKrasG12G13vsNonG12G13FitSig <- output[[2]]
 pfsKrasG12G13vsNonG12G13FitPlot <- output[[3]]
+pfsKrasG12G13vsNonG12G13FitOneYear <- output[[4]]
 
 osKrasG12vsNonG12FitPlot
 osKrasG12G13vsNonG12G13FitPlot
 pfsKrasG12vsNonG12FitPlot
 pfsKrasG12G13vsNonG12G13FitPlot
 
-## 1.1.2 Fit KNN model for OS and PFS using KRAS status and ageAtStartTreatment
+## 1.1.2 Fit KNN model for OS and PFS using various variables
 ## Removal of instances with missing data (NaN), subset data
 colorectalTriKnn_os <- colorectalTri %>% subset(select = c(ageAtTreatmentStart, hasKrasG12Mut, hasKrasG13Mut, hasKrasNonG12G13Mut, tumorMutationalLoad, os)) %>% na.omit()
 colorectalTriKnn_pfs <- colorectalTri %>% subset(select = c(ageAtTreatmentStart, hasKrasG12Mut, hasKrasG13Mut, hasKrasNonG12G13Mut, tumorMutationalLoad, pfs)) %>% na.omit()
