@@ -26,6 +26,7 @@ library(ggsurvfit)
 
 # Get access to functions ---------------------------------------------------------------
 source(paste0(Sys.getenv("HOME"), "/hmf/repos/actin-analysis/scripts/cpct_data_analysis_functions.R"))
+source(paste0(Sys.getenv("HOME"), "/hmf/repos/actin-analysis/scripts/cpct_treatment_curation.R"))
  
 # Retrieve data ------------------------------------------------------------------
 dbProd <- dbConnect(MySQL(), dbname='hmfpatients', groups="RAnalysis")
@@ -156,11 +157,12 @@ pembrolizumab <- cpct %>%
 ## Colorectal df
 colorectal <- cpct %>% 
   dplyr::filter(primaryTumorLocation == 'Colorectum') %>%
-  subset(select = c(sampleId, patientId, isFemale, ageAtTreatmentStart, hasSystemicPreTreatment, primaryTumorLocation, isKrasWildtype, hasKrasG12Mut, hasKrasG13Mut, hasKrasNonG12G13Mut, isNrasWildtype, isBRAFV600EWildtype, hasErbb2Amp, hasMsi, tumorMutationalLoad, totalDriverCount, treatment, bestResponse, pfs, os))
+  cpct_colorectal_treatment_curation() %>%
+  subset(select = c(sampleId, patientId, isFemale, ageAtTreatmentStart, hasSystemicPreTreatment, primaryTumorLocation, isKrasWildtype, hasKrasG12Mut, hasKrasG13Mut, hasKrasNonG12G13Mut, isNrasWildtype, isBRAFV600EWildtype, hasErbb2Amp, hasMsi, tumorMutationalLoad, totalDriverCount, treatment, treatmentCurated, bestResponse, pfs, os))
 
 # 1.1 ANALYSIS - Trifluridine/Tipiracil in CRC ---------------------------------------------------------------
 colorectalTri <- colorectal %>% 
-  dplyr::filter(treatment == 'Tipiracil' | treatment == 'Trifluridine/Trifluridine' | treatment == 'Trifluridine')
+  dplyr::filter(treatment == 'Trifluridine')
 
 ## 1.1.0 Additional cleaning (none)
 ## 1.1.1 Generate OS/PFS plots based on KRAS status
@@ -245,11 +247,7 @@ assign(paste0("colorectalTriKnn_results_summary_",outcomes[i],"_",names(predicto
   }
 }
 
-
 # 1.2 ANALYSIS - CAPOX/CAPOX-B in CRC untreated patients ---------------------------------------------------------------
-colorectal <- add_column(colorectal, treatmentCurated = ifelse((grepl("Oxaliplatin", colorectal$treatment) & grepl("Bevacizumab", colorectal$treatment) & grepl("Capecitabine", colorectal$treatment) &! grepl("Fluorouracil", colorectal$treatment) &! grepl("Irinotecan", colorectal$treatment)), "CAPOX-B", colorectal$treatment), .after = "treatment")
-colorectal <- mutate(colorectal, treatmentCurated = ifelse((grepl("Oxaliplatin", colorectal$treatmentCurated) &! grepl("Bevacizumab", colorectal$treatmentCurated) & grepl("Capecitabine", colorectal$treatmentCurated) &! grepl("Fluorouracil", colorectal$treatmentCurated) &! grepl("Irinotecan", colorectal$treatmentCurated)), "CAPOX", colorectal$treatmentCurated))
-
 colorectalCapox <- colorectal %>% 
   dplyr::filter(treatmentCurated == 'CAPOX' | treatmentCurated == 'CAPOX-B') %>%
   dplyr::filter(hasSystemicPreTreatment == 'FALSE')
@@ -258,6 +256,9 @@ colorectalCapox <- colorectalCapox %>%
   add_column(krasG12vsNonG12 = ifelse((colorectalCapox$hasKrasG12Mut == TRUE), "hasKrasG12", "krasG12Wildtype")) %>%
   add_column(krasG12G13vsNonG12G13 = ifelse((colorectalCapox$hasKrasG12Mut == TRUE | colorectalCapox$hasKrasG13Mut == TRUE), "hasKrasG12G13", "krasG12G13Wildtype"))
 
+# 1.2.0 Cleaning (TODO) ---------------------------------------------------------------
+
+# 1.2.1 Survival analyses -------------------------------------------------------------
 colorectalCapox$statusOs <- ifelse(!is.na(colorectalCapox$os), 1, 0)
 colorectalCapox$statusPfs <- ifelse(!is.na(colorectalCapox$pfs), 1, 0)
 
@@ -291,6 +292,11 @@ plot(os_capox_plot_treatmentCurated)
 plot(pfs_capox_plot_isFemale)
 plot(pfs_capox_plot_krasG12vsNonG12)
 plot(pfs_capox_plot_treatmentCurated)
+
+# 1.3 ANALYSIS - CRC untreated patients ---------------------------------------------------------------
+
+
+
 
 # 2 General data exploration ------------------------------------------------------------------
 ## Age at registration, start date after registration date
