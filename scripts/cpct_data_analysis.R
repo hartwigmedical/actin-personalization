@@ -304,10 +304,43 @@ pfs_capox_plot_isNrasWildtype
 pfs_capox_plot_isBRAFV600EWildtype
 pfs_capox_plot_isTp53Wildtype
 
-# 1.3 ANALYSIS - CRC untreated patients ---------------------------------------------------------------
+# 1.3 ANALYSIS - Doublet/Triplet +/- Bevacizumab in CRC untreated patients ---------------------------------------------------------------
+colorectalDoubTrip <- colorectal %>% 
+  dplyr::filter(treatmentCurated == 'CAPOX' | treatmentCurated == 'CAPOX-B' | treatmentCurated == 'FOLFOX-B' | treatmentCurated == 'FOLFOX' | treatmentCurated == 'FOLFOXIRI-B' | treatmentCurated == 'FOLFOXIRI') %>%
+  dplyr::filter(hasSystemicPreTreatment == 'FALSE')
 
+colorectalDoubTrip <- colorectalDoubTrip %>%
+  add_column(krasG12vsNonG12 = ifelse((colorectalDoubTrip$hasKrasG12Mut == TRUE), "hasKrasG12", "krasG12Wildtype")) %>%
+  add_column(krasG12G13vsNonG12G13 = ifelse((colorectalDoubTrip$hasKrasG12Mut == TRUE | colorectalDoubTrip$hasKrasG13Mut == TRUE), "hasKrasG12G13", "krasG12G13Wildtype")) %>%
+  add_column(ageCategory = ifelse((colorectalDoubTrip$ageAtTreatmentStart >= 65), ">=65", "<65"))
 
+colorectalDoubTrip$statusOs <- ifelse(!is.na(colorectalDoubTrip$os), 1, 0)
+colorectalDoubTrip$statusPfs <- ifelse(!is.na(colorectalDoubTrip$pfs), 1, 0)
 
+paste0("Nr of uncensored (included) patients for OS: ", sum(colorectalDoubTrip$statusOs == 1))
+paste0("Nr of uncensored (included) patients for PFS: ", sum(colorectalDoubTrip$statusPfs == 1))
+
+event_at_time_os = 365.25 #Year
+event_at_time_pfs = event_at_time_os/4 #3months
+
+split_vars=c("krasG12vsNonG12")
+
+for (i in 1:length(split_vars)) {
+  output <- generate_survival_plot(data_set=colorectalDoubTrip, survival_var=colorectalDoubTrip$os, censor_status_var=colorectalDoubTrip$statusOs, split_var = unlist(select(colorectalDoubTrip, split_vars[i])), type = "OS", event_at_time=event_at_time_os)
+  assign(paste0("os_doub_trip_fit_",split_vars[i]), output[[1]])
+  assign(paste0("os_doub_trip_sig_",split_vars[i]), output[[2]])
+  assign(paste0("os_doub_trip_plot_",split_vars[i]), output[[3]])
+  assign(paste0("os_doub_trip_timeEvent_",split_vars[i]), output[[4]])
+  
+  output <- generate_survival_plot(data_set=colorectalDoubTrip, survival_var=colorectalDoubTrip$pfs, censor_status_var=colorectalDoubTrip$statusPfs, split_var = unlist(select(colorectalDoubTrip, split_vars[i])), type = "PFS", event_at_time=event_at_time_pfs)
+  assign(paste0("pfs_doub_trip_fit_",split_vars[i]), output[[1]])
+  assign(paste0("pfs_doub_trip_sig_",split_vars[i]), output[[2]])
+  assign(paste0("pfs_doub_trip_plot_",split_vars[i]), output[[3]])
+  assign(paste0("pfs_doub_trip_timeEvent_",split_vars[i]), output[[4]])
+}
+
+os_doub_trip_plot_krasG12vsNonG12
+pfs_doub_trip_plot_krasG12vsNonG12
 
 # 2 General data exploration ------------------------------------------------------------------
 ## Age at registration, start date after registration date
