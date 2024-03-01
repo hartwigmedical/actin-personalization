@@ -88,6 +88,7 @@ queryCPCTDrivers <- "select a.sampleId,
 if(krasStatus='positive', 0,1) as isKrasWildtype,
 if(nrasStatus='positive', 0,1) as isNrasWildtype,
 if(b2mStatus='positive', 0, 1) as isB2MWildtype,
+if(tp53Status='positive', 0,1) as isTp53Wildtype,
 if(erbb2AmpStatus='positive', 1,0) as hasErbb2Amp,
 if(msStatus='MSI',1,0) as hasMsi,
 tml as tumorMutationalLoad,
@@ -101,6 +102,7 @@ left join (select sampleId, msStatus, tml from purity) as f on a.sampleId=f.samp
 left join (select sampleId, 'positive' as erbb2AmpStatus from driverCatalog where gene='ERBB2' and likelihoodMethod='AMP') as g on a.sampleId=g.sampleId
 left join (select sampleId, count(*) as driverCount from driverCatalog where driverLikelihood>0.8 group by 1) as h on a.sampleId=h.sampleId
 left join (select sampleId, count(*) as fusionCount from svFusion where reported group by 1) as i on a.sampleId=i.sampleId
+left join (select sampleId, 'positive' as tp53Status from driverCatalog where gene='TP53' and driverLikelihood>0.8) as j on a.sampleId=j.sampleId
 ;"
 
 queryKrasG12 <- "select distinct sampleId, 1 as krasG12Status from somaticVariant where reported and gene='KRAS' and canonicalHgvsProteinImpact like 'p.Gly12%';"
@@ -146,6 +148,7 @@ cpct$hasMsi <- as.logical(cpct$hasMsi)
 cpct$isKrasWildtype <- as.logical(cpct$isKrasWildtype)
 cpct$isNrasWildtype <- as.logical(cpct$isNrasWildtype)
 cpct$isB2MWildtype <- as.logical(cpct$isB2MWildtype)
+cpct$isTp53Wildtype <- as.logical(cpct$isTp53Wildtype)
 cpct$hasErbb2Amp <- as.logical(cpct$hasErbb2Amp)
 
 ## Pembrolizumab df
@@ -158,7 +161,7 @@ pembrolizumab <- cpct %>%
 colorectal <- cpct %>% 
   dplyr::filter(primaryTumorLocation == 'Colorectum') %>%
   cpct_colorectal_treatment_curation() %>%
-  subset(select = c(sampleId, patientId, isFemale, ageAtTreatmentStart, hasSystemicPreTreatment, primaryTumorLocation, isKrasWildtype, hasKrasG12Mut, hasKrasG13Mut, hasKrasNonG12G13Mut, isNrasWildtype, isBRAFV600EWildtype, hasErbb2Amp, hasMsi, tumorMutationalLoad, totalDriverCount, treatment, treatmentCurated, bestResponse, pfs, os))
+  subset(select = c(sampleId, patientId, isFemale, ageAtTreatmentStart, hasSystemicPreTreatment, primaryTumorLocation, isKrasWildtype, hasKrasG12Mut, hasKrasG13Mut, hasKrasNonG12G13Mut, isNrasWildtype, isBRAFV600EWildtype, isTp53Wildtype, hasErbb2Amp, hasMsi, tumorMutationalLoad, totalDriverCount, treatment, treatmentCurated, bestResponse, pfs, os))
 
 # 1.1 ANALYSIS - Trifluridine/Tipiracil in CRC ---------------------------------------------------------------
 colorectalTri <- colorectal %>% 
@@ -247,6 +250,7 @@ assign(paste0("colorectalTriKnn_results_summary_",outcomes[i],"_",names(predicto
   }
 }
 
+
 # 1.2 ANALYSIS - CAPOX/CAPOX-B in CRC untreated patients ---------------------------------------------------------------
 colorectalCapox <- colorectal %>% 
   dplyr::filter(treatmentCurated == 'CAPOX' | treatmentCurated == 'CAPOX-B') %>%
@@ -254,10 +258,10 @@ colorectalCapox <- colorectal %>%
 
 colorectalCapox <- colorectalCapox %>%
   add_column(krasG12vsNonG12 = ifelse((colorectalCapox$hasKrasG12Mut == TRUE), "hasKrasG12", "krasG12Wildtype")) %>%
-  add_column(krasG12G13vsNonG12G13 = ifelse((colorectalCapox$hasKrasG12Mut == TRUE | colorectalCapox$hasKrasG13Mut == TRUE), "hasKrasG12G13", "krasG12G13Wildtype"))
+  add_column(krasG12G13vsNonG12G13 = ifelse((colorectalCapox$hasKrasG12Mut == TRUE | colorectalCapox$hasKrasG13Mut == TRUE), "hasKrasG12G13", "krasG12G13Wildtype")) %>%
+  add_column(ageCategory = ifelse((colorectalCapox$ageAtTreatmentStart >= 65), ">=65", "<65"))
 
-# 1.2.0 Cleaning (TODO) ---------------------------------------------------------------
-
+# 1.2.0 Cleaning (NA) ---------------------------------------------------------------
 # 1.2.1 Survival analyses -------------------------------------------------------------
 colorectalCapox$statusOs <- ifelse(!is.na(colorectalCapox$os), 1, 0)
 colorectalCapox$statusPfs <- ifelse(!is.na(colorectalCapox$pfs), 1, 0)
@@ -268,7 +272,7 @@ paste0("Nr of uncensored (included) patients for PFS: ", sum(colorectalCapox$sta
 event_at_time_os = 365.25 #Year
 event_at_time_pfs = event_at_time_os/4 #3months
 
-split_vars=c("krasG12vsNonG12", "treatmentCurated", "isFemale")
+split_vars=c("isFemale",  "ageCategory", "treatmentCurated", "krasG12vsNonG12", "isNrasWildtype", "isBRAFV600EWildtype", "isTp53Wildtype")
 
 for (i in 1:length(split_vars)) {
   output <- generate_survival_plot(data_set=colorectalCapox, survival_var=colorectalCapox$os, censor_status_var=colorectalCapox$statusOs, split_var = unlist(select(colorectalCapox, split_vars[i])), type = "OS", event_at_time=event_at_time_os)
@@ -276,9 +280,7 @@ for (i in 1:length(split_vars)) {
   assign(paste0("os_capox_sig_",split_vars[i]), output[[2]])
   assign(paste0("os_capox_plot_",split_vars[i]), output[[3]])
   assign(paste0("os_capox_timeEvent_",split_vars[i]), output[[4]])
-}
 
-for (i in 1:length(split_vars)) {
   output <- generate_survival_plot(data_set=colorectalCapox, survival_var=colorectalCapox$pfs, censor_status_var=colorectalCapox$statusPfs, split_var = unlist(select(colorectalCapox, split_vars[i])), type = "PFS", event_at_time=event_at_time_pfs)
   assign(paste0("pfs_capox_fit_",split_vars[i]), output[[1]])
   assign(paste0("pfs_capox_sig_",split_vars[i]), output[[2]])
@@ -286,12 +288,21 @@ for (i in 1:length(split_vars)) {
   assign(paste0("pfs_capox_timeEvent_",split_vars[i]), output[[4]])
 }
 
-plot(os_capox_plot_isFemale)
-plot(os_capox_plot_krasG12vsNonG12)
-plot(os_capox_plot_treatmentCurated)
-plot(pfs_capox_plot_isFemale)
-plot(pfs_capox_plot_krasG12vsNonG12)
-plot(pfs_capox_plot_treatmentCurated)
+os_capox_plot_isFemale
+os_capox_plot_ageCategory
+os_capox_plot_treatmentCurated
+os_capox_plot_krasG12vsNonG12
+os_capox_plot_isNrasWildtype
+os_capox_plot_isBRAFV600EWildtype
+os_capox_plot_isTp53Wildtype
+
+pfs_capox_plot_isFemale
+pfs_capox_plot_ageCategory
+pfs_capox_plot_treatmentCurated
+pfs_capox_plot_krasG12vsNonG12
+pfs_capox_plot_isNrasWildtype
+pfs_capox_plot_isBRAFV600EWildtype
+pfs_capox_plot_isTp53Wildtype
 
 # 1.3 ANALYSIS - CRC untreated patients ---------------------------------------------------------------
 
