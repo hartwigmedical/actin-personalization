@@ -32,7 +32,27 @@ ncr_dia_pts_with_verb <- ncr_dia[ncr_dia$key_nkr %in% pts_with_verb, ]
 c(min(ncr$leeft), max(ncr$leeft), median(ncr$leeft))
 hist(ncr$leeft, breaks=(max(ncr$leeft)-min(ncr$leeft)))
 
-ncr %>% group_by(vit_stat, epis) %>% summarise(count=n())
-ncr %>% group_by(perf_stat) %>% summarise(count=n())
+ncr %>% group_by(epis, vit_stat) %>% summarise(count=n(), distinct_count_key_nkr=n_distinct(key_nkr))
+ncr %>% group_by(epis, perf_stat) %>% summarise(count=n(), distinct_count_key_nkr=n_distinct(key_nkr))
+
+ncr %>% group_by(epis, asa) %>% summarise(count=n(), distinct_count_key_nkr=n_distinct(key_nkr))
+ncr %>% group_by(epis, cci) %>% summarise(count=n(), distinct_count_key_nkr=n_distinct(key_nkr))
+hist(ncr$cci, breaks=(max(ncr$cci, na.rm=T)-min(ncr$cci, na.rm=T)))
+
+ncr %>% group_by(epis, morf_cat) %>% summarise(count=n(), distinct_count_key_nkr=n_distinct(key_nkr))
+hist(ncr$cci, breaks=(max(ncr$cci, na.rm=T)-min(ncr$cci, na.rm=T)))
+
+ncr %>% group_by(epis, msi_stat) %>% summarise(count=n(), distinct_count_key_nkr=n_distinct(key_nkr))
+ncr %>% group_by(epis, braf_mut) %>% summarise(count=n(), distinct_count_key_nkr=n_distinct(key_nkr))
+ncr %>% group_by(epis, ras_mut) %>% summarise(count=n(), distinct_count_key_nkr=n_distinct(key_nkr))
+
+unknown_value = 9999
+hist(ncr$prechir_cea[ncr$prechir_cea!=unknown_value], breaks = 100)
+hist(ncr$postchir_cea[ncr$postchir_cea!=unknown_value], breaks = 100)
+hist(ncr$ldh1[ncr$ldh1!=unknown_value], breaks = 100)
+hist(ncr$af1[ncr$af1!=unknown_value], breaks = 100)
+hist(ncr$neutro1[ncr$neutro1!=unknown_value], breaks = 100)
+hist(ncr$albumine1[ncr$albumine1!=unknown_value], breaks = 100)
+hist(ncr$leuko1[ncr$leuko1!=unknown_value], breaks = 100)
 
 
