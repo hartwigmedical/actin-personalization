@@ -29,6 +29,7 @@ pts_with_verb <- names(table(ncr_verb$key_nkr))
 ncr_dia_pts_with_verb <- ncr_dia[ncr_dia$key_nkr %in% pts_with_verb, ]
 
 ## Other data exploration
+### Age, vit stat, perf stat, scales
 c(min(ncr$leeft), max(ncr$leeft), median(ncr$leeft))
 hist(ncr$leeft, breaks=(max(ncr$leeft)-min(ncr$leeft)))
 
@@ -42,10 +43,12 @@ hist(ncr$cci, breaks=(max(ncr$cci, na.rm=T)-min(ncr$cci, na.rm=T)))
 ncr %>% group_by(epis, morf_cat) %>% summarise(count=n(), distinct_count_key_nkr=n_distinct(key_nkr))
 hist(ncr$cci, breaks=(max(ncr$cci, na.rm=T)-min(ncr$cci, na.rm=T)))
 
+### Molecular 
 ncr %>% group_by(epis, msi_stat) %>% summarise(count=n(), distinct_count_key_nkr=n_distinct(key_nkr))
 ncr %>% group_by(epis, braf_mut) %>% summarise(count=n(), distinct_count_key_nkr=n_distinct(key_nkr))
 ncr %>% group_by(epis, ras_mut) %>% summarise(count=n(), distinct_count_key_nkr=n_distinct(key_nkr))
 
+### Lab
 unknown_value = 9999
 hist(ncr$prechir_cea[ncr$prechir_cea!=unknown_value], breaks = 100)
 hist(ncr$postchir_cea[ncr$postchir_cea!=unknown_value], breaks = 100)
@@ -54,5 +57,29 @@ hist(ncr$af1[ncr$af1!=unknown_value], breaks = 100)
 hist(ncr$neutro1[ncr$neutro1!=unknown_value], breaks = 100)
 hist(ncr$albumine1[ncr$albumine1!=unknown_value], breaks = 100)
 hist(ncr$leuko1[ncr$leuko1!=unknown_value], breaks = 100)
+
+### Treatment
+ncr %>% group_by(epis, tumgericht_ther) %>% summarise(count=n(), distinct_count_key_nkr=n_distinct(key_nkr))
+ncr %>% dplyr::filter(epis=='DIA') %>% dplyr::filter(tumgericht_ther==0) %>% group_by(geen_ther_reden) %>% summarise(count=n(), distinct_count_key_nkr=n_distinct(key_nkr))
+
+ncr_unknown_which_treatment <- ncr %>%
+  dplyr::filter(epis=='DIA') %>%
+  dplyr::filter(tumgericht_ther==1) %>%
+  dplyr::filter(mdl_res==0 & chir==0 & rt==0 & chemort == 0 & chemo==0 & target==0 & hipec==0 & meta_chir_code1=="" & meta_rt_code1=="") %>%
+  select(key_nkr, grep("tumgericht_ther",colnames(ncr)):tail(length(ncr)))
+
+ncr %>% dplyr::filter(epis=='DIA') %>% dplyr::filter(tumgericht_ther==1) %>% group_by(mdl_res, chir) %>% summarise(count=n(), distinct_count_key_nkr=n_distinct(key_nkr))
+ncr %>% dplyr::filter(epis=='DIA') %>% dplyr::filter(tumgericht_ther==1) %>% group_by(rt, chemort) %>% summarise(count=n(), distinct_count_key_nkr=n_distinct(key_nkr))
+ncr %>% dplyr::filter(epis=='DIA') %>% dplyr::filter(tumgericht_ther==1) %>% group_by(chemo) %>% summarise(count=n(), distinct_count_key_nkr=n_distinct(key_nkr))
+ncr %>% dplyr::filter(epis=='DIA') %>% dplyr::filter(tumgericht_ther==1) %>% group_by(target) %>% summarise(count=n(), distinct_count_key_nkr=n_distinct(key_nkr))
+ncr %>% dplyr::filter(epis=='DIA') %>% dplyr::filter(tumgericht_ther==1) %>% group_by(hipec) %>% summarise(count=n(), distinct_count_key_nkr=n_distinct(key_nkr))
+
+### Treatment outcome
+ncr %>% dplyr::filter(epis=='DIA') %>% dplyr::filter(tumgericht_ther==1) %>% summarise(count=n(), distinct_count_key_nkr=n_distinct(key_nkr))
+ncr %>% dplyr::filter(epis=='DIA') %>% group_by(tumgericht_ther, respons_uitslag) %>% summarise(count=n(), distinct_count_key_nkr=n_distinct(key_nkr))
+hist(ncr$respons_int, breaks=100)
+
+ncr %>% dplyr::filter(epis=='DIA') %>% group_by(epis, tumgericht_ther, pfs_event1) %>% summarise(count=n(), distinct_count_key_nkr=n_distinct(key_nkr))
+
 
 
