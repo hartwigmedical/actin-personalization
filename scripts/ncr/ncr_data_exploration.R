@@ -1,7 +1,7 @@
 library(dplyr)
 
 rm(list=ls())
-ncr <- read.csv(paste0(Sys.getenv("HOME"), "/hmf/tmp/K23244.csv"), sep=";")
+ncr <- read.csv(paste0(Sys.getenv("HOME"), "/hmf/tmp/ncr_crc_dataset.csv"), sep=";")
 
 ## Keys, epis, meta_epis, teller
 ncr %>% summarise(count_key_nkr=n(), distinct_count_key_nkr=n_distinct(key_nkr), distinct_count_key_zid=n_distinct(key_zid), distinct_count_key_eid=n_distinct(key_eid))
@@ -27,6 +27,19 @@ pts_with_key_occurring_more_than_once_verb <- names(table(ncr_verb$key_nkr)[tabl
 ncr_verb_pts_multiple_verb <- ncr_verb[ncr_verb$key_nkr %in% pts_with_key_occurring_more_than_once_verb, ]
 pts_with_verb <- names(table(ncr_verb$key_nkr)) 
 ncr_dia_pts_with_verb <- ncr_dia[ncr_dia$key_nkr %in% pts_with_verb, ]
+
+## meta_epis
+ncr_pts_with_immediate_mets_but_low_stage <- ncr %>% 
+  select('key_nkr','epis', 'meta_epis', 'stadium', 'meta_topo_sublok1', 'meta_int1', 'tumgericht_ther', 'mdl_res', 'mdl_res_int1', 'chir', 'chir_type1',
+         'chir_int1', 'rt', 'chemort', 'rt_start_int1', 'meta_rt_code1', 'meta_rt_start_int1', 'meta_chir_int1', 'chemo','target', 'syst_start_int1', 'respons_int', 'pfs_int1') %>%
+  dplyr::filter(stadium %in% c(1,2,3,'2A','2B','2C','3A','3B','3C') & meta_epis==1) %>%
+  arrange(stadium)
+
+ncr_pts_with_later_mets_but_high_stage <- ncr %>% 
+  select('key_nkr','epis', 'meta_epis', 'stadium', 'meta_topo_sublok1', 'meta_int1', 'tumgericht_ther', 'mdl_res', 'mdl_res_int1', 'chir', 'chir_type1',
+         'chir_int1', 'rt', 'chemort', 'rt_start_int1', 'meta_rt_code1', 'meta_rt_start_int1', 'meta_chir_int1', 'chemo','target', 'syst_start_int1', 'respons_int', 'pfs_int1') %>%
+  dplyr::filter(stadium %in% c(4,'4A','4B','4C') & meta_epis==2) %>%
+  arrange(stadium)
 
 ## Other data exploration
 ### Age, vit stat, perf stat, scales
@@ -63,23 +76,28 @@ ncr %>% group_by(epis, tumgericht_ther) %>% summarise(count=n(), distinct_count_
 ncr %>% dplyr::filter(epis=='DIA') %>% dplyr::filter(tumgericht_ther==0) %>% group_by(geen_ther_reden) %>% summarise(count=n(), distinct_count_key_nkr=n_distinct(key_nkr))
 
 ncr_unknown_which_treatment <- ncr %>%
-  dplyr::filter(epis=='DIA') %>%
   dplyr::filter(tumgericht_ther==1) %>%
   dplyr::filter(mdl_res==0 & chir==0 & rt==0 & chemort == 0 & chemo==0 & target==0 & hipec==0 & meta_chir_code1=="" & meta_rt_code1=="") %>%
   select(key_nkr, grep("tumgericht_ther",colnames(ncr)):tail(length(ncr)))
 
-ncr %>% dplyr::filter(epis=='DIA') %>% dplyr::filter(tumgericht_ther==1) %>% group_by(mdl_res, chir) %>% summarise(count=n(), distinct_count_key_nkr=n_distinct(key_nkr))
-ncr %>% dplyr::filter(epis=='DIA') %>% dplyr::filter(tumgericht_ther==1) %>% group_by(rt, chemort) %>% summarise(count=n(), distinct_count_key_nkr=n_distinct(key_nkr))
-ncr %>% dplyr::filter(epis=='DIA') %>% dplyr::filter(tumgericht_ther==1) %>% group_by(chemo) %>% summarise(count=n(), distinct_count_key_nkr=n_distinct(key_nkr))
-ncr %>% dplyr::filter(epis=='DIA') %>% dplyr::filter(tumgericht_ther==1) %>% group_by(target) %>% summarise(count=n(), distinct_count_key_nkr=n_distinct(key_nkr))
-ncr %>% dplyr::filter(epis=='DIA') %>% dplyr::filter(tumgericht_ther==1) %>% group_by(hipec) %>% summarise(count=n(), distinct_count_key_nkr=n_distinct(key_nkr))
+ncr %>% dplyr::filter(tumgericht_ther==1) %>% group_by(mdl_res, chir) %>% summarise(count=n(), distinct_count_key_nkr=n_distinct(key_nkr))
+ncr %>% dplyr::filter(tumgericht_ther==1) %>% group_by(rt, chemort) %>% summarise(count=n(), distinct_count_key_nkr=n_distinct(key_nkr))
+ncr %>% dplyr::filter(tumgericht_ther==1) %>% group_by(chemo) %>% summarise(count=n(), distinct_count_key_nkr=n_distinct(key_nkr))
+ncr %>% dplyr::filter(tumgericht_ther==1) %>% group_by(target) %>% summarise(count=n(), distinct_count_key_nkr=n_distinct(key_nkr))
+ncr %>% dplyr::filter(tumgericht_ther==1) %>% group_by(hipec) %>% summarise(count=n(), distinct_count_key_nkr=n_distinct(key_nkr))
 
 ### Treatment outcome
-ncr %>% dplyr::filter(epis=='DIA') %>% dplyr::filter(tumgericht_ther==1) %>% summarise(count=n(), distinct_count_key_nkr=n_distinct(key_nkr))
-ncr %>% dplyr::filter(epis=='DIA') %>% group_by(tumgericht_ther, respons_uitslag) %>% summarise(count=n(), distinct_count_key_nkr=n_distinct(key_nkr))
+ncr %>% dplyr::filter(tumgericht_ther==1) %>% summarise(count=n(), distinct_count_key_nkr=n_distinct(key_nkr))
+ncr %>% group_by(tumgericht_ther, respons_uitslag) %>% summarise(count=n(), distinct_count_key_nkr=n_distinct(key_nkr))
 hist(ncr$respons_int, breaks=100)
 
-ncr %>% dplyr::filter(epis=='DIA') %>% group_by(epis, tumgericht_ther, pfs_event1) %>% summarise(count=n(), distinct_count_key_nkr=n_distinct(key_nkr))
+ncr %>% group_by(epis, tumgericht_ther, pfs_event1) %>% summarise(count=n(), distinct_count_key_nkr=n_distinct(key_nkr))
+
+
+## Tasks
+### Select all patients who started with palliative systemic therapy?
+
+
 
 
 
