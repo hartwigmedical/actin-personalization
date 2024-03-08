@@ -12,3 +12,18 @@ concat_syst_code_values <- function(data) {
   
   return(out)
 }
+
+translate_atc <- function(atc_codes) {
+  
+  atc_translation_table <- list("L01BC06" = "Capecitabine", "L01XA03" = "Oxaliplatin", "L01FG01" = "Bevacizumab", "L01BC02" = 'Fluorouracil', "L01CE02" = 'Irinotecan')
+  atc_codes <- unlist(strsplit(atc_codes, ", "))
+  
+  translated_atc_codes <- lapply(atc_codes, function(atc) {
+    if (atc %in% names(atc_translation_table)) {
+      return(atc_translation_table[[atc]])
+    } else {
+      return(atc)
+    }
+  })
+  return(paste(translated_atc_codes, collapse = ", "))
+}

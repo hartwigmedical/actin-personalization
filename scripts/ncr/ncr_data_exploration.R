@@ -95,7 +95,7 @@ ncr %>% dplyr::filter(tumgericht_ther==1) %>% summarise(count=n(), distinct_coun
 ncr %>% group_by(tumgericht_ther, respons_uitslag) %>% summarise(count=n(), distinct_count_key_nkr=n_distinct(key_nkr))
 hist(ncr$respons_int, breaks=100)
 
-ncr %>% group_by(epis, tumgericht_ther, pfs_event1) %>% summarise(count=n(), distinct_count_key_nkr=n_distinct(key_nkr))
+ncr %>% group_by(epis, tumgericht_ther, pfs_event1) %>% summarise(count=n(), distinct_count_key_nkr=n_distinct(key_nkr)) 
 
 ## Tasks
 ## Select systemic therapy lines for every patient
@@ -115,6 +115,17 @@ ncr_lines <- ncr_lines_prep %>%
 
 ncr_lines[] <- lapply(ncr_lines, function(x) gsub("^c\\((.*)\\)$", "\\1", x))
 ncr_lines[ncr_lines == "character(0)"] <- ""
+
+ncr_lines <- ncr_lines %>%
+  add_column(line1_read = sapply(ncr_lines$line1, translate_atc)) %>%
+  add_column(line2_read = sapply(ncr_lines$line2, translate_atc)) %>%
+  add_column(line3_read = sapply(ncr_lines$line3, translate_atc)) %>%
+  add_column(line4_read = sapply(ncr_lines$line4, translate_atc)) %>%
+  add_column(line5_read = sapply(ncr_lines$line5, translate_atc)) %>%
+  add_column(line6_read = sapply(ncr_lines$line6, translate_atc)) %>%
+  add_column(line7_read = sapply(ncr_lines$line7, translate_atc)) 
+  
+ncr_first_lines_summary <- ncr_lines %>% dplyr::filter(line1 != "") %>% group_by(line1_read) %>% summarise(count=n(), distinct_count_key_nkr=n_distinct(key_nkr)) %>% arrange(count)
 
 ### Overall survival exploration (WIP)
 ncr_surv <- ncr %>% dplyr::filter(tumgericht_ther==1 & (chemo==4 | target==4)) %>%
