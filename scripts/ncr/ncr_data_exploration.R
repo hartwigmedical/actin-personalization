@@ -1,4 +1,5 @@
 library(dplyr)
+library(tibble)
 
 rm(list=ls())
 ncr <- read.csv(paste0(Sys.getenv("HOME"), "/hmf/tmp/ncr_crc_dataset.csv"), sep=";")
@@ -81,8 +82,7 @@ ncr %>% dplyr::filter(epis=='DIA') %>% dplyr::filter(tumgericht_ther==0) %>% gro
 
 ncr_unknown_which_treatment <- ncr %>%
   dplyr::filter(tumgericht_ther==1) %>%
-  dplyr::filter(mdl_res==0 & chir==0 & rt==0 & chemort == 0 & chemo==0 & target==0 & hipec==0 & meta_chir_code1=="" & meta_rt_code1=="") %>%
-  select(key_nkr, grep("tumgericht_ther",colnames(ncr)):tail(length(ncr)))
+  dplyr::filter(mdl_res==0 & chir==0 & rt==0 & chemort == 0 & chemo==0 & target==0 & hipec==0 & meta_chir_code1=="" & meta_rt_code1=="") 
 
 ncr %>% dplyr::filter(tumgericht_ther==1) %>% group_by(mdl_res, chir) %>% summarise(count=n(), distinct_count_key_nkr=n_distinct(key_nkr))
 ncr %>% dplyr::filter(tumgericht_ther==1) %>% group_by(rt, chemort) %>% summarise(count=n(), distinct_count_key_nkr=n_distinct(key_nkr))
@@ -99,33 +99,94 @@ ncr %>% group_by(epis, tumgericht_ther, pfs_event1) %>% summarise(count=n(), dis
 
 ## Tasks
 ## Select systemic therapy lines for every patient
-ncr_lines_prep <- ncr %>% 
+ncr_lines_substance_prep <- ncr %>% 
   dplyr::filter(tumgericht_ther==1) %>%
-  select(c('key_nkr'),starts_with(c('syst_schemanum','syst_code'))) %>%
+  select(c('key_nkr','key_zid'),starts_with(c('syst_schemanum','syst_code'))) %>%
   pivot_longer(cols = starts_with("syst_schemanum"), names_to = "syst_schemanum_key", values_to = "syst_schemanum_value") %>%
   pivot_longer(cols = starts_with("syst_code"), names_to = "syst_code_key", values_to = "syst_code_value")
 
-ncr_lines <- ncr_lines_prep %>%
-  add_column(schemanum_code_value = as.numeric(gsub("\\D", "", ncr_lines_prep$syst_schemanum_key)), .after = 1) %>%
-  add_column(code_schemanum_value = as.numeric(gsub("\\D", "", ncr_lines_prep$syst_code_key)), .after = 5) %>% 
+ncr_lines_substance <- ncr_lines_substance_prep %>%
+  add_column(schemanum_code_value = as.numeric(gsub("\\D", "", ncr_lines_substance_prep$syst_schemanum_key)), .after = 2) %>%
+  add_column(code_schemanum_value = as.numeric(gsub("\\D", "", ncr_lines_substance_prep$syst_code_key)), .after = 6) %>% 
   distinct() %>%
-  group_by(key_nkr) %>%
+  group_by(key_nkr, key_zid) %>%
   do(concat_syst_code_values(.)) %>%
   ungroup()
 
-ncr_lines[] <- lapply(ncr_lines, function(x) gsub("^c\\((.*)\\)$", "\\1", x))
-ncr_lines[ncr_lines == "character(0)"] <- ""
+ncr_lines_substance[] <- lapply(ncr_lines_substance, function(x) gsub("^c\\((.*)\\)$", "\\1", x))
+ncr_lines_substance[ncr_lines_substance == "character(0)"] <- ""
 
-ncr_lines <- ncr_lines %>%
-  add_column(line1_read = sapply(ncr_lines$line1, translate_atc)) %>%
-  add_column(line2_read = sapply(ncr_lines$line2, translate_atc)) %>%
-  add_column(line3_read = sapply(ncr_lines$line3, translate_atc)) %>%
-  add_column(line4_read = sapply(ncr_lines$line4, translate_atc)) %>%
-  add_column(line5_read = sapply(ncr_lines$line5, translate_atc)) %>%
-  add_column(line6_read = sapply(ncr_lines$line6, translate_atc)) %>%
-  add_column(line7_read = sapply(ncr_lines$line7, translate_atc)) 
+ncr_lines_substance_written <- ncr_lines_substance %>%
+  add_column(line1_written = sapply(ncr_lines_substance$line1, translate_atc)) %>%
+  add_column(line2_written = sapply(ncr_lines_substance$line2, translate_atc)) %>%
+  add_column(line3_written = sapply(ncr_lines_substance$line3, translate_atc)) %>%
+  add_column(line4_written = sapply(ncr_lines_substance$line4, translate_atc)) %>%
+  add_column(line5_written = sapply(ncr_lines_substance$line5, translate_atc)) %>%
+  add_column(line6_written = sapply(ncr_lines_substance$line6, translate_atc)) %>%
+  add_column(line7_written = sapply(ncr_lines_substance$line7, translate_atc)) %>%
+  select(matches("key") | matches("written"))
   
-ncr_first_lines_summary <- ncr_lines %>% dplyr::filter(line1 != "") %>% group_by(line1_read) %>% summarise(count=n(), distinct_count_key_nkr=n_distinct(key_nkr)) %>% arrange(count)
+ncr_first_lines_summary <- ncr_lines_substance_written %>% dplyr::filter(line1 != "") %>% group_by(line1_read) %>% summarise(count=n(), distinct_count_key_nkr=n_distinct(key_nkr))
+
+### Select start and stop interval for every line, merge with substances and calculate duration
+ncr_lines_start_prep <- ncr %>% 
+  dplyr::filter(tumgericht_ther==1) %>%
+  select(c('key_nkr','key_zid'),starts_with(c('syst_schemanum','syst_start_int'))) %>%
+  pivot_longer(cols = starts_with("syst_schemanum"), names_to = "syst_schemanum_key", values_to = "syst_schemanum_value") %>%
+  pivot_longer(cols = starts_with("syst_start_int"), names_to = "syst_start_int_key", values_to = "syst_start_int_value")
+
+ncr_lines_start <- ncr_lines_start_prep %>%
+  add_column(schemanum_line_start_value = as.numeric(gsub("\\D", "", ncr_lines_start_prep$syst_schemanum_key)), .after = 2) %>%
+  add_column(line_start_schemanum_value = as.numeric(gsub("\\D", "", ncr_lines_start_prep$syst_start_int_key)), .after = 6) %>% 
+  distinct() %>%
+  group_by(key_nkr, key_zid) %>%
+  do(concat_start_int_values(.)) %>%
+  ungroup()
+
+ncr_lines_start[] <- lapply(ncr_lines_start, function(x) gsub("^c\\((.*)\\)$", "\\1", x))
+ncr_lines_start[ncr_lines_start == "integer(0)"] <- ""
+ncr_lines_start$line_start_1 = sapply(ncr_lines_start$line_start_1, extract_min)
+ncr_lines_start$line_start_2 = sapply(ncr_lines_start$line_start_2, extract_min)
+ncr_lines_start$line_start_3 = sapply(ncr_lines_start$line_start_3, extract_min)
+ncr_lines_start$line_start_4 = sapply(ncr_lines_start$line_start_4, extract_min)
+ncr_lines_start$line_start_5 = sapply(ncr_lines_start$line_start_5, extract_min)
+ncr_lines_start$line_start_6 = sapply(ncr_lines_start$line_start_6, extract_min)
+ncr_lines_start$line_start_7 = sapply(ncr_lines_start$line_start_7, extract_min)
+
+ncr_lines_stop_prep <- ncr %>% 
+  dplyr::filter(tumgericht_ther==1) %>%
+  select(c('key_nkr','key_zid'),starts_with(c('syst_schemanum','syst_stop_int'))) %>%
+  pivot_longer(cols = starts_with("syst_schemanum"), names_to = "syst_schemanum_key", values_to = "syst_schemanum_value") %>%
+  pivot_longer(cols = starts_with("syst_stop_int"), names_to = "syst_stop_int_key", values_to = "syst_stop_int_value")
+
+ncr_lines_stop <- ncr_lines_stop_prep %>%
+  add_column(schemanum_line_stop_value = as.numeric(gsub("\\D", "", ncr_lines_stop_prep$syst_schemanum_key)), .after = 2) %>%
+  add_column(line_stop_schemanum_value = as.numeric(gsub("\\D", "", ncr_lines_stop_prep$syst_stop_int_key)), .after = 6) %>% 
+  distinct() %>%
+  group_by(key_nkr, key_zid) %>%
+  do(concat_stop_int_values(.)) %>%
+  ungroup()
+
+ncr_lines_stop[] <- lapply(ncr_lines_stop, function(x) gsub("^c\\((.*)\\)$", "\\1", x))
+ncr_lines_stop[ncr_lines_stop == "integer(0)"] <- ""
+ncr_lines_stop$line_stop_1 = sapply(ncr_lines_stop$line_stop_1, extract_max)
+ncr_lines_stop$line_stop_2 = sapply(ncr_lines_stop$line_stop_2, extract_max)
+ncr_lines_stop$line_stop_3 = sapply(ncr_lines_stop$line_stop_3, extract_max)
+ncr_lines_stop$line_stop_4 = sapply(ncr_lines_stop$line_stop_4, extract_max)
+ncr_lines_stop$line_stop_5 = sapply(ncr_lines_stop$line_stop_5, extract_max)
+ncr_lines_stop$line_stop_6 = sapply(ncr_lines_stop$line_stop_6, extract_max)
+ncr_lines_stop$line_stop_7 = sapply(ncr_lines_stop$line_stop_7, extract_max)
+
+ncr_lines_details <- inner_join(ncr_lines_substance_written,ncr_lines_start, by=c('key_nkr','key_zid')) %>%
+  inner_join(ncr_lines_stop, by=c('key_nkr','key_zid')) %>%
+  add_column(line_duration_1 = ifelse(join$line_stop_1 == "","", as.integer(join$line_stop_1)-as.integer(join$line_start_1))) %>%
+  add_column(line_duration_2 = ifelse(join$line_stop_2 == "","", as.integer(join$line_stop_2)-as.integer(join$line_start_2))) %>%
+  add_column(line_duration_3 = ifelse(join$line_stop_3 == "","", as.integer(join$line_stop_3)-as.integer(join$line_start_3))) %>%
+  add_column(line_duration_4 = ifelse(join$line_stop_4 == "","", as.integer(join$line_stop_4)-as.integer(join$line_start_4))) %>%
+  add_column(line_duration_5 = ifelse(join$line_stop_5 == "","", as.integer(join$line_stop_5)-as.integer(join$line_start_5))) %>%
+  add_column(line_duration_6 = ifelse(join$line_stop_6 == "","", as.integer(join$line_stop_6)-as.integer(join$line_start_6))) %>%
+  add_column(line_duration_7 = ifelse(join$line_stop_7 == "","", as.integer(join$line_stop_7)-as.integer(join$line_start_7)))
+
 
 ### Overall survival exploration (WIP)
 ncr_surv <- ncr %>% dplyr::filter(tumgericht_ther==1 & (chemo==4 | target==4)) %>%
@@ -140,3 +201,6 @@ atc_trifluridine <- "L01BC59"
 ncr_trifluridine <- ncr %>%
   dplyr::filter(syst_code1==atc_trifluridine | syst_code2==atc_trifluridine | syst_code3==atc_trifluridine | syst_code4==atc_trifluridine | syst_code5==atc_trifluridine | syst_code6==atc_trifluridine | syst_code7==atc_trifluridine | syst_code8==atc_trifluridine | syst_code9==atc_trifluridine | syst_code10==atc_trifluridine | syst_code11==atc_trifluridine | syst_code12==atc_trifluridine) %>%
   select(c('key_nkr','epis'),matches(c('vit_')),c('syst_code1','syst_code2','syst_code3','syst_code4','syst_code5','syst_code6','syst_code7','syst_code8','syst_code9','syst_code10','syst_code11','syst_code12'),matches(c('syst_schemanum','syst_start_','pfs')))
+
+
+
