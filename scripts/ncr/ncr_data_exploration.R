@@ -2,9 +2,9 @@ library(dplyr)
 library(tibble)
 
 rm(list=ls())
-ncr <- read.csv(paste0(Sys.getenv("HOME"), "/hmf/tmp/ncr_crc_dataset.csv"), sep=";")
 
 source(paste0(Sys.getenv("HOME"), "/hmf/repos/actin-analysis/scripts/ncr/ncr_data_exploration_functions.R"))
+ncr <- load_ncr_data()
 
 ## Keys, epis, meta_epis, teller
 ncr %>% summarise(count_key_nkr=n(), distinct_count_key_nkr=n_distinct(key_nkr), distinct_count_key_zid=n_distinct(key_zid), distinct_count_key_eid=n_distinct(key_eid))
