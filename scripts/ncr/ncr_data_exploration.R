@@ -18,7 +18,7 @@ ncr %>% group_by(epis, meta_epis, teller) %>% summarise(count_key_nkr=n(), disti
 ncr_dia <- ncr %>% dplyr::filter(epis=='DIA') %>% arrange(key_nkr)
 ncr_dia %>% summarise(count_key_nkr=n(), distinct_count_key_nkr=n_distinct(key_nkr))
 
-pts_with_key_occurring_more_than_once_dia <- names(table(ncr_dia$key_nkr)[table(ncr_dia$key_nkr)>1]) 
+pts_with_key_occurring_more_than_once_dia <- names(table(ncr_dia$key_nkr)[table(ncr_dia$key_nkr) > 1])
 ncr_dia_pts_multiple_dia <- ncr_dia[ncr_dia$key_nkr %in% pts_with_key_occurring_more_than_once_dia, ]
 n_distinct(ncr_dia_pts_multiple_dia$key_nkr)
 
@@ -26,22 +26,22 @@ n_distinct(ncr_dia_pts_multiple_dia$key_nkr)
 ncr_verb <- ncr %>% dplyr::filter(epis=='VERB') %>% arrange(key_nkr)
 ncr_verb %>% summarise(count_key_nkr=n(), distinct_count_key_nkr=n_distinct(key_nkr))
 
-pts_with_key_occurring_more_than_once_verb <- names(table(ncr_verb$key_nkr)[table(ncr_verb$key_nkr)>1]) 
+pts_with_key_occurring_more_than_once_verb <- names(table(ncr_verb$key_nkr)[table(ncr_verb$key_nkr) > 1])
 ncr_verb_pts_multiple_verb <- ncr_verb[ncr_verb$key_nkr %in% pts_with_key_occurring_more_than_once_verb, ]
-pts_with_verb <- names(table(ncr_verb$key_nkr)) 
+pts_with_verb <- names(table(ncr_verb$key_nkr))
 ncr_dia_pts_with_verb <- ncr_dia[ncr_dia$key_nkr %in% pts_with_verb, ]
 
 ## meta_epis
-df_easy <- c('key_nkr','epis', 'meta_epis', 'cstadium','pstadium','stadium', 'meta_topo_sublok1','meta_topo_sublok2','meta_topo_sublok3', 'meta_int1', 'meta_int2', 'meta_int3', 'meta_prog1','meta_prog2','meta_prog3', 
-             'tumgericht_ther', 'mdl_res', 'mdl_res_int1', 'chir', 'chir_type1', 'chir_int1', 'rt', 'chemort', 'rt_start_int1', 'meta_rt_code1', 'meta_rt_start_int1', 'meta_chir_int1', 'hipec','hipec_int1', 'chemo','target', 
+df_easy <- c('key_nkr', 'epis', 'meta_epis', 'cstadium', 'pstadium', 'stadium', 'meta_topo_sublok1', 'meta_topo_sublok2', 'meta_topo_sublok3', 'meta_int1', 'meta_int2', 'meta_int3', 'meta_prog1', 'meta_prog2', 'meta_prog3',
+             'tumgericht_ther', 'mdl_res', 'mdl_res_int1', 'chir', 'chir_type1', 'chir_int1', 'rt', 'chemort', 'rt_start_int1', 'meta_rt_code1', 'meta_rt_start_int1', 'meta_chir_int1', 'hipec', 'hipec_int1', 'chemo', 'target',
               'syst_start_int1', 'syst_stop_int1','syst_kuren1', 'respons_int', 'pfs_event1', 'pfs_int1')
 
-ncr_pts_with_immediate_mets_but_low_stage <- ncr %>% 
+ncr_pts_with_immediate_mets_but_low_stage <- ncr %>%
   select(all_of(df_easy)) %>%
   dplyr::filter(stadium %in% c(1,2,3,'2A','2B','2C','3A','3B','3C') & meta_epis==1) %>%
   arrange(stadium)
 
-ncr_pts_with_later_mets_but_high_stage <- ncr %>% 
+ncr_pts_with_later_mets_but_high_stage <- ncr %>%
   select(all_of(df_easy)) %>%
   dplyr::filter(stadium %in% c(4,'4A','4B','4C') & meta_epis==2) %>%
   arrange(stadium)
@@ -67,7 +67,7 @@ ncr %>% group_by(epis, braf_mut) %>% summarise(count=n(), distinct_count_key_nkr
 ncr %>% group_by(epis, ras_mut) %>% summarise(count=n(), distinct_count_key_nkr=n_distinct(key_nkr))
 
 ### Lab
-unknown_value = 9999
+unknown_value <- 9999
 hist(ncr$prechir_cea[ncr$prechir_cea!=unknown_value], breaks = 100)
 hist(ncr$postchir_cea[ncr$postchir_cea!=unknown_value], breaks = 100)
 hist(ncr$ldh1[ncr$ldh1!=unknown_value], breaks = 100)
@@ -82,7 +82,15 @@ ncr %>% dplyr::filter(epis=='DIA') %>% dplyr::filter(tumgericht_ther==0) %>% gro
 
 ncr_unknown_which_treatment <- ncr %>%
   dplyr::filter(tumgericht_ther==1) %>%
-  dplyr::filter(mdl_res==0 & chir==0 & rt==0 & chemort == 0 & chemo==0 & target==0 & hipec==0 & meta_chir_code1=="" & meta_rt_code1=="") 
+  dplyr::filter(mdl_res == 0 &
+                  chir == 0 &
+                  rt == 0 &
+                  chemort == 0 &
+                  chemo == 0 &
+                  target == 0 &
+                  hipec == 0 &
+                  meta_chir_code1 == "" &
+                  meta_rt_code1 == "")
 
 ncr %>% dplyr::filter(tumgericht_ther==1) %>% group_by(mdl_res, chir) %>% summarise(count=n(), distinct_count_key_nkr=n_distinct(key_nkr))
 ncr %>% dplyr::filter(tumgericht_ther==1) %>% group_by(rt, chemort) %>% summarise(count=n(), distinct_count_key_nkr=n_distinct(key_nkr))
@@ -95,11 +103,13 @@ ncr %>% dplyr::filter(tumgericht_ther==1) %>% summarise(count=n(), distinct_coun
 ncr %>% group_by(tumgericht_ther, respons_uitslag) %>% summarise(count=n(), distinct_count_key_nkr=n_distinct(key_nkr))
 hist(ncr$respons_int, breaks=100)
 
-ncr %>% group_by(epis, tumgericht_ther, pfs_event1) %>% summarise(count=n(), distinct_count_key_nkr=n_distinct(key_nkr)) 
+ncr %>%
+  group_by(epis, tumgericht_ther, pfs_event1) %>%
+  summarise(count = n(), distinct_count_key_nkr = n_distinct(key_nkr))
 
 ## Tasks
 ## Select systemic therapy lines for every patient
-ncr_lines_substance_prep <- ncr %>% 
+ncr_lines_substance_prep <- ncr %>%
   dplyr::filter(tumgericht_ther==1) %>%
   select(c('key_nkr','key_zid'),starts_with(c('syst_schemanum','syst_code'))) %>%
   pivot_longer(cols = starts_with("syst_schemanum"), names_to = "syst_schemanum_key", values_to = "syst_schemanum_value") %>%
@@ -107,7 +117,7 @@ ncr_lines_substance_prep <- ncr %>%
 
 ncr_lines_substance <- ncr_lines_substance_prep %>%
   add_column(schemanum_code_value = as.numeric(gsub("\\D", "", ncr_lines_substance_prep$syst_schemanum_key)), .after = 2) %>%
-  add_column(code_schemanum_value = as.numeric(gsub("\\D", "", ncr_lines_substance_prep$syst_code_key)), .after = 6) %>% 
+  add_column(code_schemanum_value = as.numeric(gsub("\\D", "", ncr_lines_substance_prep$syst_code_key)), .after = 6) %>%
   distinct() %>%
   group_by(key_nkr, key_zid) %>%
   do(concat_syst_code_values(.)) %>%
@@ -125,11 +135,11 @@ ncr_lines_substance_written <- ncr_lines_substance %>%
   add_column(line6_written = sapply(ncr_lines_substance$line6, translate_atc)) %>%
   add_column(line7_written = sapply(ncr_lines_substance$line7, translate_atc)) %>%
   select(matches("key") | matches("written"))
-  
+
 ncr_first_lines_summary <- ncr_lines_substance_written %>% dplyr::filter(line1 != "") %>% group_by(line1_read) %>% summarise(count=n(), distinct_count_key_nkr=n_distinct(key_nkr))
 
 ### Select start and stop interval for every line, merge with substances and calculate duration
-ncr_lines_start_prep <- ncr %>% 
+ncr_lines_start_prep <- ncr %>%
   dplyr::filter(tumgericht_ther==1) %>%
   select(c('key_nkr','key_zid'),starts_with(c('syst_schemanum','syst_start_int'))) %>%
   pivot_longer(cols = starts_with("syst_schemanum"), names_to = "syst_schemanum_key", values_to = "syst_schemanum_value") %>%
@@ -137,7 +147,7 @@ ncr_lines_start_prep <- ncr %>%
 
 ncr_lines_start <- ncr_lines_start_prep %>%
   add_column(schemanum_line_start_value = as.numeric(gsub("\\D", "", ncr_lines_start_prep$syst_schemanum_key)), .after = 2) %>%
-  add_column(line_start_schemanum_value = as.numeric(gsub("\\D", "", ncr_lines_start_prep$syst_start_int_key)), .after = 6) %>% 
+  add_column(line_start_schemanum_value = as.numeric(gsub("\\D", "", ncr_lines_start_prep$syst_start_int_key)), .after = 6) %>%
   distinct() %>%
   group_by(key_nkr, key_zid) %>%
   do(concat_start_int_values(.)) %>%
@@ -145,15 +155,15 @@ ncr_lines_start <- ncr_lines_start_prep %>%
 
 ncr_lines_start[] <- lapply(ncr_lines_start, function(x) gsub("^c\\((.*)\\)$", "\\1", x))
 ncr_lines_start[ncr_lines_start == "integer(0)"] <- ""
-ncr_lines_start$line_start_1 = sapply(ncr_lines_start$line_start_1, extract_min)
-ncr_lines_start$line_start_2 = sapply(ncr_lines_start$line_start_2, extract_min)
-ncr_lines_start$line_start_3 = sapply(ncr_lines_start$line_start_3, extract_min)
-ncr_lines_start$line_start_4 = sapply(ncr_lines_start$line_start_4, extract_min)
-ncr_lines_start$line_start_5 = sapply(ncr_lines_start$line_start_5, extract_min)
-ncr_lines_start$line_start_6 = sapply(ncr_lines_start$line_start_6, extract_min)
-ncr_lines_start$line_start_7 = sapply(ncr_lines_start$line_start_7, extract_min)
+ncr_lines_start$line_start_1 <- sapply(ncr_lines_start$line_start_1, extract_min)
+ncr_lines_start$line_start_2 <- sapply(ncr_lines_start$line_start_2, extract_min)
+ncr_lines_start$line_start_3 <- sapply(ncr_lines_start$line_start_3, extract_min)
+ncr_lines_start$line_start_4 <- sapply(ncr_lines_start$line_start_4, extract_min)
+ncr_lines_start$line_start_5 <- sapply(ncr_lines_start$line_start_5, extract_min)
+ncr_lines_start$line_start_6 <- sapply(ncr_lines_start$line_start_6, extract_min)
+ncr_lines_start$line_start_7 <- sapply(ncr_lines_start$line_start_7, extract_min)
 
-ncr_lines_stop_prep <- ncr %>% 
+ncr_lines_stop_prep <- ncr %>%
   dplyr::filter(tumgericht_ther==1) %>%
   select(c('key_nkr','key_zid'),starts_with(c('syst_schemanum','syst_stop_int'))) %>%
   pivot_longer(cols = starts_with("syst_schemanum"), names_to = "syst_schemanum_key", values_to = "syst_schemanum_value") %>%
@@ -161,7 +171,7 @@ ncr_lines_stop_prep <- ncr %>%
 
 ncr_lines_stop <- ncr_lines_stop_prep %>%
   add_column(schemanum_line_stop_value = as.numeric(gsub("\\D", "", ncr_lines_stop_prep$syst_schemanum_key)), .after = 2) %>%
-  add_column(line_stop_schemanum_value = as.numeric(gsub("\\D", "", ncr_lines_stop_prep$syst_stop_int_key)), .after = 6) %>% 
+  add_column(line_stop_schemanum_value = as.numeric(gsub("\\D", "", ncr_lines_stop_prep$syst_stop_int_key)), .after = 6) %>%
   distinct() %>%
   group_by(key_nkr, key_zid) %>%
   do(concat_stop_int_values(.)) %>%
@@ -169,13 +179,13 @@ ncr_lines_stop <- ncr_lines_stop_prep %>%
 
 ncr_lines_stop[] <- lapply(ncr_lines_stop, function(x) gsub("^c\\((.*)\\)$", "\\1", x))
 ncr_lines_stop[ncr_lines_stop == "integer(0)"] <- ""
-ncr_lines_stop$line_stop_1 = sapply(ncr_lines_stop$line_stop_1, extract_max)
-ncr_lines_stop$line_stop_2 = sapply(ncr_lines_stop$line_stop_2, extract_max)
-ncr_lines_stop$line_stop_3 = sapply(ncr_lines_stop$line_stop_3, extract_max)
-ncr_lines_stop$line_stop_4 = sapply(ncr_lines_stop$line_stop_4, extract_max)
-ncr_lines_stop$line_stop_5 = sapply(ncr_lines_stop$line_stop_5, extract_max)
-ncr_lines_stop$line_stop_6 = sapply(ncr_lines_stop$line_stop_6, extract_max)
-ncr_lines_stop$line_stop_7 = sapply(ncr_lines_stop$line_stop_7, extract_max)
+ncr_lines_stop$line_stop_1 <- sapply(ncr_lines_stop$line_stop_1, extract_max)
+ncr_lines_stop$line_stop_2 <- sapply(ncr_lines_stop$line_stop_2, extract_max)
+ncr_lines_stop$line_stop_3 <- sapply(ncr_lines_stop$line_stop_3, extract_max)
+ncr_lines_stop$line_stop_4 <- sapply(ncr_lines_stop$line_stop_4, extract_max)
+ncr_lines_stop$line_stop_5 <- sapply(ncr_lines_stop$line_stop_5, extract_max)
+ncr_lines_stop$line_stop_6 <- sapply(ncr_lines_stop$line_stop_6, extract_max)
+ncr_lines_stop$line_stop_7 <- sapply(ncr_lines_stop$line_stop_7, extract_max)
 
 ncr_lines_details <- inner_join(ncr_lines_substance_written,ncr_lines_start, by=c('key_nkr','key_zid')) %>%
   inner_join(ncr_lines_stop, by=c('key_nkr','key_zid')) %>%

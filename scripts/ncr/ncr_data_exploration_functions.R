@@ -1,5 +1,5 @@
 concat_syst_code_values <- function(data) {
-  
+
   out <- data.frame(
     line1 = gsub('"', '', paste(na.omit(data[data$syst_schemanum_value == 1 & data$code_schemanum_value == data$schemanum_code_value, "syst_code_value"]), collapse = ", ")),
     line2 = gsub('"', '', paste(na.omit(data[data$syst_schemanum_value == 2 & data$code_schemanum_value == data$schemanum_code_value, "syst_code_value"]), collapse = ", ")),
@@ -8,13 +8,13 @@ concat_syst_code_values <- function(data) {
     line5 = gsub('"', '', paste(na.omit(data[data$syst_schemanum_value == 5 & data$code_schemanum_value == data$schemanum_code_value, "syst_code_value"]), collapse = ", ")),
     line6 = gsub('"', '', paste(na.omit(data[data$syst_schemanum_value == 6 & data$code_schemanum_value == data$schemanum_code_value, "syst_code_value"]), collapse = ", ")),
     line7 = gsub('"', '', paste(na.omit(data[data$syst_schemanum_value == 7 & data$code_schemanum_value == data$schemanum_code_value, "syst_code_value"]), collapse = ", "))
-    )
-  
+  )
+
   return(out)
 }
 
 concat_start_int_values <- function(data) {
-  
+
   out <- data.frame(
     line_start_1 = gsub('"', '', paste(na.omit(data[data$syst_schemanum_value == 1 & data$line_start_schemanum_value == data$schemanum_line_start_value, "syst_start_int_value"]), collapse = ", ")),
     line_start_2 = gsub('"', '', paste(na.omit(data[data$syst_schemanum_value == 2 & data$line_start_schemanum_value == data$schemanum_line_start_value, "syst_start_int_value"]), collapse = ", ")),
@@ -23,13 +23,13 @@ concat_start_int_values <- function(data) {
     line_start_5 = gsub('"', '', paste(na.omit(data[data$syst_schemanum_value == 5 & data$line_start_schemanum_value == data$schemanum_line_start_value, "syst_start_int_value"]), collapse = ", ")),
     line_start_6 = gsub('"', '', paste(na.omit(data[data$syst_schemanum_value == 6 & data$line_start_schemanum_value == data$schemanum_line_start_value, "syst_start_int_value"]), collapse = ", ")),
     line_start_7 = gsub('"', '', paste(na.omit(data[data$syst_schemanum_value == 7 & data$line_start_schemanum_value == data$schemanum_line_start_value, "syst_start_int_value"]), collapse = ", "))
-    )
-  
+  )
+
   return(out)
 }
 
 concat_stop_int_values <- function(data) {
-  
+
   out <- data.frame(
     line_stop_1 = gsub('"', '', paste(na.omit(data[data$syst_schemanum_value == 1 & data$line_stop_schemanum_value == data$schemanum_line_stop_value, "syst_stop_int_value"]), collapse = ", ")),
     line_stop_2 = gsub('"', '', paste(na.omit(data[data$syst_schemanum_value == 2 & data$line_stop_schemanum_value == data$schemanum_line_stop_value, "syst_stop_int_value"]), collapse = ", ")),
@@ -39,15 +39,15 @@ concat_stop_int_values <- function(data) {
     line_stop_6 = gsub('"', '', paste(na.omit(data[data$syst_schemanum_value == 6 & data$line_stop_schemanum_value == data$schemanum_line_stop_value, "syst_stop_int_value"]), collapse = ", ")),
     line_stop_7 = gsub('"', '', paste(na.omit(data[data$syst_schemanum_value == 7 & data$line_stop_schemanum_value == data$schemanum_line_stop_value, "syst_stop_int_value"]), collapse = ", "))
   )
-  
+
   return(out)
 }
 
 extract_min <- function(string) {
-  
+
   if (string == "") {
     return("")
-  } else if (grepl(":",string)) {
+  } else if (grepl(":", string)) {
     numbers <- as.integer(strsplit(string, ":")[[1]])
     return(min(numbers))
   } else {
@@ -57,10 +57,10 @@ extract_min <- function(string) {
 }
 
 extract_max <- function(string) {
-  
+
   if (string == "") {
     return("")
-  } else if (grepl(":",string)) {
+  } else if (grepl(":", string)) {
     numbers <- as.integer(strsplit(string, ":")[[1]])
     return(max(numbers))
   } else {
@@ -71,14 +71,14 @@ extract_max <- function(string) {
 
 
 translate_atc <- function(atc_codes) {
-  
-  atc_translation_table <- list("L01BC06" = "Capecitabine", 
+
+  atc_translation_table <- list("L01BC06" = "Capecitabine",
                                 "L01XA01" = "Cisplatin",
                                 "L01XA02" = "Carboplatin",
-                                "L01XA03" = "Oxaliplatin", 
+                                "L01XA03" = "Oxaliplatin",
                                 "L01CD01" = "Paclitaxel",
                                 "L01BC05" = "Gemcitabine",
-                                "L01BC02" = "Fluorouracil", 
+                                "L01BC02" = "Fluorouracil",
                                 "L01CE02" = "Irinotecan",
                                 "L01BC53" = "Tegafur/gimeracil/oteracil",
                                 "L01BC59" = "Trifluridine/tipiracil",
@@ -86,7 +86,7 @@ translate_atc <- function(atc_codes) {
                                 "422000" = "Platinum chemotherapy",
                                 "690420" = "Chemotherapy abroad",
                                 "L01F" = "Monoclonal antibodies",
-                                "L01FG01" = "Bevacizumab", 
+                                "L01FG01" = "Bevacizumab",
                                 "L01FE02" = "Panitumumab",
                                 "L01FE01" = "Cetuximab",
                                 "L01EC03" = "Encorafenib",
@@ -94,9 +94,9 @@ translate_atc <- function(atc_codes) {
                                 "L01FF01" = "Nivolumab",
                                 "L01FF02" = "Pembrolizumab",
                                 "L01FX04" = "Ipilimumab"
-                                )
+  )
   atc_codes <- unlist(strsplit(atc_codes, ", "))
-  
+
   translated_atc_codes <- lapply(atc_codes, function(atc) {
     if (atc %in% names(atc_translation_table)) {
       return(atc_translation_table[[atc]])

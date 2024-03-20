@@ -179,8 +179,8 @@ colorectalTri$statusPfs <- ifelse(!is.na(colorectalTri$pfs), 1, 0)
 paste0("Nr of uncensored (included) patients for OS: ", sum(colorectalTri$statusOs == 1))
 paste0("Nr of uncensored (included) patients for PFS: ", sum(colorectalTri$statusPfs == 1))
 
-event_at_time_os = 365.25 #Year
-event_at_time_pfs = event_at_time_os/4 #3months
+event_at_time_os <- 365.25 #Year
+event_at_time_pfs <- event_at_time_os / 4 #3months
 
 output <- generate_survival_plot(data_set=colorectalTri, survival_var=colorectalTri$os, censor_status_var=colorectalTri$statusOs, split_var = colorectalTri$krasG12vsNonG12, type = "OS", event_at_time=event_at_time_os)
 osKrasG12vsNonG12Fit <- output[[1]]
@@ -233,7 +233,7 @@ train <- training(split)
 test <- testing(split)
 set.seed(NULL)
 
-predictor_vars=c(unname(unlist(drop_na(predictor_vectors[j]))))
+    predictor_vars <- c(unname(unlist(drop_na(predictor_vectors[j]))))
 output <- knn_cross_validation(training_set=train, outcome_var=c(outcomes[i]), predictor_vars=predictor_vars, vfold=5, kmax=12)
 recipe <- output[[1]]
 results <- output[[2]]
@@ -269,10 +269,10 @@ colorectalCapox$statusPfs <- ifelse(!is.na(colorectalCapox$pfs), 1, 0)
 paste0("Nr of uncensored (included) patients for OS: ", sum(colorectalCapox$statusOs == 1))
 paste0("Nr of uncensored (included) patients for PFS: ", sum(colorectalCapox$statusPfs == 1))
 
-event_at_time_os = 365.25 #Year
-event_at_time_pfs = event_at_time_os/4 #3months
+event_at_time_os <- 365.25 #Year
+event_at_time_pfs <- event_at_time_os / 4 #3months
 
-split_vars=c("isFemale",  "ageCategory", "treatmentCurated", "krasG12vsNonG12", "isNrasWildtype", "isBRAFV600EWildtype", "isTp53Wildtype")
+split_vars <- c("isFemale", "ageCategory", "treatmentCurated", "krasG12vsNonG12", "isNrasWildtype", "isBRAFV600EWildtype", "isTp53Wildtype")
 
 for (i in 1:length(split_vars)) {
   output <- generate_survival_plot(data_set=colorectalCapox, survival_var=colorectalCapox$os, censor_status_var=colorectalCapox$statusOs, split_var = unlist(select(colorectalCapox, split_vars[i])), type = "OS", event_at_time=event_at_time_os)
@@ -320,10 +320,10 @@ colorectalDoubTrip$statusPfs <- ifelse(!is.na(colorectalDoubTrip$pfs), 1, 0)
 paste0("Nr of uncensored (included) patients for OS: ", sum(colorectalDoubTrip$statusOs == 1))
 paste0("Nr of uncensored (included) patients for PFS: ", sum(colorectalDoubTrip$statusPfs == 1))
 
-event_at_time_os = 365.25 #Year
-event_at_time_pfs = event_at_time_os/4 #3months
+event_at_time_os <- 365.25 #Year
+event_at_time_pfs <- event_at_time_os / 4 #3months
 
-split_vars=c("krasG12vsNonG12")
+split_vars <- c("krasG12vsNonG12")
 
 for (i in 1:length(split_vars)) {
   output <- generate_survival_plot(data_set=colorectalDoubTrip, survival_var=colorectalDoubTrip$os, censor_status_var=colorectalDoubTrip$statusOs, split_var = unlist(select(colorectalDoubTrip, split_vars[i])), type = "OS", event_at_time=event_at_time_os)
