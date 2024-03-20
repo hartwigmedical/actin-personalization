@@ -4,10 +4,12 @@ library(tibble)
 rm(list=ls())
 
 source(paste0(Sys.getenv("HOME"), "/hmf/repos/actin-analysis/scripts/ncr/ncr_data_exploration_functions.R"))
+source(paste0(Sys.getenv("HOME"), "/hmf/repos/actin-analysis/scripts/ncr/ncr_patients_like_me_functions.R"))
+
 ncr <- load_ncr_data()
 
 ## Keys, epis, meta_epis, teller
-ncr %>% summarise(count_key_nkr=n(), distinct_count_key_nkr=n_distinct(key_nkr), distinct_count_key_zid=n_distinct(key_zid), distinct_count_key_eid=n_distinct(key_eid))
+ncr %>% summarise(distinct_count_key_nkr=n_distinct(key_nkr), distinct_count_key_zid=n_distinct(key_zid), distinct_count_key_eid=n_distinct(key_eid))
 
 ncr %>% group_by(epis) %>% summarise(count_key_nkr=n(), distinct_count_key_nkr=n_distinct(key_nkr))
 ncr %>% group_by(epis, meta_epis) %>% summarise(count_key_nkr=n(), distinct_count_key_nkr=n_distinct(key_nkr))
@@ -134,9 +136,12 @@ ncr_lines_substance_written <- ncr_lines_substance %>%
   add_column(line5_written = sapply(ncr_lines_substance$line5, translate_atc)) %>%
   add_column(line6_written = sapply(ncr_lines_substance$line6, translate_atc)) %>%
   add_column(line7_written = sapply(ncr_lines_substance$line7, translate_atc)) %>%
-  select(matches("key") | matches("written"))
+  select(matches("key") | matches("written")) 
 
-ncr_first_lines_summary <- ncr_lines_substance_written %>% dplyr::filter(line1 != "") %>% group_by(line1_read) %>% summarise(count=n(), distinct_count_key_nkr=n_distinct(key_nkr))
+ncr_first_lines_summary <- ncr_lines_substance_written %>% dplyr::filter(line1_written != "") %>% group_by(line1_written) %>% summarise(count=n(), distinct_count_key_nkr=n_distinct(key_nkr))
+
+ncr_lines_substance_written$key_nkr <- as.integer(ncr_lines_substance_written$key_nkr)
+ncr_lines_substance_written$key_zid <- as.integer(ncr_lines_substance_written$key_zid)
 
 ### Select start and stop interval for every line, merge with substances and calculate duration
 ncr_lines_start_prep <- ncr %>%
@@ -163,6 +168,9 @@ ncr_lines_start$line_start_5 <- sapply(ncr_lines_start$line_start_5, extract_min
 ncr_lines_start$line_start_6 <- sapply(ncr_lines_start$line_start_6, extract_min)
 ncr_lines_start$line_start_7 <- sapply(ncr_lines_start$line_start_7, extract_min)
 
+ncr_lines_start$key_nkr <- as.integer(ncr_lines_start$key_nkr)
+ncr_lines_start$key_zid <- as.integer(ncr_lines_start$key_zid)
+
 ncr_lines_stop_prep <- ncr %>%
   dplyr::filter(tumgericht_ther==1) %>%
   select(c('key_nkr','key_zid'),starts_with(c('syst_schemanum','syst_stop_int'))) %>%
@@ -187,16 +195,28 @@ ncr_lines_stop$line_stop_5 <- sapply(ncr_lines_stop$line_stop_5, extract_max)
 ncr_lines_stop$line_stop_6 <- sapply(ncr_lines_stop$line_stop_6, extract_max)
 ncr_lines_stop$line_stop_7 <- sapply(ncr_lines_stop$line_stop_7, extract_max)
 
-ncr_lines_details <- inner_join(ncr_lines_substance_written,ncr_lines_start, by=c('key_nkr','key_zid')) %>%
-  inner_join(ncr_lines_stop, by=c('key_nkr','key_zid')) %>%
-  add_column(line_duration_1 = ifelse(join$line_stop_1 == "","", as.integer(join$line_stop_1)-as.integer(join$line_start_1))) %>%
-  add_column(line_duration_2 = ifelse(join$line_stop_2 == "","", as.integer(join$line_stop_2)-as.integer(join$line_start_2))) %>%
-  add_column(line_duration_3 = ifelse(join$line_stop_3 == "","", as.integer(join$line_stop_3)-as.integer(join$line_start_3))) %>%
-  add_column(line_duration_4 = ifelse(join$line_stop_4 == "","", as.integer(join$line_stop_4)-as.integer(join$line_start_4))) %>%
-  add_column(line_duration_5 = ifelse(join$line_stop_5 == "","", as.integer(join$line_stop_5)-as.integer(join$line_start_5))) %>%
-  add_column(line_duration_6 = ifelse(join$line_stop_6 == "","", as.integer(join$line_stop_6)-as.integer(join$line_start_6))) %>%
-  add_column(line_duration_7 = ifelse(join$line_stop_7 == "","", as.integer(join$line_stop_7)-as.integer(join$line_start_7)))
+ncr_lines_stop$key_nkr <- as.integer(ncr_lines_stop$key_nkr)
+ncr_lines_stop$key_zid <- as.integer(ncr_lines_stop$key_zid)
 
+ncr_lines_details <- inner_join(ncr_lines_substance_written,ncr_lines_start, by=c('key_nkr','key_zid')) %>%
+  inner_join(ncr_lines_stop, by=c('key_nkr','key_zid'))
+  
+ncr_lines_details <- ncr_lines_details %>%
+  add_column(line_duration_1 = as.integer(ifelse(ncr_lines_details$line_stop_1 == "","", as.integer(ncr_lines_details$line_stop_1)-as.integer(ncr_lines_details$line_start_1)))) %>%
+  add_column(line_duration_2 = as.integer(ifelse(ncr_lines_details$line_stop_2 == "","", as.integer(ncr_lines_details$line_stop_2)-as.integer(ncr_lines_details$line_start_2)))) %>%
+  add_column(line_duration_3 = as.integer(ifelse(ncr_lines_details$line_stop_3 == "","", as.integer(ncr_lines_details$line_stop_3)-as.integer(ncr_lines_details$line_start_3)))) %>%
+  add_column(line_duration_4 = as.integer(ifelse(ncr_lines_details$line_stop_4 == "","", as.integer(ncr_lines_details$line_stop_4)-as.integer(ncr_lines_details$line_start_4)))) %>%
+  add_column(line_duration_5 = as.integer(ifelse(ncr_lines_details$line_stop_5 == "","", as.integer(ncr_lines_details$line_stop_5)-as.integer(ncr_lines_details$line_start_5)))) %>%
+  add_column(line_duration_6 = as.integer(ifelse(ncr_lines_details$line_stop_6 == "","", as.integer(ncr_lines_details$line_stop_6)-as.integer(ncr_lines_details$line_start_6)))) %>%
+  add_column(line_duration_7 = as.integer(ifelse(ncr_lines_details$line_stop_7 == "","", as.integer(ncr_lines_details$line_stop_7)-as.integer(ncr_lines_details$line_start_7))))
+
+## Find similar patients and what type of treatment they received
+ncr_similar_out <- find_similar_patients(ncr_ref_data = ncr, patient_age = 80, patient_who = 0)
+ncr_similar <- left_join(ncr_similar_out, ncr_lines_details, by=c('key_nkr','key_zid'))
+
+line1_summary <- ncr_similar %>% dplyr::filter(line1_written != "")
+pie(table(line1_summary$line1_written))
+hist(as.numeric(line1_summary$line_duration_1), breaks=70)
 
 ### Overall survival exploration (WIP)
 ncr_surv <- ncr %>% dplyr::filter(tumgericht_ther==1 & (chemo==4 | target==4)) %>%
