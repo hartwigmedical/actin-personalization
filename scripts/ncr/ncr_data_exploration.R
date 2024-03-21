@@ -211,7 +211,12 @@ ncr_lines_details <- ncr_lines_details %>%
   add_column(line_duration_7 = as.integer(ifelse(ncr_lines_details$line_stop_7 == "","", as.integer(ncr_lines_details$line_stop_7)-as.integer(ncr_lines_details$line_start_7))))
 
 ## Find similar patients and what type of treatment they received
-ncr_similar_out <- find_similar_patients(ncr_ref_data = ncr, patient_age = 80, patient_who = 0)
+### <-- Try some random patient details
+age <- 80
+who <- 0
+hasHadSurgery <- 1
+
+ncr_similar_out <- find_similar_patients_2(ncr_ref_data = ncr, patient_age = age, patient_who = who, patient_has_had_surgery = hasHadSurgery)
 ncr_similar <- left_join(ncr_similar_out, ncr_lines_details, by=c('key_nkr','key_zid'))
 
 line1_summary <- ncr_similar %>% dplyr::filter(line1_written != "")
