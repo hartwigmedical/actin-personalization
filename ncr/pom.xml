@@ -11,7 +11,7 @@
     <artifactId>ncr</artifactId>
     <packaging>jar</packaging>
     <version>local-SNAPSHOT</version>
-    <name>HMF ACTIN Analysis - NCR</name>
+    <name>HMF ACTIN Personalization - NCR</name>
 
     <dependencies>
         <dependency>
