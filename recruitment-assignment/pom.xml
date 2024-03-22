@@ -11,7 +11,7 @@
     <artifactId>recruitment-assignment</artifactId>
     <packaging>jar</packaging>
     <version>local-SNAPSHOT</version>
-    <name>HMF ACTIN Analysis - Recruitment Assignment</name>
+    <name>HMF ACTIN Personalization - Recruitment Assignment</name>
 
     <dependencies>
         <dependency>
