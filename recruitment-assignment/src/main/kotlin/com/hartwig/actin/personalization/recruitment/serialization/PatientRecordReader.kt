@@ -1,6 +1,6 @@
-package com.hartwig.actin.analysis.recruitment.serialization
+package com.hartwig.actin.personalization.recruitment.serialization
 
-import com.hartwig.actin.analysis.recruitment.datamodel.PatientRecord
+import com.hartwig.actin.personalization.recruitment.datamodel.PatientRecord
 import java.io.File
 import java.nio.file.Files
 
