@@ -25,8 +25,8 @@ library(ggsurvfit)
  setwd(wd)
 
 # Get access to functions ---------------------------------------------------------------
-source(paste0(Sys.getenv("HOME"), "/hmf/repos/actin-analysis/scripts/cpct/cpct_data_analysis_functions.R"))
-source(paste0(Sys.getenv("HOME"), "/hmf/repos/actin-analysis/scripts/cpct/cpct_treatment_curation.R"))
+source(paste0(Sys.getenv("HOME"), "/hmf/repos/actin-personalization/scripts/cpct/cpct_data_analysis_functions.R"))
+source(paste0(Sys.getenv("HOME"), "/hmf/repos/actin-personalization/scripts/cpct/cpct_treatment_curation.R"))
  
 # Retrieve data ------------------------------------------------------------------
 dbProd <- dbConnect(MySQL(), dbname='hmfpatients', groups="RAnalysis")
