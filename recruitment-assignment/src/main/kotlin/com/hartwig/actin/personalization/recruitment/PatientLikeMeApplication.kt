@@ -1,7 +1,7 @@
-package com.hartwig.actin.analysis.recruitment
+package com.hartwig.actin.personalization.recruitment
 
-import com.hartwig.actin.analysis.recruitment.algo.NearestNeighborModel
-import com.hartwig.actin.analysis.recruitment.serialization.PatientRecordReader
+import com.hartwig.actin.personalization.recruitment.algo.NearestNeighborModel
+import com.hartwig.actin.personalization.recruitment.serialization.PatientRecordReader
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 
