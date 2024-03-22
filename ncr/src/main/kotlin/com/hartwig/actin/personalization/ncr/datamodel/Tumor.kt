@@ -1,9 +1,9 @@
 package com.hartwig.actin.personalization.ncr.datamodel
 
-data class Tumor(
-    val id: Int,
-    val ageAtIncidence: Int,
-    val intervalIncidenceVitalStatus: Int,
+interface Tumor {
+    val tumorType: TumorType
+    val tumorLocation: TumorLocation
+    val stageTNM: StageTNM
+    val hasHadTumorDirectedSystemicTherapy: Boolean
 
-
-    )
+}

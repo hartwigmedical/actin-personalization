@@ -1,6 +1,6 @@
 package com.hartwig.actin.personalization.ncr.datamodel
 
-enum class CciClassificationPreTreatmentStart {
+enum class Cci {
     SCORE_0,
     SCORE_1,
     SCORE_2,
