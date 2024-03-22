@@ -3,10 +3,10 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.hartwig.actin</groupId>
-    <artifactId>actin-analysis</artifactId>
+    <artifactId>actin-personalization</artifactId>
     <packaging>pom</packaging>
     <version>local-SNAPSHOT</version>
-    <name>HMF ACTIN Analysis</name>
+    <name>HMF ACTIN Personalization</name>
 
     <modules>
         <module>recruitment-assignment</module>

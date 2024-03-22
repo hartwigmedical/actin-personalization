@@ -3,8 +3,8 @@ library(tibble)
 
 rm(list=ls())
 
-source(paste0(Sys.getenv("HOME"), "/hmf/repos/actin-analysis/scripts/ncr/ncr_data_exploration_functions.R"))
-source(paste0(Sys.getenv("HOME"), "/hmf/repos/actin-analysis/scripts/ncr/ncr_patients_like_me_functions.R"))
+source(paste0(Sys.getenv("HOME"), "/hmf/repos/actin-personalization/scripts/ncr/ncr_data_exploration_functions.R"))
+source(paste0(Sys.getenv("HOME"), "/hmf/repos/actin-personalization/scripts/ncr/ncr_patients_like_me_functions.R"))
 
 ncr <- load_ncr_data()
 
