@@ -1,4 +1,4 @@
-package com.hartwig.actin.analysis.ncr.datamodel
+package com.hartwig.actin.personalization.ncr.datamodel
 
 data class PatientRecord(
     val id: Int,

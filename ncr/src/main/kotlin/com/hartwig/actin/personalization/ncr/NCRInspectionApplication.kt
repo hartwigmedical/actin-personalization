@@ -1,4 +1,4 @@
-package com.hartwig.actin.analysis.ncr
+package com.hartwig.actin.personalization.ncr
 
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
