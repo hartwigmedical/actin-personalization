@@ -7,6 +7,22 @@ data class DiagnosisEpisode  (
     override val whoStatusPreTreatmentStart: Int?,
     override val asaClassificationPreSurgeryOrEndoscopy: AsaClassificationPreSurgeryOrEndoscopy?,
 
+    override val tumorIncidenceYear: Int,
+    override val tumorBasisOfDiagnosis: TumorBasisOfDiagnosis,
+    override val tumorLocation: TumorLocation,
+    override val tumorDifferentiationGrade: TumorDifferentiationGrade?,
+    override val stageCT: StageCT?,
+    override val stageCN: StageCN?,
+    override val stageCM: StageCM?,
+    override val stageCTNM: StageTNM?,
+    override val stagePT: StagePT?,
+    override val stagePN: StagePN?,
+    override val stagePM: StagePM?,
+    override val stagePTNM: StageTNM?,
+    override val stageTNM: StageTNM?,
+    override val numberOfInvestigatedLymphNodes: Int?,
+    override val numberOfPositiveLymphNodes: Int?,
+
     val cci: Int?,
     val cciNumberOfCategories: CciNumberOfCategories?,
     val cciHasAids: Boolean?,
@@ -26,7 +42,6 @@ data class DiagnosisEpisode  (
     val cciHasRenalDisease: Boolean?,
     val cciHasLiverDisease: Boolean?,
     val cciHasUlcerDisease: Boolean?,
-
 
 
     ): Episode

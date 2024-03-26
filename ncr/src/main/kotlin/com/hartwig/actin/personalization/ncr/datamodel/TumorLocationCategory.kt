@@ -14,5 +14,5 @@ enum class TumorLocationCategory {
     ENDOCRINE_GLAND,
     EYE,
     CENTRAL_NERVOUS_SYSTEM,
-    OTHER
+    OTHER,
 }

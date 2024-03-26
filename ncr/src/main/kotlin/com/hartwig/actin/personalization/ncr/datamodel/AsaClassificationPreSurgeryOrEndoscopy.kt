@@ -6,5 +6,5 @@ enum class AsaClassificationPreSurgeryOrEndoscopy {
     III,
     IV,
     V,
-    VI
+    VI,
 }

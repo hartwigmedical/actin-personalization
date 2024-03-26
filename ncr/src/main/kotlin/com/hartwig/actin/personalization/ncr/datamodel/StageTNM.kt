@@ -21,5 +21,5 @@ enum class StageTNM {
     IVC,
     M,
     NA,
-    X
+    X,
 }
