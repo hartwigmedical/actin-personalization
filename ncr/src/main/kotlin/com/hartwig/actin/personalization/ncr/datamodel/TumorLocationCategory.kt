@@ -1,0 +1,18 @@
+package com.hartwig.actin.personalization.ncr.datamodel
+
+enum class TumorLocationCategory {
+    HEAD_AND_NECK,
+    DIGESTIVE_TRACT,
+    RESPIRATORY_TRACT,
+    SKIN,
+    BONE_CARTILAGE_AND_SOFT_TISSUE,
+    BREAST,
+    FEMALE_REPRODUCTIVE_SYSTEM,
+    MALE_REPRODUCTIVE_SYSTEM,
+    URINARY_TRACT,
+    HEMATOLOGY,
+    ENDOCRINE_GLAND,
+    EYE,
+    CENTRAL_NERVOUS_SYSTEM,
+    OTHER
+}
