@@ -1,7 +1,7 @@
 package com.hartwig.actin.personalization.ncr.serialization
 
 data class NCRPrimarySurgery(
-    val chir: Int,
+    val chir: Int?,
     val chirInt1: Int?,
     val chirInt2: Int?,
     val chirOpnameduur1: Int?,
