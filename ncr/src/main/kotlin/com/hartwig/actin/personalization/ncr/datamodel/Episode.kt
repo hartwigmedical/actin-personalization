@@ -4,6 +4,6 @@ interface Episode {
     val id: Int
     val order: Int
     val distantMetastasesStatus: DistantMetastasesStatus
-    val whoStatusPreTreatmentStart: WhoStatusPreTreatmentStart?
+    val whoStatusPreTreatmentStart: Int?
     val asaClassificationPreSurgeryOrEndoscopy: AsaClassificationPreSurgeryOrEndoscopy?
 }
