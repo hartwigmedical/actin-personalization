@@ -13,7 +13,7 @@ data class NCRRecord(
     val vitStatInt: Int,
     val perfStat: Int,
     val asa: Int,
-    val cci: NCRCharlsonComorbitidy,
+    val cci: NCRCharlsonComorbitidy?,
     val mal: NCRPreviousMalignancy,
     val incjr: Int,
     val topoSublok: String,
