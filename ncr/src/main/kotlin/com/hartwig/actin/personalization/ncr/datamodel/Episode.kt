@@ -23,7 +23,7 @@ interface Episode {
     val numberOfPositiveLymphNodes: Int?
 
     val distantMetastasesStatus: DistantMetastasesStatus //meta_epis
-    val metastases: List<Metastases>
+    val metastases: List<Metastasis>
     val hasKnownLiverMetastases: Boolean
     val numberOfLiverMetastases: Int?
     val maximumSizeOfLiverMetastasis: Int?
@@ -36,5 +36,11 @@ interface Episode {
     val extraMuralInvastionCategory: ExtraMuralInvasionCategory?
     val tumorRegression: TumorRegression?
 
-    val labMeasurements: List<LabMeasurements>
+    val labMeasurements: List<LabMeasurement>
+
+    val hasReceivedTumorDirectedTreatment: Boolean
+    val reasonRefrainmentFromTumorDirectedTreatment : ReasonRefrainmentFromTumorDirectedTreatment?
+    val hasParticipatedInTrial: Boolean?
+    val mdlResections: List<MDLResection>
+    val surgeries: List<Surgery>
 }

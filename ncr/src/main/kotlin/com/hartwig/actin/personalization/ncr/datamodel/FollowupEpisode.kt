@@ -23,7 +23,7 @@ data class FollowupEpisode (
     override val numberOfPositiveLymphNodes: Int?,
 
     override val distantMetastasesStatus: DistantMetastasesStatus,
-    override val metastases: List<Metastases>,
+    override val metastases: List<Metastasis>,
     override val hasKnownLiverMetastases: Boolean,
     override val numberOfLiverMetastases: Int?,
     override val maximumSizeOfLiverMetastasis: Int?,
@@ -36,6 +36,12 @@ data class FollowupEpisode (
     override val extraMuralInvastionCategory: ExtraMuralInvasionCategory?,
     override val tumorRegression: TumorRegression?,
 
-    override val labMeasurements: List<LabMeasurements>,
+    override val labMeasurements: List<LabMeasurement>,
+
+    override val hasReceivedTumorDirectedTreatment: Boolean,
+    override val reasonRefrainmentFromTumorDirectedTreatment : ReasonRefrainmentFromTumorDirectedTreatment?,
+    override val hasParticipatedInTrial: Boolean?,
+    override val mdlResections: List<MDLResection>,
+    override val surgeries: List<Surgery>,
 
     ): Episode
