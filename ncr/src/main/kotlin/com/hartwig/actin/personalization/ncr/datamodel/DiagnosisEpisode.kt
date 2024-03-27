@@ -39,17 +39,25 @@ data class DiagnosisEpisode  (
     override val labMeasurements: List<LabMeasurement>,
 
     override val hasReceivedTumorDirectedTreatment: Boolean,
-    override val reasonRefrainmentFromTumorDirectedTreatment : ReasonRefrainmentFromTumorDirectedTreatment?,
+    override val reasonRefrainmentFromTumorDirectedTreatment: ReasonRefrainmentFromTumorDirectedTreatment?,
     override val hasParticipatedInTrial: Boolean?,
+
     override val mdlResections: List<MDLResection>,
     override val surgeries: List<Surgery>,
     override val surgeriesMetastases: List<SurgeryMetastases>,
     override val radiotherapies: List<Radiotherapy>,
     override val radiotherapiesMetastases: List<RadiotherapyMetastases>,
+    override val systemicTreatments: List<SystemicTreatment>,
+    override val treatmentLines: List<SystemicTreatmentLine>,
+
     override val hasHadPreSurgeryRadiotherapy: Boolean,
     override val hasHadPostSurgeryRadiotherapy: Boolean,
     override val hasHadPreSurgeryChemoRadiotherapy: Boolean,
     override val hasHadPostSurgeryChemoRadiotherapy: Boolean,
+    override val hasHadPreSurgerySystemicChemotherapy: Boolean,
+    override val hasHadPostSurgerySystemicChemotherapy: Boolean,
+    override val hasHadPreSurgerySystemicTargetedTherapy: Boolean,
+    override val hasHadPostSurgerySystemicTargetedTherapy: Boolean,
 
     val cci: Int?,
     val cciNumberOfCategories: CciNumberOfCategories?,

@@ -47,10 +47,15 @@ interface Episode {
     val surgeriesMetastases: List<SurgeryMetastases>
     val radiotherapies: List<Radiotherapy>
     val radiotherapiesMetastases: List<RadiotherapyMetastases>
+    val systemicTreatments: List<SystemicTreatment>
+    val treatmentLines: List<SystemicTreatmentLine>
+
     val hasHadPreSurgeryRadiotherapy: Boolean
     val hasHadPostSurgeryRadiotherapy: Boolean
     val hasHadPreSurgeryChemoRadiotherapy: Boolean
     val hasHadPostSurgeryChemoRadiotherapy: Boolean
-
-
+    val hasHadPreSurgerySystemicChemotherapy: Boolean
+    val hasHadPostSurgerySystemicChemotherapy: Boolean
+    val hasHadPreSurgerySystemicTargetedTherapy: Boolean
+    val hasHadPostSurgerySystemicTargetedTherapy: Boolean
 }
