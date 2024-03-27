@@ -1,6 +1,6 @@
 package com.hartwig.actin.personalization.ncr.serialization.datamodel
 
-data class NCRMetastases(
+data class NCRMetastaticDiagnosis(
     val metaTopoSublok1: String?,
     val metaTopoSublok2: String?,
     val metaTopoSublok3: String?,

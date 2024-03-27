@@ -1,13 +1,23 @@
 package com.hartwig.actin.personalization.ncr.serialization
 
-import com.hartwig.actin.personalization.ncr.serialization.datamodel.NCRCharlsonComorbitidy
+import com.hartwig.actin.personalization.ncr.serialization.datamodel.NCRCharlsonComorbidities
+import com.hartwig.actin.personalization.ncr.serialization.datamodel.NCRClinicalCharacteristics
+import com.hartwig.actin.personalization.ncr.serialization.datamodel.NCRHIPEC
+import com.hartwig.actin.personalization.ncr.serialization.datamodel.NCRIdentification
 import com.hartwig.actin.personalization.ncr.serialization.datamodel.NCRLabValues
-import com.hartwig.actin.personalization.ncr.serialization.datamodel.NCRMetastases
-import com.hartwig.actin.personalization.ncr.serialization.datamodel.NCRPreviousMalignancy
+import com.hartwig.actin.personalization.ncr.serialization.datamodel.NCRLocalResection
+import com.hartwig.actin.personalization.ncr.serialization.datamodel.NCRMetastaticDiagnosis
+import com.hartwig.actin.personalization.ncr.serialization.datamodel.NCRMetastaticRadiotherapy
+import com.hartwig.actin.personalization.ncr.serialization.datamodel.NCRMetastaticSurgery
+import com.hartwig.actin.personalization.ncr.serialization.datamodel.NCRMolecularCharacteristics
+import com.hartwig.actin.personalization.ncr.serialization.datamodel.NCRPatientCharacteristics
+import com.hartwig.actin.personalization.ncr.serialization.datamodel.NCRPrimaryDiagnosis
 import com.hartwig.actin.personalization.ncr.serialization.datamodel.NCRPrimaryRadiotherapy
 import com.hartwig.actin.personalization.ncr.serialization.datamodel.NCRPrimarySurgery
+import com.hartwig.actin.personalization.ncr.serialization.datamodel.NCRPriorMalignancies
 import com.hartwig.actin.personalization.ncr.serialization.datamodel.NCRRecord
 import com.hartwig.actin.personalization.ncr.serialization.datamodel.NCRSystemicTreatment
+import com.hartwig.actin.personalization.ncr.serialization.datamodel.NCRTreatment
 import com.hartwig.actin.personalization.ncr.serialization.datamodel.NCRTreatmentResponse
 import java.io.File
 import java.nio.file.Files
@@ -27,37 +37,44 @@ object NCRDataReader {
         val extractor = NCRFieldExtractor(fields, parts)
 
         return NCRRecord(
+            identification = readIdentification(extractor),
+            patientCharacteristics = readPatientCharacteristics(extractor),
+            clinicalCharacteristics = readClinicalCharacteristics(extractor),
+            molecularCharacteristics = readMolecularCharacteristics(extractor),
+            priorMalignancies = readPriorMalignancies(extractor),
+            primaryDiagnosis = readPrimaryDiagnosis(extractor),
+            metastaticDiagnosis = readMetastaticDiagnosis(extractor),
+            comorbidities = readCharlsonComorbidities(extractor),
+            labValues = readLabValues(extractor),
+            treatment = readTreatment(extractor),
+            treatmentResponse = readTreatmentResponse(extractor)
+        )
+    }
+
+    private fun readIdentification(extractor: NCRFieldExtractor): NCRIdentification {
+        return NCRIdentification(
             keyNkr = extractor.mandatoryInt("key_nkr"),
             keyZid = extractor.mandatoryInt("key_zid"),
             keyEid = extractor.mandatoryInt("key_eid"),
             epis = extractor.mandatoryString("epis"),
             metaEpis = extractor.mandatoryInt("meta_epis"),
-            teller = extractor.mandatoryInt("teller"),
+            teller = extractor.mandatoryInt("teller")
+        )
+    }
+
+    private fun readPatientCharacteristics(extractor: NCRFieldExtractor): NCRPatientCharacteristics {
+        return NCRPatientCharacteristics(
             gesl = extractor.mandatoryInt("gesl"),
             leeft = extractor.mandatoryInt("leeft"),
             vitStat = extractor.optionalInt("vit_stat"),
             vitStatInt = extractor.optionalInt("vit_stat_int"),
             perfStat = extractor.optionalInt("perf_stat"),
-            asa = extractor.optionalInt("asa"),
-            readCharlsonComorbitidy(extractor),
-            readPreviousMalignancy(extractor),
-            incjr = extractor.mandatoryInt("incjr"),
-            topoSublok = extractor.mandatoryString("topo_sublok"),
-            morfCat = extractor.optionalInt("morf_cat"),
-            diagBasis = extractor.mandatoryInt("diag_basis"),
-            diffgrad = extractor.mandatoryString("diffgrad"),
-            ct = extractor.mandatoryString("ct"),
-            cn = extractor.mandatoryString("cn"),
-            cm = extractor.mandatoryString("cm"),
-            pt = extractor.optionalString("pt"),
-            pn = extractor.optionalString("pn"),
-            pm = extractor.optionalString("pm"),
-            cstadium = extractor.mandatoryString("cstadium"),
-            pstadium = extractor.mandatoryString("pstadium"),
-            stadium = extractor.mandatoryString("stadium"),
-            ondLymf = extractor.optionalInt("ond_lymf"),
-            posLymf = extractor.optionalInt("pos_lymf"),
-            readMetastases(extractor),
+            asa = extractor.optionalInt("asa")
+        )
+    }
+
+    private fun readClinicalCharacteristics(extractor: NCRFieldExtractor): NCRClinicalCharacteristics {
+        return NCRClinicalCharacteristics(
             dubbeltum = extractor.optionalInt("dubbeltum"),
             ileus = extractor.optionalInt("ileus"),
             perforatie = extractor.optionalInt("perforatie"),
@@ -66,77 +83,20 @@ object NCRDataReader {
             veneusInvas = extractor.optionalInt("veneus_invas"),
             lymfInvas = extractor.optionalInt("lymf_invas"),
             emi = extractor.optionalInt("emi"),
-            tumregres = extractor.optionalInt("tumregres"),
-            msiStat = extractor.optionalInt("msi_stat"),
-            brafMut = extractor.optionalInt("braf_mut"),
-            rasMut = extractor.optionalInt("ras_mut"),
-            readLabValues(extractor),
-            deelnameStudie = extractor.optionalInt("deelname_studie"),
-            tumgerichtTher = extractor.optionalInt("tumgericht_ther"),
-            geenTherReden = extractor.optionalInt("geen_ther_reden"),
-            mdlRes = extractor.optionalInt("mdl_res"),
-            mdlResType1 = extractor.optionalInt("mdl_res_type1"),
-            mdlResType2 = extractor.optionalInt("mdl_res_type2"),
-            mdlResInt1 = extractor.optionalInt("mdl_res_int1"),
-            mdlResInt2 = extractor.optionalInt("mdl_res_int2"),
-            readPrimarySurgery(extractor),
-            chemort = extractor.optionalInt("chemort"),
-            readPrimaryRadiotherapy(extractor),
-            metaRtCode1 = extractor.optionalString("meta_rt_code1"),
-            metaRtCode2 = extractor.optionalString("meta_rt_code2"),
-            metaRtCode3 = extractor.optionalString("meta_rt_code3"),
-            metaRtCode4 = extractor.optionalString("meta_rt_code4"),
-            metaRtStartInt1 = extractor.optionalString("meta_rt_start_int1"),
-            metaRtStartInt2 = extractor.optionalString("meta_rt_start_int2"),
-            metaRtStartInt3 = extractor.optionalString("meta_rt_start_int3"),
-            metaRtStartInt4 = extractor.optionalString("meta_rt_start_int4"),
-            metaRtStopInt1 = extractor.optionalString("meta_rt_stop_int1"),
-            metaRtStopInt2 = extractor.optionalString("meta_rt_stop_int2"),
-            metaRtStopInt3 = extractor.optionalString("meta_rt_stop_int3"),
-            metaRtStopInt4 = extractor.optionalString("meta_rt_stop_int4"),
-            metaChirCode1 = extractor.optionalString("meta_chir_code1"),
-            metaChirCode2 = extractor.optionalString("meta_chir_code2"),
-            metaChirCode3 = extractor.optionalString("meta_chir_code3"),
-            metaChirInt1 = extractor.optionalInt("meta_chir_int1"),
-            metaChirInt2 = extractor.optionalInt("meta_chir_int2"),
-            metaChirInt3 = extractor.optionalInt("meta_chir_int3"),
-            metaChirRad1 = extractor.optionalInt("meta_chir_rad1"),
-            metaChirRad2 = extractor.optionalInt("meta_chir_rad2"),
-            metaChirRad3 = extractor.optionalInt("meta_chir_rad3"),
-            readSystemicTreatment(extractor),
-            hipec = extractor.optionalInt("hipec"),
-            hipecInt1 = extractor.optionalInt("hipec_int1"),
-            readTreatmentResponse(extractor)
+            tumregres = extractor.optionalInt("tumregres")
         )
     }
 
-    private fun readCharlsonComorbitidy(extractor: NCRFieldExtractor): NCRCharlsonComorbitidy? {
-        // Assumption: A patient either has all CCI values or none.
-        return if (extractor.hasValue("cci")) NCRCharlsonComorbitidy(
-            cci = extractor.mandatoryInt("cci"),
-            cciAids = extractor.mandatoryInt("cci_aids"),
-            cciCat = extractor.mandatoryInt("cci_cat"),
-            cciChf = extractor.mandatoryInt("cci_chf"),
-            cciCollagenosis = extractor.mandatoryInt("cci_collagenosis"),
-            cciCopd = extractor.mandatoryInt("cci_copd"),
-            cciCvd = extractor.mandatoryInt("cci_cvd"),
-            cciDementia = extractor.mandatoryInt("cci_dementia"),
-            cciDm = extractor.mandatoryInt("cci_dm"),
-            cciEodDm = extractor.mandatoryInt("cci_eod_dm"),
-            cciMalignancy = extractor.mandatoryInt("cci_malignancy"),
-            cciMetastatic = extractor.mandatoryInt("cci_metastatic"),
-            cciMi = extractor.mandatoryInt("cci_mi"),
-            cciMildLiver = extractor.mandatoryInt("cci_mild_liver"),
-            cciPlegia = extractor.mandatoryInt("cci_plegia"),
-            cciPvd = extractor.mandatoryInt("cci_pvd"),
-            cciRenal = extractor.mandatoryInt("cci_renal"),
-            cciSevereLiver = extractor.mandatoryInt("cci_severe_liver"),
-            cciUlcer = extractor.mandatoryInt("cci_ulcer")
-        ) else null
+    private fun readMolecularCharacteristics(extractor: NCRFieldExtractor): NCRMolecularCharacteristics {
+        return NCRMolecularCharacteristics(
+            msiStat = extractor.optionalInt("msi_stat"),
+            brafMut = extractor.optionalInt("braf_mut"),
+            rasMut = extractor.optionalInt("ras_mut")
+        )
     }
 
-    private fun readPreviousMalignancy(extractor : NCRFieldExtractor): NCRPreviousMalignancy {
-        return NCRPreviousMalignancy(
+    private fun readPriorMalignancies(extractor: NCRFieldExtractor): NCRPriorMalignancies {
+        return NCRPriorMalignancies(
             mal1Int = extractor.optionalInt("mal1_int"),
             mal2Int = extractor.optionalInt("mal2_int"),
             mal3Int = extractor.optionalInt("mal3_int"),
@@ -182,8 +142,29 @@ object NCRDataReader {
         )
     }
 
-    private fun readMetastases(extractor: NCRFieldExtractor) : NCRMetastases {
-        return NCRMetastases(
+    private fun readPrimaryDiagnosis(extractor: NCRFieldExtractor): NCRPrimaryDiagnosis {
+        return NCRPrimaryDiagnosis(
+            incjr = extractor.mandatoryInt("incjr"),
+            topoSublok = extractor.mandatoryString("topo_sublok"),
+            morfCat = extractor.optionalInt("morf_cat"),
+            diagBasis = extractor.mandatoryInt("diag_basis"),
+            diffgrad = extractor.mandatoryString("diffgrad"),
+            ct = extractor.mandatoryString("ct"),
+            cn = extractor.mandatoryString("cn"),
+            cm = extractor.mandatoryString("cm"),
+            pt = extractor.optionalString("pt"),
+            pn = extractor.optionalString("pn"),
+            pm = extractor.optionalString("pm"),
+            cstadium = extractor.mandatoryString("cstadium"),
+            pstadium = extractor.mandatoryString("pstadium"),
+            stadium = extractor.mandatoryString("stadium"),
+            ondLymf = extractor.optionalInt("ond_lymf"),
+            posLymf = extractor.optionalInt("pos_lymf")
+        )
+    }
+
+    private fun readMetastaticDiagnosis(extractor: NCRFieldExtractor): NCRMetastaticDiagnosis {
+        return NCRMetastaticDiagnosis(
             metaTopoSublok1 = extractor.optionalString("meta_topo_sublok1"),
             metaTopoSublok2 = extractor.optionalString("meta_topo_sublok2"),
             metaTopoSublok3 = extractor.optionalString("meta_topo_sublok3"),
@@ -216,6 +197,30 @@ object NCRDataReader {
             metaProg10 = extractor.optionalInt("meta_prog10"),
             metaLeverAantal = extractor.optionalInt("meta_lever_aantal"),
             metaLeverAfm = extractor.optionalInt("meta_lever_afm")
+        )
+    }
+
+    private fun readCharlsonComorbidities(extractor: NCRFieldExtractor): NCRCharlsonComorbidities {
+        return NCRCharlsonComorbidities(
+            cci = extractor.optionalInt("cci"),
+            cciAids = extractor.optionalInt("cci_aids"),
+            cciCat = extractor.optionalInt("cci_cat"),
+            cciChf = extractor.optionalInt("cci_chf"),
+            cciCollagenosis = extractor.optionalInt("cci_collagenosis"),
+            cciCopd = extractor.optionalInt("cci_copd"),
+            cciCvd = extractor.optionalInt("cci_cvd"),
+            cciDementia = extractor.optionalInt("cci_dementia"),
+            cciDm = extractor.optionalInt("cci_dm"),
+            cciEodDm = extractor.optionalInt("cci_eod_dm"),
+            cciMalignancy = extractor.optionalInt("cci_malignancy"),
+            cciMetastatic = extractor.optionalInt("cci_metastatic"),
+            cciMi = extractor.optionalInt("cci_mi"),
+            cciMildLiver = extractor.optionalInt("cci_mild_liver"),
+            cciPlegia = extractor.optionalInt("cci_plegia"),
+            cciPvd = extractor.optionalInt("cci_pvd"),
+            cciRenal = extractor.optionalInt("cci_renal"),
+            cciSevereLiver = extractor.optionalInt("cci_severe_liver"),
+            cciUlcer = extractor.optionalInt("cci_ulcer")
         )
     }
 
@@ -266,7 +271,32 @@ object NCRDataReader {
         )
     }
 
-    private fun readPrimarySurgery(extractor: NCRFieldExtractor) : NCRPrimarySurgery {
+    private fun readTreatment(extractor: NCRFieldExtractor): NCRTreatment {
+        return NCRTreatment(
+            deelnameStudie = extractor.optionalInt("deelname_studie"),
+            tumgerichtTher = extractor.optionalInt("tumgericht_ther"),
+            geenTherReden = extractor.optionalInt("geen_ther_reden"),
+            localResection = readLocalResection(extractor),
+            primarySurgery = readPrimarySurgery(extractor),
+            metastaticSurgery = readMetastaticSurgery(extractor),
+            primaryRadiotherapy = readPrimaryRadiotherapy(extractor),
+            metastaticRadiotherapy = readMetastaticRadiotherapy(extractor),
+            systemicTreatment = readSystemicTreatment(extractor),
+            hipec = readHIPEC(extractor)
+        )
+    }
+
+    private fun readLocalResection(extractor: NCRFieldExtractor): NCRLocalResection {
+        return NCRLocalResection(
+            mdlRes = extractor.optionalInt("mdl_res"),
+            mdlResType1 = extractor.optionalInt("mdl_res_type1"),
+            mdlResType2 = extractor.optionalInt("mdl_res_type2"),
+            mdlResInt1 = extractor.optionalInt("mdl_res_int1"),
+            mdlResInt2 = extractor.optionalInt("mdl_res_int2")
+        )
+    }
+
+    private fun readPrimarySurgery(extractor: NCRFieldExtractor): NCRPrimarySurgery {
         return NCRPrimarySurgery(
             chir = extractor.optionalInt("chir"),
             chirInt1 = extractor.optionalInt("chir_int1"),
@@ -288,9 +318,24 @@ object NCRDataReader {
         )
     }
 
-    private fun readPrimaryRadiotherapy(extractor: NCRFieldExtractor) : NCRPrimaryRadiotherapy {
-       return NCRPrimaryRadiotherapy(
+    private fun readMetastaticSurgery(extractor: NCRFieldExtractor): NCRMetastaticSurgery {
+        return NCRMetastaticSurgery(
+            metaChirCode1 = extractor.optionalString("meta_chir_code1"),
+            metaChirCode2 = extractor.optionalString("meta_chir_code2"),
+            metaChirCode3 = extractor.optionalString("meta_chir_code3"),
+            metaChirInt1 = extractor.optionalInt("meta_chir_int1"),
+            metaChirInt2 = extractor.optionalInt("meta_chir_int2"),
+            metaChirInt3 = extractor.optionalInt("meta_chir_int3"),
+            metaChirRad1 = extractor.optionalInt("meta_chir_rad1"),
+            metaChirRad2 = extractor.optionalInt("meta_chir_rad2"),
+            metaChirRad3 = extractor.optionalInt("meta_chir_rad3")
+        )
+    }
+
+    private fun readPrimaryRadiotherapy(extractor: NCRFieldExtractor): NCRPrimaryRadiotherapy {
+        return NCRPrimaryRadiotherapy(
             rt = extractor.mandatoryInt("rt"),
+            chemort = extractor.optionalInt("chemort"),
             rtType1 = extractor.optionalInt("rt_type1"),
             rtType2 = extractor.optionalInt("rt_type2"),
             rtStartInt1 = extractor.optionalInt("rt_start_int1"),
@@ -299,6 +344,23 @@ object NCRDataReader {
             rtStopInt2 = extractor.optionalInt("rt_stop_int2"),
             rtDosis1 = extractor.optionalDouble("rt_dosis1"),
             rtDosis2 = extractor.optionalDouble("rt_dosis2"),
+        )
+    }
+
+    private fun readMetastaticRadiotherapy(extractor: NCRFieldExtractor): NCRMetastaticRadiotherapy {
+        return NCRMetastaticRadiotherapy(
+            metaRtCode1 = extractor.optionalString("meta_rt_code1"),
+            metaRtCode2 = extractor.optionalString("meta_rt_code2"),
+            metaRtCode3 = extractor.optionalString("meta_rt_code3"),
+            metaRtCode4 = extractor.optionalString("meta_rt_code4"),
+            metaRtStartInt1 = extractor.optionalString("meta_rt_start_int1"),
+            metaRtStartInt2 = extractor.optionalString("meta_rt_start_int2"),
+            metaRtStartInt3 = extractor.optionalString("meta_rt_start_int3"),
+            metaRtStartInt4 = extractor.optionalString("meta_rt_start_int4"),
+            metaRtStopInt1 = extractor.optionalString("meta_rt_stop_int1"),
+            metaRtStopInt2 = extractor.optionalString("meta_rt_stop_int2"),
+            metaRtStopInt3 = extractor.optionalString("meta_rt_stop_int3"),
+            metaRtStopInt4 = extractor.optionalString("meta_rt_stop_int4")
         )
     }
 
@@ -393,8 +455,15 @@ object NCRDataReader {
         )
     }
 
-    private fun readTreatmentResponse(extractor: NCRFieldExtractor) : NCRTreatmentResponse {
-       return NCRTreatmentResponse(
+    private fun readHIPEC(extractor: NCRFieldExtractor): NCRHIPEC {
+        return NCRHIPEC(
+            hipec = extractor.optionalInt("hipec"),
+            hipecInt1 = extractor.optionalInt("hipec_int1")
+        )
+    }
+
+    private fun readTreatmentResponse(extractor: NCRFieldExtractor): NCRTreatmentResponse {
+        return NCRTreatmentResponse(
             responsUitslag = extractor.optionalString("respons_uitslag"),
             responsInt = extractor.optionalInt("respons_int"),
             pfsEvent1 = extractor.optionalInt("pfs_event1"),
