@@ -11,13 +11,13 @@ interface Episode {
     val tumorBasisOfDiagnosis: TumorBasisOfDiagnosis
     val tumorLocation: TumorLocation
     val tumorDifferentiationGrade: TumorDifferentiationGrade?
-    val stageCT: StageT?
-    val stageCN: StageN?
-    val stageCM: StageM?
+    val tnmCT: TNM_T?
+    val tnmCN: TNM_N?
+    val tnmCM: TNM_M?
+    val tnmPT: TNM_T?
+    val tnmPN: TNM_N?
+    val tnmPM: TNM_M?
     val stageCTNM: StageTNM?
-    val stagePT: StageT?
-    val stagePN: StageN?
-    val stagePM: StageM?
     val stagePTNM: StageTNM?
     val stageTNM: StageTNM?
     val numberOfInvestigatedLymphNodes: Int?

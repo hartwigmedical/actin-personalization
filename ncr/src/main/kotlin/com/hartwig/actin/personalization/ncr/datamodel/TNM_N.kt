@@ -1,6 +1,6 @@
 package com.hartwig.actin.personalization.ncr.datamodel
 
-enum class StageN {
+enum class TNM_N {
     N0,
     N1,
     N1A,
