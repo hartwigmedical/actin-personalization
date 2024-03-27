@@ -28,6 +28,14 @@ data class DiagnosisEpisode  (
     override val numberOfLiverMetastases: Int?,
     override val maximumSizeOfLiverMetastasis: Int?,
 
+    override val hasDoublePrimaryTumor: Boolean?,
+    override val mesorectalFasciaIsClear: Boolean?,
+    override val distanceToMesorectalFascia: Int?,
+    override val venousInvasionCategory: VenousInvasionCategory?,
+    override val lymphaticInvasionCategory: LymphaticInvasionCategory?,
+    override val extraMuralInvastionCategory: ExtraMuralInvasionCategory?,
+    override val tumorRegression: TumorRegression?,
+
     val cci: Int?,
     val cciNumberOfCategories: CciNumberOfCategories?,
     val cciHasAids: Boolean?,
@@ -47,6 +55,10 @@ data class DiagnosisEpisode  (
     val cciHasRenalDisease: Boolean?,
     val cciHasLiverDisease: Boolean?,
     val cciHasUlcerDisease: Boolean?,
+
+    val presentedWithIleus: Boolean?,
+    val presentedWithPerforation: Boolean?,
+    val anorectalVergeDistanceCategory: AnorectalVergeDistanceCategory?,
 
 
     ): Episode

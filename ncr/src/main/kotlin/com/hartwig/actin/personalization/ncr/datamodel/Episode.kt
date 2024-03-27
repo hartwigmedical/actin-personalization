@@ -28,5 +28,12 @@ interface Episode {
     val numberOfLiverMetastases: Int?
     val maximumSizeOfLiverMetastasis: Int?
 
+    val hasDoublePrimaryTumor: Boolean?
+    val mesorectalFasciaIsClear: Boolean?
+    val distanceToMesorectalFascia: Int?
+    val venousInvasionCategory: VenousInvasionCategory?
+    val lymphaticInvasionCategory: LymphaticInvasionCategory?
+    val extraMuralInvastionCategory: ExtraMuralInvasionCategory?
+    val tumorRegression: TumorRegression?
 
 }
