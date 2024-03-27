@@ -3,7 +3,6 @@ package com.hartwig.actin.personalization.ncr.datamodel
 interface Episode {
     val id: Int
     val order: Int
-    val distantMetastasesStatus: DistantMetastasesStatus
     val whoStatusPreTreatmentStart: Int?
     val asaClassificationPreSurgeryOrEndoscopy: AsaClassificationPreSurgeryOrEndoscopy?
 
@@ -22,4 +21,12 @@ interface Episode {
     val stageTNM: StageTNM?
     val numberOfInvestigatedLymphNodes: Int?
     val numberOfPositiveLymphNodes: Int?
+
+    val distantMetastasesStatus: DistantMetastasesStatus //meta_epis
+    val metastases: List<Metastases>
+    val hasKnownLiverMetastases: Boolean
+    val numberOfLiverMetastases: Int?
+    val maximumSizeOfLiverMetastasis: Int?
+
+
 }
