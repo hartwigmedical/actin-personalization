@@ -1,5 +1,14 @@
 package com.hartwig.actin.personalization.ncr.serialization
 
+import com.hartwig.actin.personalization.ncr.serialization.datamodel.NCRCharlsonComorbitidy
+import com.hartwig.actin.personalization.ncr.serialization.datamodel.NCRLabValues
+import com.hartwig.actin.personalization.ncr.serialization.datamodel.NCRMetastases
+import com.hartwig.actin.personalization.ncr.serialization.datamodel.NCRPreviousMalignancy
+import com.hartwig.actin.personalization.ncr.serialization.datamodel.NCRPrimaryRadiotherapy
+import com.hartwig.actin.personalization.ncr.serialization.datamodel.NCRPrimarySurgery
+import com.hartwig.actin.personalization.ncr.serialization.datamodel.NCRRecord
+import com.hartwig.actin.personalization.ncr.serialization.datamodel.NCRSystemicTreatment
+import com.hartwig.actin.personalization.ncr.serialization.datamodel.NCRTreatmentResponse
 import java.io.File
 import java.nio.file.Files
 

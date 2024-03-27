@@ -1,4 +1,4 @@
-package com.hartwig.actin.personalization.ncr.serialization
+package com.hartwig.actin.personalization.ncr.serialization.datamodel
 
 data class NCRPrimaryRadiotherapy(
     val rt: Int,
