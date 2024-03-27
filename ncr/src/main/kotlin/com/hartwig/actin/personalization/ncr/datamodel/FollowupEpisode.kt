@@ -43,5 +43,12 @@ data class FollowupEpisode (
     override val hasParticipatedInTrial: Boolean?,
     override val mdlResections: List<MDLResection>,
     override val surgeries: List<Surgery>,
+    override val surgeriesMetastases: List<SurgeryMetastases>,
+    override val radiotherapies: List<Radiotherapy>,
+    override val radiotherapiesMetastases: List<RadiotherapyMetastases>,
+    override val hasHadPreSurgeryRadiotherapy: Boolean,
+    override val hasHadPostSurgeryRadiotherapy: Boolean,
+    override val hasHadPreSurgeryChemoRadiotherapy: Boolean,
+    override val hasHadPostSurgeryChemoRadiotherapy: Boolean,
 
     ): Episode

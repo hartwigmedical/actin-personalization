@@ -41,6 +41,16 @@ interface Episode {
     val hasReceivedTumorDirectedTreatment: Boolean
     val reasonRefrainmentFromTumorDirectedTreatment : ReasonRefrainmentFromTumorDirectedTreatment?
     val hasParticipatedInTrial: Boolean?
+
     val mdlResections: List<MDLResection>
     val surgeries: List<Surgery>
+    val surgeriesMetastases: List<SurgeryMetastases>
+    val radiotherapies: List<Radiotherapy>
+    val radiotherapiesMetastases: List<RadiotherapyMetastases>
+    val hasHadPreSurgeryRadiotherapy: Boolean
+    val hasHadPostSurgeryRadiotherapy: Boolean
+    val hasHadPreSurgeryChemoRadiotherapy: Boolean
+    val hasHadPostSurgeryChemoRadiotherapy: Boolean
+
+
 }
