@@ -36,4 +36,5 @@ interface Episode {
     val extraMuralInvastionCategory: ExtraMuralInvasionCategory?
     val tumorRegression: TumorRegression?
 
+    val labMeasurements: List<LabMeasurements>
 }

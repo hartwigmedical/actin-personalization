@@ -36,4 +36,6 @@ data class FollowupEpisode (
     override val extraMuralInvastionCategory: ExtraMuralInvasionCategory?,
     override val tumorRegression: TumorRegression?,
 
+    override val labMeasurements: List<LabMeasurements>,
+
     ): Episode

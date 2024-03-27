@@ -36,6 +36,8 @@ data class DiagnosisEpisode  (
     override val extraMuralInvastionCategory: ExtraMuralInvasionCategory?,
     override val tumorRegression: TumorRegression?,
 
+    override val labMeasurements: List<LabMeasurements>,
+
     val cci: Int?,
     val cciNumberOfCategories: CciNumberOfCategories?,
     val cciHasAids: Boolean?,
@@ -60,5 +62,10 @@ data class DiagnosisEpisode  (
     val presentedWithPerforation: Boolean?,
     val anorectalVergeDistanceCategory: AnorectalVergeDistanceCategory?,
 
+    val hasMsi: Boolean?,
+    val hasBrafMutation: Boolean?,
+    val hasBrafV600EMutation: Boolean?,
+    val hasRasMutation: Boolean?,
+    val hasKrasG12CMutation: Boolean?,
 
     ): Episode
