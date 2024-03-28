@@ -47,9 +47,10 @@ data class FollowupEpisode (
     override val surgeriesMetastases: List<SurgeryMetastases>,
     override val radiotherapies: List<Radiotherapy>,
     override val radiotherapiesMetastases: List<RadiotherapyMetastases>,
+    override val hasHadHipecTreatment: Boolean,
+    override val intervalTumorIncidenceHipecTreatment: Int?,
     override val systemicTreatments: List<SystemicTreatment>,
     override val treatmentLines: List<SystemicTreatmentLine>,
-
     override val hasHadPreSurgeryRadiotherapy: Boolean,
     override val hasHadPostSurgeryRadiotherapy: Boolean,
     override val hasHadPreSurgeryChemoRadiotherapy: Boolean,
@@ -59,4 +60,7 @@ data class FollowupEpisode (
     override val hasHadPreSurgerySystemicTargetedTherapy: Boolean,
     override val hasHadPostSurgerySystemicTargetedTherapy: Boolean,
 
+    override val responseMeasure: ResponseMeasure?,
+    override val pfsMeasures: List<PFSMeasure>,
+    
     ): Episode

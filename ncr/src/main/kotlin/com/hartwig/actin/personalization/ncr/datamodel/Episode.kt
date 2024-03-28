@@ -47,9 +47,10 @@ interface Episode {
     val surgeriesMetastases: List<SurgeryMetastases>
     val radiotherapies: List<Radiotherapy>
     val radiotherapiesMetastases: List<RadiotherapyMetastases>
+    val hasHadHipecTreatment: Boolean
+    val intervalTumorIncidenceHipecTreatment: Int?
     val systemicTreatments: List<SystemicTreatment>
     val treatmentLines: List<SystemicTreatmentLine>
-
     val hasHadPreSurgeryRadiotherapy: Boolean
     val hasHadPostSurgeryRadiotherapy: Boolean
     val hasHadPreSurgeryChemoRadiotherapy: Boolean
@@ -58,4 +59,7 @@ interface Episode {
     val hasHadPostSurgerySystemicChemotherapy: Boolean
     val hasHadPreSurgerySystemicTargetedTherapy: Boolean
     val hasHadPostSurgerySystemicTargetedTherapy: Boolean
+
+    val responseMeasure: ResponseMeasure?
+    val pfsMeasures: List<PFSMeasure>
 }
