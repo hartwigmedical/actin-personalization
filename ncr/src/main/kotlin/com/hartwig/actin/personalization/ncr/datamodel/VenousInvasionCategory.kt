@@ -5,5 +5,5 @@ enum class VenousInvasionCategory {
     EXTRAMURAL,
     INTRAMURAL,
     SUSPECT,
-    NA
+    NA,
 }
