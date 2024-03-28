@@ -1,5 +1,6 @@
 package com.hartwig.actin.personalization.ncr.datamodel
 
-enum class Drug {
-
-}
+data class Drug (
+    val drugName: DrugName,
+    val atcCode: AtcCode
+)
