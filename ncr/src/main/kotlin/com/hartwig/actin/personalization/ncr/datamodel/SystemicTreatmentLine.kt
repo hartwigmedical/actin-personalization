@@ -2,6 +2,7 @@ package com.hartwig.actin.personalization.ncr.datamodel
 
 data class SystemicTreatmentLine(
     val treatmentLineName: TreatmentLineName,
+    val treatmentLineCategory: TreatmentLineCategory,
     val drugs: List<Drug>,
     val intervalTumorIncidenceTreatmentLineStartMin: Int,
     val intervalTumorIncidenceTreatmentLineStartMax: Int,
