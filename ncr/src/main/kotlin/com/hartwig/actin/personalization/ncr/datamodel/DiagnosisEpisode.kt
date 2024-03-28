@@ -50,7 +50,7 @@ data class DiagnosisEpisode  (
     override val hasHadHipecTreatment: Boolean,
     override val intervalTumorIncidenceHipecTreatment: Int?,
     override val systemicTreatments: List<SystemicTreatment>,
-    override val treatmentLines: List<SystemicTreatmentLine>,
+    override val treatmentLines: List<SystemicTreatmentScheme>,
     override val hasHadPreSurgeryRadiotherapy: Boolean,
     override val hasHadPostSurgeryRadiotherapy: Boolean,
     override val hasHadPreSurgeryChemoRadiotherapy: Boolean,

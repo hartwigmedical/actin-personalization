@@ -1,6 +1,6 @@
 package com.hartwig.actin.personalization.ncr.datamodel
 
-data class SystemicTreatmentLine(
+data class SystemicTreatmentScheme( //Should combine treatments of same scheme number
     val treatmentLineName: TreatmentLineName,
     val treatmentLineCategory: TreatmentLineCategory,
     val drugs: List<Drug>,
