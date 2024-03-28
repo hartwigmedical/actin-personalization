@@ -8,6 +8,6 @@ data class TumorPrior(
     val TumorPriorId: Int,
     val tumorLocationCategory: TumorLocationCategory,
     val stageTNM: StageTNM?,
-    val treatments: List<Treatment> //to think about
+    val systemicTreatments: List<SystemicTreatment>
 
 ): Tumor

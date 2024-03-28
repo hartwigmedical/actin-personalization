@@ -2,7 +2,7 @@ package com.hartwig.actin.personalization.ncr.datamodel
 
 data class SystemicTreatment(
     val treatmentName: TreatmentName,
-    val treatmentSchemeNumber: Int,
+    val treatmentSchemeNumber: Int?, //Nullable because absent for prior tumors
     val treatmentNumberOfCycles: Int?,
     val treatmentCyclesDetails: TreatmentCyclesDetails?,
     val intervalTumorIncidenceTreatmentStart: Int,
