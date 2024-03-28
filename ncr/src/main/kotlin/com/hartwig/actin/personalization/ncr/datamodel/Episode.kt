@@ -50,7 +50,7 @@ interface Episode {
     val hasHadHipecTreatment: Boolean
     val intervalTumorIncidenceHipecTreatment: Int?
     val systemicTreatments: List<SystemicTreatment>
-    val treatmentLines: List<SystemicTreatmentScheme>
+    val systemicTreatmentSchemes: List<SystemicTreatmentScheme>?
     val hasHadPreSurgeryRadiotherapy: Boolean
     val hasHadPostSurgeryRadiotherapy: Boolean
     val hasHadPreSurgeryChemoRadiotherapy: Boolean
