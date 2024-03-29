@@ -42,7 +42,7 @@ data class DiagnosisEpisode  (
     override val reasonRefrainmentFromTumorDirectedTreatment: ReasonRefrainmentFromTumorDirectedTreatment?,
     override val hasParticipatedInTrial: Boolean?,
 
-    override val mdlResections: List<MDLResection>,
+    override val gastroenterologyResections: List<GastroenterologyResection>,
     override val surgeries: List<Surgery>,
     override val surgeriesMetastases: List<SurgeryMetastases>,
     override val radiotherapies: List<Radiotherapy>,

@@ -42,7 +42,7 @@ interface Episode {
     val reasonRefrainmentFromTumorDirectedTreatment : ReasonRefrainmentFromTumorDirectedTreatment?
     val hasParticipatedInTrial: Boolean?
 
-    val mdlResections: List<MDLResection>
+    val gastroenterologyResections: List<GastroenterologyResection>
     val surgeries: List<Surgery>
     val surgeriesMetastases: List<SurgeryMetastases>
     val radiotherapies: List<Radiotherapy>

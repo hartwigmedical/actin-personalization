@@ -1,6 +1,6 @@
 package com.hartwig.actin.personalization.ncr.datamodel
 
-enum class MDLResectionType {
+enum class GastroenterologyResectionType {
     ABLATION,
     ENDOMUCOSAL_RESECTION,
     ENDOSCOPIC_FULL_THICKNESS_RESECTION,
