@@ -6,9 +6,7 @@ data class TumorOfInterest(
     override val consolidatedTumorLocation: TumorLocation,
     override val hasHadTumorDirectedSystemicTherapy: Boolean,
 
-    val id: Int,
-
     val hasHadPriorTumor: Boolean,
     val intervalsTumorIncidenceDiagnosisTumorPrior: List<Int?>
 
-    ): Tumor
+) : Tumor

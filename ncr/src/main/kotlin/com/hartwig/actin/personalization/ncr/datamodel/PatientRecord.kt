@@ -1,9 +1,9 @@
 package com.hartwig.actin.personalization.ncr.datamodel
 
 data class PatientRecord(
-    val id: Int,
+    val ncrId: Int,
     val sex: Sex,
-    val vitalStatus: VitalStatus,
+    val isAlive: Boolean?,
     val episodesPerTumorOfInterest: Map<TumorOfInterest, TumorEpisodes>,
-    val previousTumors: List<TumorPrior>
+    val priorTumors: List<TumorPrior>
 )
