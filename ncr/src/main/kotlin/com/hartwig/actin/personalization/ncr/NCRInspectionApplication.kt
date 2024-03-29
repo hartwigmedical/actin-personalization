@@ -1,5 +1,7 @@
 package com.hartwig.actin.personalization.ncr
 
+import com.hartwig.actin.personalization.ncr.datamodel.PatientRecord
+import com.hartwig.actin.personalization.ncr.interpretation.PatientRecordFactory
 import com.hartwig.actin.personalization.ncr.serialization.NCRDataReader
 import com.hartwig.actin.personalization.ncr.serialization.datamodel.NCRRecord
 import org.apache.commons.cli.CommandLine
@@ -30,6 +32,10 @@ class NCRInspectionApplication(private val ncrDatasetPath: String) {
         printLabValueOverview(ncrRecords)
         printTreatmentOverview(ncrRecords)
         printTreatmentResponseOverview(ncrRecords)
+
+        LOGGER.info("Creating patient records from NCR records")
+        val patientRecords : List<PatientRecord> = PatientRecordFactory.create(ncrRecords)
+        LOGGER.info(" Created {} patient records from {} NCR records", patientRecords.count(), ncrRecords.count())
 
         LOGGER.info("Done!")
     }
