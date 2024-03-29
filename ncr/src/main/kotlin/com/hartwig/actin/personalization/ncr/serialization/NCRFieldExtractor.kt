@@ -17,7 +17,7 @@ class NCRFieldExtractor(private val fields: Map<String, Int>, private val parts:
         try {
             return value(property).toInt()
         } catch (exception: NumberFormatException) {
-            logPatientID(property)
+            logEpisodeID(property)
             throw exception
         }
     }
@@ -26,7 +26,7 @@ class NCRFieldExtractor(private val fields: Map<String, Int>, private val parts:
         try {
             return value(property).ifBlank { null }?.toInt()
         } catch (exception: NumberFormatException) {
-            logPatientID(property)
+            logEpisodeID(property)
             throw exception
         }
     }
@@ -35,16 +35,7 @@ class NCRFieldExtractor(private val fields: Map<String, Int>, private val parts:
         try {
             return value(property).ifBlank { null }?.toDouble()
         } catch (exception: NumberFormatException) {
-            logPatientID(property)
-            throw exception
-        }
-    }
-
-    fun hasValue(property: String): Boolean {
-        try {
-            return value(property).isNotBlank()
-        } catch (exception: NumberFormatException) {
-            logPatientID(property)
+            logEpisodeID(property)
             throw exception
         }
     }
@@ -53,12 +44,12 @@ class NCRFieldExtractor(private val fields: Map<String, Int>, private val parts:
         return parts[fields[property]!!]
     }
 
-    private fun logPatientID(property: String) {
-        LOGGER.warn("Could not parse property '{}' with value '{}' for patient {}", property, value(property), value(PATIENT_ID))
+    private fun logEpisodeID(property: String) {
+        LOGGER.warn("Could not parse property '{}' with value '{}' for episode {}", property, value(property), value(EPISODE_ID))
     }
 
     companion object {
-        private const val PATIENT_ID: String = "key_nkr"
+        private const val EPISODE_ID: String = "key_eid"
         private val LOGGER: Logger = LogManager.getLogger(NCRFieldExtractor::class)
     }
 }

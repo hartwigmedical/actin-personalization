@@ -234,7 +234,7 @@ class NCRInspectionApplication(private val ncrDatasetPath: String) {
     }
 
     private fun <T : Comparable<T>> countRecords(listPerPatient: List<Pair<Int, T>>): Map<T, Int> {
-        return listPerPatient.groupingBy { it.second }.eachCount().toSortedMap(nullsFirst())
+        return listPerPatient.groupingBy { it.second }.eachCount().toSortedMap()
     }
 
     private fun <T : Comparable<T>> countNullableRecords(listPerPatient: List<Pair<Int, T?>>): Map<T?, Int> {
