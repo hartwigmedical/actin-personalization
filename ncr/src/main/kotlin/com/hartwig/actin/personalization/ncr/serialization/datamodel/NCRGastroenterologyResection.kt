@@ -1,6 +1,6 @@
 package com.hartwig.actin.personalization.ncr.serialization.datamodel
 
-data class NCRLocalResection(
+data class NCRGastroenterologyResection(
     val mdlRes: Int?,
     val mdlResType1: Int?,
     val mdlResType2: Int?,

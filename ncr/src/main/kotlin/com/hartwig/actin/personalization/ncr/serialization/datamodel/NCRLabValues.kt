@@ -30,7 +30,7 @@ data class NCRLabValues(
     val albumine1: Double?,
     val albumine2: Double?,
     val albumine3: Double?,
-    // TODO (KD): Figure out why albumine4 is an integer rather than double!
+    // TODO (KD): Pending NCR update, albumine4 will become a Double
     val albumine4: Int?,
     val albumineInt1: Int?,
     val albumineInt2: Int?,

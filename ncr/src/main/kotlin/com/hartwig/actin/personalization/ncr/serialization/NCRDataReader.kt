@@ -2,10 +2,10 @@ package com.hartwig.actin.personalization.ncr.serialization
 
 import com.hartwig.actin.personalization.ncr.serialization.datamodel.NCRCharlsonComorbidities
 import com.hartwig.actin.personalization.ncr.serialization.datamodel.NCRClinicalCharacteristics
+import com.hartwig.actin.personalization.ncr.serialization.datamodel.NCRGastroenterologyResection
 import com.hartwig.actin.personalization.ncr.serialization.datamodel.NCRHIPEC
 import com.hartwig.actin.personalization.ncr.serialization.datamodel.NCRIdentification
 import com.hartwig.actin.personalization.ncr.serialization.datamodel.NCRLabValues
-import com.hartwig.actin.personalization.ncr.serialization.datamodel.NCRLocalResection
 import com.hartwig.actin.personalization.ncr.serialization.datamodel.NCRMetastaticDiagnosis
 import com.hartwig.actin.personalization.ncr.serialization.datamodel.NCRMetastaticRadiotherapy
 import com.hartwig.actin.personalization.ncr.serialization.datamodel.NCRMetastaticSurgery
@@ -155,9 +155,9 @@ object NCRDataReader {
             pt = extractor.optionalString("pt"),
             pn = extractor.optionalString("pn"),
             pm = extractor.optionalString("pm"),
-            cstadium = extractor.mandatoryString("cstadium"),
-            pstadium = extractor.mandatoryString("pstadium"),
-            stadium = extractor.mandatoryString("stadium"),
+            cstadium = extractor.optionalString("cstadium"),
+            pstadium = extractor.optionalString("pstadium"),
+            stadium = extractor.optionalString("stadium"),
             ondLymf = extractor.optionalInt("ond_lymf"),
             posLymf = extractor.optionalInt("pos_lymf")
         )
@@ -276,7 +276,7 @@ object NCRDataReader {
             deelnameStudie = extractor.optionalInt("deelname_studie"),
             tumgerichtTher = extractor.optionalInt("tumgericht_ther"),
             geenTherReden = extractor.optionalInt("geen_ther_reden"),
-            localResection = readLocalResection(extractor),
+            gastroenterologyResection = readGastroenterologyResection(extractor),
             primarySurgery = readPrimarySurgery(extractor),
             metastaticSurgery = readMetastaticSurgery(extractor),
             primaryRadiotherapy = readPrimaryRadiotherapy(extractor),
@@ -286,8 +286,8 @@ object NCRDataReader {
         )
     }
 
-    private fun readLocalResection(extractor: NCRFieldExtractor): NCRLocalResection {
-        return NCRLocalResection(
+    private fun readGastroenterologyResection(extractor: NCRFieldExtractor): NCRGastroenterologyResection {
+        return NCRGastroenterologyResection(
             mdlRes = extractor.optionalInt("mdl_res"),
             mdlResType1 = extractor.optionalInt("mdl_res_type1"),
             mdlResType2 = extractor.optionalInt("mdl_res_type2"),

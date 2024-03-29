@@ -12,9 +12,9 @@ data class NCRPrimaryDiagnosis(
     val pt: String?,
     val pn: String?,
     val pm: String?,
-    val cstadium: String,
-    val pstadium: String,
-    val stadium: String,
+    val cstadium: String?,
+    val pstadium: String?,
+    val stadium: String?,
     val ondLymf: Int?,
     val posLymf: Int?
 )

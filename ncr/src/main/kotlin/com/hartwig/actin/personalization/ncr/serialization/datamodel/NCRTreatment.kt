@@ -4,7 +4,7 @@ data class NCRTreatment(
     val deelnameStudie: Int?,
     val tumgerichtTher: Int?,
     val geenTherReden: Int?,
-    val localResection: NCRLocalResection,
+    val gastroenterologyResection: NCRGastroenterologyResection,
     val primarySurgery: NCRPrimarySurgery,
     val metastaticSurgery: NCRMetastaticSurgery,
     val primaryRadiotherapy: NCRPrimaryRadiotherapy,
