@@ -9,9 +9,6 @@ data class TumorOfInterest(
     val id: Int,
 
     val hasHadPriorTumor: Boolean,
-    val intervalTumorIncidenceDiagnosisTumorPrior1: Int?, //Unsure, doesn't feel good with 1/2/3/4
-    val intervalTumorIncidenceDiagnosisTumorPrior2: Int?,
-    val intervalTumorIncidenceDiagnosisTumorPrior3: Int?,
-    val intervalTumorIncidenceDiagnosisTumorPrior4: Int?,
+    val intervalsTumorIncidenceDiagnosisTumorPrior: List<Int?>
 
     ): Tumor
