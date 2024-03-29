@@ -8,10 +8,18 @@ source(paste0(Sys.getenv("HOME"), "/hmf/repos/actin-personalization/scripts/ncr/
 
 ncr <- load_ncr_data()
 
-## Keys, epis, meta_epis, teller
-ncr %>% summarise(distinct_count_key_nkr=n_distinct(key_nkr), distinct_count_key_zid=n_distinct(key_zid), distinct_count_key_eid=n_distinct(key_eid))
+## Playing around
+ncr_wip <- ncr %>% select(c('key_nkr','key_zid','epis'),starts_with(c('c','p')) | ends_with('lymf')) %>% select(!starts_with('cci')) %>% select(!starts_with('chir'))
+ncr_wip <- ncr %>% select(c('key_nkr','key_zid','epis','meta_epis'),ends_with(c('morf')))
 
+ncr_wip <- ncr[ncr$epis == 'DIA' & ncr$meta_epis %in% c(0), ]
+ncr_wip2 <- ncr[ncr$key_nkr %in% ncr_wip$key_nkr & ncr$epis == 'VERB', ]
+
+## Keys, epis, meta_epis, teller
 ncr %>% group_by(epis) %>% summarise(count_key_nkr=n(), distinct_count_key_nkr=n_distinct(key_nkr))
+ncr %>% group_by(meta_epis) %>% summarise(count_key_nkr=n(), distinct_count_key_nkr=n_distinct(key_nkr))
+ncr %>% group_by(teller) %>% summarise(count_key_nkr=n(), distinct_count_key_nkr=n_distinct(key_nkr))
+
 ncr %>% group_by(epis, meta_epis) %>% summarise(count_key_nkr=n(), distinct_count_key_nkr=n_distinct(key_nkr))
 ncr %>% group_by(epis, teller) %>% summarise(count_key_nkr=n(), distinct_count_key_nkr=n_distinct(key_nkr))
 ncr %>% group_by(epis, meta_epis, teller) %>% summarise(count_key_nkr=n(), distinct_count_key_nkr=n_distinct(key_nkr))
@@ -21,7 +29,7 @@ ncr_dia <- ncr %>% dplyr::filter(epis=='DIA') %>% arrange(key_nkr)
 ncr_dia %>% summarise(count_key_nkr=n(), distinct_count_key_nkr=n_distinct(key_nkr))
 
 pts_with_key_occurring_more_than_once_dia <- names(table(ncr_dia$key_nkr)[table(ncr_dia$key_nkr) > 1])
-ncr_dia_pts_multiple_dia <- ncr_dia[ncr_dia$key_nkr %in% pts_with_key_occurring_more_than_once_dia, ]
+ncr_dia_pts_multiple_dia <- ncr_dia[ncr_dia$key_nkr %in% pts_with_key_occurring_more_than_once_dia, ] %>% select(!starts_with(c('cci','mal','meta')))
 n_distinct(ncr_dia_pts_multiple_dia$key_nkr)
 
 ## epis=VERB
@@ -36,7 +44,7 @@ ncr_dia_pts_with_verb <- ncr_dia[ncr_dia$key_nkr %in% pts_with_verb, ]
 ## meta_epis
 df_easy <- c('key_nkr', 'epis', 'meta_epis', 'cstadium', 'pstadium', 'stadium', 'meta_topo_sublok1', 'meta_topo_sublok2', 'meta_topo_sublok3', 'meta_int1', 'meta_int2', 'meta_int3', 'meta_prog1', 'meta_prog2', 'meta_prog3',
              'tumgericht_ther', 'mdl_res', 'mdl_res_int1', 'chir', 'chir_type1', 'chir_int1', 'rt', 'chemort', 'rt_start_int1', 'meta_rt_code1', 'meta_rt_start_int1', 'meta_chir_int1', 'hipec', 'hipec_int1', 'chemo', 'target',
-              'syst_start_int1', 'syst_stop_int1','syst_kuren1', 'respons_int', 'pfs_event1', 'pfs_int1')
+              'syst_start_int1', 'syst_stop_int1','syst_kuren1', 'respons_uitslag', 'respons_int', 'pfs_event1', 'pfs_int1')
 
 ncr_pts_with_immediate_mets_but_low_stage <- ncr %>%
   select(all_of(df_easy)) %>%
@@ -64,19 +72,52 @@ ncr %>% group_by(epis, morf_cat) %>% summarise(count=n(), distinct_count_key_nkr
 hist(ncr$cci, breaks=(max(ncr$cci, na.rm=T)-min(ncr$cci, na.rm=T)))
 
 ### Molecular 
-ncr %>% group_by(epis, msi_stat) %>% summarise(count=n(), distinct_count_key_nkr=n_distinct(key_nkr))
-ncr %>% group_by(epis, braf_mut) %>% summarise(count=n(), distinct_count_key_nkr=n_distinct(key_nkr))
-ncr %>% group_by(epis, ras_mut) %>% summarise(count=n(), distinct_count_key_nkr=n_distinct(key_nkr))
+msi <- ncr %>% dplyr::filter(epis=='DIA') %>% group_by(msi_stat) %>% summarise(count=n(), distinct_count_key_zid=n_distinct(key_zid)) %>% 
+  mutate(msi_stat = ifelse(is.na(msi_stat) | msi_stat == 9, "Unknown/missing", as.character(msi_stat))) %>%
+  group_by(msi_stat) %>%
+  summarize_all(sum) %>% 
+  mutate(msi_stat = ifelse(msi_stat == 0, "MSS", msi_stat)) %>%
+  mutate(msi_stat = ifelse(msi_stat == 1, "MSI", msi_stat))
+
+pie(msi$count, labels=paste0(msi$msi_stat, " (", round(msi$count), ")"), col=c('springgreen4', 'firebrick2','ivory4'), main="MSI")
+
+braf <- ncr %>% dplyr::filter(epis=='DIA') %>% group_by(braf_mut) %>% summarise(count=n(), distinct_count_key_zid=n_distinct(key_zid)) %>% 
+  mutate(braf_mut = ifelse(is.na(braf_mut) | braf_mut == 9, "Unknown/missing", as.character(braf_mut))) %>%
+  group_by(braf_mut) %>%
+  summarize_all(sum) %>% 
+  mutate(braf_mut = ifelse(braf_mut == 0, "BRAF wildtype", braf_mut)) %>%
+  mutate(braf_mut = ifelse(braf_mut == 1, "BRAF mut (type unknown)", braf_mut)) %>% 
+  mutate(braf_mut = ifelse(braf_mut == 2, "BRAF mut (V600E)", braf_mut)) %>%
+  mutate(braf_mut = ifelse(braf_mut == 3, "BRAF mut (non-V600E)", braf_mut)) 
+
+order <- c("BRAF wildtype","BRAF mut (V600E)","BRAF mut (type unknown)","BRAF mut (non-V600E)","Unknown/missing")
+braf <- braf[match(order, braf$braf_mut), ]
+
+pie(braf$count, labels=paste0(braf$braf_mut, " (", round(braf$count), ")"), col=c('firebrick2','springgreen4','blue','purple','ivory4'), main="BRAF status", init.angle=60, cex=0.9)
+
+ras <- ncr %>% dplyr::filter(epis=='DIA') %>% group_by(ras_mut) %>% summarise(count=n(), distinct_count_key_zid=n_distinct(key_zid)) %>% 
+  mutate(ras_mut = ifelse(is.na(ras_mut) | ras_mut == 9, "Unknown/missing", as.character(ras_mut))) %>%
+  group_by(ras_mut) %>%
+  summarize_all(sum) %>% 
+  mutate(ras_mut = ifelse(ras_mut == 0, "RAS wildtype", ras_mut)) %>%
+  mutate(ras_mut = ifelse(ras_mut == 1, "RAS mut (type unknown)", ras_mut)) %>% 
+  mutate(ras_mut = ifelse(ras_mut == 2, "RAS mut (other)", ras_mut)) %>%
+  mutate(ras_mut = ifelse(ras_mut == 3, "RAS mut (KRAS G12C)", ras_mut)) 
+
+order <- c("RAS wildtype","RAS mut (KRAS G12C)","RAS mut (type unknown)","RAS mut (other)","Unknown/missing")
+ras <- ras[match(order, ras$ras_mut), ]
+
+pie(ras$count, labels=paste0(ras$ras_mut, " (", round(ras$count), ")"), col=c('firebrick2','springgreen4','blue','purple','ivory4'), main="RAS status", init.angle=60, cex=0.9)
 
 ### Lab
 unknown_value <- 9999
-hist(ncr$prechir_cea[ncr$prechir_cea!=unknown_value], breaks = 100)
-hist(ncr$postchir_cea[ncr$postchir_cea!=unknown_value], breaks = 100)
-hist(ncr$ldh1[ncr$ldh1!=unknown_value], breaks = 100)
-hist(ncr$af1[ncr$af1!=unknown_value], breaks = 100)
-hist(ncr$neutro1[ncr$neutro1!=unknown_value], breaks = 100)
-hist(ncr$albumine1[ncr$albumine1!=unknown_value], breaks = 100)
-hist(ncr$leuko1[ncr$leuko1!=unknown_value], breaks = 100)
+boxplot(ncr$prechir_cea[ncr$prechir_cea!=unknown_value], breaks = 100)
+boxplot(ncr$postchir_cea[ncr$postchir_cea!=unknown_value], breaks = 100)
+boxplot(ncr$ldh1[ncr$ldh1!=unknown_value], breaks = 100)
+boxplot(ncr$af1[ncr$af1!=unknown_value], breaks = 100)
+boxplot(ncr$neutro1[ncr$neutro1!=unknown_value], breaks = 100)
+boxplot(ncr$albumine1[ncr$albumine1!=unknown_value], breaks = 100)
+boxplot(ncr$leuko1[ncr$leuko1!=unknown_value], breaks = 100)
 
 ### Treatment
 ncr %>% group_by(epis, tumgericht_ther) %>% summarise(count=n(), distinct_count_key_nkr=n_distinct(key_nkr))
@@ -101,9 +142,25 @@ ncr %>% dplyr::filter(tumgericht_ther==1) %>% group_by(target) %>% summarise(cou
 ncr %>% dplyr::filter(tumgericht_ther==1) %>% group_by(hipec) %>% summarise(count=n(), distinct_count_key_nkr=n_distinct(key_nkr))
 
 ### Treatment outcome
-ncr %>% dplyr::filter(tumgericht_ther==1) %>% summarise(count=n(), distinct_count_key_nkr=n_distinct(key_nkr))
-ncr %>% group_by(tumgericht_ther, respons_uitslag) %>% summarise(count=n(), distinct_count_key_nkr=n_distinct(key_nkr))
-hist(ncr$respons_int, breaks=100)
+ncr %>% dplyr::filter(tumgericht_ther==1) %>% summarise(count=n(), distinct_count_key_nkr=n_distinct(key_nkr), distinct_count_key_zid=n_distinct(key_zid))
+ncr %>% dplyr::filter(tumgericht_ther==1) %>% dplyr::filter(meta_epis == 1) %>% summarise(count=n(), distinct_count_key_nkr=n_distinct(key_nkr), distinct_count_key_zid=n_distinct(key_zid))
+tumg <- ncr %>% dplyr::filter(tumgericht_ther==1) %>% dplyr::filter(meta_epis %in% c(1)) %>% select(all_of(df_easy)) 
+
+ncr %>% dplyr::filter(tumgericht_ther==1) %>% dplyr::filter(meta_epis == 1) %>% dplyr::filter(chemo %in% c(2,3,4) | target %in% c(2,3,4)) %>% summarise(count=n(), distinct_count_key_nkr=n_distinct(key_nkr), distinct_count_key_zid=n_distinct(key_zid))
+tumg <- ncr %>% dplyr::filter(tumgericht_ther==1) %>% dplyr::filter(meta_epis %in% c(1)) %>% dplyr::filter(chemo %in% c(2,3,4) | target %in% c(2,3,4)) %>% select(all_of(df_easy)) 
+
+ncr %>% dplyr::filter(tumgericht_ther==1) %>% dplyr::filter(meta_epis == 1) %>% dplyr::filter(!chemo %in% c(2,3,4) & !target %in% c(2,3,4)) %>% summarise(count=n(), distinct_count_key_nkr=n_distinct(key_nkr), distinct_count_key_zid=n_distinct(key_zid))
+tumg <- ncr %>% dplyr::filter(tumgericht_ther==1) %>% dplyr::filter(meta_epis %in% c(1)) %>% dplyr::filter(!chemo %in% c(2,3,4) & !target %in% c(2,3,4)) %>% select(all_of(df_easy)) 
+
+ncr %>% dplyr::filter(tumgericht_ther==1) %>% dplyr::filter(meta_epis == 1) %>% dplyr::filter(chemo %in% c(2,3,4) | target %in% c(2,3,4)) %>% dplyr::filter(respons_uitslag %in% c('CR','MR','PD','PR','SD')) %>% summarise(count=n(), distinct_count_key_nkr=n_distinct(key_nkr), distinct_count_key_zid=n_distinct(key_zid))
+ncr %>% dplyr::filter(tumgericht_ther==1) %>% dplyr::filter(meta_epis == 1) %>% dplyr::filter(chemo %in% c(2,3,4) | target %in% c(2,3,4)) %>% dplyr::filter(pfs_event1 %in% c('0','1','2')) %>% summarise(count=n(), distinct_count_key_nkr=n_distinct(key_nkr), distinct_count_key_zid=n_distinct(key_zid))
+tumg <- ncr %>% dplyr::filter(tumgericht_ther==1) %>% dplyr::filter(meta_epis %in% c(1)) %>% dplyr::filter(chemo %in% c(2,3,4) | target %in% c(2,3,4)) %>% dplyr::filter(respons_uitslag %in% c('CR','MR','PD','PR','SD')) %>% select(all_of(df_easy)) 
+tumg <- ncr %>% dplyr::filter(tumgericht_ther==1) %>% dplyr::filter(meta_epis %in% c(1)) %>% dplyr::filter(chemo %in% c(2,3,4) | target %in% c(2,3,4)) %>% dplyr::filter(pfs_event1 %in% c('0','1','2')) %>% select(all_of(df_easy)) 
+
+ncr %>% dplyr::filter(tumgericht_ther==1) %>% dplyr::filter(meta_epis == 1) %>% dplyr::filter(chemo %in% c(4) | target %in% c(2,3,4)) %>% dplyr::filter(respons_uitslag %in% c('CR','MR','PD','PR','SD')) %>% summarise(count=n(), distinct_count_key_nkr=n_distinct(key_nkr), distinct_count_key_zid=n_distinct(key_zid))
+ncr %>% dplyr::filter(tumgericht_ther==1) %>% dplyr::filter(meta_epis == 1) %>% dplyr::filter(chemo %in% c(4) | target %in% c(2,3,4)) %>% dplyr::filter(pfs_event1 %in% c('0','1','2')) %>% summarise(count=n(), distinct_count_key_nkr=n_distinct(key_nkr), distinct_count_key_zid=n_distinct(key_zid))
+tumg <- ncr %>% dplyr::filter(tumgericht_ther==1) %>% dplyr::filter(meta_epis %in% c(1)) %>% dplyr::filter(chemo %in% c(2,3,4) | target %in% c(2,3,4)) %>% dplyr::filter(respons_uitslag %in% c('CR','MR','PD','PR','SD')) %>% select(all_of(df_easy)) 
+tumg <- ncr %>% dplyr::filter(tumgericht_ther==1) %>% dplyr::filter(meta_epis %in% c(1)) %>% dplyr::filter(chemo %in% c(2,3,4) | target %in% c(2,3,4)) %>% dplyr::filter(pfs_event1 %in% c('0','1','2')) %>% select(all_of(df_easy)) 
 
 ncr %>%
   group_by(epis, tumgericht_ther, pfs_event1) %>%
@@ -236,6 +293,3 @@ atc_trifluridine <- "L01BC59"
 ncr_trifluridine <- ncr %>%
   dplyr::filter(syst_code1==atc_trifluridine | syst_code2==atc_trifluridine | syst_code3==atc_trifluridine | syst_code4==atc_trifluridine | syst_code5==atc_trifluridine | syst_code6==atc_trifluridine | syst_code7==atc_trifluridine | syst_code8==atc_trifluridine | syst_code9==atc_trifluridine | syst_code10==atc_trifluridine | syst_code11==atc_trifluridine | syst_code12==atc_trifluridine) %>%
   select(c('key_nkr','epis'),matches(c('vit_')),c('syst_code1','syst_code2','syst_code3','syst_code4','syst_code5','syst_code6','syst_code7','syst_code8','syst_code9','syst_code10','syst_code11','syst_code12'),matches(c('syst_schemanum','syst_start_','pfs')))
-
-
-
