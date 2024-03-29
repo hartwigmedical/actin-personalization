@@ -36,20 +36,21 @@ object PatientRecordFactory {
     }
 
     private fun extractSex(ncrRecords: List<NCRRecord>): Sex {
-        val sexes: List<Int> = ncrRecords.map { it.patientCharacteristics.gesl }
+        val sexes: List<Int> = ncrRecords.map { it.patientCharacteristics.gesl }.distinct()
         if (sexes.count() != 1) {
             throw IllegalStateException("Multiple sexes found for patient with NCR ID '" + extractNcrId(ncrRecords) + "'")
         }
 
         return when (val sex = sexes[0]) {
-            0 -> Sex.MALE
-            1 -> Sex.FEMALE
+            1 -> Sex.MALE
+            2 -> Sex.FEMALE
             else -> throw IllegalStateException("Cannot convert sex: $sex")
         }
     }
 
     private fun determineIsAlive(ncrRecords: List<NCRRecord>): Boolean? {
-        val vitalStatuses: List<Int?> = ncrRecords.map { it.patientCharacteristics.vitStat }
+        // Vital status is only collect on diagnosis episodes.
+        val vitalStatuses: List<Int?> = diagnosisEpisodes(ncrRecords).map { it.patientCharacteristics.vitStat }.distinct()
         if (vitalStatuses.count() != 1) {
             throw IllegalStateException("Non-unique or missing vital statuses when creating a single patient record: $vitalStatuses")
         }
@@ -83,5 +84,9 @@ object PatientRecordFactory {
 
     private fun createTumorEpisodes(ncrRecords: List<NCRRecord>): TumorEpisodes {
         TODO("Not yet implemented")
+    }
+
+    private fun diagnosisEpisodes(ncrRecords: List<NCRRecord>): List<NCRRecord> {
+        return ncrRecords.filter { it.identification.epis == "DIA" }
     }
 }
