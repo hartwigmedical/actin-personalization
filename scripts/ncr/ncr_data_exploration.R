@@ -42,7 +42,7 @@ pts_with_verb <- names(table(ncr_verb$key_nkr))
 ncr_dia_pts_with_verb <- ncr_dia[ncr_dia$key_nkr %in% pts_with_verb, ]
 
 ## meta_epis
-df_easy <- c('key_nkr', 'epis', 'meta_epis', 'cstadium', 'pstadium', 'stadium', 'meta_topo_sublok1', 'meta_topo_sublok2', 'meta_topo_sublok3', 'meta_int1', 'meta_int2', 'meta_int3', 'meta_prog1', 'meta_prog2', 'meta_prog3',
+df_easy <- c('key_nkr', 'key_zid', 'key_eid', 'epis', 'meta_epis', 'cstadium', 'pstadium', 'stadium', 'meta_topo_sublok1', 'meta_topo_sublok2', 'meta_topo_sublok3', 'meta_int1', 'meta_int2', 'meta_int3', 'meta_prog1', 'meta_prog2', 'meta_prog3',
              'tumgericht_ther', 'mdl_res', 'mdl_res_int1', 'chir', 'chir_type1', 'chir_int1', 'rt', 'chemort', 'rt_start_int1', 'meta_rt_code1', 'meta_rt_start_int1', 'meta_chir_int1', 'hipec', 'hipec_int1', 'chemo', 'target',
               'syst_start_int1', 'syst_stop_int1','syst_kuren1', 'respons_uitslag', 'respons_int', 'pfs_event1', 'pfs_int1')
 
@@ -144,33 +144,35 @@ ncr %>% dplyr::filter(tumgericht_ther==1) %>% group_by(hipec) %>% summarise(coun
 ### Treatment outcome
 ncr %>% dplyr::filter(tumgericht_ther==1) %>% summarise(count=n(), distinct_count_key_nkr=n_distinct(key_nkr), distinct_count_key_zid=n_distinct(key_zid))
 ncr %>% dplyr::filter(tumgericht_ther==1) %>% dplyr::filter(meta_epis == 1) %>% summarise(count=n(), distinct_count_key_nkr=n_distinct(key_nkr), distinct_count_key_zid=n_distinct(key_zid))
-tumg <- ncr %>% dplyr::filter(tumgericht_ther==1) %>% dplyr::filter(meta_epis %in% c(1)) %>% select(all_of(df_easy)) 
+tumg_0 <- ncr %>% dplyr::filter(tumgericht_ther==1) %>% dplyr::filter(meta_epis %in% c(1)) %>% select(all_of(df_easy)) 
 
 ncr %>% dplyr::filter(tumgericht_ther==1) %>% dplyr::filter(meta_epis == 1) %>% dplyr::filter(chemo %in% c(2,3,4) | target %in% c(2,3,4)) %>% summarise(count=n(), distinct_count_key_nkr=n_distinct(key_nkr), distinct_count_key_zid=n_distinct(key_zid))
-tumg <- ncr %>% dplyr::filter(tumgericht_ther==1) %>% dplyr::filter(meta_epis %in% c(1)) %>% dplyr::filter(chemo %in% c(2,3,4) | target %in% c(2,3,4)) %>% select(all_of(df_easy)) 
+tumg_1 <- tumg_0 %>% dplyr::filter(chemo %in% c(2,3,4) | target %in% c(2,3,4))
 
 ncr %>% dplyr::filter(tumgericht_ther==1) %>% dplyr::filter(meta_epis == 1) %>% dplyr::filter(!chemo %in% c(2,3,4) & !target %in% c(2,3,4)) %>% summarise(count=n(), distinct_count_key_nkr=n_distinct(key_nkr), distinct_count_key_zid=n_distinct(key_zid))
 tumg <- ncr %>% dplyr::filter(tumgericht_ther==1) %>% dplyr::filter(meta_epis %in% c(1)) %>% dplyr::filter(!chemo %in% c(2,3,4) & !target %in% c(2,3,4)) %>% select(all_of(df_easy)) 
 
 ncr %>% dplyr::filter(tumgericht_ther==1) %>% dplyr::filter(meta_epis == 1) %>% dplyr::filter(chemo %in% c(2,3,4) | target %in% c(2,3,4)) %>% dplyr::filter(respons_uitslag %in% c('CR','MR','PD','PR','SD')) %>% summarise(count=n(), distinct_count_key_nkr=n_distinct(key_nkr), distinct_count_key_zid=n_distinct(key_zid))
 ncr %>% dplyr::filter(tumgericht_ther==1) %>% dplyr::filter(meta_epis == 1) %>% dplyr::filter(chemo %in% c(2,3,4) | target %in% c(2,3,4)) %>% dplyr::filter(pfs_event1 %in% c('0','1','2')) %>% summarise(count=n(), distinct_count_key_nkr=n_distinct(key_nkr), distinct_count_key_zid=n_distinct(key_zid))
-tumg <- ncr %>% dplyr::filter(tumgericht_ther==1) %>% dplyr::filter(meta_epis %in% c(1)) %>% dplyr::filter(chemo %in% c(2,3,4) | target %in% c(2,3,4)) %>% dplyr::filter(respons_uitslag %in% c('CR','MR','PD','PR','SD')) %>% select(all_of(df_easy)) 
-tumg <- ncr %>% dplyr::filter(tumgericht_ther==1) %>% dplyr::filter(meta_epis %in% c(1)) %>% dplyr::filter(chemo %in% c(2,3,4) | target %in% c(2,3,4)) %>% dplyr::filter(pfs_event1 %in% c('0','1','2')) %>% select(all_of(df_easy)) 
+tumg_2a <- tumg_1 %>% dplyr::filter(respons_uitslag %in% c('CR','MR','PD','PR','SD'))
+tumg_2b <- tumg_1 %>% dplyr::filter(pfs_event1 %in% c('0','1','2'))
 
-ncr %>% dplyr::filter(tumgericht_ther==1) %>% dplyr::filter(meta_epis == 1) %>% dplyr::filter(chemo %in% c(4) | target %in% c(2,3,4)) %>% dplyr::filter(respons_uitslag %in% c('CR','MR','PD','PR','SD')) %>% summarise(count=n(), distinct_count_key_nkr=n_distinct(key_nkr), distinct_count_key_zid=n_distinct(key_zid))
-ncr %>% dplyr::filter(tumgericht_ther==1) %>% dplyr::filter(meta_epis == 1) %>% dplyr::filter(chemo %in% c(4) | target %in% c(2,3,4)) %>% dplyr::filter(pfs_event1 %in% c('0','1','2')) %>% summarise(count=n(), distinct_count_key_nkr=n_distinct(key_nkr), distinct_count_key_zid=n_distinct(key_zid))
-tumg <- ncr %>% dplyr::filter(tumgericht_ther==1) %>% dplyr::filter(meta_epis %in% c(1)) %>% dplyr::filter(chemo %in% c(2,3,4) | target %in% c(2,3,4)) %>% dplyr::filter(respons_uitslag %in% c('CR','MR','PD','PR','SD')) %>% select(all_of(df_easy)) 
-tumg <- ncr %>% dplyr::filter(tumgericht_ther==1) %>% dplyr::filter(meta_epis %in% c(1)) %>% dplyr::filter(chemo %in% c(2,3,4) | target %in% c(2,3,4)) %>% dplyr::filter(pfs_event1 %in% c('0','1','2')) %>% select(all_of(df_easy)) 
+tumg_3a <- inner_join(tumg_2a, ncr_lines_substance_written, by=c('key_nkr','key_zid','key_eid')) 
+tumg_3a[tumg_3a == ""] <- NA
+tumg_3a <- tumg_3a %>% mutate(first_line = coalesce(line1_written, line2_written, line3_written, line4_written, line5_written, line6_written, line7_written))
 
-ncr %>%
-  group_by(epis, tumgericht_ther, pfs_event1) %>%
-  summarise(count = n(), distinct_count_key_nkr = n_distinct(key_nkr))
+tumg_3b <- inner_join(tumg_2b, ncr_lines_substance_written, by=c('key_nkr','key_zid','key_eid'))
+tumg_3b[tumg_3b == ""] <- NA
+tumg_3b <- tumg_3b %>% mutate(first_line = coalesce(line1_written, line2_written, line3_written, line4_written, line5_written, line6_written, line7_written))
+
+tumg_resp_firstline <- tumg_3a %>% group_by(first_line) %>% summarise(count_key_zid=n(), distinct_count_key_zid=n_distinct(key_zid)) %>% print(n=80)
+tumg_pfs_firstline <- tumg_3b %>% group_by(first_line) %>% summarise(count_key_zid=n(), distinct_count_key_zid=n_distinct(key_zid)) %>% print(n=100)
 
 ## Tasks
 ## Select systemic therapy lines for every patient
 ncr_lines_substance_prep <- ncr %>%
   dplyr::filter(tumgericht_ther==1) %>%
-  select(c('key_nkr','key_zid'),starts_with(c('syst_schemanum','syst_code'))) %>%
+  select(c('key_nkr','key_zid','key_eid'),starts_with(c('syst_schemanum','syst_code'))) %>%
   pivot_longer(cols = starts_with("syst_schemanum"), names_to = "syst_schemanum_key", values_to = "syst_schemanum_value") %>%
   pivot_longer(cols = starts_with("syst_code"), names_to = "syst_code_key", values_to = "syst_code_value")
 
@@ -178,7 +180,7 @@ ncr_lines_substance <- ncr_lines_substance_prep %>%
   add_column(schemanum_code_value = as.numeric(gsub("\\D", "", ncr_lines_substance_prep$syst_schemanum_key)), .after = 2) %>%
   add_column(code_schemanum_value = as.numeric(gsub("\\D", "", ncr_lines_substance_prep$syst_code_key)), .after = 6) %>%
   distinct() %>%
-  group_by(key_nkr, key_zid) %>%
+  group_by(key_nkr, key_zid, key_eid) %>%
   do(concat_syst_code_values(.)) %>%
   ungroup()
 
@@ -199,6 +201,7 @@ ncr_first_lines_summary <- ncr_lines_substance_written %>% dplyr::filter(line1_w
 
 ncr_lines_substance_written$key_nkr <- as.integer(ncr_lines_substance_written$key_nkr)
 ncr_lines_substance_written$key_zid <- as.integer(ncr_lines_substance_written$key_zid)
+ncr_lines_substance_written$key_eid <- as.integer(ncr_lines_substance_written$key_eid)
 
 ### Select start and stop interval for every line, merge with substances and calculate duration
 ncr_lines_start_prep <- ncr %>%
