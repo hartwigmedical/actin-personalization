@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <artifactId>actin-analysis</artifactId>
+        <artifactId>actin-personalization</artifactId>
         <groupId>com.hartwig.actin</groupId>
         <version>local-SNAPSHOT</version>
     </parent>
@@ -11,7 +11,7 @@
     <artifactId>recruitment-assignment</artifactId>
     <packaging>jar</packaging>
     <version>local-SNAPSHOT</version>
-    <name>HMF ACTIN Analysis - Recruitment Assignment</name>
+    <name>HMF ACTIN Personalization - Recruitment Assignment</name>
 
     <dependencies>
         <dependency>
@@ -62,7 +62,7 @@
                     <archive>
                         <manifest>
                             <addClasspath>true</addClasspath>
-                            <mainClass>com.hartwig.actin.analysis.recruitment.PatientLikeMeApplication</mainClass>
+                            <mainClass>com.hartwig.actin.personalization.recruitment.PatientLikeMeApplication</mainClass>
                             <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
                         </manifest>
                     </archive>

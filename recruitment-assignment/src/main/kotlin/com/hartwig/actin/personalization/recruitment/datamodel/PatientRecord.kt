@@ -1,4 +1,4 @@
-package com.hartwig.actin.analysis.recruitment.datamodel
+package com.hartwig.actin.personalization.recruitment.datamodel
 
 data class PatientRecord(
     val id : Int,
