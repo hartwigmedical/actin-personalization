@@ -6,7 +6,7 @@ data class TumorPrior(
     override val consolidatedTumorLocation: TumorLocation,
     override val hasHadTumorDirectedSystemicTherapy: Boolean,
 
-    val TumorPriorId: Int,
+    val tumorPriorId: Int,
     val tumorLocationCategory: TumorLocationCategory,
     val stageTNM: StageTNM?,
     val systemicTreatments: List<SystemicTreatment>

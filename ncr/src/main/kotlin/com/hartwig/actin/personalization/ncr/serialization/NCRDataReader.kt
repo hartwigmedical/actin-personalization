@@ -482,10 +482,6 @@ object NCRDataReader {
     }
 
     private fun createFields(header: Array<String>): Map<String, Int> {
-        val fields: MutableMap<String, Int> = HashMap()
-        for ((i) in header.withIndex()) {
-            fields[header[i]] = i
-        }
-        return fields
+        return header.withIndex().associate { (i, field) -> field to i }
     }
 }

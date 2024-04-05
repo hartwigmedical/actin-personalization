@@ -33,7 +33,7 @@ data class DiagnosisEpisode  (
     override val distanceToMesorectalFascia: Int?,
     override val venousInvasionCategory: VenousInvasionCategory?,
     override val lymphaticInvasionCategory: LymphaticInvasionCategory?,
-    override val extraMuralInvastionCategory: ExtraMuralInvasionCategory?,
+    override val extraMuralInvasionCategory: ExtraMuralInvasionCategory?,
     override val tumorRegression: TumorRegression?,
 
     override val labMeasurements: List<LabMeasurement>,
