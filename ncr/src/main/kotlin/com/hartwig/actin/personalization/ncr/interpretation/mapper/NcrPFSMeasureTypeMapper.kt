@@ -1,6 +1,6 @@
 package com.hartwig.actin.personalization.ncr.interpretation.mapper
 
-import com.hartwig.actin.personalization.ncr.datamodel.PFSMeasureType
+import com.hartwig.actin.personalization.datamodel.PFSMeasureType
 
 object NcrPFSMeasureTypeMapper : NcrCodeMapper<PFSMeasureType> {
 

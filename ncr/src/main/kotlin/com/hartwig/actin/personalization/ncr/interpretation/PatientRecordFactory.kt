@@ -1,15 +1,15 @@
 package com.hartwig.actin.personalization.ncr.interpretation
 
-import com.hartwig.actin.personalization.ncr.datamodel.DiagnosisEpisode
-import com.hartwig.actin.personalization.ncr.datamodel.PatientRecord
-import com.hartwig.actin.personalization.ncr.datamodel.Sex
-import com.hartwig.actin.personalization.ncr.datamodel.TNM_M
-import com.hartwig.actin.personalization.ncr.datamodel.TNM_N
-import com.hartwig.actin.personalization.ncr.datamodel.TumorEpisodes
-import com.hartwig.actin.personalization.ncr.datamodel.TumorLocation
-import com.hartwig.actin.personalization.ncr.datamodel.TumorOfInterest
-import com.hartwig.actin.personalization.ncr.datamodel.TumorSubLocation
-import com.hartwig.actin.personalization.ncr.datamodel.TumorType
+import com.hartwig.actin.personalization.datamodel.DiagnosisEpisode
+import com.hartwig.actin.personalization.datamodel.PatientRecord
+import com.hartwig.actin.personalization.datamodel.Sex
+import com.hartwig.actin.personalization.datamodel.TNM_M
+import com.hartwig.actin.personalization.datamodel.TNM_N
+import com.hartwig.actin.personalization.datamodel.TumorEpisodes
+import com.hartwig.actin.personalization.datamodel.TumorLocation
+import com.hartwig.actin.personalization.datamodel.TumorOfInterest
+import com.hartwig.actin.personalization.datamodel.TumorSubLocation
+import com.hartwig.actin.personalization.datamodel.TumorType
 import com.hartwig.actin.personalization.ncr.serialization.datamodel.NCRRecord
 import java.util.stream.Collectors
 

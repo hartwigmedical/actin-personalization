@@ -1,6 +1,6 @@
 package com.hartwig.actin.personalization.ncr.interpretation.mapper
 
-import com.hartwig.actin.personalization.ncr.datamodel.DistantMetastasesStatus
+import com.hartwig.actin.personalization.datamodel.DistantMetastasesStatus
 
 object NcrDistantMetastasesStatusMapper : NcrCodeMapper<DistantMetastasesStatus> {
 

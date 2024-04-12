@@ -1,6 +1,6 @@
 package com.hartwig.actin.personalization.ncr.interpretation.mapper
 
-import com.hartwig.actin.personalization.ncr.datamodel.RadiotherapyType
+import com.hartwig.actin.personalization.datamodel.RadiotherapyType
 
 object NcrRadiotherapyTypeMapper : NcrCodeMapper<RadiotherapyType?> {
 

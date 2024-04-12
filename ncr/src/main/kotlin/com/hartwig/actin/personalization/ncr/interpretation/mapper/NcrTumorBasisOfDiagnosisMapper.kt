@@ -1,6 +1,6 @@
 package com.hartwig.actin.personalization.ncr.interpretation.mapper
 
-import com.hartwig.actin.personalization.ncr.datamodel.TumorBasisOfDiagnosis
+import com.hartwig.actin.personalization.datamodel.TumorBasisOfDiagnosis
 
 object NcrTumorBasisOfDiagnosisMapper : NcrCodeMapper<TumorBasisOfDiagnosis> {
 

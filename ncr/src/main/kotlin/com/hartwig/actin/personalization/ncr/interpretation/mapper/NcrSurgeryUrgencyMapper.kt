@@ -1,6 +1,6 @@
 package com.hartwig.actin.personalization.ncr.interpretation.mapper
 
-import com.hartwig.actin.personalization.ncr.datamodel.SurgeryUrgency
+import com.hartwig.actin.personalization.datamodel.SurgeryUrgency
 
 object NcrSurgeryUrgencyMapper : NcrCodeMapper<SurgeryUrgency?> {
 

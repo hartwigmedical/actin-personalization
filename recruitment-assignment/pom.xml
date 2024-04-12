@@ -4,7 +4,7 @@
 
     <parent>
         <artifactId>actin-personalization</artifactId>
-        <groupId>com.hartwig.actin</groupId>
+        <groupId>com.hartwig.actin.personalization</groupId>
         <version>local-SNAPSHOT</version>
     </parent>
 

@@ -1,6 +1,6 @@
 package com.hartwig.actin.personalization.ncr.interpretation.mapper
 
-import com.hartwig.actin.personalization.ncr.datamodel.GastroenterologyResectionType
+import com.hartwig.actin.personalization.datamodel.GastroenterologyResectionType
 
 object NcrGastroenterologyResectionTypeMapper : NcrCodeMapper<GastroenterologyResectionType> {
 

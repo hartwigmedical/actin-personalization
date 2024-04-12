@@ -1,6 +1,6 @@
 package com.hartwig.actin.personalization.ncr.interpretation.mapper
 
-import com.hartwig.actin.personalization.ncr.datamodel.VitalStatus
+import com.hartwig.actin.personalization.datamodel.VitalStatus
 
 object NcrVitalStatusMapper : NcrCodeMapper<VitalStatus> {
 

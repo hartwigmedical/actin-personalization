@@ -1,6 +1,6 @@
 package com.hartwig.actin.personalization.ncr.interpretation.mapper
 
-import com.hartwig.actin.personalization.ncr.datamodel.TumorRegression
+import com.hartwig.actin.personalization.datamodel.TumorRegression
 
 object NcrTumorRegressionMapper : NcrCodeMapper<TumorRegression?> {
 

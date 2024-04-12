@@ -1,6 +1,6 @@
 package com.hartwig.actin.personalization.ncr.interpretation.mapper
 
-import com.hartwig.actin.personalization.ncr.datamodel.AnastomoticLeakageAfterSurgery
+import com.hartwig.actin.personalization.datamodel.AnastomoticLeakageAfterSurgery
 
 object NcrAnastomoticLeakageAfterSurgeryMapper : NcrCodeMapper<AnastomoticLeakageAfterSurgery?> {
 

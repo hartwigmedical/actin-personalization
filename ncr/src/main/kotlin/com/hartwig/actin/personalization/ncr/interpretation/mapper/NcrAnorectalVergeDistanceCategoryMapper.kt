@@ -1,6 +1,6 @@
 package com.hartwig.actin.personalization.ncr.interpretation.mapper
 
-import com.hartwig.actin.personalization.ncr.datamodel.AnorectalVergeDistanceCategory
+import com.hartwig.actin.personalization.datamodel.AnorectalVergeDistanceCategory
 
 object NcrAnorectalVergeDistanceCategoryMapper : NcrCodeMapper<AnorectalVergeDistanceCategory?> {
 
