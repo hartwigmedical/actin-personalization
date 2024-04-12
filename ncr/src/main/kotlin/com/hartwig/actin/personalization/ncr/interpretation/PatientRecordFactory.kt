@@ -10,22 +10,22 @@ import com.hartwig.actin.personalization.datamodel.TumorLocation
 import com.hartwig.actin.personalization.datamodel.TumorOfInterest
 import com.hartwig.actin.personalization.datamodel.TumorSubLocation
 import com.hartwig.actin.personalization.datamodel.TumorType
-import com.hartwig.actin.personalization.ncr.serialization.datamodel.NCRRecord
+import com.hartwig.actin.personalization.ncr.datamodel.NcrRecord
 import java.util.stream.Collectors
 
 private const val DIAGNOSIS_EPISODE = "DIA"
 
 object PatientRecordFactory {
 
-    fun create(ncrRecords: List<NCRRecord>): List<PatientRecord> {
-        val recordsPerPatient: Map<Int, List<NCRRecord>> = ncrRecords.groupBy { it.identification.keyNkr }
+    fun create(ncrRecords: List<NcrRecord>): List<PatientRecord> {
+        val recordsPerPatient: Map<Int, List<NcrRecord>> = ncrRecords.groupBy { it.identification.keyNkr }
 
         return recordsPerPatient.entries.parallelStream()
             .map { createPatientRecord(it.value) }
             .collect(Collectors.toList())
     }
 
-    private fun createPatientRecord(ncrRecords: List<NCRRecord>): PatientRecord {
+    private fun createPatientRecord(ncrRecords: List<NcrRecord>): PatientRecord {
         return PatientRecord(
             ncrId = extractNcrId(ncrRecords),
             sex = extractSex(ncrRecords),
@@ -35,7 +35,7 @@ object PatientRecordFactory {
         )
     }
 
-    private fun extractNcrId(ncrRecords: List<NCRRecord>): Int {
+    private fun extractNcrId(ncrRecords: List<NcrRecord>): Int {
         val ncrIds: List<Int> = ncrRecords.map { it.identification.keyNkr }.distinct()
         if (ncrIds.count() != 1) {
             throw IllegalStateException("Non-unique or missing NCR ID when creating a single patient record: $ncrIds")
@@ -43,7 +43,7 @@ object PatientRecordFactory {
         return ncrIds[0]
     }
 
-    private fun extractSex(ncrRecords: List<NCRRecord>): Sex {
+    private fun extractSex(ncrRecords: List<NcrRecord>): Sex {
         val sexes: List<Int> = ncrRecords.map { it.patientCharacteristics.gesl }.distinct()
         if (sexes.count() != 1) {
             throw IllegalStateException("Multiple sexes found for patient with NCR ID '" + extractNcrId(ncrRecords) + "'")
@@ -52,7 +52,7 @@ object PatientRecordFactory {
         return NcrCodeResolver.resolve(sexes.single())
     }
 
-    private fun determineIsAlive(ncrRecords: List<NCRRecord>): Boolean? {
+    private fun determineIsAlive(ncrRecords: List<NcrRecord>): Boolean? {
         // Vital status is only collect on diagnosis episodes.
         val vitalStatuses: List<Int?> = diagnosisEpisodes(ncrRecords).map { it.patientCharacteristics.vitStat }.distinct()
         if (vitalStatuses.count() != 1) {
@@ -66,16 +66,16 @@ object PatientRecordFactory {
         }
     }
 
-    private fun determineEpisodesPerTumorOfInterest(ncrRecords: List<NCRRecord>): Map<TumorOfInterest, TumorEpisodes> {
+    private fun determineEpisodesPerTumorOfInterest(ncrRecords: List<NcrRecord>): Map<TumorOfInterest, TumorEpisodes> {
         val recordsPerTumor = ncrRecords.groupBy { it.identification.keyZid }
         return recordsPerTumor.values.associate(::createEpisodesForOneTumorOfInterest)
     }
 
-    private fun createEpisodesForOneTumorOfInterest(ncrRecords: List<NCRRecord>): Pair<TumorOfInterest, TumorEpisodes> {
+    private fun createEpisodesForOneTumorOfInterest(ncrRecords: List<NcrRecord>): Pair<TumorOfInterest, TumorEpisodes> {
         return Pair(createTumorOfInterest(ncrRecords), createTumorEpisodes(ncrRecords))
     }
 
-    private fun createTumorOfInterest(ncrRecords: List<NCRRecord>): TumorOfInterest {
+    private fun createTumorOfInterest(ncrRecords: List<NcrRecord>): TumorOfInterest {
         return TumorOfInterest(
             consolidatedTumorType = TumorType.ADENOCARCINOMA_DIFFUSE_TYPE,
             consolidatedTumorSubLocation = TumorSubLocation.UNKNOWN_PRIMARY_TUMOR,
@@ -86,7 +86,7 @@ object PatientRecordFactory {
         )
     }
 
-    private fun createTumorEpisodes(ncrRecords: List<NCRRecord>): TumorEpisodes {
+    private fun createTumorEpisodes(ncrRecords: List<NcrRecord>): TumorEpisodes {
         val (ncrDiagnosisEpisodes, ncrTreatmentEpisodes) = ncrRecords.partition { it.identification.epis == DIAGNOSIS_EPISODE }
         val diagnosisEpisode = ncrDiagnosisEpisodes.minBy { it.identification.keyEid }.let {
             DiagnosisEpisode(
@@ -178,7 +178,7 @@ object PatientRecordFactory {
         return TumorEpisodes(diagnosisEpisode, listOf())
     }
 
-    private fun diagnosisEpisodes(ncrRecords: List<NCRRecord>): List<NCRRecord> {
+    private fun diagnosisEpisodes(ncrRecords: List<NcrRecord>): List<NcrRecord> {
         return ncrRecords.filter { it.identification.epis == DIAGNOSIS_EPISODE }
     }
 }

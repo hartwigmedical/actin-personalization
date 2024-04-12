@@ -1,6 +1,6 @@
-package com.hartwig.actin.personalization.ncr.serialization.datamodel
+package com.hartwig.actin.personalization.ncr.datamodel
 
-data class NCRSystemicTreatment(
+data class NcrSystemicTreatment(
     val chemo: Int,
     val target: Int,
     val systCode1: String?,

@@ -1,42 +1,42 @@
 package com.hartwig.actin.personalization.ncr.serialization
 
-import com.hartwig.actin.personalization.ncr.serialization.datamodel.NCRCharlsonComorbidities
-import com.hartwig.actin.personalization.ncr.serialization.datamodel.NCRClinicalCharacteristics
-import com.hartwig.actin.personalization.ncr.serialization.datamodel.NCRGastroenterologyResection
-import com.hartwig.actin.personalization.ncr.serialization.datamodel.NCRHIPEC
-import com.hartwig.actin.personalization.ncr.serialization.datamodel.NCRIdentification
-import com.hartwig.actin.personalization.ncr.serialization.datamodel.NCRLabValues
-import com.hartwig.actin.personalization.ncr.serialization.datamodel.NCRMetastaticDiagnosis
-import com.hartwig.actin.personalization.ncr.serialization.datamodel.NCRMetastaticRadiotherapy
-import com.hartwig.actin.personalization.ncr.serialization.datamodel.NCRMetastaticSurgery
-import com.hartwig.actin.personalization.ncr.serialization.datamodel.NCRMolecularCharacteristics
-import com.hartwig.actin.personalization.ncr.serialization.datamodel.NCRPatientCharacteristics
-import com.hartwig.actin.personalization.ncr.serialization.datamodel.NCRPrimaryDiagnosis
-import com.hartwig.actin.personalization.ncr.serialization.datamodel.NCRPrimaryRadiotherapy
-import com.hartwig.actin.personalization.ncr.serialization.datamodel.NCRPrimarySurgery
-import com.hartwig.actin.personalization.ncr.serialization.datamodel.NCRPriorMalignancies
-import com.hartwig.actin.personalization.ncr.serialization.datamodel.NCRRecord
-import com.hartwig.actin.personalization.ncr.serialization.datamodel.NCRSystemicTreatment
-import com.hartwig.actin.personalization.ncr.serialization.datamodel.NCRTreatment
-import com.hartwig.actin.personalization.ncr.serialization.datamodel.NCRTreatmentResponse
+import com.hartwig.actin.personalization.ncr.datamodel.NcrCharlsonComorbidities
+import com.hartwig.actin.personalization.ncr.datamodel.NcrClinicalCharacteristics
+import com.hartwig.actin.personalization.ncr.datamodel.NcrGastroenterologyResection
+import com.hartwig.actin.personalization.ncr.datamodel.NcrHipec
+import com.hartwig.actin.personalization.ncr.datamodel.NcrIdentification
+import com.hartwig.actin.personalization.ncr.datamodel.NcrLabValues
+import com.hartwig.actin.personalization.ncr.datamodel.NcrMetastaticDiagnosis
+import com.hartwig.actin.personalization.ncr.datamodel.NcrMetastaticRadiotherapy
+import com.hartwig.actin.personalization.ncr.datamodel.NcrMetastaticSurgery
+import com.hartwig.actin.personalization.ncr.datamodel.NcrMolecularCharacteristics
+import com.hartwig.actin.personalization.ncr.datamodel.NcrPatientCharacteristics
+import com.hartwig.actin.personalization.ncr.datamodel.NcrPrimaryDiagnosis
+import com.hartwig.actin.personalization.ncr.datamodel.NcrPrimaryRadiotherapy
+import com.hartwig.actin.personalization.ncr.datamodel.NcrPrimarySurgery
+import com.hartwig.actin.personalization.ncr.datamodel.NcrPriorMalignancies
+import com.hartwig.actin.personalization.ncr.datamodel.NcrRecord
+import com.hartwig.actin.personalization.ncr.datamodel.NcrSystemicTreatment
+import com.hartwig.actin.personalization.ncr.datamodel.NcrTreatment
+import com.hartwig.actin.personalization.ncr.datamodel.NcrTreatmentResponse
 import java.io.File
 import java.nio.file.Files
 
-object NCRDataReader {
+object NcrDataReader {
 
     private const val FIELD_DELIMITER = ";"
 
-    fun read(tsv: String): List<NCRRecord> {
+    fun read(tsv: String): List<NcrRecord> {
         val lines = Files.readAllLines(File(tsv).toPath())
         val fields = createFields(lines[0].split(FIELD_DELIMITER).toTypedArray())
 
         return lines.subList(1, lines.size).map { createRecord(fields, it.split(FIELD_DELIMITER).toTypedArray()) }
     }
 
-    private fun createRecord(fields: Map<String, Int>, parts: Array<String>): NCRRecord {
-        val extractor = NCRFieldExtractor(fields, parts)
+    private fun createRecord(fields: Map<String, Int>, parts: Array<String>): NcrRecord {
+        val extractor = NcrFieldExtractor(fields, parts)
 
-        return NCRRecord(
+        return NcrRecord(
             identification = readIdentification(extractor),
             patientCharacteristics = readPatientCharacteristics(extractor),
             clinicalCharacteristics = readClinicalCharacteristics(extractor),
@@ -51,8 +51,8 @@ object NCRDataReader {
         )
     }
 
-    private fun readIdentification(extractor: NCRFieldExtractor): NCRIdentification {
-        return NCRIdentification(
+    private fun readIdentification(extractor: NcrFieldExtractor): NcrIdentification {
+        return NcrIdentification(
             keyNkr = extractor.mandatoryInt("key_nkr"),
             keyZid = extractor.mandatoryInt("key_zid"),
             keyEid = extractor.mandatoryInt("key_eid"),
@@ -62,8 +62,8 @@ object NCRDataReader {
         )
     }
 
-    private fun readPatientCharacteristics(extractor: NCRFieldExtractor): NCRPatientCharacteristics {
-        return NCRPatientCharacteristics(
+    private fun readPatientCharacteristics(extractor: NcrFieldExtractor): NcrPatientCharacteristics {
+        return NcrPatientCharacteristics(
             gesl = extractor.mandatoryInt("gesl"),
             leeft = extractor.mandatoryInt("leeft"),
             vitStat = extractor.optionalInt("vit_stat"),
@@ -73,8 +73,8 @@ object NCRDataReader {
         )
     }
 
-    private fun readClinicalCharacteristics(extractor: NCRFieldExtractor): NCRClinicalCharacteristics {
-        return NCRClinicalCharacteristics(
+    private fun readClinicalCharacteristics(extractor: NcrFieldExtractor): NcrClinicalCharacteristics {
+        return NcrClinicalCharacteristics(
             dubbeltum = extractor.optionalInt("dubbeltum"),
             ileus = extractor.optionalInt("ileus"),
             perforatie = extractor.optionalInt("perforatie"),
@@ -87,16 +87,16 @@ object NCRDataReader {
         )
     }
 
-    private fun readMolecularCharacteristics(extractor: NCRFieldExtractor): NCRMolecularCharacteristics {
-        return NCRMolecularCharacteristics(
+    private fun readMolecularCharacteristics(extractor: NcrFieldExtractor): NcrMolecularCharacteristics {
+        return NcrMolecularCharacteristics(
             msiStat = extractor.optionalInt("msi_stat"),
             brafMut = extractor.optionalInt("braf_mut"),
             rasMut = extractor.optionalInt("ras_mut")
         )
     }
 
-    private fun readPriorMalignancies(extractor: NCRFieldExtractor): NCRPriorMalignancies {
-        return NCRPriorMalignancies(
+    private fun readPriorMalignancies(extractor: NcrFieldExtractor): NcrPriorMalignancies {
+        return NcrPriorMalignancies(
             mal1Int = extractor.optionalInt("mal1_int"),
             mal2Int = extractor.optionalInt("mal2_int"),
             mal3Int = extractor.optionalInt("mal3_int"),
@@ -142,8 +142,8 @@ object NCRDataReader {
         )
     }
 
-    private fun readPrimaryDiagnosis(extractor: NCRFieldExtractor): NCRPrimaryDiagnosis {
-        return NCRPrimaryDiagnosis(
+    private fun readPrimaryDiagnosis(extractor: NcrFieldExtractor): NcrPrimaryDiagnosis {
+        return NcrPrimaryDiagnosis(
             incjr = extractor.mandatoryInt("incjr"),
             topoSublok = extractor.mandatoryString("topo_sublok"),
             morfCat = extractor.optionalInt("morf_cat"),
@@ -163,8 +163,8 @@ object NCRDataReader {
         )
     }
 
-    private fun readMetastaticDiagnosis(extractor: NCRFieldExtractor): NCRMetastaticDiagnosis {
-        return NCRMetastaticDiagnosis(
+    private fun readMetastaticDiagnosis(extractor: NcrFieldExtractor): NcrMetastaticDiagnosis {
+        return NcrMetastaticDiagnosis(
             metaTopoSublok1 = extractor.optionalString("meta_topo_sublok1"),
             metaTopoSublok2 = extractor.optionalString("meta_topo_sublok2"),
             metaTopoSublok3 = extractor.optionalString("meta_topo_sublok3"),
@@ -200,8 +200,8 @@ object NCRDataReader {
         )
     }
 
-    private fun readCharlsonComorbidities(extractor: NCRFieldExtractor): NCRCharlsonComorbidities {
-        return NCRCharlsonComorbidities(
+    private fun readCharlsonComorbidities(extractor: NcrFieldExtractor): NcrCharlsonComorbidities {
+        return NcrCharlsonComorbidities(
             cci = extractor.optionalInt("cci"),
             cciAids = extractor.optionalInt("cci_aids"),
             cciCat = extractor.optionalInt("cci_cat"),
@@ -224,8 +224,8 @@ object NCRDataReader {
         )
     }
 
-    private fun readLabValues(extractor: NCRFieldExtractor): NCRLabValues {
-        return NCRLabValues(
+    private fun readLabValues(extractor: NcrFieldExtractor): NcrLabValues {
+        return NcrLabValues(
             prechirCea = extractor.optionalDouble("prechir_cea"),
             postchirCea = extractor.optionalDouble("postchir_cea"),
             ldh1 = extractor.optionalInt("ldh1"),
@@ -271,8 +271,8 @@ object NCRDataReader {
         )
     }
 
-    private fun readTreatment(extractor: NCRFieldExtractor): NCRTreatment {
-        return NCRTreatment(
+    private fun readTreatment(extractor: NcrFieldExtractor): NcrTreatment {
+        return NcrTreatment(
             deelnameStudie = extractor.optionalInt("deelname_studie"),
             tumgerichtTher = extractor.optionalInt("tumgericht_ther"),
             geenTherReden = extractor.optionalInt("geen_ther_reden"),
@@ -286,8 +286,8 @@ object NCRDataReader {
         )
     }
 
-    private fun readGastroenterologyResection(extractor: NCRFieldExtractor): NCRGastroenterologyResection {
-        return NCRGastroenterologyResection(
+    private fun readGastroenterologyResection(extractor: NcrFieldExtractor): NcrGastroenterologyResection {
+        return NcrGastroenterologyResection(
             mdlRes = extractor.optionalInt("mdl_res"),
             mdlResType1 = extractor.optionalInt("mdl_res_type1"),
             mdlResType2 = extractor.optionalInt("mdl_res_type2"),
@@ -296,8 +296,8 @@ object NCRDataReader {
         )
     }
 
-    private fun readPrimarySurgery(extractor: NCRFieldExtractor): NCRPrimarySurgery {
-        return NCRPrimarySurgery(
+    private fun readPrimarySurgery(extractor: NcrFieldExtractor): NcrPrimarySurgery {
+        return NcrPrimarySurgery(
             chir = extractor.optionalInt("chir"),
             chirInt1 = extractor.optionalInt("chir_int1"),
             chirInt2 = extractor.optionalInt("chir_int2"),
@@ -318,8 +318,8 @@ object NCRDataReader {
         )
     }
 
-    private fun readMetastaticSurgery(extractor: NCRFieldExtractor): NCRMetastaticSurgery {
-        return NCRMetastaticSurgery(
+    private fun readMetastaticSurgery(extractor: NcrFieldExtractor): NcrMetastaticSurgery {
+        return NcrMetastaticSurgery(
             metaChirCode1 = extractor.optionalString("meta_chir_code1"),
             metaChirCode2 = extractor.optionalString("meta_chir_code2"),
             metaChirCode3 = extractor.optionalString("meta_chir_code3"),
@@ -332,8 +332,8 @@ object NCRDataReader {
         )
     }
 
-    private fun readPrimaryRadiotherapy(extractor: NCRFieldExtractor): NCRPrimaryRadiotherapy {
-        return NCRPrimaryRadiotherapy(
+    private fun readPrimaryRadiotherapy(extractor: NcrFieldExtractor): NcrPrimaryRadiotherapy {
+        return NcrPrimaryRadiotherapy(
             rt = extractor.mandatoryInt("rt"),
             chemort = extractor.optionalInt("chemort"),
             rtType1 = extractor.optionalInt("rt_type1"),
@@ -347,8 +347,8 @@ object NCRDataReader {
         )
     }
 
-    private fun readMetastaticRadiotherapy(extractor: NCRFieldExtractor): NCRMetastaticRadiotherapy {
-        return NCRMetastaticRadiotherapy(
+    private fun readMetastaticRadiotherapy(extractor: NcrFieldExtractor): NcrMetastaticRadiotherapy {
+        return NcrMetastaticRadiotherapy(
             metaRtCode1 = extractor.optionalString("meta_rt_code1"),
             metaRtCode2 = extractor.optionalString("meta_rt_code2"),
             metaRtCode3 = extractor.optionalString("meta_rt_code3"),
@@ -364,8 +364,8 @@ object NCRDataReader {
         )
     }
 
-    private fun readSystemicTreatment(extractor: NCRFieldExtractor): NCRSystemicTreatment {
-        return NCRSystemicTreatment(
+    private fun readSystemicTreatment(extractor: NcrFieldExtractor): NcrSystemicTreatment {
+        return NcrSystemicTreatment(
             chemo = extractor.mandatoryInt("chemo"),
             target = extractor.mandatoryInt("target"),
             systCode1 = extractor.optionalString("syst_code1"),
@@ -455,15 +455,15 @@ object NCRDataReader {
         )
     }
 
-    private fun readHIPEC(extractor: NCRFieldExtractor): NCRHIPEC {
-        return NCRHIPEC(
+    private fun readHIPEC(extractor: NcrFieldExtractor): NcrHipec {
+        return NcrHipec(
             hipec = extractor.optionalInt("hipec"),
             hipecInt1 = extractor.optionalInt("hipec_int1")
         )
     }
 
-    private fun readTreatmentResponse(extractor: NCRFieldExtractor): NCRTreatmentResponse {
-        return NCRTreatmentResponse(
+    private fun readTreatmentResponse(extractor: NcrFieldExtractor): NcrTreatmentResponse {
+        return NcrTreatmentResponse(
             responsUitslag = extractor.optionalString("respons_uitslag"),
             responsInt = extractor.optionalInt("respons_int"),
             pfsEvent1 = extractor.optionalInt("pfs_event1"),

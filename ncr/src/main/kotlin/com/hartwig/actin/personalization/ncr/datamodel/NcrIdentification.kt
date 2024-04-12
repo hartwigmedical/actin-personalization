@@ -1,6 +1,6 @@
-package com.hartwig.actin.personalization.ncr.serialization.datamodel
+package com.hartwig.actin.personalization.ncr.datamodel
 
-data class NCRIdentification(
+data class NcrIdentification(
     val keyNkr: Int,
     val keyZid: Int,
     val keyEid: Int,

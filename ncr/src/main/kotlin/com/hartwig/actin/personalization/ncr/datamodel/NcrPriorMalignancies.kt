@@ -1,6 +1,6 @@
-package com.hartwig.actin.personalization.ncr.serialization.datamodel
+package com.hartwig.actin.personalization.ncr.datamodel
 
-data class NCRPriorMalignancies(
+data class NcrPriorMalignancies(
     val mal1Int: Int?,
     val mal2Int: Int?,
     val mal3Int: Int?,

@@ -1,6 +1,6 @@
-package com.hartwig.actin.personalization.ncr.serialization.datamodel
+package com.hartwig.actin.personalization.ncr.datamodel
 
-data class NCRPrimaryDiagnosis(
+data class NcrPrimaryDiagnosis(
     val incjr: Int,
     val topoSublok: String,
     val morfCat: Int?,

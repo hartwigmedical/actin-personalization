@@ -1,6 +1,6 @@
-package com.hartwig.actin.personalization.ncr.serialization.datamodel
+package com.hartwig.actin.personalization.ncr.datamodel
 
-data class NCRTreatmentResponse(
+data class NcrTreatmentResponse(
     val responsUitslag: String?,
     val responsInt: Int?,
     val pfsEvent1: Int?,

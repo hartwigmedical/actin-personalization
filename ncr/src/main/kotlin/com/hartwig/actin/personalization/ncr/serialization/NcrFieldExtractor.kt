@@ -3,7 +3,7 @@ package com.hartwig.actin.personalization.ncr.serialization
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 
-class NCRFieldExtractor(private val fields: Map<String, Int>, private val parts: Array<String>) {
+class NcrFieldExtractor(private val fields: Map<String, Int>, private val parts: Array<String>) {
 
     fun mandatoryString(property: String): String {
         return value(property)
@@ -50,6 +50,6 @@ class NCRFieldExtractor(private val fields: Map<String, Int>, private val parts:
 
     companion object {
         private const val EPISODE_ID: String = "key_eid"
-        private val LOGGER: Logger = LogManager.getLogger(NCRFieldExtractor::class)
+        private val LOGGER: Logger = LogManager.getLogger(NcrFieldExtractor::class)
     }
 }

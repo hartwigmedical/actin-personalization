@@ -1,6 +1,6 @@
-package com.hartwig.actin.personalization.ncr.serialization.datamodel
+package com.hartwig.actin.personalization.ncr.datamodel
 
-data class NCRLabValues(
+data class NcrLabValues(
     val prechirCea: Double?,
     val postchirCea: Double?,
     val ldh1: Int?,

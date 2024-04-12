@@ -71,7 +71,7 @@
                     <archive>
                         <manifest>
                             <addClasspath>true</addClasspath>
-                            <mainClass>com.hartwig.actin.personalization.ncr.NCRInspectionApplication</mainClass>
+                            <mainClass>com.hartwig.actin.personalization.ncr.NcrInspectionApplication</mainClass>
                             <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
                         </manifest>
                     </archive>

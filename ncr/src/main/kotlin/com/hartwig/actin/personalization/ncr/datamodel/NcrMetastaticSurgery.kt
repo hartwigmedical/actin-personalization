@@ -1,6 +1,6 @@
-package com.hartwig.actin.personalization.ncr.serialization.datamodel
+package com.hartwig.actin.personalization.ncr.datamodel
 
-data class NCRMetastaticSurgery(
+data class NcrMetastaticSurgery(
     val metaChirCode1: String?,
     val metaChirCode2: String?,
     val metaChirCode3: String?,

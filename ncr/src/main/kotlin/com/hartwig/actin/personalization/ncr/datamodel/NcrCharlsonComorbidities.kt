@@ -1,6 +1,6 @@
-package com.hartwig.actin.personalization.ncr.serialization.datamodel
+package com.hartwig.actin.personalization.ncr.datamodel
 
-data class NCRCharlsonComorbidities(
+data class NcrCharlsonComorbidities(
     val cci: Int?,
     val cciAids: Int?,
     val cciCat: Int?,

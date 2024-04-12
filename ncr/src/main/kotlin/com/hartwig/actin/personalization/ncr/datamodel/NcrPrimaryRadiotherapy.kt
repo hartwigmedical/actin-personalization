@@ -1,6 +1,6 @@
-package com.hartwig.actin.personalization.ncr.serialization.datamodel
+package com.hartwig.actin.personalization.ncr.datamodel
 
-data class NCRPrimaryRadiotherapy(
+data class NcrPrimaryRadiotherapy(
     val rt: Int,
     val chemort: Int?,
     val rtType1: Int?,

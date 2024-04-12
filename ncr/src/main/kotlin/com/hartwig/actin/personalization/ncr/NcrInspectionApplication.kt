@@ -1,9 +1,9 @@
 package com.hartwig.actin.personalization.ncr
 
 import com.hartwig.actin.personalization.datamodel.PatientRecord
+import com.hartwig.actin.personalization.ncr.datamodel.NcrRecord
 import com.hartwig.actin.personalization.ncr.interpretation.PatientRecordFactory
-import com.hartwig.actin.personalization.ncr.serialization.NCRDataReader
-import com.hartwig.actin.personalization.ncr.serialization.datamodel.NCRRecord
+import com.hartwig.actin.personalization.ncr.serialization.NcrDataReader
 import org.apache.commons.cli.CommandLine
 import org.apache.commons.cli.DefaultParser
 import org.apache.commons.cli.Options
@@ -16,7 +16,7 @@ class NCRInspectionApplication(private val ncrDatasetPath: String) {
         LOGGER.info("Running NCR inspection application")
 
         LOGGER.info("Reading NCR dataset from {}", ncrDatasetPath)
-        val ncrRecords = NCRDataReader.read(ncrDatasetPath)
+        val ncrRecords = NcrDataReader.read(ncrDatasetPath)
         LOGGER.info(" Read {} NCR records", ncrRecords.size)
 
         LOGGER.info("Printing overview of NCR records")
@@ -40,7 +40,7 @@ class NCRInspectionApplication(private val ncrDatasetPath: String) {
         LOGGER.info("Done!")
     }
 
-    private fun printIdentificationOverview(ncrRecords: List<NCRRecord>) {
+    private fun printIdentificationOverview(ncrRecords: List<NcrRecord>) {
         val patientCount: Int = ncrRecords.map { it.identification.keyNkr }.distinct().count()
         val tumorCount: Int = ncrRecords.map { it.identification.keyZid }.distinct().count()
         val episodeCount: Int = ncrRecords.map { it.identification.keyEid }.distinct().count()
@@ -48,7 +48,7 @@ class NCRInspectionApplication(private val ncrDatasetPath: String) {
         LOGGER.info(" {} unique patients found, with {} tumors and {} episodes", patientCount, tumorCount, episodeCount)
     }
 
-    private fun printPatientCharacteristicsOverview(ncrRecords: List<NCRRecord>) {
+    private fun printPatientCharacteristicsOverview(ncrRecords: List<NcrRecord>) {
         LOGGER.info(" Printing (some) patient characteristics")
         val recordCountPerVitalStatus: Map<Int?, Int> =
             countNullableRecords(ncrRecords.map { it.identification.keyEid to it.patientCharacteristics.vitStat })
@@ -62,7 +62,7 @@ class NCRInspectionApplication(private val ncrDatasetPath: String) {
         recordCountPerPerfStat.entries.forEach { LOGGER.info("  {} records have WHO score '{}'", it.value, it.key) }
     }
 
-    private fun printClinicalCharacteristicsOverview(ncrRecords: List<NCRRecord>) {
+    private fun printClinicalCharacteristicsOverview(ncrRecords: List<NcrRecord>) {
         LOGGER.info(" Printing (some) clinical characteristics")
         val recordCountPerDoubleTumor: Map<Int?, Int> =
             countNullableRecords(ncrRecords.map { it.identification.keyEid to it.clinicalCharacteristics.dubbeltum })
@@ -73,7 +73,7 @@ class NCRInspectionApplication(private val ncrDatasetPath: String) {
         recordCountPerIleus.entries.forEach { LOGGER.info("  {} records have ileus '{}'", it.value, it.key) }
     }
 
-    private fun printMolecularCharacteristicsOverview(ncrRecords: List<NCRRecord>) {
+    private fun printMolecularCharacteristicsOverview(ncrRecords: List<NcrRecord>) {
         LOGGER.info(" Printing (some) molecular characteristics")
         val recordCountPerMSIStatus: Map<Int?, Int> =
             countNullableRecords(ncrRecords.map { it.identification.keyEid to it.molecularCharacteristics.msiStat })
@@ -88,7 +88,7 @@ class NCRInspectionApplication(private val ncrDatasetPath: String) {
         recordCountPerRASStatus.entries.forEach { LOGGER.info("  {} records have RAS status '{}'", it.value, it.key) }
     }
 
-    private fun printPriorMalignancyOverview(ncrRecords: List<NCRRecord>) {
+    private fun printPriorMalignancyOverview(ncrRecords: List<NcrRecord>) {
         LOGGER.info(" Printing (some) prior malignancy characteristics")
         val recordsWithNoPriorMalignancies = ncrRecords.filter {
             it.priorMalignancies.mal1Int == null && it.priorMalignancies.mal2Int == null
@@ -119,7 +119,7 @@ class NCRInspectionApplication(private val ncrDatasetPath: String) {
         LOGGER.info("  {} records have 4 prior malignancies", recordsWithFourPriorMalignancies.count())
     }
 
-    private fun printPrimaryDiagnosisOverview(ncrRecords: List<NCRRecord>) {
+    private fun printPrimaryDiagnosisOverview(ncrRecords: List<NcrRecord>) {
         LOGGER.info(" Printing (some) primary diagnosis data")
 
         val recordsPerYearOfIncidence: Map<Int, Int> =
@@ -135,7 +135,7 @@ class NCRInspectionApplication(private val ncrDatasetPath: String) {
         recordsPerStadium.entries.forEach { LOGGER.info("  {} records have stadium '{}'", it.value, it.key) }
     }
 
-    private fun printMetastaticDiagnosisOverview(ncrRecords: List<NCRRecord>) {
+    private fun printMetastaticDiagnosisOverview(ncrRecords: List<NcrRecord>) {
         LOGGER.info(" Printing (some) metastatic diagnosis data")
         val recordsWithNoMetastases = ncrRecords.filter {
             it.metastaticDiagnosis.metaInt1 == null && it.metastaticDiagnosis.metaInt2 == null
@@ -165,7 +165,7 @@ class NCRInspectionApplication(private val ncrDatasetPath: String) {
         LOGGER.info("  {} records have (at least) 4 metastases", recordsWithAtLeastFourMetastases.count())
     }
 
-    private fun printComorbidityOverview(ncrRecords: List<NCRRecord>) {
+    private fun printComorbidityOverview(ncrRecords: List<NcrRecord>) {
         LOGGER.info(" Printing (some) comorbidity data")
 
         val recordsPerComorbidity: Map<Int?, Int> =
@@ -173,7 +173,7 @@ class NCRInspectionApplication(private val ncrDatasetPath: String) {
         recordsPerComorbidity.entries.forEach { LOGGER.info("  {} records have Charlson comorbidity index '{}'", it.value, it.key) }
     }
 
-    private fun printLabValueOverview(ncrRecords: List<NCRRecord>) {
+    private fun printLabValueOverview(ncrRecords: List<NcrRecord>) {
         LOGGER.info(" Printing (some) lab data")
 
         val recordsWithAtLeastOneLDHMeasure = ncrRecords.filter { it.labValues.ldh1 != null }
@@ -189,7 +189,7 @@ class NCRInspectionApplication(private val ncrDatasetPath: String) {
         LOGGER.info("  {} records have at least 1 Leuko measure", recordsWithAtLeastOneLeukoMeasure.count())
     }
 
-    private fun printTreatmentOverview(ncrRecords: List<NCRRecord>) {
+    private fun printTreatmentOverview(ncrRecords: List<NcrRecord>) {
         LOGGER.info(" Printing (some) treatment data")
 
         val recordsPerTrialParticipation: Map<Int?, Int> =
@@ -228,7 +228,7 @@ class NCRInspectionApplication(private val ncrDatasetPath: String) {
         LOGGER.info("  {} records have had HIPEC", recordsWithHIPEC.count())
     }
 
-    private fun printTreatmentResponseOverview(ncrRecords: List<NCRRecord>) {
+    private fun printTreatmentResponseOverview(ncrRecords: List<NcrRecord>) {
         LOGGER.info(" Printing (some) treatment response data")
 
         val recordsPerResponse: Map<String?, Int> =

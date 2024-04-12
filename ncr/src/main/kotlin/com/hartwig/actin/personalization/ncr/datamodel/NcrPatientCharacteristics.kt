@@ -1,6 +1,6 @@
-package com.hartwig.actin.personalization.ncr.serialization.datamodel
+package com.hartwig.actin.personalization.ncr.datamodel
 
-data class NCRPatientCharacteristics(
+data class NcrPatientCharacteristics(
     val gesl: Int,
     val leeft: Int,
     val vitStat: Int?,

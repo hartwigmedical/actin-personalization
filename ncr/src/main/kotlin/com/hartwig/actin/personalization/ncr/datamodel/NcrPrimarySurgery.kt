@@ -1,6 +1,6 @@
-package com.hartwig.actin.personalization.ncr.serialization.datamodel
+package com.hartwig.actin.personalization.ncr.datamodel
 
-data class NCRPrimarySurgery(
+data class NcrPrimarySurgery(
     val chir: Int?,
     val chirInt1: Int?,
     val chirInt2: Int?,

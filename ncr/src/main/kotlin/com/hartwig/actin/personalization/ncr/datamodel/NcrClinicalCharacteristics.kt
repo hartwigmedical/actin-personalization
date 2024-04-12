@@ -1,6 +1,6 @@
-package com.hartwig.actin.personalization.ncr.serialization.datamodel
+package com.hartwig.actin.personalization.ncr.datamodel
 
-data class NCRClinicalCharacteristics(
+data class NcrClinicalCharacteristics(
     val dubbeltum: Int?,
     val ileus: Int?,
     val perforatie: Int?,
