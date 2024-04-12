@@ -33,7 +33,7 @@ interface Episode {
     val distanceToMesorectalFascia: Int?
     val venousInvasionCategory: VenousInvasionCategory?
     val lymphaticInvasionCategory: LymphaticInvasionCategory?
-    val extraMuralInvastionCategory: ExtraMuralInvasionCategory?
+    val extraMuralInvasionCategory: ExtraMuralInvasionCategory?
     val tumorRegression: TumorRegression?
 
     val labMeasurements: List<LabMeasurement>
