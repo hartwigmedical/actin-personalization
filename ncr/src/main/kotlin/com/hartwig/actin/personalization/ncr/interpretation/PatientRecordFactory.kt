@@ -5,7 +5,6 @@ import com.hartwig.actin.personalization.ncr.datamodel.PatientRecord
 import com.hartwig.actin.personalization.ncr.datamodel.Sex
 import com.hartwig.actin.personalization.ncr.datamodel.TNM_M
 import com.hartwig.actin.personalization.ncr.datamodel.TNM_N
-import com.hartwig.actin.personalization.ncr.datamodel.TNM_T
 import com.hartwig.actin.personalization.ncr.datamodel.TumorEpisodes
 import com.hartwig.actin.personalization.ncr.datamodel.TumorLocation
 import com.hartwig.actin.personalization.ncr.datamodel.TumorOfInterest
@@ -16,7 +15,7 @@ import java.util.stream.Collectors
 
 private const val DIAGNOSIS_EPISODE = "DIA"
 
-class PatientRecordFactory {
+object PatientRecordFactory {
 
     fun create(ncrRecords: List<NCRRecord>): List<PatientRecord> {
         val recordsPerPatient: Map<Int, List<NCRRecord>> = ncrRecords.groupBy { it.identification.keyNkr }
@@ -99,20 +98,84 @@ class PatientRecordFactory {
                 tumorBasisOfDiagnosis = NcrCodeResolver.resolve(it.primaryDiagnosis.diagBasis),
                 tumorLocation = TumorLocation.OTHER_AND_ILL_DEFINED_LOCALIZATIONS, // TODO
                 tumorDifferentiationGrade = NcrCodeResolver.resolve(it.primaryDiagnosis.diffgrad.toInt()),
-                tnmCT = enumValueOf<TNM_T>(it.primaryDiagnosis.ct),
+                tnmCT = null, // enumValueOf<TNM_T>(it.primaryDiagnosis.cn),
                 tnmCN = enumValueOf<TNM_N>(it.primaryDiagnosis.cn),
                 tnmCM = enumValueOf<TNM_M>(it.primaryDiagnosis.cm),
-                tnmPT = it.primaryDiagnosis.pt?.let(::enumValueOf),
-                tnmPN = it.primaryDiagnosis.pn?.let(::enumValueOf),
-                tnmPM = it.primaryDiagnosis.pm?.let(::enumValueOf),
-                stageCTNM = it.primaryDiagnosis.cstadium?.let(::enumValueOf),
-                stagePTNM = it.primaryDiagnosis.pstadium?.let(::enumValueOf),
-                stageTNM = it.primaryDiagnosis.stadium?.let(::enumValueOf),
+                tnmPT = null, //it.primaryDiagnosis.pt?.let(::enumValueOf),
+                tnmPN = null, //it.primaryDiagnosis.pn?.let(::enumValueOf),
+                tnmPM = null, //it.primaryDiagnosis.pm?.let(::enumValueOf),
+                stageCTNM = null, //it.primaryDiagnosis.cstadium?.let(::enumValueOf),
+                stagePTNM = null, //it.primaryDiagnosis.pstadium?.let(::enumValueOf),
+                stageTNM = null, //it.primaryDiagnosis.stadium?.let(::enumValueOf),
                 numberOfInvestigatedLymphNodes = it.primaryDiagnosis.ondLymf,
                 numberOfPositiveLymphNodes = it.primaryDiagnosis.posLymf,
                 distantMetastasesStatus = NcrCodeResolver.resolve(it.identification.metaEpis),
+                // TODO Implement
+                metastases = listOf(),
+                hasKnownLiverMetastases = false,
+                numberOfLiverMetastases = null,
+                maximumSizeOfLiverMetastasis = null,
+                hasDoublePrimaryTumor = null,
+                mesorectalFasciaIsClear = null,
+                distanceToMesorectalFascia = null,
+                venousInvasionCategory = null,
+                lymphaticInvasionCategory = null,
+                extraMuralInvasionCategory = null,
+                tumorRegression = null,
+                labMeasurements = listOf(),
+                hasReceivedTumorDirectedTreatment = false,
+                reasonRefrainmentFromTumorDirectedTreatment = null,
+                hasParticipatedInTrial = null,
+                gastroenterologyResections = listOf(),
+                surgeries = listOf(),
+                surgeriesMetastases = listOf(),
+                radiotherapies = listOf(),
+                radiotherapiesMetastases = listOf(),
+                hasHadHipecTreatment = false,
+                intervalTumorIncidenceHipecTreatment = null,
+                systemicTreatments = listOf(),
+                systemicTreatmentSchemes = listOf(),
+                hasHadPreSurgeryRadiotherapy = false,
+                hasHadPostSurgeryRadiotherapy = false,
+                hasHadPreSurgeryChemoRadiotherapy = false,
+                hasHadPostSurgeryChemoRadiotherapy = true,
+                hasHadPreSurgerySystemicChemotherapy = false,
+                hasHadPostSurgerySystemicChemotherapy = false,
+                hasHadPreSurgerySystemicTargetedTherapy = false,
+                hasHadPostSurgerySystemicTargetedTherapy = false,
+                responseMeasure = null,
+                pfsMeasures = listOf(),
+                cci = null,
+                cciNumberOfCategories = null,
+                cciHasAids = null,
+                cciHasCongestiveHeartFailure = null,
+                cciHasCollagenosis = null,
+                cciHasCopd = null,
+                cciHasCerebrovascularDisease = null,
+                cciHasDementia = null,
+                cciHasDiabetesMellitus = null,
+                cciHasDiabetesMellitusWithEndOrganDamage = null,
+                cciHasOtherMalignancy = null,
+                cciHasOtherMetastaticSolidTumor = null,
+                cciHasMyocardialInfarct = null,
+                cciHasMildLiverDisease = null,
+                cciHasHemiplegiaOrParaplegia = null,
+                cciHasPeripheralVascularDisease = null,
+                cciHasRenalDisease = null,
+                cciHasLiverDisease = null,
+                cciHasUlcerDisease = null,
+                presentedWithIleus = null,
+                presentedWithPerforation = null,
+                anorectalVergeDistanceCategory = null,
+                hasMsi = null,
+                hasBrafMutation = null,
+                hasBrafV600EMutation = null,
+                hasRasMutation = null,
+                hasKrasG12CMutation = null
             )
         }
+
+        return TumorEpisodes(diagnosisEpisode, listOf())
     }
 
     private fun diagnosisEpisodes(ncrRecords: List<NCRRecord>): List<NCRRecord> {
