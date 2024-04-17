@@ -20,6 +20,9 @@ ncr %>% group_by(epis) %>% summarise(count_key_nkr=n(), distinct_count_key_nkr=n
 ncr %>% group_by(meta_epis) %>% summarise(count_key_nkr=n(), distinct_count_key_nkr=n_distinct(key_nkr))
 ncr %>% group_by(teller) %>% summarise(count_key_nkr=n(), distinct_count_key_nkr=n_distinct(key_nkr))
 
+ncr %>% group_by(epis, perf_stat) %>% summarise(count_key_nkr=n(), distinct_count_key_nkr=n_distinct(key_nkr))
+
+
 ncr %>% group_by(epis, meta_epis) %>% summarise(count_key_nkr=n(), distinct_count_key_nkr=n_distinct(key_nkr))
 ncr %>% group_by(epis, teller) %>% summarise(count_key_nkr=n(), distinct_count_key_nkr=n_distinct(key_nkr))
 ncr %>% group_by(epis, meta_epis, teller) %>% summarise(count_key_nkr=n(), distinct_count_key_nkr=n_distinct(key_nkr))
@@ -71,6 +74,20 @@ hist(ncr$cci, breaks=(max(ncr$cci, na.rm=T)-min(ncr$cci, na.rm=T)))
 ncr %>% group_by(epis, morf_cat) %>% summarise(count=n(), distinct_count_key_nkr=n_distinct(key_nkr))
 hist(ncr$cci, breaks=(max(ncr$cci, na.rm=T)-min(ncr$cci, na.rm=T)))
 
+### Clinical 
+who <- ncr %>% dplyr::filter(epis=='DIA') %>% group_by(perf_stat) %>% summarise(count=n(), distinct_count_key_zid=n_distinct(key_zid)) %>% 
+  mutate(perf_stat = ifelse(is.na(perf_stat) | perf_stat == 9, "Unknown/missing", as.character(perf_stat))) %>%
+  group_by(perf_stat) %>%
+  summarize_all(sum) %>% 
+  mutate(perf_stat = ifelse(perf_stat == 0, "WHO 0", perf_stat)) %>%
+  mutate(perf_stat = ifelse(perf_stat == 1, "WHO 1", perf_stat)) %>%
+  mutate(perf_stat = ifelse(perf_stat == 2, "WHO 2", perf_stat)) %>%
+  mutate(perf_stat = ifelse(perf_stat == 3, "WHO 3", perf_stat)) %>%
+  mutate(perf_stat = ifelse(perf_stat == 4, "WHO 4", perf_stat))
+
+pie(who$count, labels=paste0(who$perf_stat, " (", round(who$count), ")"), col=c('springgreen4', 'firebrick2','blue','purple','yellow','ivory4'), main="WHO")
+
+
 ### Molecular 
 msi <- ncr %>% dplyr::filter(epis=='DIA') %>% group_by(msi_stat) %>% summarise(count=n(), distinct_count_key_zid=n_distinct(key_zid)) %>% 
   mutate(msi_stat = ifelse(is.na(msi_stat) | msi_stat == 9, "Unknown/missing", as.character(msi_stat))) %>%
@@ -120,7 +137,7 @@ boxplot(ncr$albumine1[ncr$albumine1!=unknown_value], breaks = 100)
 boxplot(ncr$leuko1[ncr$leuko1!=unknown_value], breaks = 100)
 
 ### Treatment
-ncr %>% group_by(epis, tumgericht_ther) %>% summarise(count=n(), distinct_count_key_nkr=n_distinct(key_nkr))
+ncr %>% group_by(epis, tumgericht_ther, geen_ther_reden) %>% summarise(count=n(), distinct_count_key_nkr=n_distinct(key_nkr))
 ncr %>% dplyr::filter(epis=='DIA') %>% dplyr::filter(tumgericht_ther==0) %>% group_by(geen_ther_reden) %>% summarise(count=n(), distinct_count_key_nkr=n_distinct(key_nkr))
 
 ncr_unknown_which_treatment <- ncr %>%
@@ -272,12 +289,14 @@ ncr_lines_details <- ncr_lines_details %>%
 
 ## Find similar patients and what type of treatment they received
 ### <-- Try some random patient details
-age <- 80
-who <- 0
-hasHadSurgery <- 1
+age <- 65
+who <- 1
 
-ncr_similar_out <- find_similar_patients_2(ncr_ref_data = ncr, patient_age = age, patient_who = who, patient_has_had_surgery = hasHadSurgery)
-ncr_similar <- left_join(ncr_similar_out, ncr_lines_details, by=c('key_nkr','key_zid'))
+ncr_similar_out <- find_similar_patients(ncr_ref_data = ncr, patient_age = age, patient_who = who)
+ncr_similar <- left_join(ncr_similar_out, ncr_lines_details, by=c('key_nkr','key_zid','key_eid'))
+ncr_similar %>% group_by(line1_written) %>% summarise(count_key_nkr=n(), distinct_count_key_nkr=n_distinct(key_nkr))
+
+ncr_wip <- ncr %>% dplyr::filter(leeft==63 & gesl==2 & asa ==2 & incjr==2015 & pfs_int1==306)
 
 line1_summary <- ncr_similar %>% dplyr::filter(line1_written != "")
 pie(table(line1_summary$line1_written))
