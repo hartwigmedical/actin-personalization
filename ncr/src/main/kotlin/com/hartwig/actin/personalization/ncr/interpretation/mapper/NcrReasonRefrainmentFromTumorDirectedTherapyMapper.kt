@@ -12,7 +12,7 @@ object NcrReasonRefrainmentFromTumorDirectedTherapyMapper : NcrCodeMapper<Reason
             12 -> ReasonRefrainmentFromTumorDirectedTreatment.EXPECTED_FAST_PROGRESSION_OR_HIGH_TUMOR_LOAD
             13 -> ReasonRefrainmentFromTumorDirectedTreatment.WISH_OR_REFUSAL_FROM_PATIENT_OR_FAMILY
             14 -> ReasonRefrainmentFromTumorDirectedTreatment.LIMITED_TUMOR_LOAD_OR_FEW_COMPLAINTS
-            else -> throw IllegalArgumentException("Unknown Sex code: $code")
+            else -> throw IllegalArgumentException("Unknown ReasonRefrainmentFromTumorDirectedTreatment code: $code")
         }
     }
 }
