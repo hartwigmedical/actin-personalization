@@ -1,6 +1,6 @@
 package com.hartwig.actin.personalization.datamodel
 
-enum class TumorLocation {
+enum class LocationGroup {
     ADRENAL,
     ANUS_AND_ANAL_CANAL,
     BILE_DUCTS,
@@ -8,6 +8,7 @@ enum class TumorLocation {
     BONE_JOINTS_CARTILAGE_OF_EXTREMITIES,
     BONE_JOINTS_CARTILAGE_OTHER_AND_NOS_LOC,
     BRAIN,
+    BREAST,
     BRONCHUS_AND_LUNG,
     CERVIX_UTERI,
     COLON,
@@ -16,7 +17,7 @@ enum class TumorLocation {
     EYE_AND_ADNEXA,
     FLOOR_OF_MOUTH,
     GALL_BLADDER,
-    GLANDULA_PAROTIS,
+    GLANDULA_PAROTID,
     GUMS,
     HEART_MEDIASTINUM_AND_PLEURA,
     HEMATOPOIETIC_AND_RETICULOENDOTHELIAL_SYSTEM,
@@ -28,7 +29,6 @@ enum class TumorLocation {
     LIVER_AND_INTRAHEPATIC_BILE_DUCTS,
     LYMPH_NODES,
     MAJOR_SALIVARY_GLANDS,
-    MOM,
     MOUTH,
     NASAL_CAVITY_AND_MIDDLE_EAR,
     NASOPHARYNX,
@@ -45,7 +45,7 @@ enum class TumorLocation {
     PARANASAL_SINUSES,
     PENIS,
     PERIPHERAL_NERVES_AND_AUTONOMIC_NERVOUS_SYSTEM,
-    PRIMARY_LOCALIZATION_UNKNOWN,
+    PRIMARY_LOCATION_UNKNOWN,
     PROSTATE,
     RECTOSIGMOID,
     RECTUM,
@@ -59,8 +59,8 @@ enum class TumorLocation {
     TESTIS,
     THYMUS,
     THYROID,
-    TONGUE_BASE,
     TONGUE,
+    TONGUE_BASE,
     TONSIL,
     URETER,
     UTERUS_NOS,

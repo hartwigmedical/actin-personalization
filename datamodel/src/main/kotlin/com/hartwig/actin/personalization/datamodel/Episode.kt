@@ -8,7 +8,7 @@ interface Episode {
 
     val tumorIncidenceYear: Int
     val tumorBasisOfDiagnosis: TumorBasisOfDiagnosis
-    val tumorLocation: TumorLocation
+    val tumorLocation: Location
     val tumorDifferentiationGrade: TumorDifferentiationGrade?
     val tnmCT: TNM_T?
     val tnmCN: TNM_N?
@@ -24,9 +24,8 @@ interface Episode {
 
     val distantMetastasesStatus: DistantMetastasesStatus //meta_epis
     val metastases: List<Metastasis>
-    val hasKnownLiverMetastases: Boolean
     val numberOfLiverMetastases: Int?
-    val maximumSizeOfLiverMetastasis: Int?
+    val maximumSizeOfLiverMetastasisInMm: Int?
 
     val hasDoublePrimaryTumor: Boolean?
     val mesorectalFasciaIsClear: Boolean?

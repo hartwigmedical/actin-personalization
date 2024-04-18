@@ -1,6 +1,7 @@
 package com.hartwig.actin.personalization.datamodel
 
 data class Metastasis (
-    val metastasisLocation: MetastasisLocation,
-    val intervalTumorIncidenceMetastasisDetection: Int?, // TODO: meta_prog
+    val metastasisLocation: Location,
+    val intervalTumorIncidenceMetastasisDetection: Int?,
+    val progression: Boolean?
 )

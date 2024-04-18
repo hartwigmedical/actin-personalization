@@ -8,7 +8,7 @@ data class FollowupEpisode (
 
     override val tumorIncidenceYear: Int,
     override val tumorBasisOfDiagnosis: TumorBasisOfDiagnosis,
-    override val tumorLocation: TumorLocation,
+    override val tumorLocation: Location,
     override val tumorDifferentiationGrade: TumorDifferentiationGrade?,
     override val tnmCT: TNM_T?,
     override val tnmCN: TNM_N?,
@@ -24,9 +24,8 @@ data class FollowupEpisode (
 
     override val distantMetastasesStatus: DistantMetastasesStatus,
     override val metastases: List<Metastasis>,
-    override val hasKnownLiverMetastases: Boolean,
     override val numberOfLiverMetastases: Int?,
-    override val maximumSizeOfLiverMetastasis: Int?,
+    override val maximumSizeOfLiverMetastasisInMm: Int?,
 
     override val hasDoublePrimaryTumor: Boolean?,
     override val mesorectalFasciaIsClear: Boolean?,

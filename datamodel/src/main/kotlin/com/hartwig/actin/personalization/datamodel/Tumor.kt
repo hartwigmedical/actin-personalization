@@ -2,7 +2,6 @@ package com.hartwig.actin.personalization.datamodel
 
 interface Tumor {
     val consolidatedTumorType: TumorType
-    val consolidatedTumorSubLocation: TumorSubLocation
-    val consolidatedTumorLocation: TumorLocation
+    val consolidatedTumorLocation: Location
     val hasHadTumorDirectedSystemicTherapy: Boolean
 }

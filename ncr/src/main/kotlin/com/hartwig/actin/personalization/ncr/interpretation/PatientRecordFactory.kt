@@ -1,16 +1,19 @@
 package com.hartwig.actin.personalization.ncr.interpretation
 
 import com.hartwig.actin.personalization.datamodel.DiagnosisEpisode
+import com.hartwig.actin.personalization.datamodel.LabMeasure
+import com.hartwig.actin.personalization.datamodel.LabMeasurement
+import com.hartwig.actin.personalization.datamodel.Location
+import com.hartwig.actin.personalization.datamodel.Metastasis
 import com.hartwig.actin.personalization.datamodel.PatientRecord
 import com.hartwig.actin.personalization.datamodel.Sex
-import com.hartwig.actin.personalization.datamodel.TNM_M
-import com.hartwig.actin.personalization.datamodel.TNM_N
 import com.hartwig.actin.personalization.datamodel.TumorEpisodes
-import com.hartwig.actin.personalization.datamodel.TumorLocation
 import com.hartwig.actin.personalization.datamodel.TumorOfInterest
-import com.hartwig.actin.personalization.datamodel.TumorSubLocation
 import com.hartwig.actin.personalization.datamodel.TumorType
+import com.hartwig.actin.personalization.ncr.datamodel.NcrLabValues
+import com.hartwig.actin.personalization.ncr.datamodel.NcrMetastaticDiagnosis
 import com.hartwig.actin.personalization.ncr.datamodel.NcrRecord
+import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrLocationMapper.resolveLocation
 import java.util.stream.Collectors
 
 private const val DIAGNOSIS_EPISODE = "DIA"
@@ -49,7 +52,7 @@ object PatientRecordFactory {
             throw IllegalStateException("Multiple sexes found for patient with NCR ID '" + extractNcrId(ncrRecords) + "'")
         }
 
-        return NcrCodeResolver.resolve(sexes.single())
+        return resolve(sexes.single())
     }
 
     private fun determineIsAlive(ncrRecords: List<NcrRecord>): Boolean? {
@@ -78,12 +81,15 @@ object PatientRecordFactory {
     private fun createTumorOfInterest(ncrRecords: List<NcrRecord>): TumorOfInterest {
         return TumorOfInterest(
             consolidatedTumorType = TumorType.ADENOCARCINOMA_DIFFUSE_TYPE,
-            consolidatedTumorSubLocation = TumorSubLocation.UNKNOWN_PRIMARY_TUMOR,
-            consolidatedTumorLocation = TumorLocation.ADRENAL,
+            consolidatedTumorLocation = Location.UNKNOWN_PRIMARY_TUMOR,
             hasHadTumorDirectedSystemicTherapy = false,
             hasHadPriorTumor = false,
             intervalsTumorIncidenceDiagnosisTumorPrior = listOf()
         )
+    }
+
+    private inline fun <reified T : E?, reified E : Enum<E>> enumValueOfNullable(code: String?): T {
+        return code?.let { enumValueOf<E>(it) } as T
     }
 
     private fun createTumorEpisodes(ncrRecords: List<NcrRecord>): TumorEpisodes {
@@ -93,36 +99,34 @@ object PatientRecordFactory {
                 id = it.identification.keyEid,
                 order = it.identification.teller,
                 whoStatusPreTreatmentStart = it.patientCharacteristics.perfStat,
-                asaClassificationPreSurgeryOrEndoscopy = it.patientCharacteristics.asa?.let(NcrCodeResolver::resolve),
+                asaClassificationPreSurgeryOrEndoscopy = resolve(it.patientCharacteristics.asa),
                 tumorIncidenceYear = it.primaryDiagnosis.incjr,
-                tumorBasisOfDiagnosis = NcrCodeResolver.resolve(it.primaryDiagnosis.diagBasis),
-                tumorLocation = TumorLocation.OTHER_AND_ILL_DEFINED_LOCALIZATIONS, // TODO
-                tumorDifferentiationGrade = NcrCodeResolver.resolve(it.primaryDiagnosis.diffgrad.toInt()),
-                tnmCT = null, // enumValueOf<TNM_T>(it.primaryDiagnosis.cn),
-                tnmCN = enumValueOf<TNM_N>(it.primaryDiagnosis.cn),
-                tnmCM = enumValueOf<TNM_M>(it.primaryDiagnosis.cm),
-                tnmPT = null, //it.primaryDiagnosis.pt?.let(::enumValueOf),
-                tnmPN = null, //it.primaryDiagnosis.pn?.let(::enumValueOf),
-                tnmPM = null, //it.primaryDiagnosis.pm?.let(::enumValueOf),
-                stageCTNM = null, //it.primaryDiagnosis.cstadium?.let(::enumValueOf),
-                stagePTNM = null, //it.primaryDiagnosis.pstadium?.let(::enumValueOf),
-                stageTNM = null, //it.primaryDiagnosis.stadium?.let(::enumValueOf),
+                tumorBasisOfDiagnosis = resolve(it.primaryDiagnosis.diagBasis),
+                tumorLocation = resolveLocation(it.primaryDiagnosis.topoSublok),
+                tumorDifferentiationGrade = resolve(it.primaryDiagnosis.diffgrad.toInt()),
+                tnmCT = enumValueOfNullable(it.primaryDiagnosis.ct),
+                tnmCN = enumValueOfNullable(it.primaryDiagnosis.cn),
+                tnmCM = enumValueOfNullable(it.primaryDiagnosis.cm),
+                tnmPT = enumValueOfNullable(it.primaryDiagnosis.pt),
+                tnmPN = enumValueOfNullable(it.primaryDiagnosis.pn),
+                tnmPM = enumValueOfNullable(it.primaryDiagnosis.pm),
+                stageCTNM = enumValueOfNullable(it.primaryDiagnosis.cstadium),
+                stagePTNM = enumValueOfNullable(it.primaryDiagnosis.pstadium),
+                stageTNM = enumValueOfNullable(it.primaryDiagnosis.stadium),
                 numberOfInvestigatedLymphNodes = it.primaryDiagnosis.ondLymf,
                 numberOfPositiveLymphNodes = it.primaryDiagnosis.posLymf,
-                distantMetastasesStatus = NcrCodeResolver.resolve(it.identification.metaEpis),
-                // TODO Implement
-                metastases = listOf(),
-                hasKnownLiverMetastases = false,
-                numberOfLiverMetastases = null,
-                maximumSizeOfLiverMetastasis = null,
-                hasDoublePrimaryTumor = null,
+                distantMetastasesStatus = resolve(it.identification.metaEpis),
+                metastases = extractMetastases(it.metastaticDiagnosis),
+                numberOfLiverMetastases = resolve(it.metastaticDiagnosis.metaLeverAantal),
+                maximumSizeOfLiverMetastasisInMm = it.metastaticDiagnosis.metaLeverAfm,
+                hasDoublePrimaryTumor = resolve(it.clinicalCharacteristics.dubbeltum),
                 mesorectalFasciaIsClear = null,
-                distanceToMesorectalFascia = null,
-                venousInvasionCategory = null,
-                lymphaticInvasionCategory = null,
-                extraMuralInvasionCategory = null,
-                tumorRegression = null,
-                labMeasurements = listOf(),
+                distanceToMesorectalFascia = extractDistanceToMesorectalFascia(it.clinicalCharacteristics.mrfAfst),
+                venousInvasionCategory = resolve(it.clinicalCharacteristics.veneusInvas),
+                lymphaticInvasionCategory = resolve(it.clinicalCharacteristics.lymfInvas),
+                extraMuralInvasionCategory = resolve(it.clinicalCharacteristics.emi),
+                tumorRegression = resolve(it.clinicalCharacteristics.tumregres),
+                labMeasurements = extractLabMeasurements(it.labValues),
                 hasReceivedTumorDirectedTreatment = false,
                 reasonRefrainmentFromTumorDirectedTreatment = null,
                 hasParticipatedInTrial = null,
@@ -145,28 +149,28 @@ object PatientRecordFactory {
                 hasHadPostSurgerySystemicTargetedTherapy = false,
                 responseMeasure = null,
                 pfsMeasures = listOf(),
-                cci = null,
-                cciNumberOfCategories = null,
-                cciHasAids = null,
-                cciHasCongestiveHeartFailure = null,
-                cciHasCollagenosis = null,
-                cciHasCopd = null,
-                cciHasCerebrovascularDisease = null,
-                cciHasDementia = null,
-                cciHasDiabetesMellitus = null,
-                cciHasDiabetesMellitusWithEndOrganDamage = null,
-                cciHasOtherMalignancy = null,
-                cciHasOtherMetastaticSolidTumor = null,
-                cciHasMyocardialInfarct = null,
-                cciHasMildLiverDisease = null,
-                cciHasHemiplegiaOrParaplegia = null,
-                cciHasPeripheralVascularDisease = null,
-                cciHasRenalDisease = null,
-                cciHasLiverDisease = null,
-                cciHasUlcerDisease = null,
-                presentedWithIleus = null,
-                presentedWithPerforation = null,
-                anorectalVergeDistanceCategory = null,
+                cci = resolve(it.comorbidities.cci),
+                cciNumberOfCategories = resolve(it.comorbidities.cciCat),
+                cciHasAids = resolve(it.comorbidities.cciAids),
+                cciHasCongestiveHeartFailure = resolve(it.comorbidities.cciChf),
+                cciHasCollagenosis = resolve(it.comorbidities.cciCollagenosis),
+                cciHasCopd = resolve(it.comorbidities.cciCopd),
+                cciHasCerebrovascularDisease = resolve(it.comorbidities.cciCvd),
+                cciHasDementia = resolve(it.comorbidities.cciDementia),
+                cciHasDiabetesMellitus = resolve(it.comorbidities.cciDm),
+                cciHasDiabetesMellitusWithEndOrganDamage = resolve(it.comorbidities.cciEodDm),
+                cciHasOtherMalignancy = resolve(it.comorbidities.cciMalignancy),
+                cciHasOtherMetastaticSolidTumor = resolve(it.comorbidities.cciMetastatic),
+                cciHasMyocardialInfarct = resolve(it.comorbidities.cciMi),
+                cciHasMildLiverDisease = resolve(it.comorbidities.cciMildLiver),
+                cciHasHemiplegiaOrParaplegia = resolve(it.comorbidities.cciPlegia),
+                cciHasPeripheralVascularDisease = resolve(it.comorbidities.cciPvd),
+                cciHasRenalDisease = resolve(it.comorbidities.cciRenal),
+                cciHasLiverDisease = resolve(it.comorbidities.cciSevereLiver),
+                cciHasUlcerDisease = resolve(it.comorbidities.cciUlcer),
+                presentedWithIleus = resolve(it.clinicalCharacteristics.ileus),
+                presentedWithPerforation = resolve(it.clinicalCharacteristics.perforatie),
+                anorectalVergeDistanceCategory = resolve(it.clinicalCharacteristics.anusAfst),
                 hasMsi = null,
                 hasBrafMutation = null,
                 hasBrafV600EMutation = null,
@@ -176,6 +180,115 @@ object PatientRecordFactory {
         }
 
         return TumorEpisodes(diagnosisEpisode, listOf())
+    }
+
+    private fun extractLabMeasurements(labValues: NcrLabValues): List<LabMeasurement> {
+        with(labValues) {
+            val measurements = listOf(
+                LabMeasure.LACTATE_DEHYDROGENASE to listOf(
+                    ldh1 to ldhInt1,
+                    ldh2 to ldhInt2,
+                    ldh3 to ldhInt3,
+                    ldh4 to ldhInt4
+                ),
+                LabMeasure.ALKALINE_PHOSPHATASE to listOf(
+                    af1 to afInt1,
+                    af2 to afInt2,
+                    af3 to afInt3,
+                    af4 to afInt4
+                ),
+                LabMeasure.NEUTROPHILS_ABSOLUTE to listOf(
+                    neutro1 to neutroInt1,
+                    neutro2 to neutroInt2,
+                    neutro3 to neutroInt3,
+                    neutro4 to neutroInt4
+                ),
+                LabMeasure.ALBUMINE to listOf(
+                    albumine1 to albumineInt1,
+                    albumine2 to albumineInt2,
+                    albumine3 to albumineInt3,
+                    albumine4 to albumineInt4
+                ),
+                LabMeasure.LEUKOCYTES_ABSOLUTE to listOf(
+                    leuko1 to leukoInt1,
+                    leuko2 to leukoInt2,
+                    leuko3 to leukoInt3,
+                    leuko4 to leukoInt4
+                )
+            )
+                .flatMap { (measure, values) ->
+                    values.filterNot { (value, interval) -> value == null && interval == null }
+                        .map { (value, interval) -> LabMeasurement(measure, value as Double, measure.unit, interval, null, null) }
+                }
+
+            return measurements + listOfNotNull(
+                periSurgicalCeaMeasurement(prechirCea, true),
+                periSurgicalCeaMeasurement(postchirCea, false)
+            )
+        }
+    }
+
+    private fun periSurgicalCeaMeasurement(measurement: Double?, isPreSurgical: Boolean) = measurement?.let {
+        LabMeasurement(
+            LabMeasure.CARCINOEMBRYONIC_ANTIGEN, it, LabMeasure.CARCINOEMBRYONIC_ANTIGEN.unit, null, isPreSurgical, !isPreSurgical
+        )
+    }
+
+    private fun extractDistanceToMesorectalFascia(mrfAfst: Int?): Int? {
+        return when (mrfAfst) {
+            null, 222, 888, 999 -> null
+            111 -> 0
+            in 0..20 -> mrfAfst
+            else -> throw IllegalStateException("Unexpected value for distance to mesorectal fascia: $mrfAfst")
+        }
+    }
+
+    private fun extractMetastases(metastaticDiagnosis: NcrMetastaticDiagnosis): List<Metastasis> {
+        return with(metastaticDiagnosis) {
+            val locations = listOfNotNull(
+                metaTopoSublok1,
+                metaTopoSublok2,
+                metaTopoSublok3,
+                metaTopoSublok4,
+                metaTopoSublok5,
+                metaTopoSublok6,
+                metaTopoSublok7,
+                metaTopoSublok8,
+                metaTopoSublok9,
+                metaTopoSublok10
+            )
+            val intervalDays = listOf(
+                metaInt1,
+                metaInt2,
+                metaInt3,
+                metaInt4,
+                metaInt5,
+                metaInt6,
+                metaInt7,
+                metaInt8,
+                metaInt9,
+                metaInt10
+            )
+            val progression = listOf(
+                metaProg1,
+                metaProg2,
+                metaProg3,
+                metaProg4,
+                metaProg5,
+                metaProg6,
+                metaProg7,
+                metaProg8,
+                metaProg9,
+                metaProg10
+            )
+            locations.mapIndexed { i, location ->
+                Metastasis(
+                    resolveLocation(location),
+                    intervalDays[i],
+                    resolve(progression[i])
+                )
+            }
+        }
     }
 
     private fun diagnosisEpisodes(ncrRecords: List<NcrRecord>): List<NcrRecord> {

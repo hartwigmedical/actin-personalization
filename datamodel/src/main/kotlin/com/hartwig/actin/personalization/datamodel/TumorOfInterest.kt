@@ -2,8 +2,7 @@ package com.hartwig.actin.personalization.datamodel
 
 data class TumorOfInterest(
     override val consolidatedTumorType: TumorType,
-    override val consolidatedTumorSubLocation: TumorSubLocation,
-    override val consolidatedTumorLocation: TumorLocation,
+    override val consolidatedTumorLocation: Location,
     override val hasHadTumorDirectedSystemicTherapy: Boolean,
 
     val hasHadPriorTumor: Boolean,
