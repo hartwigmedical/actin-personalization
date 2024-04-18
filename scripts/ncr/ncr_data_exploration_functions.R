@@ -4,6 +4,12 @@ load_ncr_data <- function() {
   return(ncr)
 }
 
+load_ncr_data_notebook <- function() {
+  ncr <- read.csv(paste0("/data/patient_like_me/ncr/K23244.csv"), sep = ";")
+
+  return(ncr)
+}
+
 concat_syst_code_values <- function(data) {
 
   out <- data.frame(
