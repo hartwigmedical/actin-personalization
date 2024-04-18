@@ -197,7 +197,7 @@ object PatientRecordFactory {
                 surgeries = extractSurgeries(treatment.primarySurgery),
                 metastasesSurgeries = extractMetastasesSurgeries(treatment.metastaticSurgery),
                 radiotherapies = listOf(),
-                radiotherapiesMetastases = listOf(),
+                metastasesRadiotherapies = listOf(),
                 hasHadHipecTreatment = false,
                 intervalTumorIncidenceHipecTreatment = null,
                 systemicTreatments = listOf(),

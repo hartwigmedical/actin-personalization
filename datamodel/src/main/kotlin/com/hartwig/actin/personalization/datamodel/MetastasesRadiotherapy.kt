@@ -1,7 +1,7 @@
 package com.hartwig.actin.personalization.datamodel
 
-data class RadiotherapyMetastases (
-    val radiotherapyMetastasesType: RadiotherapyMetastasesType,
+data class MetastasesRadiotherapy(
+    val metastasesRadiotherapyType: MetastasesRadiotherapyType,
     val intervalTumorIncidenceRadiotherapyMetastasesStart: Int?,
     val intervalTumorIncidenceRadiotherapyMetastasesStop: Int?,
 )

@@ -45,7 +45,7 @@ data class Episode(
     val surgeries: List<Surgery>,
     val metastasesSurgeries: List<MetastasesSurgery>,
     val radiotherapies: List<Radiotherapy>,
-    val radiotherapiesMetastases: List<RadiotherapyMetastases>,
+    val metastasesRadiotherapies: List<MetastasesRadiotherapy>,
     val hasHadHipecTreatment: Boolean,
     val intervalTumorIncidenceHipecTreatment: Int?,
     val systemicTreatments: List<SystemicTreatment>,
