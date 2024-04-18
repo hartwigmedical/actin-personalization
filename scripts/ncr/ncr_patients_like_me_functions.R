@@ -7,15 +7,21 @@ find_similar_patients <- function(ncr_ref_data, patient_age, patient_who) {
   ##  - Adenocarcinoma (morf_cat == 1) without any other tumors (dubbeltum == 0)
   ##  - Has had treatment (tumgericht_ther == 1)
   
-  out <- ncr_ref_data %>% dplyr::filter(epis == 'DIA' &
+  out <- ncr_ref_data %>% dplyr::filter( epis =='DIA' &
                                          meta_epis == 1 &
-                                         is.na(mal1_int) &
+                                         topo_sublok == 'C209' &
                                          morf_cat == 1 &
-                                         dubbeltum == 0 &
+                                         meta_topo_sublok1 == 'C220' &
+                                         meta_topo_sublok2 == "" &
+                                         pos_lymf == 0 &
                                          tumgericht_ther == 1 &
-                                         leeft >= patient_age - 1 &
-                                         leeft <= patient_age + 1 &
-                                         perf_stat == patient_who)
+                                         (chemo == 4 | target == 4) &
+                                         #respons_uitslag %in% c('CR','MR','PD','PR','SD')
+                                         #pfs_event1 %in% c('0','1','2')
+                                         leeft >= patient_age - 5 &
+                                         leeft <= patient_age + 5 
+                                         #perf_stat == patient_who
+                                         )
 
   return(out)
 }
