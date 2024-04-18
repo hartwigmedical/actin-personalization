@@ -1,10 +1,12 @@
 load_ncr_data <- function() {
+    
   ncr <- read.csv(paste0(Sys.getenv("HOME"), "/hmf/tmp/ncr_crc_dataset.csv"), sep = ";")
 
   return(ncr)
 }
 
 load_ncr_data_notebook <- function() {
+    
   ncr <- read.csv(paste0("/data/patient_like_me/ncr/K23244.csv"), sep = ";")
 
   return(ncr)
