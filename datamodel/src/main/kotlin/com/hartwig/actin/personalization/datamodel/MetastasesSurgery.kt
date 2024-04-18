@@ -1,7 +1,7 @@
 package com.hartwig.actin.personalization.datamodel
 
-data class SurgeryMetastases(
-    val surgeryMetastasesType: SurgeryMetastasesType,
+data class MetastasesSurgery(
+    val metastasesSurgeryType: MetastasesSurgeryType,
     val surgeryMetastasesRadicality: SurgeryRadicality?,
     val intervalTumorIncidenceSurgeryMetastases: Int?,
     val intervalTumorIncidenceRMetastasesStop: Int?,

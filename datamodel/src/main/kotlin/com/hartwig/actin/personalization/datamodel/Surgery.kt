@@ -9,5 +9,4 @@ data class Surgery(
     val anastomoticLeakageAfterSurgery: AnastomoticLeakageAfterSurgery?,
     val intervalTumorIncidenceSurgery: Int?,
     val durationOfHospitalization: Int?,
-
-    )
+)

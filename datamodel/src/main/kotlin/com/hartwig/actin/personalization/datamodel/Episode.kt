@@ -43,7 +43,7 @@ data class Episode(
 
     val gastroenterologyResections: List<GastroenterologyResection>,
     val surgeries: List<Surgery>,
-    val surgeriesMetastases: List<SurgeryMetastases>,
+    val metastasesSurgeries: List<MetastasesSurgery>,
     val radiotherapies: List<Radiotherapy>,
     val radiotherapiesMetastases: List<RadiotherapyMetastases>,
     val hasHadHipecTreatment: Boolean,

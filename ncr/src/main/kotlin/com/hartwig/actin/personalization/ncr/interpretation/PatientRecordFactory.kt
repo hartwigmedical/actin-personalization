@@ -2,19 +2,26 @@ package com.hartwig.actin.personalization.ncr.interpretation
 
 import com.hartwig.actin.personalization.datamodel.Diagnosis
 import com.hartwig.actin.personalization.datamodel.Episode
+import com.hartwig.actin.personalization.datamodel.GastroenterologyResection
 import com.hartwig.actin.personalization.datamodel.LabMeasure
 import com.hartwig.actin.personalization.datamodel.LabMeasurement
 import com.hartwig.actin.personalization.datamodel.Location
+import com.hartwig.actin.personalization.datamodel.MetastasesSurgery
 import com.hartwig.actin.personalization.datamodel.Metastasis
 import com.hartwig.actin.personalization.datamodel.PatientRecord
 import com.hartwig.actin.personalization.datamodel.Sex
+import com.hartwig.actin.personalization.datamodel.Surgery
 import com.hartwig.actin.personalization.datamodel.TumorEpisodes
 import com.hartwig.actin.personalization.datamodel.TumorOfInterest
 import com.hartwig.actin.personalization.datamodel.TumorType
+import com.hartwig.actin.personalization.ncr.datamodel.NcrGastroenterologyResection
 import com.hartwig.actin.personalization.ncr.datamodel.NcrLabValues
 import com.hartwig.actin.personalization.ncr.datamodel.NcrMetastaticDiagnosis
+import com.hartwig.actin.personalization.ncr.datamodel.NcrMetastaticSurgery
+import com.hartwig.actin.personalization.ncr.datamodel.NcrPrimarySurgery
 import com.hartwig.actin.personalization.ncr.datamodel.NcrRecord
 import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrLocationMapper.resolveLocation
+import com.hartwig.actin.personalization.ncr.interpretation.mapper.resolveMetastasesSurgeryType
 import java.util.stream.Collectors
 
 private const val DIAGNOSIS_EPISODE = "DIA"
@@ -183,12 +190,12 @@ object PatientRecordFactory {
                 extraMuralInvasionCategory = resolve(clinicalCharacteristics.emi),
                 tumorRegression = resolve(clinicalCharacteristics.tumregres),
                 labMeasurements = extractLabMeasurements(labValues),
-                hasReceivedTumorDirectedTreatment = false,
-                reasonRefrainmentFromTumorDirectedTreatment = null,
-                hasParticipatedInTrial = null,
-                gastroenterologyResections = listOf(),
-                surgeries = listOf(),
-                surgeriesMetastases = listOf(),
+                hasReceivedTumorDirectedTreatment = resolve(treatment.tumgerichtTher),
+                reasonRefrainmentFromTumorDirectedTreatment = resolve(treatment.geenTherReden),
+                hasParticipatedInTrial = resolve(treatment.deelnameStudie),
+                gastroenterologyResections = extractGastroenterologyResections(treatment.gastroenterologyResection),
+                surgeries = extractSurgeries(treatment.primarySurgery),
+                metastasesSurgeries = extractMetastasesSurgeries(treatment.metastaticSurgery),
                 radiotherapies = listOf(),
                 radiotherapiesMetastases = listOf(),
                 hasHadHipecTreatment = false,
@@ -207,6 +214,54 @@ object PatientRecordFactory {
                 pfsMeasures = listOf()
             )
         }
+    }
+
+    private fun extractMetastasesSurgeries(metastaticSurgery: NcrMetastaticSurgery): List<MetastasesSurgery> {
+        return with(metastaticSurgery) {
+            listOf(
+                Triple(metaChirCode1, metaChirRad1, metaChirInt1),
+                Triple(metaChirCode2, metaChirRad2, metaChirInt2),
+                Triple(metaChirCode3, metaChirRad3, metaChirInt3)
+            )
+                .mapNotNull { (type, radicality, interval) ->
+                    type?.let { MetastasesSurgery(resolveMetastasesSurgeryType(it), resolve(radicality), interval, null) }
+                }
+        }
+    }
+
+    private fun extractSurgeries(primarySurgery: NcrPrimarySurgery): List<Surgery> {
+        return with(primarySurgery) {
+            listOfNotNull(
+                chirType1?.let { extractSurgery(it, chirTech1, chirUrg1, chirRad1, chirCrm1, chirNaadlek1, chirInt1, chirOpnameduur1) },
+                chirType2?.let { extractSurgery(it, chirTech2, chirUrg2, chirRad2, chirCrm2, chirNaadlek2, chirInt2, chirOpnameduur2) }
+            )
+        }
+    }
+
+    private fun extractSurgery(
+        surgeryType: Int, technique: Int?, urgency: Int?, radicality: Int?, margins: Int?, leakage: Int?, interval: Int?, duration: Int?
+    ): Surgery {
+        return Surgery(
+            resolve(surgeryType),
+            resolve(technique),
+            resolve(urgency),
+            resolve(radicality),
+            resolve(margins),
+            resolve(leakage),
+            interval,
+            duration
+        )
+    }
+
+    private fun extractGastroenterologyResections(resection: NcrGastroenterologyResection): List<GastroenterologyResection> {
+        return with(resection) {
+            listOf(
+                mdlResType1 to mdlResInt1,
+                mdlResType2 to mdlResInt2
+            )
+        }
+            .filter { it.first != null }
+            .map { (type, interval) -> GastroenterologyResection(resolve(type), interval) }
     }
 
     private fun extractLabMeasurements(labValues: NcrLabValues): List<LabMeasurement> {
