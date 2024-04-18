@@ -1,6 +1,7 @@
 package com.hartwig.actin.personalization.ncr.interpretation
 
-import com.hartwig.actin.personalization.datamodel.DiagnosisEpisode
+import com.hartwig.actin.personalization.datamodel.Diagnosis
+import com.hartwig.actin.personalization.datamodel.Episode
 import com.hartwig.actin.personalization.datamodel.LabMeasure
 import com.hartwig.actin.personalization.datamodel.LabMeasurement
 import com.hartwig.actin.personalization.datamodel.Location
@@ -93,40 +94,95 @@ object PatientRecordFactory {
     }
 
     private fun createTumorEpisodes(ncrRecords: List<NcrRecord>): TumorEpisodes {
-        val (ncrDiagnosisEpisodes, ncrTreatmentEpisodes) = ncrRecords.partition { it.identification.epis == DIAGNOSIS_EPISODE }
-        val diagnosisEpisode = ncrDiagnosisEpisodes.minBy { it.identification.keyEid }.let {
-            DiagnosisEpisode(
-                id = it.identification.keyEid,
-                order = it.identification.teller,
-                whoStatusPreTreatmentStart = it.patientCharacteristics.perfStat,
-                asaClassificationPreSurgeryOrEndoscopy = resolve(it.patientCharacteristics.asa),
-                tumorIncidenceYear = it.primaryDiagnosis.incjr,
-                tumorBasisOfDiagnosis = resolve(it.primaryDiagnosis.diagBasis),
-                tumorLocation = resolveLocation(it.primaryDiagnosis.topoSublok),
-                tumorDifferentiationGrade = resolve(it.primaryDiagnosis.diffgrad.toInt()),
-                tnmCT = enumValueOfNullable(it.primaryDiagnosis.ct),
-                tnmCN = enumValueOfNullable(it.primaryDiagnosis.cn),
-                tnmCM = enumValueOfNullable(it.primaryDiagnosis.cm),
-                tnmPT = enumValueOfNullable(it.primaryDiagnosis.pt),
-                tnmPN = enumValueOfNullable(it.primaryDiagnosis.pn),
-                tnmPM = enumValueOfNullable(it.primaryDiagnosis.pm),
-                stageCTNM = enumValueOfNullable(it.primaryDiagnosis.cstadium),
-                stagePTNM = enumValueOfNullable(it.primaryDiagnosis.pstadium),
-                stageTNM = enumValueOfNullable(it.primaryDiagnosis.stadium),
-                numberOfInvestigatedLymphNodes = it.primaryDiagnosis.ondLymf,
-                numberOfPositiveLymphNodes = it.primaryDiagnosis.posLymf,
-                distantMetastasesStatus = resolve(it.identification.metaEpis),
-                metastases = extractMetastases(it.metastaticDiagnosis),
-                numberOfLiverMetastases = resolve(it.metastaticDiagnosis.metaLeverAantal),
-                maximumSizeOfLiverMetastasisInMm = it.metastaticDiagnosis.metaLeverAfm,
-                hasDoublePrimaryTumor = resolve(it.clinicalCharacteristics.dubbeltum),
-                mesorectalFasciaIsClear = null,
-                distanceToMesorectalFascia = extractDistanceToMesorectalFascia(it.clinicalCharacteristics.mrfAfst),
-                venousInvasionCategory = resolve(it.clinicalCharacteristics.veneusInvas),
-                lymphaticInvasionCategory = resolve(it.clinicalCharacteristics.lymfInvas),
-                extraMuralInvasionCategory = resolve(it.clinicalCharacteristics.emi),
-                tumorRegression = resolve(it.clinicalCharacteristics.tumregres),
-                labMeasurements = extractLabMeasurements(it.labValues),
+        val (ncrDiagnosisRecords, ncrTreatmentRecords) = ncrRecords.partition { it.identification.epis == DIAGNOSIS_EPISODE }
+        val diagnosisRecord = ncrDiagnosisRecords.minBy { it.identification.keyEid }
+        val diagnosisEpisode = extractEpisode(diagnosisRecord)
+        val diagnosis = with(diagnosisRecord) {
+            val (hasBrafMutation, hasBrafV600EMutation) = when (molecularCharacteristics.brafMut) {
+                0 -> Pair(false, false)
+                1 -> Pair(true, null)
+                2 -> Pair(true, true)
+                3 -> Pair(true, false)
+                9, null -> Pair(null, null)
+                else -> throw IllegalStateException("Unexpected value for BRAF mutation: ${molecularCharacteristics.brafMut}")
+            }
+            val (hasRasMutation, hasKrasG12CMutation) = when (molecularCharacteristics.rasMut) {
+                0 -> Pair(false, false)
+                1 -> Pair(true, null)
+                2 -> Pair(true, false)
+                3 -> Pair(true, true)
+                9, null -> Pair(null, null)
+                else -> throw IllegalStateException("Unexpected value for RAS mutation: ${molecularCharacteristics.rasMut}")
+            }
+
+            Diagnosis(
+                cci = resolve(comorbidities.cci),
+                cciNumberOfCategories = resolve(comorbidities.cciCat),
+                cciHasAids = resolve(comorbidities.cciAids),
+                cciHasCongestiveHeartFailure = resolve(comorbidities.cciChf),
+                cciHasCollagenosis = resolve(comorbidities.cciCollagenosis),
+                cciHasCopd = resolve(comorbidities.cciCopd),
+                cciHasCerebrovascularDisease = resolve(comorbidities.cciCvd),
+                cciHasDementia = resolve(comorbidities.cciDementia),
+                cciHasDiabetesMellitus = resolve(comorbidities.cciDm),
+                cciHasDiabetesMellitusWithEndOrganDamage = resolve(comorbidities.cciEodDm),
+                cciHasOtherMalignancy = resolve(comorbidities.cciMalignancy),
+                cciHasOtherMetastaticSolidTumor = resolve(comorbidities.cciMetastatic),
+                cciHasMyocardialInfarct = resolve(comorbidities.cciMi),
+                cciHasMildLiverDisease = resolve(comorbidities.cciMildLiver),
+                cciHasHemiplegiaOrParaplegia = resolve(comorbidities.cciPlegia),
+                cciHasPeripheralVascularDisease = resolve(comorbidities.cciPvd),
+                cciHasRenalDisease = resolve(comorbidities.cciRenal),
+                cciHasLiverDisease = resolve(comorbidities.cciSevereLiver),
+                cciHasUlcerDisease = resolve(comorbidities.cciUlcer),
+                presentedWithIleus = resolve(clinicalCharacteristics.ileus),
+                presentedWithPerforation = resolve(clinicalCharacteristics.perforatie),
+                anorectalVergeDistanceCategory = resolve(clinicalCharacteristics.anusAfst),
+                hasMsi = resolve(molecularCharacteristics.msiStat),
+                hasBrafMutation = hasBrafMutation,
+                hasBrafV600EMutation = hasBrafV600EMutation,
+                hasRasMutation = hasRasMutation,
+                hasKrasG12CMutation = hasKrasG12CMutation
+            )
+        }
+
+        return TumorEpisodes(diagnosis, diagnosisEpisode, ncrTreatmentRecords.map(::extractEpisode))
+    }
+
+    private fun extractEpisode(record: NcrRecord): Episode {
+        return with(record) {
+            Episode(
+                id = identification.keyEid,
+                order = identification.teller,
+                whoStatusPreTreatmentStart = patientCharacteristics.perfStat,
+                asaClassificationPreSurgeryOrEndoscopy = resolve(patientCharacteristics.asa),
+                tumorIncidenceYear = primaryDiagnosis.incjr,
+                tumorBasisOfDiagnosis = resolve(primaryDiagnosis.diagBasis),
+                tumorLocation = resolveLocation(primaryDiagnosis.topoSublok),
+                tumorDifferentiationGrade = resolve(primaryDiagnosis.diffgrad.toInt()),
+                tnmCT = enumValueOfNullable(primaryDiagnosis.ct),
+                tnmCN = enumValueOfNullable(primaryDiagnosis.cn),
+                tnmCM = enumValueOfNullable(primaryDiagnosis.cm),
+                tnmPT = enumValueOfNullable(primaryDiagnosis.pt),
+                tnmPN = enumValueOfNullable(primaryDiagnosis.pn),
+                tnmPM = enumValueOfNullable(primaryDiagnosis.pm),
+                stageCTNM = enumValueOfNullable(primaryDiagnosis.cstadium),
+                stagePTNM = enumValueOfNullable(primaryDiagnosis.pstadium),
+                stageTNM = enumValueOfNullable(primaryDiagnosis.stadium),
+                numberOfInvestigatedLymphNodes = primaryDiagnosis.ondLymf,
+                numberOfPositiveLymphNodes = primaryDiagnosis.posLymf,
+                distantMetastasesStatus = resolve(identification.metaEpis),
+                metastases = extractMetastases(metastaticDiagnosis),
+                numberOfLiverMetastases = resolve(metastaticDiagnosis.metaLeverAantal),
+                maximumSizeOfLiverMetastasisInMm = metastaticDiagnosis.metaLeverAfm,
+                hasDoublePrimaryTumor = resolve(clinicalCharacteristics.dubbeltum),
+                mesorectalFasciaIsClear = null,  // TODO: do we need this?
+                distanceToMesorectalFascia = extractDistanceToMesorectalFascia(clinicalCharacteristics.mrfAfst),
+                venousInvasionCategory = resolve(clinicalCharacteristics.veneusInvas),
+                lymphaticInvasionCategory = resolve(clinicalCharacteristics.lymfInvas),
+                extraMuralInvasionCategory = resolve(clinicalCharacteristics.emi),
+                tumorRegression = resolve(clinicalCharacteristics.tumregres),
+                labMeasurements = extractLabMeasurements(labValues),
                 hasReceivedTumorDirectedTreatment = false,
                 reasonRefrainmentFromTumorDirectedTreatment = null,
                 hasParticipatedInTrial = null,
@@ -148,38 +204,9 @@ object PatientRecordFactory {
                 hasHadPreSurgerySystemicTargetedTherapy = false,
                 hasHadPostSurgerySystemicTargetedTherapy = false,
                 responseMeasure = null,
-                pfsMeasures = listOf(),
-                cci = resolve(it.comorbidities.cci),
-                cciNumberOfCategories = resolve(it.comorbidities.cciCat),
-                cciHasAids = resolve(it.comorbidities.cciAids),
-                cciHasCongestiveHeartFailure = resolve(it.comorbidities.cciChf),
-                cciHasCollagenosis = resolve(it.comorbidities.cciCollagenosis),
-                cciHasCopd = resolve(it.comorbidities.cciCopd),
-                cciHasCerebrovascularDisease = resolve(it.comorbidities.cciCvd),
-                cciHasDementia = resolve(it.comorbidities.cciDementia),
-                cciHasDiabetesMellitus = resolve(it.comorbidities.cciDm),
-                cciHasDiabetesMellitusWithEndOrganDamage = resolve(it.comorbidities.cciEodDm),
-                cciHasOtherMalignancy = resolve(it.comorbidities.cciMalignancy),
-                cciHasOtherMetastaticSolidTumor = resolve(it.comorbidities.cciMetastatic),
-                cciHasMyocardialInfarct = resolve(it.comorbidities.cciMi),
-                cciHasMildLiverDisease = resolve(it.comorbidities.cciMildLiver),
-                cciHasHemiplegiaOrParaplegia = resolve(it.comorbidities.cciPlegia),
-                cciHasPeripheralVascularDisease = resolve(it.comorbidities.cciPvd),
-                cciHasRenalDisease = resolve(it.comorbidities.cciRenal),
-                cciHasLiverDisease = resolve(it.comorbidities.cciSevereLiver),
-                cciHasUlcerDisease = resolve(it.comorbidities.cciUlcer),
-                presentedWithIleus = resolve(it.clinicalCharacteristics.ileus),
-                presentedWithPerforation = resolve(it.clinicalCharacteristics.perforatie),
-                anorectalVergeDistanceCategory = resolve(it.clinicalCharacteristics.anusAfst),
-                hasMsi = null,
-                hasBrafMutation = null,
-                hasBrafV600EMutation = null,
-                hasRasMutation = null,
-                hasKrasG12CMutation = null
+                pfsMeasures = listOf()
             )
         }
-
-        return TumorEpisodes(diagnosisEpisode, listOf())
     }
 
     private fun extractLabMeasurements(labValues: NcrLabValues): List<LabMeasurement> {
