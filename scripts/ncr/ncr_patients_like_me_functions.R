@@ -47,7 +47,7 @@ find_similar_patients_2 <- function(ncr_ref_data, patient_age, patient_who, pati
                                           meta_epis == 1 &
                                           morf_cat == 1 &
                                           tumgericht_ther == 1 &
-                                          (chemo == code || target == code) &
+                                          (chemo == code | target == code) &
                                           leeft >= patient_age - 1 &
                                           leeft <= patient_age + 1 &
                                           perf_stat == patient_who)
