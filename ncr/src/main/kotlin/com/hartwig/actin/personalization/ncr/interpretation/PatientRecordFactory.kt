@@ -6,23 +6,36 @@ import com.hartwig.actin.personalization.datamodel.GastroenterologyResection
 import com.hartwig.actin.personalization.datamodel.LabMeasure
 import com.hartwig.actin.personalization.datamodel.LabMeasurement
 import com.hartwig.actin.personalization.datamodel.Location
+import com.hartwig.actin.personalization.datamodel.MetastasesRadiotherapy
 import com.hartwig.actin.personalization.datamodel.MetastasesSurgery
 import com.hartwig.actin.personalization.datamodel.Metastasis
 import com.hartwig.actin.personalization.datamodel.PatientRecord
+import com.hartwig.actin.personalization.datamodel.Radiotherapy
 import com.hartwig.actin.personalization.datamodel.Sex
 import com.hartwig.actin.personalization.datamodel.Surgery
+import com.hartwig.actin.personalization.datamodel.SystemicTreatment
+import com.hartwig.actin.personalization.datamodel.SystemicTreatmentScheme
 import com.hartwig.actin.personalization.datamodel.TumorEpisodes
 import com.hartwig.actin.personalization.datamodel.TumorOfInterest
 import com.hartwig.actin.personalization.datamodel.TumorType
 import com.hartwig.actin.personalization.ncr.datamodel.NcrGastroenterologyResection
 import com.hartwig.actin.personalization.ncr.datamodel.NcrLabValues
 import com.hartwig.actin.personalization.ncr.datamodel.NcrMetastaticDiagnosis
+import com.hartwig.actin.personalization.ncr.datamodel.NcrMetastaticRadiotherapy
 import com.hartwig.actin.personalization.ncr.datamodel.NcrMetastaticSurgery
+import com.hartwig.actin.personalization.ncr.datamodel.NcrPrimaryRadiotherapy
 import com.hartwig.actin.personalization.ncr.datamodel.NcrPrimarySurgery
 import com.hartwig.actin.personalization.ncr.datamodel.NcrRecord
+import com.hartwig.actin.personalization.ncr.datamodel.NcrSystemicTreatment
 import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrLocationMapper.resolveLocation
+import com.hartwig.actin.personalization.ncr.interpretation.mapper.resolveCyclesAndDetails
+import com.hartwig.actin.personalization.ncr.interpretation.mapper.resolveMetastasesRadiotherapyType
 import com.hartwig.actin.personalization.ncr.interpretation.mapper.resolveMetastasesSurgeryType
+import com.hartwig.actin.personalization.ncr.interpretation.mapper.resolvePreAndPostSurgery
+import com.hartwig.actin.personalization.ncr.interpretation.mapper.resolveTreatmentName
 import java.util.stream.Collectors
+import kotlin.math.max
+import kotlin.math.min
 
 private const val DIAGNOSIS_EPISODE = "DIA"
 
@@ -158,6 +171,16 @@ object PatientRecordFactory {
 
     private fun extractEpisode(record: NcrRecord): Episode {
         return with(record) {
+            val (hasHadPreSurgeryRadiotherapy, hasHadPostSurgeryRadiotherapy) = resolvePreAndPostSurgery(treatment.primaryRadiotherapy.rt)
+            val (hasHadPreSurgeryChemoRadiotherapy, hasHadPostSurgeryChemoRadiotherapy) =
+                resolvePreAndPostSurgery(treatment.primaryRadiotherapy.chemort)
+            val (hasHadPreSurgerySystemicChemotherapy, hasHadPostSurgerySystemicChemotherapy) =
+                resolvePreAndPostSurgery(treatment.systemicTreatment.chemo)
+            val (hasHadPreSurgerySystemicTargetedTherapy, hasHadPostSurgerySystemicTargetedTherapy) =
+                resolvePreAndPostSurgery(treatment.systemicTreatment.target)
+
+            val rawSystemicTreatmentSchemes = extractRawSystemicTreatmentSchemes(treatment.systemicTreatment)
+            
             Episode(
                 id = identification.keyEid,
                 order = identification.teller,
@@ -196,22 +219,124 @@ object PatientRecordFactory {
                 gastroenterologyResections = extractGastroenterologyResections(treatment.gastroenterologyResection),
                 surgeries = extractSurgeries(treatment.primarySurgery),
                 metastasesSurgeries = extractMetastasesSurgeries(treatment.metastaticSurgery),
-                radiotherapies = listOf(),
-                metastasesRadiotherapies = listOf(),
-                hasHadHipecTreatment = false,
-                intervalTumorIncidenceHipecTreatment = null,
-                systemicTreatments = listOf(),
+                radiotherapies = extractRadiotherapies(treatment.primaryRadiotherapy),
+                metastasesRadiotherapies = extractMetastasesRadiotherapies(treatment.metastaticRadiotherapy),
+                hasHadHipecTreatment = resolve(treatment.hipec.hipec),
+                intervalTumorIncidenceHipecTreatment = treatment.hipec.hipecInt1,
+                systemicTreatments = rawSystemicTreatmentSchemes.flatMap(SystemicTreatmentScheme::treatments),
                 systemicTreatmentSchemes = listOf(),
-                hasHadPreSurgeryRadiotherapy = false,
-                hasHadPostSurgeryRadiotherapy = false,
-                hasHadPreSurgeryChemoRadiotherapy = false,
-                hasHadPostSurgeryChemoRadiotherapy = true,
-                hasHadPreSurgerySystemicChemotherapy = false,
-                hasHadPostSurgerySystemicChemotherapy = false,
-                hasHadPreSurgerySystemicTargetedTherapy = false,
-                hasHadPostSurgerySystemicTargetedTherapy = false,
+                hasHadPreSurgeryRadiotherapy = hasHadPreSurgeryRadiotherapy,
+                hasHadPostSurgeryRadiotherapy = hasHadPostSurgeryRadiotherapy,
+                hasHadPreSurgeryChemoRadiotherapy = hasHadPreSurgeryChemoRadiotherapy,
+                hasHadPostSurgeryChemoRadiotherapy = hasHadPostSurgeryChemoRadiotherapy,
+                hasHadPreSurgerySystemicChemotherapy = hasHadPreSurgerySystemicChemotherapy,
+                hasHadPostSurgerySystemicChemotherapy = hasHadPostSurgerySystemicChemotherapy,
+                hasHadPreSurgerySystemicTargetedTherapy = hasHadPreSurgerySystemicTargetedTherapy,
+                hasHadPostSurgerySystemicTargetedTherapy = hasHadPostSurgerySystemicTargetedTherapy,
                 responseMeasure = null,
                 pfsMeasures = listOf()
+            )
+        }
+    }
+
+    private data class StartAndStopMinAndMax(val startMin: Int?, val startMax: Int?, val stopMin: Int?, val stopMax: Int?) {
+
+        operator fun plus(other: StartAndStopMinAndMax): StartAndStopMinAndMax {
+            return StartAndStopMinAndMax(
+                startMin = minOfNullables(startMin, other.startMin),
+                startMax = maxOfNullables(startMax, other.startMax),
+                stopMin = minOfNullables(stopMin, other.stopMin),
+                stopMax = maxOfNullables(stopMax, other.stopMax)
+            )
+        }
+
+        private fun maxOfNullables(a: Int?, b: Int?): Int? {
+            return when {
+                a == null -> b
+                b == null -> a
+                else -> max(a, b)
+            }
+        }
+
+        private fun minOfNullables(a: Int?, b: Int?): Int? {
+            return when {
+                a == null -> b
+                b == null -> a
+                else -> min(a, b)
+            }
+        }
+    }
+
+
+    private fun extractRawSystemicTreatmentSchemes(
+        ncrSystemicTreatment: NcrSystemicTreatment
+    ): List<SystemicTreatmentScheme> {
+        return with(ncrSystemicTreatment) {
+            listOfNotNull(
+                systCode1?.let { extractSystemic(it, systSchemanum1, systKuren1, systStartInt1, systStopInt1, systPrepost1) },
+                systCode2?.let { extractSystemic(it, systSchemanum2, systKuren2, systStartInt2, systStopInt2, systPrepost2) },
+                systCode3?.let { extractSystemic(it, systSchemanum3, systKuren3, systStartInt3, systStopInt3, systPrepost3) },
+                systCode4?.let { extractSystemic(it, systSchemanum4, systKuren4, systStartInt4, systStopInt4, systPrepost4) },
+                systCode5?.let { extractSystemic(it, systSchemanum5, systKuren5, systStartInt5, systStopInt5, systPrepost5) },
+                systCode6?.let { extractSystemic(it, systSchemanum6, systKuren6, systStartInt6, systStopInt6, systPrepost6) },
+                systCode7?.let { extractSystemic(it, systSchemanum7, systKuren7, systStartInt7, systStopInt7, systPrepost7) },
+                systCode8?.let { extractSystemic(it, systSchemanum8, systKuren8, systStartInt8, systStopInt8, systPrepost8) },
+                systCode9?.let { extractSystemic(it, systSchemanum9, systKuren9, systStartInt9, systStopInt9, systPrepost9) },
+                systCode10?.let { extractSystemic(it, systSchemanum10, systKuren10, systStartInt10, systStopInt10, systPrepost10) },
+                systCode11?.let { extractSystemic(it, systSchemanum11, systKuren11, systStartInt11, systStopInt11, systPrepost11) },
+                systCode12?.let { extractSystemic(it, systSchemanum12, systKuren12, systStartInt12, systStopInt12, systPrepost12) },
+                systCode13?.let { extractSystemic(it, systSchemanum13, systKuren13, systStartInt13, systStopInt13, systPrepost13) },
+                systCode14?.let { extractSystemic(it, systSchemanum14, systKuren14, systStartInt14, systStopInt14, systPrepost14) }
+            )
+                .groupBy(SystemicTreatment::treatmentSchemeNumber)
+                .map { (_, treatments) ->
+                    val (startMin, startMax, stopMin, stopMax) = treatments.map {
+                        with(it) {
+                            StartAndStopMinAndMax(
+                                intervalTumorIncidenceTreatmentStart,
+                                intervalTumorIncidenceTreatmentStart,
+                                intervalTumorIncidenceTreatmentStop,
+                                intervalTumorIncidenceTreatmentStop
+                            )
+                        }
+                    }
+                        .reduce(StartAndStopMinAndMax::plus)
+                    SystemicTreatmentScheme(treatments, startMin, startMax, stopMin, stopMax, null, null, null, null, emptyList())
+                }
+        }
+    }
+
+    private fun extractSystemic(
+        code: String, schemaNum: Int?, cycleCode: Int?, startInterval: Int?, stopInterval: Int?, prePostCode: Int?
+    ): SystemicTreatment {
+        val (preSurgery, postSurgery) = resolvePreAndPostSurgery(prePostCode)
+        val (cycles, cycleDetails) = resolveCyclesAndDetails(cycleCode)
+        return SystemicTreatment(
+            resolveTreatmentName(code), schemaNum, cycles, cycleDetails, startInterval, stopInterval, preSurgery, postSurgery
+        )
+    }
+
+    private fun extractMetastasesRadiotherapies(ncrMetastaticRadiotherapy: NcrMetastaticRadiotherapy): List<MetastasesRadiotherapy> {
+        return with(ncrMetastaticRadiotherapy) {
+            listOf(
+                Triple(metaRtCode1, metaRtStartInt1, metaRtStopInt1),
+                Triple(metaRtCode2, metaRtStartInt2, metaRtStopInt2),
+                Triple(metaRtCode3, metaRtStartInt3, metaRtStopInt3),
+                Triple(metaRtCode4, metaRtStartInt4, metaRtStopInt4)
+            )
+                .mapNotNull { (type, startInterval, stopInterval) ->
+                    type?.let {
+                        MetastasesRadiotherapy(resolveMetastasesRadiotherapyType(it), startInterval?.toInt(), stopInterval?.toInt())
+                    }
+                }
+        }
+    }
+
+    private fun extractRadiotherapies(ncrPrimaryRadiotherapy: NcrPrimaryRadiotherapy): List<Radiotherapy> {
+        return with(ncrPrimaryRadiotherapy) {
+            listOfNotNull(
+                rtType1?.let { Radiotherapy(resolve(it), rtDosis1, rtStartInt1, rtStopInt1) },
+                rtType2?.let { Radiotherapy(resolve(it), rtDosis2, rtStartInt2, rtStopInt2) }
             )
         }
     }

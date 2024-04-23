@@ -25,8 +25,8 @@ fun resolveTreatmentName(code: String): TreatmentName {
         "L01BC03" -> TreatmentName.TEGAFUR
         "L01BC05" -> TreatmentName.GEMCITABINE_SYSTEMIC
         "L01BC06" -> TreatmentName.CAPECITABINE
-        "L01BC53" -> TreatmentName.TEGAFUR_GIMERACIL_OTERACIL
-        "L01BC59" -> TreatmentName.TRIFLURIDINE_TIPIRACIL
+        "L01BC53" -> TreatmentName.TEGAFUR_OR_GIMERACIL_OR_OTERACIL
+        "L01BC59" -> TreatmentName.TRIFLURIDINE_AND_TIPIRACIL
         "L01CA02" -> TreatmentName.VINCRISTINE
         "L01CB01" -> TreatmentName.ETOPOSIDE
         "L01CD01" -> TreatmentName.PACLITAXEL
@@ -39,7 +39,7 @@ fun resolveTreatmentName(code: String): TreatmentName {
         "L01XA01" -> TreatmentName.CISPLATIN
         "L01XA02" -> TreatmentName.CARBOPLATIN
         "L01XA03" -> TreatmentName.OXALIPLATIN
-        "L01XX05" -> TreatmentName.HYDROREA_HYDROXYUREA
+        "L01XX05" -> TreatmentName.HYDROREA_OR_HYDROXYUREA
         "L01XX27" -> TreatmentName.ATO_ARSENIC_TRIOXIDE
         "500000" -> TreatmentName.HORMONAL_THERAPY_NNO
         "510000" -> TreatmentName.HORMONAL_THERAPY_THROUGH_SURGERY
@@ -47,12 +47,12 @@ fun resolveTreatmentName(code: String): TreatmentName {
         "H01CB02" -> TreatmentName.OCTREOTIDE
         "L02AB01" -> TreatmentName.MEGESTROL_MEGACE
         "L02AE" -> TreatmentName.GONADORELIN_AGONISTS_LHRH
-        "L02AE02" -> TreatmentName.LEUPRORELIN_ELIGARD_LUCRIN
+        "L02AE02" -> TreatmentName.LEUPRORELIN_ELIGARD_OR_LUCRIN
         "L02AE03" -> TreatmentName.GOSERELIN_ZOLADEX
         "L02AE04" -> TreatmentName.TRIPTORELIN_PAMORELIN
         "L02BA01" -> TreatmentName.TAMOXIFEN
         "L02BB" -> TreatmentName.ANTI_ANDROGENS
-        "L02BB03" -> TreatmentName.BICALUTAMIDE_BILURON_CASODEX
+        "L02BB03" -> TreatmentName.BICALUTAMIDE_BILURON_OR_CASODEX
         "L02BG" -> TreatmentName.AROMATASE_INHIBITORS
         "L02BG03" -> TreatmentName.ANASTROZOLE
         "L02BG04" -> TreatmentName.LETROZOLE_FEMARA
