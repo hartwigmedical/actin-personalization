@@ -60,5 +60,5 @@ data class Episode(
     val hasHadPostSurgerySystemicTargetedTherapy: Boolean,
 
     val responseMeasure: ResponseMeasure?,
-    val pfsMeasures: List<PFSMeasure>,
+    val pfsMeasures: List<PfsMeasure>,
 )

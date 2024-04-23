@@ -9,7 +9,8 @@ import com.hartwig.actin.personalization.datamodel.ExtraMuralInvasionCategory
 import com.hartwig.actin.personalization.datamodel.GastroenterologyResectionType
 import com.hartwig.actin.personalization.datamodel.LymphaticInvasionCategory
 import com.hartwig.actin.personalization.datamodel.NumberOfLiverMetastases
-import com.hartwig.actin.personalization.datamodel.PFSMeasureType
+import com.hartwig.actin.personalization.datamodel.PfsMeasureFollowUpEvent
+import com.hartwig.actin.personalization.datamodel.PfsMeasureType
 import com.hartwig.actin.personalization.datamodel.RadiotherapyType
 import com.hartwig.actin.personalization.datamodel.ReasonRefrainmentFromTumorDirectedTreatment
 import com.hartwig.actin.personalization.datamodel.Sex
@@ -35,7 +36,8 @@ import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrExtraMural
 import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrGastroenterologyResectionTypeMapper
 import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrLymphaticInvasionCategoryMapper
 import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrNumberOfLiverMetastasesMapper
-import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrPFSMeasureTypeMapper
+import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrPfsMeasureFollowUpEventMapper
+import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrPfsMeasureTypeMapper
 import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrRadiotherapyTypeMapper
 import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrReasonRefrainmentFromTumorDirectedTherapyMapper
 import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrSexMapper
@@ -64,7 +66,8 @@ inline fun <reified T> resolve(code: Int): T {
         GastroenterologyResectionType::class -> NcrGastroenterologyResectionTypeMapper
         LymphaticInvasionCategory::class -> NcrLymphaticInvasionCategoryMapper
         NumberOfLiverMetastases::class -> NcrNumberOfLiverMetastasesMapper
-        PFSMeasureType::class -> NcrPFSMeasureTypeMapper
+        PfsMeasureType::class -> NcrPfsMeasureTypeMapper
+        PfsMeasureFollowUpEvent::class -> NcrPfsMeasureFollowUpEventMapper
         RadiotherapyType::class -> NcrRadiotherapyTypeMapper
         ReasonRefrainmentFromTumorDirectedTreatment::class -> NcrReasonRefrainmentFromTumorDirectedTherapyMapper
         Sex::class -> NcrSexMapper

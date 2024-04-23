@@ -1,6 +1,6 @@
 package com.hartwig.actin.personalization.datamodel
 
-enum class PFSMeasureType {
+enum class PfsMeasureType {
     CENSOR,
     PROGRESSION,
     DEATH
