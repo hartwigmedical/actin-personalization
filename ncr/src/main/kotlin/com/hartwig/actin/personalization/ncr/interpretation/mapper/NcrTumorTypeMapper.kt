@@ -6,6 +6,10 @@ object NcrTumorTypeMapper : NcrCodeMapper<TumorType> {
 
     override fun resolve(code: Int): TumorType {
         return when (code) {
+            1 -> TumorType.CRC_ADENOCARCINOMA
+            2 -> TumorType.CRC_MUCINOUS
+            3 -> TumorType.CRC_SIGNET_RING_CELL
+            5 -> TumorType.CRC_OTHER
             8000 -> TumorType.NEOPLASM_NOS
             8001 -> TumorType.MALIGNANT_TUMOR_CELLS
             8010 -> TumorType.CARCINOMA_NOS

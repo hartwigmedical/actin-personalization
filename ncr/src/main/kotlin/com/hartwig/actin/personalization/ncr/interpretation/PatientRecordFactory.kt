@@ -5,21 +5,21 @@ import com.hartwig.actin.personalization.datamodel.Episode
 import com.hartwig.actin.personalization.datamodel.GastroenterologyResection
 import com.hartwig.actin.personalization.datamodel.LabMeasure
 import com.hartwig.actin.personalization.datamodel.LabMeasurement
-import com.hartwig.actin.personalization.datamodel.Location
 import com.hartwig.actin.personalization.datamodel.MetastasesRadiotherapy
 import com.hartwig.actin.personalization.datamodel.MetastasesSurgery
 import com.hartwig.actin.personalization.datamodel.Metastasis
 import com.hartwig.actin.personalization.datamodel.PatientRecord
 import com.hartwig.actin.personalization.datamodel.PfsMeasure
+import com.hartwig.actin.personalization.datamodel.PriorTumor
 import com.hartwig.actin.personalization.datamodel.Radiotherapy
 import com.hartwig.actin.personalization.datamodel.ResponseMeasure
 import com.hartwig.actin.personalization.datamodel.ResponseMeasureType
 import com.hartwig.actin.personalization.datamodel.Sex
+import com.hartwig.actin.personalization.datamodel.StageTNM
 import com.hartwig.actin.personalization.datamodel.Surgery
 import com.hartwig.actin.personalization.datamodel.SystemicTreatmentScheme
 import com.hartwig.actin.personalization.datamodel.TumorEpisodes
 import com.hartwig.actin.personalization.datamodel.TumorOfInterest
-import com.hartwig.actin.personalization.datamodel.TumorType
 import com.hartwig.actin.personalization.ncr.datamodel.NcrGastroenterologyResection
 import com.hartwig.actin.personalization.ncr.datamodel.NcrLabValues
 import com.hartwig.actin.personalization.ncr.datamodel.NcrMetastaticDiagnosis
@@ -34,6 +34,7 @@ import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrLocationMa
 import com.hartwig.actin.personalization.ncr.interpretation.mapper.resolveMetastasesRadiotherapyType
 import com.hartwig.actin.personalization.ncr.interpretation.mapper.resolveMetastasesSurgeryType
 import com.hartwig.actin.personalization.ncr.interpretation.mapper.resolvePreAndPostSurgery
+import com.hartwig.actin.personalization.ncr.interpretation.mapper.resolveTreatmentName
 import java.util.stream.Collectors
 
 private const val DIAGNOSIS_EPISODE = "DIA"
@@ -53,8 +54,7 @@ object PatientRecordFactory {
             ncrId = extractNcrId(ncrRecords),
             sex = extractSex(ncrRecords),
             isAlive = determineIsAlive(ncrRecords),
-            episodesPerTumorOfInterest = determineEpisodesPerTumorOfInterest(ncrRecords),
-            priorTumors = listOf()
+            episodesPerTumorOfInterest = determineEpisodesPerTumorOfInterest(ncrRecords)
         )
     }
 
@@ -95,16 +95,101 @@ object PatientRecordFactory {
     }
 
     private fun createEpisodesForOneTumorOfInterest(ncrRecords: List<NcrRecord>): Pair<TumorOfInterest, TumorEpisodes> {
-        return Pair(createTumorOfInterest(ncrRecords), createTumorEpisodes(ncrRecords))
+        val tumorEpisodes = createTumorEpisodes(ncrRecords)
+        val episodes = tumorEpisodes.followupEpisodes + tumorEpisodes.diagnosisEpisode
+
+        val diagnosisRecord = diagnosisEpisodes(ncrRecords).minBy { it.identification.keyEid }
+        val priorTumors = extractPriorTumors(diagnosisRecord)
+        val tumorOfInterest = TumorOfInterest(
+            consolidatedTumorType = resolve(ncrRecords.mapNotNull { it.primaryDiagnosis.morfCat }.distinct().single()),
+            consolidatedTumorLocation = episodes.map(Episode::tumorLocation).distinct().single(),
+            hasHadTumorDirectedSystemicTherapy = episodes.any(Episode::hasReceivedTumorDirectedTreatment),
+            hasHadPriorTumor = priorTumors.isNotEmpty(),
+            priorTumors = priorTumors
+        )
+        return Pair(tumorOfInterest, tumorEpisodes)
     }
 
-    private fun createTumorOfInterest(ncrRecords: List<NcrRecord>): TumorOfInterest {
-        return TumorOfInterest(
-            consolidatedTumorType = TumorType.ADENOCARCINOMA_DIFFUSE_TYPE,
-            consolidatedTumorLocation = Location.UNKNOWN_PRIMARY_TUMOR,
-            hasHadTumorDirectedSystemicTherapy = false,
-            hasHadPriorTumor = false,
-            intervalsTumorIncidenceDiagnosisTumorPrior = listOf()
+    private fun extractPriorTumors(record: NcrRecord): List<PriorTumor> {
+        return with(record.priorMalignancies) {
+            listOfNotNull(
+                mal1Morf?.let {
+                    extractPriorTumor(
+                        it,
+                        mal1TopoSublok,
+                        mal1Syst,
+                        mal1Int,
+                        1,
+                        mal1Tumsoort,
+                        mal1Stadium,
+                        listOfNotNull(
+                            mal1SystCode1,
+                            mal1SystCode2,
+                            mal1SystCode3,
+                            mal1SystCode4,
+                            mal1SystCode5,
+                            mal1SystCode6,
+                            mal1SystCode7,
+                            mal1SystCode8,
+                            mal1SystCode9
+                        )
+                    )
+                },
+                mal2Morf?.let {
+                    extractPriorTumor(
+                        it,
+                        mal2TopoSublok,
+                        mal2Syst,
+                        mal2Int,
+                        2,
+                        mal2Tumsoort,
+                        mal2Stadium,
+                        listOfNotNull(mal2SystCode1, mal2SystCode2, mal2SystCode3, mal2SystCode4, mal2SystCode5)
+                    )
+                },
+                mal3Morf?.let {
+                    extractPriorTumor(
+                        it,
+                        mal3TopoSublok,
+                        mal3Syst,
+                        mal3Int,
+                        3,
+                        mal3Tumsoort,
+                        mal3Stadium,
+                        listOfNotNull(mal3SystCode1, mal3SystCode2, mal3SystCode3, mal3SystCode4)
+                    )
+                },
+                mal4Morf?.let {
+                    extractPriorTumor(
+                        it, mal4TopoSublok, mal4Syst, mal4Int, 4, mal4Tumsoort, mal4Stadium, emptyList()
+                    )
+                }
+            )
+        }
+    }
+
+    private fun extractPriorTumor(
+        type: Int,
+        location: String?,
+        hadSystemic: Int?,
+        interval: Int?,
+        id: Int,
+        category: Int?,
+        stage: String?,
+        treatments: List<String>
+    ): PriorTumor {
+        if (location == null) {
+            throw IllegalStateException("Missing location for prior tumor with ID $id")
+        }
+        return PriorTumor(
+            consolidatedTumorType = resolve(type),
+            consolidatedTumorLocation = resolveLocation(location),
+            hasHadTumorDirectedSystemicTherapy = resolve(hadSystemic),
+            incidenceIntervalPrimaryTumor = interval,
+            tumorPriorId = id,
+            tumorLocationCategory = resolve(category),
+            stageTNM = stage?.let { enumValueOf<StageTNM>(it) },
+            systemicTreatments = treatments.map(::resolveTreatmentName)
         )
     }
 

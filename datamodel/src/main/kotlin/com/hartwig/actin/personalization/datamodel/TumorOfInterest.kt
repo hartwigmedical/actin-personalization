@@ -6,6 +6,5 @@ data class TumorOfInterest(
     override val hasHadTumorDirectedSystemicTherapy: Boolean,
 
     val hasHadPriorTumor: Boolean,
-    val intervalsTumorIncidenceDiagnosisTumorPrior: List<Int?>
-
+    val priorTumors: List<PriorTumor>
 ) : Tumor
