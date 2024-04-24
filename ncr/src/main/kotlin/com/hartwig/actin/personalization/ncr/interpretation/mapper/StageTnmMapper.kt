@@ -3,8 +3,8 @@ package com.hartwig.actin.personalization.ncr.interpretation.mapper
 import com.hartwig.actin.personalization.datamodel.StageTnm
 import com.hartwig.actin.personalization.ncr.interpretation.NcrStringCodeMapper
 
-object StageTnmMapper : NcrStringCodeMapper<StageTnm> {
-    override fun resolve(code: String): StageTnm {
+object StageTnmMapper : NcrStringCodeMapper<StageTnm?> {
+    override fun resolve(code: String): StageTnm? {
         return when (code) {
             "0" -> StageTnm.ZERO
             "1" -> StageTnm.I
@@ -19,6 +19,7 @@ object StageTnmMapper : NcrStringCodeMapper<StageTnm> {
             "4C" -> StageTnm.IVC
             "NA" -> StageTnm.NA
             "X" -> StageTnm.X
+            "NVT" -> null
             else -> throw IllegalArgumentException("Unknown StageTnm code: $code")
         }
     }

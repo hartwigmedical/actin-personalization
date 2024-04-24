@@ -24,7 +24,7 @@ data class Episode(
 
     val distantMetastasesStatus: DistantMetastasesStatus,
     val metastases: List<Metastasis>,
-    val numberOfLiverMetastases: Int?,
+    val numberOfLiverMetastases: NumberOfLiverMetastases?,
     val maximumSizeOfLiverMetastasisInMm: Int?,
 
     val hasDoublePrimaryTumor: Boolean?,
