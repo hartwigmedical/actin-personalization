@@ -11,6 +11,7 @@ object NcrTnmMMapper : NcrStringCodeMapper<TnmM?> {
             "1A" -> TnmM.M1A
             "1B" -> TnmM.M1B
             "1C" -> TnmM.M1C
+            "-" -> TnmM.M_minus
             "X" -> TnmM.X
             "" -> null
             else -> throw IllegalArgumentException("Unknown TnmM code: $code")

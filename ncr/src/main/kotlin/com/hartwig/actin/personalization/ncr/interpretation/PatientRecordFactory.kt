@@ -75,7 +75,6 @@ object PatientRecordFactory {
     private fun createTumorEpisodes(ncrRecords: List<NcrRecord>): TumorEpisodes {
         val (ncrDiagnosisRecords, ncrTreatmentRecords) = ncrRecords.partition { it.identification.epis == DIAGNOSIS_EPISODE }
         val diagnosisRecord = ncrDiagnosisRecords.minBy { it.identification.keyEid }
-        val diagnosisEpisode = extractEpisode(diagnosisRecord)
         val diagnosis = with(diagnosisRecord) {
             val (hasBrafMutation, hasBrafV600EMutation) = when (molecularCharacteristics.brafMut) {
                 0 -> Pair(false, false)
@@ -125,7 +124,7 @@ object PatientRecordFactory {
             )
         }
 
-        return TumorEpisodes(diagnosis, diagnosisEpisode, ncrTreatmentRecords.map(::extractEpisode))
+        return TumorEpisodes(diagnosis, extractEpisode(diagnosisRecord)!!, ncrTreatmentRecords.mapNotNull(::extractEpisode))
     }
 
     private fun diagnosisEpisodes(ncrRecords: List<NcrRecord>): List<NcrRecord> {
