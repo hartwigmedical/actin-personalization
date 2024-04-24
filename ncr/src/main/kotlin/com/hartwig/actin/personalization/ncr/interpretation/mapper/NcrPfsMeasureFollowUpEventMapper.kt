@@ -1,8 +1,9 @@
 package com.hartwig.actin.personalization.ncr.interpretation.mapper
 
 import com.hartwig.actin.personalization.datamodel.PfsMeasureFollowUpEvent
+import com.hartwig.actin.personalization.ncr.interpretation.NcrIntCodeMapper
 
-object NcrPfsMeasureFollowUpEventMapper : NcrCodeMapper<PfsMeasureFollowUpEvent?> {
+object NcrPfsMeasureFollowUpEventMapper : NcrIntCodeMapper<PfsMeasureFollowUpEvent?> {
 
     override fun resolve(code: Int): PfsMeasureFollowUpEvent? {
         return when (code) {

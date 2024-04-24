@@ -1,8 +1,9 @@
 package com.hartwig.actin.personalization.ncr.interpretation.mapper
 
 import com.hartwig.actin.personalization.datamodel.VenousInvasionCategory
+import com.hartwig.actin.personalization.ncr.interpretation.NcrIntCodeMapper
 
-object NcrVenousInvasionCategoryMapper : NcrCodeMapper<VenousInvasionCategory?> {
+object NcrVenousInvasionCategoryMapper : NcrIntCodeMapper<VenousInvasionCategory?> {
 
     override fun resolve(code: Int): VenousInvasionCategory? {
         return when (code) {

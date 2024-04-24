@@ -1,8 +1,9 @@
 package com.hartwig.actin.personalization.ncr.interpretation.mapper
 
 import com.hartwig.actin.personalization.datamodel.GastroenterologyResectionType
+import com.hartwig.actin.personalization.ncr.interpretation.NcrIntCodeMapper
 
-object NcrGastroenterologyResectionTypeMapper : NcrCodeMapper<GastroenterologyResectionType> {
+object NcrGastroenterologyResectionTypeMapper : NcrIntCodeMapper<GastroenterologyResectionType> {
 
     override fun resolve(code: Int): GastroenterologyResectionType {
         return when (code) {

@@ -1,8 +1,9 @@
 package com.hartwig.actin.personalization.ncr.interpretation.mapper
 
 import com.hartwig.actin.personalization.datamodel.NumberOfLiverMetastases
+import com.hartwig.actin.personalization.ncr.interpretation.NcrIntCodeMapper
 
-object NcrNumberOfLiverMetastasesMapper : NcrCodeMapper<NumberOfLiverMetastases?> {
+object NcrNumberOfLiverMetastasesMapper : NcrIntCodeMapper<NumberOfLiverMetastases?> {
 
     override fun resolve(code: Int): NumberOfLiverMetastases? {
         return when (code) {

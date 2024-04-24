@@ -1,6 +1,8 @@
 package com.hartwig.actin.personalization.ncr.interpretation.mapper
 
-object NcrBooleanMapper : NcrCodeMapper<Boolean?> {
+import com.hartwig.actin.personalization.ncr.interpretation.NcrIntCodeMapper
+
+object NcrBooleanMapper : NcrIntCodeMapper<Boolean?> {
 
     override fun resolve(code: Int): Boolean? {
         return when (code) {

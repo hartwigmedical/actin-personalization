@@ -23,10 +23,9 @@ import com.hartwig.actin.personalization.ncr.datamodel.NcrPrimarySurgery
 import com.hartwig.actin.personalization.ncr.datamodel.NcrRecord
 import com.hartwig.actin.personalization.ncr.datamodel.NcrTreatmentResponse
 import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrLocationMapper
-import com.hartwig.actin.personalization.ncr.interpretation.mapper.resolveMetastasesRadiotherapyType
-import com.hartwig.actin.personalization.ncr.interpretation.mapper.resolveMetastasesSurgeryType
 import com.hartwig.actin.personalization.ncr.interpretation.mapper.resolvePreAndPostSurgery
 import com.hartwig.actin.personalization.ncr.interpretation.resolve
+import com.hartwig.actin.personalization.ncr.interpretation.resolveNullable
 
 fun extractEpisode(record: NcrRecord): Episode {
     return with(record) {
@@ -55,15 +54,15 @@ fun extractEpisode(record: NcrRecord): Episode {
             tumorBasisOfDiagnosis = resolve(primaryDiagnosis.diagBasis),
             tumorLocation = NcrLocationMapper.resolveLocation(primaryDiagnosis.topoSublok),
             tumorDifferentiationGrade = resolve(primaryDiagnosis.diffgrad.toInt()),
-            tnmCT = enumValueOfNullable(primaryDiagnosis.ct),
-            tnmCN = enumValueOfNullable(primaryDiagnosis.cn),
-            tnmCM = enumValueOfNullable(primaryDiagnosis.cm),
-            tnmPT = enumValueOfNullable(primaryDiagnosis.pt),
-            tnmPN = enumValueOfNullable(primaryDiagnosis.pn),
-            tnmPM = enumValueOfNullable(primaryDiagnosis.pm),
-            stageCTNM = enumValueOfNullable(primaryDiagnosis.cstadium),
-            stagePTNM = enumValueOfNullable(primaryDiagnosis.pstadium),
-            stageTNM = enumValueOfNullable(primaryDiagnosis.stadium),
+            tnmCT = resolve(primaryDiagnosis.ct),
+            tnmCN = resolve(primaryDiagnosis.cn),
+            tnmCM = resolve(primaryDiagnosis.cm),
+            tnmPT = resolveNullable(primaryDiagnosis.pt),
+            tnmPN = resolveNullable(primaryDiagnosis.pn),
+            tnmPM = resolveNullable(primaryDiagnosis.pm),
+            stageCTNM = resolveNullable(primaryDiagnosis.cstadium),
+            stagePTNM = resolveNullable(primaryDiagnosis.pstadium),
+            stageTNM = resolveNullable(primaryDiagnosis.stadium),
             numberOfInvestigatedLymphNodes = primaryDiagnosis.ondLymf,
             numberOfPositiveLymphNodes = primaryDiagnosis.posLymf,
             distantMetastasesStatus = resolve(identification.metaEpis),
@@ -104,10 +103,6 @@ fun extractEpisode(record: NcrRecord): Episode {
     }
 }
 
-private inline fun <reified T : E?, reified E : Enum<E>> enumValueOfNullable(code: String?): T {
-    return code?.let { enumValueOf<E>(it) } as T
-}
-
 private fun extractPfsMeasures(response: NcrTreatmentResponse): List<PfsMeasure> {
     return with(response) {
         listOf(
@@ -130,7 +125,7 @@ private fun extractMetastasesRadiotherapies(ncrMetastaticRadiotherapy: NcrMetast
         )
             .mapNotNull { (type, startInterval, stopInterval) ->
                 type?.let {
-                    MetastasesRadiotherapy(resolveMetastasesRadiotherapyType(it), startInterval?.toInt(), stopInterval?.toInt())
+                    MetastasesRadiotherapy(resolve(it), startInterval?.toInt(), stopInterval?.toInt())
                 }
             }
     }
@@ -153,7 +148,7 @@ private fun extractMetastasesSurgeries(metastaticSurgery: NcrMetastaticSurgery):
             Triple(metaChirCode3, metaChirRad3, metaChirInt3)
         )
             .mapNotNull { (type, radicality, interval) ->
-                type?.let { MetastasesSurgery(resolveMetastasesSurgeryType(it), resolve(radicality), interval, null) }
+                type?.let { MetastasesSurgery(resolve(it), resolve(radicality), interval, null) }
             }
     }
 }

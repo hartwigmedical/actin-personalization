@@ -1,8 +1,9 @@
 package com.hartwig.actin.personalization.ncr.interpretation.mapper
 
 import com.hartwig.actin.personalization.datamodel.DistantMetastasesStatus
+import com.hartwig.actin.personalization.ncr.interpretation.NcrIntCodeMapper
 
-object NcrDistantMetastasesStatusMapper : NcrCodeMapper<DistantMetastasesStatus> {
+object NcrDistantMetastasesStatusMapper : NcrIntCodeMapper<DistantMetastasesStatus> {
 
     override fun resolve(code: Int): DistantMetastasesStatus {
         return when (code) {

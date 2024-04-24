@@ -1,8 +1,9 @@
 package com.hartwig.actin.personalization.ncr.interpretation.mapper
 
 import com.hartwig.actin.personalization.datamodel.VitalStatus
+import com.hartwig.actin.personalization.ncr.interpretation.NcrIntCodeMapper
 
-object NcrVitalStatusMapper : NcrCodeMapper<VitalStatus> {
+object NcrVitalStatusMapper : NcrIntCodeMapper<VitalStatus> {
 
     override fun resolve(code: Int): VitalStatus {
         return when (code) {

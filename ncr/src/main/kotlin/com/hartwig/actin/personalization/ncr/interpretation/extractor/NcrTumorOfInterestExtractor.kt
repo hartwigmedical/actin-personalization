@@ -2,13 +2,12 @@ package com.hartwig.actin.personalization.ncr.interpretation.extractor
 
 import com.hartwig.actin.personalization.datamodel.Episode
 import com.hartwig.actin.personalization.datamodel.PriorTumor
-import com.hartwig.actin.personalization.datamodel.StageTNM
+import com.hartwig.actin.personalization.datamodel.StageTnm
 import com.hartwig.actin.personalization.datamodel.TumorEpisodes
 import com.hartwig.actin.personalization.datamodel.TumorOfInterest
 import com.hartwig.actin.personalization.ncr.datamodel.NcrRecord
 import com.hartwig.actin.personalization.ncr.interpretation.DIAGNOSIS_EPISODE
 import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrLocationMapper
-import com.hartwig.actin.personalization.ncr.interpretation.mapper.resolveTreatmentName
 import com.hartwig.actin.personalization.ncr.interpretation.resolve
 
 fun extractTumorOfInterest(ncrRecords: List<NcrRecord>, tumorEpisodes: TumorEpisodes): TumorOfInterest {
@@ -104,7 +103,7 @@ private fun extractPriorTumor(
         incidenceIntervalPrimaryTumor = interval,
         tumorPriorId = id,
         tumorLocationCategory = resolve(category),
-        stageTNM = stage?.let { enumValueOf<StageTNM>(it) },
-        systemicTreatments = treatments.map(::resolveTreatmentName)
+        stageTNM = stage?.let { enumValueOf<StageTnm>(it) },
+        systemicTreatments = treatments.map(::resolve)
     )
 }

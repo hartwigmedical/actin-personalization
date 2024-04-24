@@ -1,8 +1,9 @@
 package com.hartwig.actin.personalization.ncr.interpretation.mapper
 
 import com.hartwig.actin.personalization.datamodel.PfsMeasureType
+import com.hartwig.actin.personalization.ncr.interpretation.NcrIntCodeMapper
 
-object NcrPfsMeasureTypeMapper : NcrCodeMapper<PfsMeasureType> {
+object NcrPfsMeasureTypeMapper : NcrIntCodeMapper<PfsMeasureType> {
 
     override fun resolve(code: Int): PfsMeasureType {
         return when (code) {

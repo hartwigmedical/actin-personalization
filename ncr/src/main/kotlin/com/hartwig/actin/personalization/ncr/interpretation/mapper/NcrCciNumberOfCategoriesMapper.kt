@@ -1,8 +1,9 @@
 package com.hartwig.actin.personalization.ncr.interpretation.mapper
 
 import com.hartwig.actin.personalization.datamodel.CciNumberOfCategories
+import com.hartwig.actin.personalization.ncr.interpretation.NcrIntCodeMapper
 
-object NcrCciNumberOfCategoriesMapper : NcrCodeMapper<CciNumberOfCategories> {
+object NcrCciNumberOfCategoriesMapper : NcrIntCodeMapper<CciNumberOfCategories> {
 
     override fun resolve(code: Int): CciNumberOfCategories {
         return when (code) {

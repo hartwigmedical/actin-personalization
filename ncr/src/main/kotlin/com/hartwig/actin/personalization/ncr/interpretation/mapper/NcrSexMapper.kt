@@ -1,8 +1,9 @@
 package com.hartwig.actin.personalization.ncr.interpretation.mapper
 
 import com.hartwig.actin.personalization.datamodel.Sex
+import com.hartwig.actin.personalization.ncr.interpretation.NcrIntCodeMapper
 
-object NcrSexMapper : NcrCodeMapper<Sex> {
+object NcrSexMapper : NcrIntCodeMapper<Sex> {
 
     override fun resolve(code: Int): Sex {
         return when (code) {

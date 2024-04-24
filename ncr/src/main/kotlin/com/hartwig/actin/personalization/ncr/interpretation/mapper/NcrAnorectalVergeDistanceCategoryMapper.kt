@@ -1,8 +1,9 @@
 package com.hartwig.actin.personalization.ncr.interpretation.mapper
 
 import com.hartwig.actin.personalization.datamodel.AnorectalVergeDistanceCategory
+import com.hartwig.actin.personalization.ncr.interpretation.NcrIntCodeMapper
 
-object NcrAnorectalVergeDistanceCategoryMapper : NcrCodeMapper<AnorectalVergeDistanceCategory?> {
+object NcrAnorectalVergeDistanceCategoryMapper : NcrIntCodeMapper<AnorectalVergeDistanceCategory?> {
 
     override fun resolve(code: Int): AnorectalVergeDistanceCategory? {
         return when (code) {

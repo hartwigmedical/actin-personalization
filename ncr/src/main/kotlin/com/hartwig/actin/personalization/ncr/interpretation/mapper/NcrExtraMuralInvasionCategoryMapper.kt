@@ -1,8 +1,9 @@
 package com.hartwig.actin.personalization.ncr.interpretation.mapper
 
 import com.hartwig.actin.personalization.datamodel.ExtraMuralInvasionCategory
+import com.hartwig.actin.personalization.ncr.interpretation.NcrIntCodeMapper
 
-object NcrExtraMuralInvasionCategoryMapper : NcrCodeMapper<ExtraMuralInvasionCategory?> {
+object NcrExtraMuralInvasionCategoryMapper : NcrIntCodeMapper<ExtraMuralInvasionCategory?> {
 
     override fun resolve(code: Int): ExtraMuralInvasionCategory? {
         return when (code) {

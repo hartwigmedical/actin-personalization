@@ -1,8 +1,9 @@
 package com.hartwig.actin.personalization.ncr.interpretation.mapper
 
 import com.hartwig.actin.personalization.datamodel.RadiotherapyType
+import com.hartwig.actin.personalization.ncr.interpretation.NcrIntCodeMapper
 
-object NcrRadiotherapyTypeMapper : NcrCodeMapper<RadiotherapyType?> {
+object NcrRadiotherapyTypeMapper : NcrIntCodeMapper<RadiotherapyType?> {
 
     override fun resolve(code: Int): RadiotherapyType? {
         return when (code) {

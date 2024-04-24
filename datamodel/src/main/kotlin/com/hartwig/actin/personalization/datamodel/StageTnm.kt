@@ -1,6 +1,6 @@
 package com.hartwig.actin.personalization.datamodel
 
-enum class StageTNM {
+enum class StageTnm {
     ZERO,
     I,
     IIA,

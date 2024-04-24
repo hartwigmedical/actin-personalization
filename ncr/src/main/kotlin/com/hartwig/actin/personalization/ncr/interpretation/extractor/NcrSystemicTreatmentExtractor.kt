@@ -9,7 +9,7 @@ import com.hartwig.actin.personalization.datamodel.SystemicTreatmentScheme
 import com.hartwig.actin.personalization.ncr.datamodel.NcrSystemicTreatment
 import com.hartwig.actin.personalization.ncr.interpretation.mapper.resolveCyclesAndDetails
 import com.hartwig.actin.personalization.ncr.interpretation.mapper.resolvePreAndPostSurgery
-import com.hartwig.actin.personalization.ncr.interpretation.mapper.resolveTreatmentName
+import com.hartwig.actin.personalization.ncr.interpretation.resolve
 import kotlin.math.max
 import kotlin.math.min
 
@@ -108,9 +108,7 @@ private fun extractSystemic(
 ): SystemicTreatment {
     val (preSurgery, postSurgery) = resolvePreAndPostSurgery(prePostCode)
     val (cycles, cycleDetails) = resolveCyclesAndDetails(cycleCode)
-    return SystemicTreatment(
-        resolveTreatmentName(code), schemaNum, cycles, cycleDetails, startInterval, stopInterval, preSurgery, postSurgery
-    )
+    return SystemicTreatment(resolve(code), schemaNum, cycles, cycleDetails, startInterval, stopInterval, preSurgery, postSurgery)
 }
 
 private data class StartAndStopMinAndMax(val startMin: Int?, val startMax: Int?, val stopMin: Int?, val stopMax: Int?) {

@@ -1,6 +1,6 @@
 package com.hartwig.actin.personalization.datamodel
 
-enum class TNM_N {
+enum class TnmN {
     N0,
     N1,
     N1A,

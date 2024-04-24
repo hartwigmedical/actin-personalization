@@ -1,8 +1,9 @@
 package com.hartwig.actin.personalization.ncr.interpretation.mapper
 
 import com.hartwig.actin.personalization.datamodel.TumorDifferentiationGrade
+import com.hartwig.actin.personalization.ncr.interpretation.NcrIntCodeMapper
 
-object NcrTumorDifferentiationGradeMapper : NcrCodeMapper<TumorDifferentiationGrade?> {
+object NcrTumorDifferentiationGradeMapper : NcrIntCodeMapper<TumorDifferentiationGrade?> {
 
     override fun resolve(code: Int): TumorDifferentiationGrade? {
         return when (code) {

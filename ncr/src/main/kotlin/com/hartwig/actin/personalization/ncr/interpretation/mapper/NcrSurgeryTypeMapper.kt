@@ -1,8 +1,9 @@
 package com.hartwig.actin.personalization.ncr.interpretation.mapper
 
 import com.hartwig.actin.personalization.datamodel.SurgeryType
+import com.hartwig.actin.personalization.ncr.interpretation.NcrIntCodeMapper
 
-object NcrSurgeryTypeMapper : NcrCodeMapper<SurgeryType> {
+object NcrSurgeryTypeMapper : NcrIntCodeMapper<SurgeryType> {
 
     override fun resolve(code: Int): SurgeryType {
         return when (code) {
