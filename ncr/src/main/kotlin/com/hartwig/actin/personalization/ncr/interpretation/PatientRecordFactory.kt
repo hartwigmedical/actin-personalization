@@ -8,6 +8,7 @@ import com.hartwig.actin.personalization.datamodel.TumorOfInterest
 import com.hartwig.actin.personalization.ncr.datamodel.NcrRecord
 import com.hartwig.actin.personalization.ncr.interpretation.extractor.extractEpisode
 import com.hartwig.actin.personalization.ncr.interpretation.extractor.extractTumorOfInterest
+import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrBooleanMapper
 import java.util.stream.Collectors
 
 const val DIAGNOSIS_EPISODE = "DIA"
@@ -94,29 +95,29 @@ object PatientRecordFactory {
             }
 
             Diagnosis(
-                cci = resolve(comorbidities.cci),
+                cci = comorbidities.cci,
                 cciNumberOfCategories = resolve(comorbidities.cciCat),
-                cciHasAids = resolve(comorbidities.cciAids),
-                cciHasCongestiveHeartFailure = resolve(comorbidities.cciChf),
-                cciHasCollagenosis = resolve(comorbidities.cciCollagenosis),
-                cciHasCopd = resolve(comorbidities.cciCopd),
-                cciHasCerebrovascularDisease = resolve(comorbidities.cciCvd),
-                cciHasDementia = resolve(comorbidities.cciDementia),
-                cciHasDiabetesMellitus = resolve(comorbidities.cciDm),
-                cciHasDiabetesMellitusWithEndOrganDamage = resolve(comorbidities.cciEodDm),
-                cciHasOtherMalignancy = resolve(comorbidities.cciMalignancy),
-                cciHasOtherMetastaticSolidTumor = resolve(comorbidities.cciMetastatic),
-                cciHasMyocardialInfarct = resolve(comorbidities.cciMi),
-                cciHasMildLiverDisease = resolve(comorbidities.cciMildLiver),
-                cciHasHemiplegiaOrParaplegia = resolve(comorbidities.cciPlegia),
-                cciHasPeripheralVascularDisease = resolve(comorbidities.cciPvd),
-                cciHasRenalDisease = resolve(comorbidities.cciRenal),
-                cciHasLiverDisease = resolve(comorbidities.cciSevereLiver),
-                cciHasUlcerDisease = resolve(comorbidities.cciUlcer),
-                presentedWithIleus = resolve(clinicalCharacteristics.ileus),
-                presentedWithPerforation = resolve(clinicalCharacteristics.perforatie),
+                cciHasAids = NcrBooleanMapper.resolve(comorbidities.cciAids),
+                cciHasCongestiveHeartFailure = NcrBooleanMapper.resolve(comorbidities.cciChf),
+                cciHasCollagenosis = NcrBooleanMapper.resolve(comorbidities.cciCollagenosis),
+                cciHasCopd = NcrBooleanMapper.resolve(comorbidities.cciCopd),
+                cciHasCerebrovascularDisease = NcrBooleanMapper.resolve(comorbidities.cciCvd),
+                cciHasDementia = NcrBooleanMapper.resolve(comorbidities.cciDementia),
+                cciHasDiabetesMellitus = NcrBooleanMapper.resolve(comorbidities.cciDm),
+                cciHasDiabetesMellitusWithEndOrganDamage = NcrBooleanMapper.resolve(comorbidities.cciEodDm),
+                cciHasOtherMalignancy = NcrBooleanMapper.resolve(comorbidities.cciMalignancy),
+                cciHasOtherMetastaticSolidTumor = NcrBooleanMapper.resolve(comorbidities.cciMetastatic),
+                cciHasMyocardialInfarct = NcrBooleanMapper.resolve(comorbidities.cciMi),
+                cciHasMildLiverDisease = NcrBooleanMapper.resolve(comorbidities.cciMildLiver),
+                cciHasHemiplegiaOrParaplegia = NcrBooleanMapper.resolve(comorbidities.cciPlegia),
+                cciHasPeripheralVascularDisease = NcrBooleanMapper.resolve(comorbidities.cciPvd),
+                cciHasRenalDisease = NcrBooleanMapper.resolve(comorbidities.cciRenal),
+                cciHasLiverDisease = NcrBooleanMapper.resolve(comorbidities.cciSevereLiver),
+                cciHasUlcerDisease = NcrBooleanMapper.resolve(comorbidities.cciUlcer),
+                presentedWithIleus = NcrBooleanMapper.resolve(clinicalCharacteristics.ileus),
+                presentedWithPerforation = NcrBooleanMapper.resolve(clinicalCharacteristics.perforatie),
                 anorectalVergeDistanceCategory = resolve(clinicalCharacteristics.anusAfst),
-                hasMsi = resolve(molecularCharacteristics.msiStat),
+                hasMsi = NcrBooleanMapper.resolve(molecularCharacteristics.msiStat),
                 hasBrafMutation = hasBrafMutation,
                 hasBrafV600EMutation = hasBrafV600EMutation,
                 hasRasMutation = hasRasMutation,

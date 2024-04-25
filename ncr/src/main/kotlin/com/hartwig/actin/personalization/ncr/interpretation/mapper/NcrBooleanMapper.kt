@@ -12,4 +12,8 @@ object NcrBooleanMapper : NcrIntCodeMapper<Boolean?> {
             else -> throw IllegalArgumentException("Unknown Boolean code: $code")
         }
     }
+
+    fun resolve(code: Int?): Boolean? {
+        return code?.let(this::resolve)
+    }
 }

@@ -23,6 +23,7 @@ import com.hartwig.actin.personalization.ncr.datamodel.NcrPrimarySurgery
 import com.hartwig.actin.personalization.ncr.datamodel.NcrRecord
 import com.hartwig.actin.personalization.ncr.datamodel.NcrTreatmentResponse
 import com.hartwig.actin.personalization.ncr.interpretation.PatientRecordFactory
+import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrBooleanMapper
 import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrLocationMapper
 import com.hartwig.actin.personalization.ncr.interpretation.mapper.resolvePreAndPostSurgery
 import com.hartwig.actin.personalization.ncr.interpretation.resolve
@@ -75,7 +76,7 @@ fun extractEpisode(record: NcrRecord): Episode? {
                 metastases = extractMetastases(metastaticDiagnosis),
                 numberOfLiverMetastases = resolve(metastaticDiagnosis.metaLeverAantal),
                 maximumSizeOfLiverMetastasisInMm = metastaticDiagnosis.metaLeverAfm,
-                hasDoublePrimaryTumor = resolve(clinicalCharacteristics.dubbeltum),
+                hasDoublePrimaryTumor = NcrBooleanMapper.resolve(clinicalCharacteristics.dubbeltum),
                 mesorectalFasciaIsClear = mesorectalFasciaIsClear,
                 distanceToMesorectalFascia = distanceToMesorectalFascia,
                 venousInvasionCategory = resolve(clinicalCharacteristics.veneusInvas),
@@ -83,15 +84,15 @@ fun extractEpisode(record: NcrRecord): Episode? {
                 extraMuralInvasionCategory = resolve(clinicalCharacteristics.emi),
                 tumorRegression = resolve(clinicalCharacteristics.tumregres),
                 labMeasurements = extractLabMeasurements(labValues),
-                hasReceivedTumorDirectedTreatment = resolve(treatment.tumgerichtTher),
+                hasReceivedTumorDirectedTreatment = NcrBooleanMapper.resolve(treatment.tumgerichtTher) ?: false,
                 reasonRefrainmentFromTumorDirectedTreatment = resolve(treatment.geenTherReden),
-                hasParticipatedInTrial = resolve(treatment.deelnameStudie),
+                hasParticipatedInTrial = NcrBooleanMapper.resolve(treatment.deelnameStudie),
                 gastroenterologyResections = extractGastroenterologyResections(treatment.gastroenterologyResection),
                 surgeries = extractSurgeries(treatment.primarySurgery),
                 metastasesSurgeries = extractMetastasesSurgeries(treatment.metastaticSurgery),
                 radiotherapies = extractRadiotherapies(treatment.primaryRadiotherapy),
                 metastasesRadiotherapies = extractMetastasesRadiotherapies(treatment.metastaticRadiotherapy),
-                hasHadHipecTreatment = resolve(treatment.hipec.hipec),
+                hasHadHipecTreatment = NcrBooleanMapper.resolve(treatment.hipec.hipec) ?: false,
                 intervalTumorIncidenceHipecTreatment = treatment.hipec.hipecInt1,
                 systemicTreatments = systemicTreatmentSchemes.flatMap(SystemicTreatmentScheme::treatments),
                 systemicTreatmentSchemes = systemicTreatmentSchemes,
