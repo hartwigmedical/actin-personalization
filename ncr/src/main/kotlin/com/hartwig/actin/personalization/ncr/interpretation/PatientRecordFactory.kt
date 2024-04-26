@@ -21,8 +21,8 @@ object PatientRecordFactory {
     fun create(ncrRecords: List<NcrRecord>): List<PatientRecord> {
         val recordsPerPatient: Map<Int, List<NcrRecord>> = ncrRecords.groupBy { it.identification.keyNkr }
 
-        return recordsPerPatient.entries.parallelStream()
-            .map { createPatientRecord(it.value) }
+        return recordsPerPatient.values.parallelStream()
+            .map(::createPatientRecord)
             .collect(Collectors.toList())
     }
 
@@ -68,11 +68,9 @@ object PatientRecordFactory {
 
     private fun determineEpisodesPerTumorOfInterest(ncrRecords: List<NcrRecord>): Map<TumorOfInterest, TumorEpisodes> {
         val recordsPerTumor = ncrRecords.groupBy { it.identification.keyZid }
-        return recordsPerTumor.values.mapNotNull(::createEpisodesForOneTumorOfInterest).toMap()
-    }
-
-    private fun createEpisodesForOneTumorOfInterest(ncrRecords: List<NcrRecord>): Pair<TumorOfInterest, TumorEpisodes>? {
-        return createTumorEpisodes(ncrRecords)?.let { Pair(extractTumorOfInterest(ncrRecords, it), it) }
+        return recordsPerTumor.entries.mapNotNull { (tumorId, records) ->
+            createTumorEpisodes(records)?.let { tumorEpisodes -> extractTumorOfInterest(records, tumorEpisodes, tumorId) to tumorEpisodes }
+        }.toMap()
     }
 
     private fun createTumorEpisodes(ncrRecords: List<NcrRecord>): TumorEpisodes? {

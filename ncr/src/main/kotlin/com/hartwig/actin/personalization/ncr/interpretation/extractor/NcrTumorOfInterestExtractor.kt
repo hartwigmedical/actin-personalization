@@ -18,19 +18,19 @@ import org.apache.logging.log4j.Logger
 
 private val LOGGER: Logger = LogManager.getLogger(PatientRecordFactory::class)
 
-fun extractTumorOfInterest(ncrRecords: List<NcrRecord>, tumorEpisodes: TumorEpisodes): TumorOfInterest {
+fun extractTumorOfInterest(ncrRecords: List<NcrRecord>, tumorEpisodes: TumorEpisodes, tumorId: Int): TumorOfInterest {
     val episodes = tumorEpisodes.followupEpisodes + tumorEpisodes.diagnosisEpisode
 
     val diagnosisRecord = ncrRecords.filter { it.identification.epis == DIAGNOSIS_EPISODE }.minBy { it.identification.keyEid }
-    val locations = episodes.map(Episode::tumorLocation).distinct()
+    val locations = episodes.map(Episode::tumorLocation).toSet()
     if (locations.size > 1) {
-        LOGGER.warn("Multiple tumor locations found for patient with NCR ID '${diagnosisRecord.identification.keyNkr}'")
+        LOGGER.warn("Multiple tumor locations found for tumor $tumorId with NCR ID ${diagnosisRecord.identification.keyNkr}: $locations")
     }
     val priorTumors = extractPriorTumors(diagnosisRecord)
 
     return TumorOfInterest(
         consolidatedTumorType = NcrTumorTypeMapper.resolve(ncrRecords.mapNotNull { it.primaryDiagnosis.morfCat }.distinct().single()),
-        consolidatedTumorLocation = locations.first(),
+        tumorLocations = locations,
         hasHadTumorDirectedSystemicTherapy = episodes.any(Episode::hasReceivedTumorDirectedTreatment),
         hasHadPriorTumor = priorTumors.isNotEmpty(),
         priorTumors = priorTumors
@@ -110,7 +110,7 @@ private fun extractPriorTumor(
     }
     return PriorTumor(
         consolidatedTumorType = NcrTumorTypeMapper.resolve(type),
-        consolidatedTumorLocation = NcrLocationMapper.resolveLocation(location),
+        tumorLocations = setOf(NcrLocationMapper.resolveLocation(location)),
         hasHadTumorDirectedSystemicTherapy = NcrBooleanMapper.resolve(hadSystemic) ?: false,
         incidenceIntervalPrimaryTumor = interval,
         tumorPriorId = id,
