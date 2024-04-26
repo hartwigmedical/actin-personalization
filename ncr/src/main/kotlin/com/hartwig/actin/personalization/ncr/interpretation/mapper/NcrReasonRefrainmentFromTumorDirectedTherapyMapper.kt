@@ -1,7 +1,6 @@
 package com.hartwig.actin.personalization.ncr.interpretation.mapper
 
 import com.hartwig.actin.personalization.datamodel.ReasonRefrainmentFromTumorDirectedTreatment
-import com.hartwig.actin.personalization.ncr.interpretation.NcrIntCodeMapper
 
 object NcrReasonRefrainmentFromTumorDirectedTherapyMapper : NcrIntCodeMapper<ReasonRefrainmentFromTumorDirectedTreatment?> {
 

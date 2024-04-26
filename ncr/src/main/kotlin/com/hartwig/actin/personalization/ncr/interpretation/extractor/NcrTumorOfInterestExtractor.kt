@@ -9,7 +9,9 @@ import com.hartwig.actin.personalization.ncr.interpretation.DIAGNOSIS_EPISODE
 import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrBooleanMapper
 import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrLocationMapper
 import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrStageTnmMapper
-import com.hartwig.actin.personalization.ncr.interpretation.resolve
+import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrTreatmentNameMapper
+import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrTumorLocationCategoryMapper
+import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrTumorTypeMapper
 
 fun extractTumorOfInterest(ncrRecords: List<NcrRecord>, tumorEpisodes: TumorEpisodes): TumorOfInterest {
     val episodes = tumorEpisodes.followupEpisodes + tumorEpisodes.diagnosisEpisode
@@ -18,7 +20,7 @@ fun extractTumorOfInterest(ncrRecords: List<NcrRecord>, tumorEpisodes: TumorEpis
     val priorTumors = extractPriorTumors(diagnosisRecord)
 
     return TumorOfInterest(
-        consolidatedTumorType = resolve(ncrRecords.mapNotNull { it.primaryDiagnosis.morfCat }.distinct().single()),
+        consolidatedTumorType = NcrTumorTypeMapper.resolve(ncrRecords.mapNotNull { it.primaryDiagnosis.morfCat }.distinct().single()),
         consolidatedTumorLocation = episodes.map(Episode::tumorLocation).distinct().single(),
         hasHadTumorDirectedSystemicTherapy = episodes.any(Episode::hasReceivedTumorDirectedTreatment),
         hasHadPriorTumor = priorTumors.isNotEmpty(),
@@ -94,17 +96,17 @@ private fun extractPriorTumor(
     stage: String?,
     treatments: List<String>
 ): PriorTumor {
-    if (location == null) {
-        throw IllegalStateException("Missing location for prior tumor with ID $id")
+    if (location == null || category == null) {
+        throw IllegalStateException("Missing location information for prior tumor with ID $id")
     }
     return PriorTumor(
-        consolidatedTumorType = resolve(type),
+        consolidatedTumorType = NcrTumorTypeMapper.resolve(type),
         consolidatedTumorLocation = NcrLocationMapper.resolveLocation(location),
         hasHadTumorDirectedSystemicTherapy = NcrBooleanMapper.resolve(hadSystemic) ?: false,
         incidenceIntervalPrimaryTumor = interval,
         tumorPriorId = id,
-        tumorLocationCategory = resolve(category),
+        tumorLocationCategory = NcrTumorLocationCategoryMapper.resolve(category),
         stageTNM = NcrStageTnmMapper.resolveNullable(stage),
-        systemicTreatments = treatments.map(::resolve)
+        systemicTreatments = treatments.map(NcrTreatmentNameMapper::resolve)
     )
 }

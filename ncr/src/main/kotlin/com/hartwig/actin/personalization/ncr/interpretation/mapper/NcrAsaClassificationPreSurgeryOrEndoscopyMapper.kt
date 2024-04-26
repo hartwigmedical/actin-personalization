@@ -1,7 +1,6 @@
 package com.hartwig.actin.personalization.ncr.interpretation.mapper
 
 import com.hartwig.actin.personalization.datamodel.AsaClassificationPreSurgeryOrEndoscopy
-import com.hartwig.actin.personalization.ncr.interpretation.NcrIntCodeMapper
 
 object NcrAsaClassificationPreSurgeryOrEndoscopyMapper : NcrIntCodeMapper<AsaClassificationPreSurgeryOrEndoscopy?> {
 

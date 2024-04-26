@@ -1,7 +1,6 @@
 package com.hartwig.actin.personalization.ncr.interpretation.mapper
 
 import com.hartwig.actin.personalization.datamodel.StageTnm
-import com.hartwig.actin.personalization.ncr.interpretation.NcrStringCodeMapper
 
 object NcrStageTnmMapper : NcrStringCodeMapper<StageTnm?> {
     override fun resolve(code: String): StageTnm? {

@@ -10,6 +10,8 @@ import com.hartwig.actin.personalization.ncr.interpretation.extractor.extractEpi
 import com.hartwig.actin.personalization.ncr.interpretation.extractor.extractTumorOfInterest
 import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrAnorectalVergeDistanceCategoryMapper
 import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrBooleanMapper
+import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrCciNumberOfCategoriesMapper
+import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrSexMapper
 import java.util.stream.Collectors
 
 const val DIAGNOSIS_EPISODE = "DIA"
@@ -47,7 +49,7 @@ object PatientRecordFactory {
             throw IllegalStateException("Multiple sexes found for patient with NCR ID '" + extractNcrId(ncrRecords) + "'")
         }
 
-        return resolve(sexes.single())
+        return NcrSexMapper.resolve(sexes.single())
     }
 
     private fun determineIsAlive(ncrRecords: List<NcrRecord>): Boolean? {
@@ -97,7 +99,7 @@ object PatientRecordFactory {
 
             Diagnosis(
                 cci = comorbidities.cci,
-                cciNumberOfCategories = resolve(comorbidities.cciCat),
+                cciNumberOfCategories = NcrCciNumberOfCategoriesMapper.resolve(comorbidities.cciCat),
                 cciHasAids = NcrBooleanMapper.resolve(comorbidities.cciAids),
                 cciHasCongestiveHeartFailure = NcrBooleanMapper.resolve(comorbidities.cciChf),
                 cciHasCollagenosis = NcrBooleanMapper.resolve(comorbidities.cciCollagenosis),
