@@ -10,6 +10,7 @@ object NcrTnmNMapper : NcrStringCodeMapper<TnmN?> {
             "1A" -> TnmN.N1A
             "1B" -> TnmN.N1B
             "1C" -> TnmN.N1C
+            "1M" -> TnmN.N1M
             "2" -> TnmN.N2
             "2A" -> TnmN.N2A
             "2B" -> TnmN.N2B

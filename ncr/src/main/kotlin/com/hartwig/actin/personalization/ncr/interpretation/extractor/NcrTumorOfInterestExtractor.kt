@@ -6,22 +6,31 @@ import com.hartwig.actin.personalization.datamodel.TumorEpisodes
 import com.hartwig.actin.personalization.datamodel.TumorOfInterest
 import com.hartwig.actin.personalization.ncr.datamodel.NcrRecord
 import com.hartwig.actin.personalization.ncr.interpretation.DIAGNOSIS_EPISODE
+import com.hartwig.actin.personalization.ncr.interpretation.PatientRecordFactory
 import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrBooleanMapper
 import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrLocationMapper
 import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrStageTnmMapper
 import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrTreatmentNameMapper
 import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrTumorLocationCategoryMapper
 import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrTumorTypeMapper
+import org.apache.logging.log4j.LogManager
+import org.apache.logging.log4j.Logger
+
+private val LOGGER: Logger = LogManager.getLogger(PatientRecordFactory::class)
 
 fun extractTumorOfInterest(ncrRecords: List<NcrRecord>, tumorEpisodes: TumorEpisodes): TumorOfInterest {
     val episodes = tumorEpisodes.followupEpisodes + tumorEpisodes.diagnosisEpisode
 
     val diagnosisRecord = ncrRecords.filter { it.identification.epis == DIAGNOSIS_EPISODE }.minBy { it.identification.keyEid }
+    val locations = episodes.map(Episode::tumorLocation).distinct()
+    if (locations.size > 1) {
+        LOGGER.warn("Multiple tumor locations found for patient with NCR ID '${diagnosisRecord.identification.keyNkr}'")
+    }
     val priorTumors = extractPriorTumors(diagnosisRecord)
 
     return TumorOfInterest(
         consolidatedTumorType = NcrTumorTypeMapper.resolve(ncrRecords.mapNotNull { it.primaryDiagnosis.morfCat }.distinct().single()),
-        consolidatedTumorLocation = episodes.map(Episode::tumorLocation).distinct().single(),
+        consolidatedTumorLocation = locations.first(),
         hasHadTumorDirectedSystemicTherapy = episodes.any(Episode::hasReceivedTumorDirectedTreatment),
         hasHadPriorTumor = priorTumors.isNotEmpty(),
         priorTumors = priorTumors

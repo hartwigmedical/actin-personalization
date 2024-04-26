@@ -162,9 +162,13 @@ private fun extractMetastasesRadiotherapies(ncrMetastaticRadiotherapy: NcrMetast
             Triple(metaRtCode3, metaRtStartInt3, metaRtStopInt3),
             Triple(metaRtCode4, metaRtStartInt4, metaRtStopInt4)
         )
-            .mapNotNull { (type, startInterval, stopInterval) ->
-                type?.let {
-                    MetastasesRadiotherapy(NcrMetastasesRadiotherapyTypeMapper.resolve(it), startInterval?.toInt(), stopInterval?.toInt())
+            .mapNotNull { (mrtType, startInterval, stopInterval) ->
+                mrtType?.let { typeCode ->
+                    MetastasesRadiotherapy(
+                        NcrMetastasesRadiotherapyTypeMapper.resolve(typeCode),
+                        startInterval?.takeIf { it != "." }?.toInt(),
+                        stopInterval?.takeIf { it != "." }?.toInt()
+                    )
                 }
             }
     }
@@ -270,8 +274,9 @@ private fun extractLabMeasurements(labValues: NcrLabValues): List<LabMeasurement
             )
         )
             .flatMap { (measure, values) ->
-                values.filterNot { (value, interval) -> value == null && interval == null }
-                    .map { (value, interval) -> LabMeasurement(measure, value as Double, measure.unit, interval, null, null) }
+                values.mapNotNull { (value, interval) ->
+                    value?.let { LabMeasurement(measure, value.toDouble(), measure.unit, interval, null, null) }
+                }
             }
 
         return measurements + listOfNotNull(

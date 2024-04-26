@@ -68,15 +68,14 @@ object PatientRecordFactory {
 
     private fun determineEpisodesPerTumorOfInterest(ncrRecords: List<NcrRecord>): Map<TumorOfInterest, TumorEpisodes> {
         val recordsPerTumor = ncrRecords.groupBy { it.identification.keyZid }
-        return recordsPerTumor.values.associate(::createEpisodesForOneTumorOfInterest)
+        return recordsPerTumor.values.mapNotNull(::createEpisodesForOneTumorOfInterest).toMap()
     }
 
-    private fun createEpisodesForOneTumorOfInterest(ncrRecords: List<NcrRecord>): Pair<TumorOfInterest, TumorEpisodes> {
-        val tumorEpisodes = createTumorEpisodes(ncrRecords)
-        return Pair(extractTumorOfInterest(ncrRecords, tumorEpisodes), tumorEpisodes)
+    private fun createEpisodesForOneTumorOfInterest(ncrRecords: List<NcrRecord>): Pair<TumorOfInterest, TumorEpisodes>? {
+        return createTumorEpisodes(ncrRecords)?.let { Pair(extractTumorOfInterest(ncrRecords, it), it) }
     }
 
-    private fun createTumorEpisodes(ncrRecords: List<NcrRecord>): TumorEpisodes {
+    private fun createTumorEpisodes(ncrRecords: List<NcrRecord>): TumorEpisodes? {
         val (ncrDiagnosisRecords, ncrTreatmentRecords) = ncrRecords.partition { it.identification.epis == DIAGNOSIS_EPISODE }
         val diagnosisRecord = ncrDiagnosisRecords.minBy { it.identification.keyEid }
         val diagnosis = with(diagnosisRecord) {
@@ -128,7 +127,9 @@ object PatientRecordFactory {
             )
         }
 
-        return TumorEpisodes(diagnosis, extractEpisode(diagnosisRecord)!!, ncrTreatmentRecords.mapNotNull(::extractEpisode))
+	return extractEpisode(diagnosisRecord)?.let {
+            TumorEpisodes(diagnosis, it, ncrTreatmentRecords.mapNotNull(::extractEpisode))
+        }
     }
 
     private fun diagnosisEpisodes(ncrRecords: List<NcrRecord>): List<NcrRecord> {
