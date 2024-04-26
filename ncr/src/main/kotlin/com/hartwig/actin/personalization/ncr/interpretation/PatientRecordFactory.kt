@@ -8,6 +8,7 @@ import com.hartwig.actin.personalization.datamodel.TumorOfInterest
 import com.hartwig.actin.personalization.ncr.datamodel.NcrRecord
 import com.hartwig.actin.personalization.ncr.interpretation.extractor.extractEpisode
 import com.hartwig.actin.personalization.ncr.interpretation.extractor.extractTumorOfInterest
+import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrAnorectalVergeDistanceCategoryMapper
 import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrBooleanMapper
 import java.util.stream.Collectors
 
@@ -116,7 +117,7 @@ object PatientRecordFactory {
                 cciHasUlcerDisease = NcrBooleanMapper.resolve(comorbidities.cciUlcer),
                 presentedWithIleus = NcrBooleanMapper.resolve(clinicalCharacteristics.ileus),
                 presentedWithPerforation = NcrBooleanMapper.resolve(clinicalCharacteristics.perforatie),
-                anorectalVergeDistanceCategory = resolve(clinicalCharacteristics.anusAfst),
+                anorectalVergeDistanceCategory = NcrAnorectalVergeDistanceCategoryMapper.resolve(clinicalCharacteristics.anusAfst),
                 hasMsi = NcrBooleanMapper.resolve(molecularCharacteristics.msiStat),
                 hasBrafMutation = hasBrafMutation,
                 hasBrafV600EMutation = hasBrafV600EMutation,

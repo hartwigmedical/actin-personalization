@@ -3,7 +3,7 @@ package com.hartwig.actin.personalization.ncr.interpretation.mapper
 import com.hartwig.actin.personalization.datamodel.StageTnm
 import com.hartwig.actin.personalization.ncr.interpretation.NcrStringCodeMapper
 
-object StageTnmMapper : NcrStringCodeMapper<StageTnm?> {
+object NcrStageTnmMapper : NcrStringCodeMapper<StageTnm?> {
     override fun resolve(code: String): StageTnm? {
         return when (code) {
             "0" -> StageTnm.ZERO

@@ -7,8 +7,7 @@ object NcrReasonRefrainmentFromTumorDirectedTherapyMapper : NcrIntCodeMapper<Rea
 
     override fun resolve(code: Int): ReasonRefrainmentFromTumorDirectedTreatment? {
         return when (code) {
-            8 -> null
-            9 -> null
+            8, 9 -> null
             11 -> ReasonRefrainmentFromTumorDirectedTreatment.COMORBIDITY_AND_OR_PERFORMANCE_OR_FUNCTIONAL_STATUS_OR_PRESENCE_OTHER_TUMOR
             12 -> ReasonRefrainmentFromTumorDirectedTreatment.EXPECTED_FAST_PROGRESSION_OR_HIGH_TUMOR_LOAD
             13 -> ReasonRefrainmentFromTumorDirectedTreatment.WISH_OR_REFUSAL_FROM_PATIENT_OR_FAMILY

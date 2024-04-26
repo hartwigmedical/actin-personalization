@@ -23,11 +23,28 @@ import com.hartwig.actin.personalization.ncr.datamodel.NcrPrimarySurgery
 import com.hartwig.actin.personalization.ncr.datamodel.NcrRecord
 import com.hartwig.actin.personalization.ncr.datamodel.NcrTreatmentResponse
 import com.hartwig.actin.personalization.ncr.interpretation.PatientRecordFactory
+import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrAnastomoticLeakageAfterSurgeryMapper
+import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrAsaClassificationPreSurgeryOrEndoscopyMapper
 import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrBooleanMapper
+import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrExtraMuralInvasionCategoryMapper
 import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrLocationMapper
+import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrLymphaticInvasionCategoryMapper
+import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrNumberOfLiverMetastasesMapper
+import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrPfsMeasureFollowUpEventMapper
+import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrRadiotherapyTypeMapper
+import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrReasonRefrainmentFromTumorDirectedTherapyMapper
+import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrStageTnmMapper
+import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrSurgeryCircumferentialResectionMarginMapper
+import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrSurgeryRadicalityMapper
+import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrSurgeryTechniqueMapper
+import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrSurgeryUrgencyMapper
+import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrTnmMMapper
+import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrTnmNMapper
+import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrTnmTMapper
+import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrTumorRegressionMapper
+import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrVenousInvasionCategoryMapper
 import com.hartwig.actin.personalization.ncr.interpretation.mapper.resolvePreAndPostSurgery
 import com.hartwig.actin.personalization.ncr.interpretation.resolve
-import com.hartwig.actin.personalization.ncr.interpretation.resolveNullable
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 
@@ -56,36 +73,38 @@ fun extractEpisode(record: NcrRecord): Episode? {
                 id = identification.keyEid,
                 order = identification.teller,
                 whoStatusPreTreatmentStart = patientCharacteristics.perfStat,
-                asaClassificationPreSurgeryOrEndoscopy = resolve(patientCharacteristics.asa),
+                asaClassificationPreSurgeryOrEndoscopy =
+                NcrAsaClassificationPreSurgeryOrEndoscopyMapper.resolve(patientCharacteristics.asa),
                 tumorIncidenceYear = primaryDiagnosis.incjr,
                 tumorBasisOfDiagnosis = resolve(primaryDiagnosis.diagBasis),
                 tumorLocation = NcrLocationMapper.resolveLocation(primaryDiagnosis.topoSublok),
                 tumorDifferentiationGrade = resolve(primaryDiagnosis.diffgrad.toInt()),
-                tnmCT = resolve(primaryDiagnosis.ct),
-                tnmCN = resolve(primaryDiagnosis.cn),
-                tnmCM = resolve(primaryDiagnosis.cm),
-                tnmPT = resolveNullable(primaryDiagnosis.pt),
-                tnmPN = resolveNullable(primaryDiagnosis.pn),
-                tnmPM = resolveNullable(primaryDiagnosis.pm),
-                stageCTNM = resolveNullable(primaryDiagnosis.cstadium),
-                stagePTNM = resolveNullable(primaryDiagnosis.pstadium),
-                stageTNM = resolveNullable(primaryDiagnosis.stadium),
+                tnmCT = NcrTnmTMapper.resolve(primaryDiagnosis.ct),
+                tnmCN = NcrTnmNMapper.resolve(primaryDiagnosis.cn),
+                tnmCM = NcrTnmMMapper.resolve(primaryDiagnosis.cm),
+                tnmPT = NcrTnmTMapper.resolveNullable(primaryDiagnosis.pt),
+                tnmPN = NcrTnmNMapper.resolveNullable(primaryDiagnosis.pn),
+                tnmPM = NcrTnmMMapper.resolveNullable(primaryDiagnosis.pm),
+                stageCTNM = NcrStageTnmMapper.resolveNullable(primaryDiagnosis.cstadium),
+                stagePTNM = NcrStageTnmMapper.resolveNullable(primaryDiagnosis.pstadium),
+                stageTNM = NcrStageTnmMapper.resolveNullable(primaryDiagnosis.stadium),
                 numberOfInvestigatedLymphNodes = primaryDiagnosis.ondLymf,
                 numberOfPositiveLymphNodes = primaryDiagnosis.posLymf,
                 distantMetastasesStatus = resolve(identification.metaEpis),
                 metastases = extractMetastases(metastaticDiagnosis),
-                numberOfLiverMetastases = resolve(metastaticDiagnosis.metaLeverAantal),
+                numberOfLiverMetastases = NcrNumberOfLiverMetastasesMapper.resolve(metastaticDiagnosis.metaLeverAantal),
                 maximumSizeOfLiverMetastasisInMm = metastaticDiagnosis.metaLeverAfm,
                 hasDoublePrimaryTumor = NcrBooleanMapper.resolve(clinicalCharacteristics.dubbeltum),
                 mesorectalFasciaIsClear = mesorectalFasciaIsClear,
                 distanceToMesorectalFascia = distanceToMesorectalFascia,
-                venousInvasionCategory = resolve(clinicalCharacteristics.veneusInvas),
-                lymphaticInvasionCategory = resolve(clinicalCharacteristics.lymfInvas),
-                extraMuralInvasionCategory = resolve(clinicalCharacteristics.emi),
-                tumorRegression = resolve(clinicalCharacteristics.tumregres),
+                venousInvasionCategory = NcrVenousInvasionCategoryMapper.resolve(clinicalCharacteristics.veneusInvas),
+                lymphaticInvasionCategory = NcrLymphaticInvasionCategoryMapper.resolve(clinicalCharacteristics.lymfInvas),
+                extraMuralInvasionCategory = NcrExtraMuralInvasionCategoryMapper.resolve(clinicalCharacteristics.emi),
+                tumorRegression = NcrTumorRegressionMapper.resolve(clinicalCharacteristics.tumregres),
                 labMeasurements = extractLabMeasurements(labValues),
                 hasReceivedTumorDirectedTreatment = NcrBooleanMapper.resolve(treatment.tumgerichtTher) ?: false,
-                reasonRefrainmentFromTumorDirectedTreatment = resolve(treatment.geenTherReden),
+                reasonRefrainmentFromTumorDirectedTreatment =
+                NcrReasonRefrainmentFromTumorDirectedTherapyMapper.resolve(treatment.geenTherReden),
                 hasParticipatedInTrial = NcrBooleanMapper.resolve(treatment.deelnameStudie),
                 gastroenterologyResections = extractGastroenterologyResections(treatment.gastroenterologyResection),
                 surgeries = extractSurgeries(treatment.primarySurgery),
@@ -122,7 +141,9 @@ private fun extractPfsMeasures(response: NcrTreatmentResponse): List<PfsMeasure>
             Triple(pfsEvent3, fupEventType3, pfsInt3),
             Triple(pfsEvent4, fupEventType4, pfsInt4)
         )
-            .mapNotNull { (event, type, interval) -> event?.let { PfsMeasure(resolve(event), resolve(type), interval) } }
+            .mapNotNull { (event, type, interval) ->
+                event?.let { PfsMeasure(resolve(it), NcrPfsMeasureFollowUpEventMapper.resolve(type), interval) }
+            }
     }
 }
 
@@ -145,11 +166,14 @@ private fun extractMetastasesRadiotherapies(ncrMetastaticRadiotherapy: NcrMetast
 private fun extractRadiotherapies(ncrPrimaryRadiotherapy: NcrPrimaryRadiotherapy): List<Radiotherapy> {
     return with(ncrPrimaryRadiotherapy) {
         listOfNotNull(
-            rtType1?.let { Radiotherapy(resolve(it), rtDosis1, rtStartInt1, rtStopInt1) },
-            rtType2?.let { Radiotherapy(resolve(it), rtDosis2, rtStartInt2, rtStopInt2) }
+            extractRadiotherapy(rtType1, rtDosis1, rtStartInt1, rtStopInt1),
+            extractRadiotherapy(rtType2, rtDosis2, rtStartInt2, rtStopInt2)
         )
     }
 }
+
+private fun extractRadiotherapy(rtType: Int?, dosage: Double?, startInt: Int?, stopInt: Int?) =
+    rtType?.let(NcrRadiotherapyTypeMapper::resolve)?.let { type -> Radiotherapy(type, dosage, startInt, stopInt) }
 
 private fun extractMetastasesSurgeries(metastaticSurgery: NcrMetastaticSurgery): List<MetastasesSurgery> {
     return with(metastaticSurgery) {
@@ -178,11 +202,11 @@ private fun extractSurgery(
 ): Surgery {
     return Surgery(
         resolve(surgeryType),
-        resolve(technique),
-        resolve(urgency),
-        resolve(radicality),
-        resolve(margins),
-        resolve(leakage),
+        NcrSurgeryTechniqueMapper.resolve(technique),
+        NcrSurgeryUrgencyMapper.resolve(urgency),
+        NcrSurgeryRadicalityMapper.resolve(radicality),
+        NcrSurgeryCircumferentialResectionMarginMapper.resolve(margins),
+        NcrAnastomoticLeakageAfterSurgeryMapper.resolve(leakage),
         interval,
         duration
     )

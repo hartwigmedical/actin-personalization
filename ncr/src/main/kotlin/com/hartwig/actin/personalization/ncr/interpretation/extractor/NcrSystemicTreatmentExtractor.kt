@@ -7,9 +7,9 @@ import com.hartwig.actin.personalization.datamodel.ResponseMeasureType
 import com.hartwig.actin.personalization.datamodel.SystemicTreatment
 import com.hartwig.actin.personalization.datamodel.SystemicTreatmentScheme
 import com.hartwig.actin.personalization.ncr.datamodel.NcrSystemicTreatment
+import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrTreatmentNameMapper.resolve
 import com.hartwig.actin.personalization.ncr.interpretation.mapper.resolveCyclesAndDetails
 import com.hartwig.actin.personalization.ncr.interpretation.mapper.resolvePreAndPostSurgery
-import com.hartwig.actin.personalization.ncr.interpretation.resolve
 import kotlin.math.max
 import kotlin.math.min
 
