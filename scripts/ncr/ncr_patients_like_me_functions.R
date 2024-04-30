@@ -40,16 +40,20 @@ find_similar_patients_2 <- function(ncr_ref_data, patient_age, patient_who, pati
   } else if (patient_has_had_surgery == 0) {
     code <- 4
   } else {
-    stop("has_had_chemotherapy not set or inadequately set")
+    stop("patient_has_had_surgery not set or inadequately set")
   }
+    
+    
   
   out <- ncr_ref_data %>% dplyr::filter(epis == 'DIA' &
                                           meta_epis == 1 &
                                           morf_cat == 1 &
-                                          tumgericht_ther == 1 &
-                                          (chemo == code | target == code) &
-                                          leeft >= patient_age - 1 &
-                                          leeft <= patient_age + 1 &
+                                          meta_topo_sublok1 %in% c('C480','C481','C482','C488') &
+                                          meta_topo_sublok2 == "" &
+                                          #tumgericht_ther == 1 &
+                                          #(chemo == code | target == code) &
+                                          leeft >= patient_age - 2 &
+                                          leeft <= patient_age + 2 &
                                           perf_stat == patient_who)
 
   return(out)
