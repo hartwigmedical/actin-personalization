@@ -8,12 +8,17 @@
         <version>local-SNAPSHOT</version>
     </parent>
 
-    <artifactId>recruitment-assignment</artifactId>
+    <artifactId>ncr</artifactId>
     <packaging>jar</packaging>
     <version>local-SNAPSHOT</version>
-    <name>HMF ACTIN Personalization - Recruitment Assignment</name>
+    <name>HMF ACTIN Personalization - NCR</name>
 
     <dependencies>
+        <dependency>
+            <groupId>com.hartwig.actin.personalization</groupId>
+            <artifactId>datamodel</artifactId>
+        </dependency>
+
         <dependency>
             <groupId>org.jetbrains.kotlin</groupId>
             <artifactId>kotlin-stdlib-jdk8</artifactId>
@@ -27,8 +32,12 @@
             <artifactId>log4j-core</artifactId>
         </dependency>
         <dependency>
-            <groupId>nz.ac.waikato.cms.weka</groupId>
-            <artifactId>weka-stable</artifactId>
+            <groupId>com.fasterxml.jackson.dataformat</groupId>
+            <artifactId>jackson-dataformat-csv</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.module</groupId>
+            <artifactId>jackson-module-kotlin</artifactId>
         </dependency>
 
         <dependency>
@@ -62,7 +71,7 @@
                     <archive>
                         <manifest>
                             <addClasspath>true</addClasspath>
-                            <mainClass>com.hartwig.actin.personalization.recruitment.PatientLikeMeApplication</mainClass>
+                            <mainClass>com.hartwig.actin.personalization.ncr.NcrInspectionApplication</mainClass>
                             <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
                         </manifest>
                     </archive>
