@@ -185,9 +185,9 @@ object NcrLocationMapper {
             "C679" -> Location.BLOW_NNO
             "C680" -> Location.URETHRA
             "C693" -> Location.CHOROIDEA
-            "C700" -> Location.CEREBRAL_OPINIONS
+            "C700" -> Location.CEREBRAL_MENINGES
             "C701" -> Location.SPINAL_MENINGES
-            "C709" -> Location.OPINIONS_NNO
+            "C709" -> Location.MENINGES_NOS
             "C710" -> Location.CEREBRUM
             "C711" -> Location.BRAIN_FRONTAL_LOBE
             "C712" -> Location.BRAIN_TEMPORAL_LOBE
