@@ -29,7 +29,7 @@ object NcrLocationMapper {
             "C103" -> Location.POSTERIOR_OROPHARYNGEAL_WALL
             "C111" -> Location.NASOPHARYNX_POSTERIOR_WALL
             "C119" -> Location.NASOPHARYNX_NOS
-            "C129" -> Location.SINUS_PYRIFORMIS
+            "C129" -> Location.SINUS_PYRIFORM
             "C130" -> Location.POSTCRICOID_REGION
             "C139" -> Location.HYPOPHARYNX_NOS
             "C148" -> Location.LIP_ORAL_CAVITY_PHARYNX_OVERLAPPING
@@ -180,14 +180,14 @@ object NcrLocationMapper {
             "C673" -> Location.BLADDER_ANTERIOR_WALL
             "C674" -> Location.BLADDER_BACK_WALL
             "C675" -> Location.BLADDER_NECK
-            "C676" -> Location.URETERAL_ORIFICE
+            "C676" -> Location.URETHRAL_ORIFICE
             "C678" -> Location.OVERLAPPING_BLADDER_LOCATION
             "C679" -> Location.BLOW_NNO
             "C680" -> Location.URETHRA
             "C693" -> Location.CHOROIDEA
-            "C700" -> Location.CEREBRAL_OPINIONS
+            "C700" -> Location.CEREBRAL_MENINGES
             "C701" -> Location.SPINAL_MENINGES
-            "C709" -> Location.OPINIONS_NNO
+            "C709" -> Location.MENINGES_NOS
             "C710" -> Location.CEREBRUM
             "C711" -> Location.BRAIN_FRONTAL_LOBE
             "C712" -> Location.BRAIN_TEMPORAL_LOBE
