@@ -22,7 +22,6 @@ import com.hartwig.actin.personalization.ncr.datamodel.NcrPrimaryRadiotherapy
 import com.hartwig.actin.personalization.ncr.datamodel.NcrPrimarySurgery
 import com.hartwig.actin.personalization.ncr.datamodel.NcrRecord
 import com.hartwig.actin.personalization.ncr.datamodel.NcrTreatmentResponse
-import com.hartwig.actin.personalization.ncr.interpretation.PatientRecordFactory
 import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrAnastomoticLeakageAfterSurgeryMapper
 import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrAsaClassificationPreSurgeryOrEndoscopyMapper
 import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrBooleanMapper
@@ -52,91 +51,82 @@ import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrTumorDiffe
 import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrTumorRegressionMapper
 import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrVenousInvasionCategoryMapper
 import com.hartwig.actin.personalization.ncr.interpretation.mapper.resolvePreAndPostSurgery
-import org.apache.logging.log4j.LogManager
-import org.apache.logging.log4j.Logger
 
-private val LOGGER: Logger = LogManager.getLogger(PatientRecordFactory::class)
-
-fun extractEpisode(record: NcrRecord): Episode? {
-    try {
-        return with(record) {
-            val responseMeasure = treatmentResponse.responsUitslag?.let {
-                if (it == "99" || it == "0") null else enumValueOf<ResponseMeasureType>(it)
-            }
-                ?.let { ResponseMeasure(it, treatmentResponse.responsInt ?: 0) }
-
-            val pfsMeasures = extractPfsMeasures(treatmentResponse)
-            val systemicTreatmentSchemes = extractSystemicTreatmentSchemes(treatment.systemicTreatment, responseMeasure, pfsMeasures)
-            val (distanceToMesorectalFascia, mesorectalFasciaIsClear) = extractDistanceToMesorectalFascia(clinicalCharacteristics.mrfAfst)
-            val (hasHadPreSurgeryRadiotherapy, hasHadPostSurgeryRadiotherapy) = resolvePreAndPostSurgery(treatment.primaryRadiotherapy.rt)
-            val (hasHadPreSurgeryChemoRadiotherapy, hasHadPostSurgeryChemoRadiotherapy) =
-                resolvePreAndPostSurgery(treatment.primaryRadiotherapy.chemort)
-            val (hasHadPreSurgerySystemicChemotherapy, hasHadPostSurgerySystemicChemotherapy) =
-                resolvePreAndPostSurgery(treatment.systemicTreatment.chemo)
-            val (hasHadPreSurgerySystemicTargetedTherapy, hasHadPostSurgerySystemicTargetedTherapy) =
-                resolvePreAndPostSurgery(treatment.systemicTreatment.target)
-
-            Episode(
-                id = identification.keyEid,
-                order = identification.teller,
-                whoStatusPreTreatmentStart = patientCharacteristics.perfStat,
-                asaClassificationPreSurgeryOrEndoscopy =
-                NcrAsaClassificationPreSurgeryOrEndoscopyMapper.resolve(patientCharacteristics.asa),
-                tumorIncidenceYear = primaryDiagnosis.incjr,
-                tumorBasisOfDiagnosis = NcrTumorBasisOfDiagnosisMapper.resolve(primaryDiagnosis.diagBasis),
-                tumorLocation = NcrLocationMapper.resolveLocation(primaryDiagnosis.topoSublok),
-                tumorDifferentiationGrade = NcrTumorDifferentiationGradeMapper.resolve(primaryDiagnosis.diffgrad.toInt()),
-                tnmCT = NcrTnmTMapper.resolve(primaryDiagnosis.ct),
-                tnmCN = NcrTnmNMapper.resolve(primaryDiagnosis.cn),
-                tnmCM = NcrTnmMMapper.resolve(primaryDiagnosis.cm),
-                tnmPT = NcrTnmTMapper.resolveNullable(primaryDiagnosis.pt),
-                tnmPN = NcrTnmNMapper.resolveNullable(primaryDiagnosis.pn),
-                tnmPM = NcrTnmMMapper.resolveNullable(primaryDiagnosis.pm),
-                stageCTNM = NcrStageTnmMapper.resolveNullable(primaryDiagnosis.cstadium),
-                stagePTNM = NcrStageTnmMapper.resolveNullable(primaryDiagnosis.pstadium),
-                stageTNM = NcrStageTnmMapper.resolveNullable(primaryDiagnosis.stadium),
-                numberOfInvestigatedLymphNodes = primaryDiagnosis.ondLymf,
-                numberOfPositiveLymphNodes = primaryDiagnosis.posLymf,
-                distantMetastasesStatus = NcrDistantMetastasesStatusMapper.resolve(identification.metaEpis),
-                metastases = extractMetastases(metastaticDiagnosis),
-                numberOfLiverMetastases = NcrNumberOfLiverMetastasesMapper.resolve(metastaticDiagnosis.metaLeverAantal),
-                maximumSizeOfLiverMetastasisInMm = metastaticDiagnosis.metaLeverAfm,
-                hasDoublePrimaryTumor = NcrBooleanMapper.resolve(clinicalCharacteristics.dubbeltum),
-                mesorectalFasciaIsClear = mesorectalFasciaIsClear,
-                distanceToMesorectalFascia = distanceToMesorectalFascia,
-                venousInvasionCategory = NcrVenousInvasionCategoryMapper.resolve(clinicalCharacteristics.veneusInvas),
-                lymphaticInvasionCategory = NcrLymphaticInvasionCategoryMapper.resolve(clinicalCharacteristics.lymfInvas),
-                extraMuralInvasionCategory = NcrExtraMuralInvasionCategoryMapper.resolve(clinicalCharacteristics.emi),
-                tumorRegression = NcrTumorRegressionMapper.resolve(clinicalCharacteristics.tumregres),
-                labMeasurements = extractLabMeasurements(labValues),
-                hasReceivedTumorDirectedTreatment = NcrBooleanMapper.resolve(treatment.tumgerichtTher) ?: false,
-                reasonRefrainmentFromTumorDirectedTreatment =
-                NcrReasonRefrainmentFromTumorDirectedTherapyMapper.resolve(treatment.geenTherReden),
-                hasParticipatedInTrial = NcrBooleanMapper.resolve(treatment.deelnameStudie),
-                gastroenterologyResections = extractGastroenterologyResections(treatment.gastroenterologyResection),
-                surgeries = extractSurgeries(treatment.primarySurgery),
-                metastasesSurgeries = extractMetastasesSurgeries(treatment.metastaticSurgery),
-                radiotherapies = extractRadiotherapies(treatment.primaryRadiotherapy),
-                metastasesRadiotherapies = extractMetastasesRadiotherapies(treatment.metastaticRadiotherapy),
-                hasHadHipecTreatment = NcrBooleanMapper.resolve(treatment.hipec.hipec) ?: false,
-                intervalTumorIncidenceHipecTreatment = treatment.hipec.hipecInt1,
-                systemicTreatments = systemicTreatmentSchemes.flatMap(SystemicTreatmentScheme::treatments),
-                systemicTreatmentSchemes = systemicTreatmentSchemes,
-                hasHadPreSurgeryRadiotherapy = hasHadPreSurgeryRadiotherapy,
-                hasHadPostSurgeryRadiotherapy = hasHadPostSurgeryRadiotherapy,
-                hasHadPreSurgeryChemoRadiotherapy = hasHadPreSurgeryChemoRadiotherapy,
-                hasHadPostSurgeryChemoRadiotherapy = hasHadPostSurgeryChemoRadiotherapy,
-                hasHadPreSurgerySystemicChemotherapy = hasHadPreSurgerySystemicChemotherapy,
-                hasHadPostSurgerySystemicChemotherapy = hasHadPostSurgerySystemicChemotherapy,
-                hasHadPreSurgerySystemicTargetedTherapy = hasHadPreSurgerySystemicTargetedTherapy,
-                hasHadPostSurgerySystemicTargetedTherapy = hasHadPostSurgerySystemicTargetedTherapy,
-                responseMeasure = responseMeasure,
-                pfsMeasures = pfsMeasures
-            )
+fun extractEpisode(record: NcrRecord): Episode {
+    return with(record) {
+        val responseMeasure = treatmentResponse.responsUitslag?.let {
+            if (it == "99" || it == "0") null else enumValueOf<ResponseMeasureType>(it)
         }
-    } catch (e: IllegalArgumentException) {
-        LOGGER.warn("Failed to extract episode from NCR record: ${record.identification.keyEid}", e)
-        return null
+            ?.let { ResponseMeasure(it, treatmentResponse.responsInt ?: 0) }
+
+        val pfsMeasures = extractPfsMeasures(treatmentResponse)
+        val systemicTreatmentSchemes = extractSystemicTreatmentSchemes(treatment.systemicTreatment, responseMeasure, pfsMeasures)
+        val (distanceToMesorectalFascia, mesorectalFasciaIsClear) = extractDistanceToMesorectalFascia(clinicalCharacteristics.mrfAfst)
+        val (hasHadPreSurgeryRadiotherapy, hasHadPostSurgeryRadiotherapy) = resolvePreAndPostSurgery(treatment.primaryRadiotherapy.rt)
+        val (hasHadPreSurgeryChemoRadiotherapy, hasHadPostSurgeryChemoRadiotherapy) =
+            resolvePreAndPostSurgery(treatment.primaryRadiotherapy.chemort)
+        val (hasHadPreSurgerySystemicChemotherapy, hasHadPostSurgerySystemicChemotherapy) =
+            resolvePreAndPostSurgery(treatment.systemicTreatment.chemo)
+        val (hasHadPreSurgerySystemicTargetedTherapy, hasHadPostSurgerySystemicTargetedTherapy) =
+            resolvePreAndPostSurgery(treatment.systemicTreatment.target)
+
+        Episode(
+            id = identification.keyEid,
+            order = identification.teller,
+            whoStatusPreTreatmentStart = patientCharacteristics.perfStat,
+            asaClassificationPreSurgeryOrEndoscopy =
+            NcrAsaClassificationPreSurgeryOrEndoscopyMapper.resolve(patientCharacteristics.asa),
+            tumorIncidenceYear = primaryDiagnosis.incjr,
+            tumorBasisOfDiagnosis = NcrTumorBasisOfDiagnosisMapper.resolve(primaryDiagnosis.diagBasis),
+            tumorLocation = NcrLocationMapper.resolveLocation(primaryDiagnosis.topoSublok),
+            tumorDifferentiationGrade = NcrTumorDifferentiationGradeMapper.resolve(primaryDiagnosis.diffgrad.toInt()),
+            tnmCT = NcrTnmTMapper.resolve(primaryDiagnosis.ct),
+            tnmCN = NcrTnmNMapper.resolve(primaryDiagnosis.cn),
+            tnmCM = NcrTnmMMapper.resolve(primaryDiagnosis.cm),
+            tnmPT = NcrTnmTMapper.resolveNullable(primaryDiagnosis.pt),
+            tnmPN = NcrTnmNMapper.resolveNullable(primaryDiagnosis.pn),
+            tnmPM = NcrTnmMMapper.resolveNullable(primaryDiagnosis.pm),
+            stageCTNM = NcrStageTnmMapper.resolveNullable(primaryDiagnosis.cstadium),
+            stagePTNM = NcrStageTnmMapper.resolveNullable(primaryDiagnosis.pstadium),
+            stageTNM = NcrStageTnmMapper.resolveNullable(primaryDiagnosis.stadium),
+            numberOfInvestigatedLymphNodes = primaryDiagnosis.ondLymf,
+            numberOfPositiveLymphNodes = primaryDiagnosis.posLymf,
+            distantMetastasesStatus = NcrDistantMetastasesStatusMapper.resolve(identification.metaEpis),
+            metastases = extractMetastases(metastaticDiagnosis),
+            numberOfLiverMetastases = NcrNumberOfLiverMetastasesMapper.resolve(metastaticDiagnosis.metaLeverAantal),
+            maximumSizeOfLiverMetastasisInMm = metastaticDiagnosis.metaLeverAfm,
+            hasDoublePrimaryTumor = NcrBooleanMapper.resolve(clinicalCharacteristics.dubbeltum),
+            mesorectalFasciaIsClear = mesorectalFasciaIsClear,
+            distanceToMesorectalFascia = distanceToMesorectalFascia,
+            venousInvasionCategory = NcrVenousInvasionCategoryMapper.resolve(clinicalCharacteristics.veneusInvas),
+            lymphaticInvasionCategory = NcrLymphaticInvasionCategoryMapper.resolve(clinicalCharacteristics.lymfInvas),
+            extraMuralInvasionCategory = NcrExtraMuralInvasionCategoryMapper.resolve(clinicalCharacteristics.emi),
+            tumorRegression = NcrTumorRegressionMapper.resolve(clinicalCharacteristics.tumregres),
+            labMeasurements = extractLabMeasurements(labValues),
+            hasReceivedTumorDirectedTreatment = NcrBooleanMapper.resolve(treatment.tumgerichtTher) ?: false,
+            reasonRefrainmentFromTumorDirectedTreatment =
+            NcrReasonRefrainmentFromTumorDirectedTherapyMapper.resolve(treatment.geenTherReden),
+            hasParticipatedInTrial = NcrBooleanMapper.resolve(treatment.deelnameStudie),
+            gastroenterologyResections = extractGastroenterologyResections(treatment.gastroenterologyResection),
+            surgeries = extractSurgeries(treatment.primarySurgery),
+            metastasesSurgeries = extractMetastasesSurgeries(treatment.metastaticSurgery),
+            radiotherapies = extractRadiotherapies(treatment.primaryRadiotherapy),
+            metastasesRadiotherapies = extractMetastasesRadiotherapies(treatment.metastaticRadiotherapy),
+            hasHadHipecTreatment = NcrBooleanMapper.resolve(treatment.hipec.hipec) ?: false,
+            intervalTumorIncidenceHipecTreatment = treatment.hipec.hipecInt1,
+            systemicTreatmentComponents = systemicTreatmentSchemes.flatMap(SystemicTreatmentScheme::treatmentComponents),
+            systemicTreatmentSchemes = systemicTreatmentSchemes,
+            hasHadPreSurgeryRadiotherapy = hasHadPreSurgeryRadiotherapy,
+            hasHadPostSurgeryRadiotherapy = hasHadPostSurgeryRadiotherapy,
+            hasHadPreSurgeryChemoRadiotherapy = hasHadPreSurgeryChemoRadiotherapy,
+            hasHadPostSurgeryChemoRadiotherapy = hasHadPostSurgeryChemoRadiotherapy,
+            hasHadPreSurgerySystemicChemotherapy = hasHadPreSurgerySystemicChemotherapy,
+            hasHadPostSurgerySystemicChemotherapy = hasHadPostSurgerySystemicChemotherapy,
+            hasHadPreSurgerySystemicTargetedTherapy = hasHadPreSurgerySystemicTargetedTherapy,
+            hasHadPostSurgerySystemicTargetedTherapy = hasHadPostSurgerySystemicTargetedTherapy,
+            responseMeasure = responseMeasure,
+            pfsMeasures = pfsMeasures
+        )
     }
 }
 
@@ -196,7 +186,7 @@ private fun extractMetastasesSurgeries(metastaticSurgery: NcrMetastaticSurgery):
             .mapNotNull { (type, radicality, interval) ->
                 type?.let {
                     MetastasesSurgery(
-                        NcrMetastasesSurgeryTypeMapper.resolve(it), NcrSurgeryRadicalityMapper.resolve(radicality), interval, null
+                        NcrMetastasesSurgeryTypeMapper.resolve(it), NcrSurgeryRadicalityMapper.resolve(radicality), interval
                     )
                 }
             }

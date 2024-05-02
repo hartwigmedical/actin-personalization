@@ -1,7 +1,7 @@
 package com.hartwig.actin.personalization.datamodel
 
-data class SystemicTreatment(
-    val treatmentName: TreatmentName,
+data class SystemicTreatmentComponent(
+    val drug: Drug,
     val treatmentSchemeNumber: Int?, //Nullable because absent for prior tumors
     val treatmentNumberOfCycles: Int?,
     val treatmentCyclesDetails: TreatmentCyclesDetails?,

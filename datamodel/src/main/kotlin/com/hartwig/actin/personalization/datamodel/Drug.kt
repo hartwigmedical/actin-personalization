@@ -1,6 +1,6 @@
 package com.hartwig.actin.personalization.datamodel
 
-enum class TreatmentName(val category: TreatmentCategory) {
+enum class Drug(val category: TreatmentCategory) {
     ABIRATERONE_ZYTIGA_AND_PREDNISONE(TreatmentCategory.HORMONAL_THERAPY),
     ANASTROZOLE(TreatmentCategory.HORMONAL_THERAPY),
     ANGIOGENESIS_INHIBITOR(TreatmentCategory.TARGETED_THERAPY),

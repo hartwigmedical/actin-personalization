@@ -4,7 +4,7 @@ import com.hartwig.actin.personalization.datamodel.PfsMeasure
 import com.hartwig.actin.personalization.datamodel.PfsMeasureType
 import com.hartwig.actin.personalization.datamodel.ResponseMeasure
 import com.hartwig.actin.personalization.datamodel.ResponseMeasureType
-import com.hartwig.actin.personalization.datamodel.SystemicTreatment
+import com.hartwig.actin.personalization.datamodel.SystemicTreatmentComponent
 import com.hartwig.actin.personalization.datamodel.SystemicTreatmentScheme
 import com.hartwig.actin.personalization.ncr.datamodel.NcrSystemicTreatment
 import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrTreatmentNameMapper.resolve
@@ -69,22 +69,22 @@ private fun extractRawSystemicTreatmentSchemesDescending(
 ): List<SystemicTreatmentScheme> {
     return with(ncrSystemicTreatment) {
         listOfNotNull(
-            systCode1?.let { extractSystemic(it, systSchemanum1, systKuren1, systStartInt1, systStopInt1, systPrepost1) },
-            systCode2?.let { extractSystemic(it, systSchemanum2, systKuren2, systStartInt2, systStopInt2, systPrepost2) },
-            systCode3?.let { extractSystemic(it, systSchemanum3, systKuren3, systStartInt3, systStopInt3, systPrepost3) },
-            systCode4?.let { extractSystemic(it, systSchemanum4, systKuren4, systStartInt4, systStopInt4, systPrepost4) },
-            systCode5?.let { extractSystemic(it, systSchemanum5, systKuren5, systStartInt5, systStopInt5, systPrepost5) },
-            systCode6?.let { extractSystemic(it, systSchemanum6, systKuren6, systStartInt6, systStopInt6, systPrepost6) },
-            systCode7?.let { extractSystemic(it, systSchemanum7, systKuren7, systStartInt7, systStopInt7, systPrepost7) },
-            systCode8?.let { extractSystemic(it, systSchemanum8, systKuren8, systStartInt8, systStopInt8, systPrepost8) },
-            systCode9?.let { extractSystemic(it, systSchemanum9, systKuren9, systStartInt9, systStopInt9, systPrepost9) },
-            systCode10?.let { extractSystemic(it, systSchemanum10, systKuren10, systStartInt10, systStopInt10, systPrepost10) },
-            systCode11?.let { extractSystemic(it, systSchemanum11, systKuren11, systStartInt11, systStopInt11, systPrepost11) },
-            systCode12?.let { extractSystemic(it, systSchemanum12, systKuren12, systStartInt12, systStopInt12, systPrepost12) },
-            systCode13?.let { extractSystemic(it, systSchemanum13, systKuren13, systStartInt13, systStopInt13, systPrepost13) },
-            systCode14?.let { extractSystemic(it, systSchemanum14, systKuren14, systStartInt14, systStopInt14, systPrepost14) }
+            systCode1?.let { extractSystemicComponent(it, systSchemanum1, systKuren1, systStartInt1, systStopInt1, systPrepost1) },
+            systCode2?.let { extractSystemicComponent(it, systSchemanum2, systKuren2, systStartInt2, systStopInt2, systPrepost2) },
+            systCode3?.let { extractSystemicComponent(it, systSchemanum3, systKuren3, systStartInt3, systStopInt3, systPrepost3) },
+            systCode4?.let { extractSystemicComponent(it, systSchemanum4, systKuren4, systStartInt4, systStopInt4, systPrepost4) },
+            systCode5?.let { extractSystemicComponent(it, systSchemanum5, systKuren5, systStartInt5, systStopInt5, systPrepost5) },
+            systCode6?.let { extractSystemicComponent(it, systSchemanum6, systKuren6, systStartInt6, systStopInt6, systPrepost6) },
+            systCode7?.let { extractSystemicComponent(it, systSchemanum7, systKuren7, systStartInt7, systStopInt7, systPrepost7) },
+            systCode8?.let { extractSystemicComponent(it, systSchemanum8, systKuren8, systStartInt8, systStopInt8, systPrepost8) },
+            systCode9?.let { extractSystemicComponent(it, systSchemanum9, systKuren9, systStartInt9, systStopInt9, systPrepost9) },
+            systCode10?.let { extractSystemicComponent(it, systSchemanum10, systKuren10, systStartInt10, systStopInt10, systPrepost10) },
+            systCode11?.let { extractSystemicComponent(it, systSchemanum11, systKuren11, systStartInt11, systStopInt11, systPrepost11) },
+            systCode12?.let { extractSystemicComponent(it, systSchemanum12, systKuren12, systStartInt12, systStopInt12, systPrepost12) },
+            systCode13?.let { extractSystemicComponent(it, systSchemanum13, systKuren13, systStartInt13, systStopInt13, systPrepost13) },
+            systCode14?.let { extractSystemicComponent(it, systSchemanum14, systKuren14, systStartInt14, systStopInt14, systPrepost14) }
         )
-            .groupBy(SystemicTreatment::treatmentSchemeNumber)
+            .groupBy(SystemicTreatmentComponent::treatmentSchemeNumber)
             .map { (_, treatments) ->
                 val (startMin, startMax, stopMin, stopMax) = treatments.map {
                     with(it) {
@@ -103,12 +103,12 @@ private fun extractRawSystemicTreatmentSchemesDescending(
     }
 }
 
-private fun extractSystemic(
+private fun extractSystemicComponent(
     code: String, schemaNum: Int?, cycleCode: Int?, startInterval: Int?, stopInterval: Int?, prePostCode: Int?
-): SystemicTreatment {
+): SystemicTreatmentComponent {
     val (preSurgery, postSurgery) = resolvePreAndPostSurgery(prePostCode)
     val (cycles, cycleDetails) = resolveCyclesAndDetails(cycleCode)
-    return SystemicTreatment(resolve(code), schemaNum, cycles, cycleDetails, startInterval, stopInterval, preSurgery, postSurgery)
+    return SystemicTreatmentComponent(resolve(code), schemaNum, cycles, cycleDetails, startInterval, stopInterval, preSurgery, postSurgery)
 }
 
 private data class StartAndStopMinAndMax(val startMin: Int?, val startMax: Int?, val stopMin: Int?, val stopMax: Int?) {

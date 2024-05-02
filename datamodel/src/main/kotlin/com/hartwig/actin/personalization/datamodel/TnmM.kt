@@ -6,6 +6,6 @@ enum class TnmM {
     M1A,
     M1B,
     M1C,
-    M_minus,
+    M_MINUS,
     X,
 }

@@ -1,6 +1,13 @@
 package com.hartwig.actin.personalization.datamodel
 
 data class Diagnosis(
+    override val consolidatedTumorType: TumorType,
+    override val tumorLocations: Set<Location>,
+    override val hasHadTumorDirectedSystemicTherapy: Boolean,
+
+    val hasHadPriorTumor: Boolean,
+    val priorTumors: List<PriorTumor>,
+    
     val cci: Int?,
     val cciNumberOfCategories: CciNumberOfCategories?,
     val cciHasAids: Boolean?,
@@ -30,4 +37,4 @@ data class Diagnosis(
     val hasBrafV600EMutation: Boolean?,
     val hasRasMutation: Boolean?,
     val hasKrasG12CMutation: Boolean?,
-)
+) : Tumor
