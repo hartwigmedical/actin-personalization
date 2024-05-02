@@ -5,7 +5,7 @@ import com.hartwig.actin.personalization.datamodel.MetastasesSurgeryType
 object NcrMetastasesSurgeryTypeMapper : NcrStringCodeMapper<MetastasesSurgeryType> {
     override fun resolve(code: String): MetastasesSurgeryType {
         return when (code) {
-            "123C26M" -> MetastasesSurgeryType.METASECTOMY_OTHER_ABDOMINAL_ORGANS
+            "123C26M" -> MetastasesSurgeryType.METASTASECTOMY_OTHER_ABDOMINAL_ORGANS
             "123C38M" -> MetastasesSurgeryType.METASTASECTOMY_PLEURAL_METASTASES
             "123C41M" -> MetastasesSurgeryType.METASTASECTOMY_BONE
             "123C44M" -> MetastasesSurgeryType.METASTASECTOMY_SKIN

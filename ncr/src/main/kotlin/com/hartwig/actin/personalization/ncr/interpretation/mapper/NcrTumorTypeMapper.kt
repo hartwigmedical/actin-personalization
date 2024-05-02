@@ -75,7 +75,7 @@ object NcrTumorTypeMapper : NcrIntCodeMapper<TumorType> {
             8523 -> TumorType.DUCTAL_CARCINOMA_MIXED_WITH_OTHER_CARCINOMA_TYPE
             8524 -> TumorType.LOBULAR_CARCINOMA_MIXED_WITH_OTHER_CARCINOMA_TYPE
             8541 -> TumorType.MORBUS_PAGET_AND_INFILTRATING_DUCTAL_CARCINOMA
-            8550 -> TumorType.ACINUS_CELL_CARCINOMA
+            8550 -> TumorType.ACINAR_CELL_CARCINOMA
             8560 -> TumorType.ADENOSQUAMOUS_CARCINOMA
             8562 -> TumorType.EPITHELIAL_MYOEPITHELIAL_CARCINOMA
             8575 -> TumorType.METAPLASTIC_CARCINOMA_NOS
@@ -134,10 +134,10 @@ object NcrTumorTypeMapper : NcrIntCodeMapper<TumorType> {
             9960 -> TumorType.MYELOPROLIFERATIVE_DISORDER_NOS
             9961 -> TumorType.PRIMARY_MYELOFIBROSIS
             9962 -> TumorType.ESSENTIAL_THROMBOCYTHEMIA
-            9980 -> TumorType.MDS_WITH_DYSPLASIA_IN_1_CELL_LINE
+            9980 -> TumorType.MDS_WITH_DYSPLASIA_IN_ONE_CELL_LINE
             9982 -> TumorType.MDS_WITH_RING_SIDEROBLASTS_OR_MDS_WITH_SF3B1_MUTATION
-            9983 -> TumorType.MDS_WITH_ELEVATED_BLASTS_1
-            9985 -> TumorType.MDS_WITH_DYSPLASIA_IN_AT_LEAST_1_CELL_LINE
+            9983 -> TumorType.MDS_WITH_ELEVATED_BLASTS_ONE
+            9985 -> TumorType.MDS_WITH_DYSPLASIA_IN_AT_LEAST_ONE_CELL_LINE
             9989 -> TumorType.MYELODYSPLASTIC_SYNDROME_NOS
             else -> throw IllegalArgumentException("Unknown TumorType code: $code")
         }
