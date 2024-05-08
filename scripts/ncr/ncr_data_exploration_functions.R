@@ -230,3 +230,34 @@ translate_atc <- function(atc_codes) {
   return(paste(translated_atc_codes, collapse = ", "))
 }
 
+treatment_plan_translation <- function(treatments) {
+
+  treatment_plan_translation_table <- list("Capecitabine, Bevacizumab, Oxaliplatin" = "CAPOX-B",
+                                            "Capecitabine" = "Capecitabine",
+                                            "Capecitabine, Oxaliplatin" = "CAPOX",
+                                            "Capecitabine, Bevacizumab" = "Capecitabine-B",
+                                            "Fluorouracil, Bevacizumab, Oxaliplatin" = "FOLFOX-B",
+                                            "Fluorouracil, Oxaliplatin" = "FOLFOX",
+                                            "Fluorouracil, Irinotecan, Bevacizumab, Oxaliplatin" = "FOLFOXIRI-B",
+                                            "Fluorouracil" = "Fluorouracil",
+                                            "Pembrolizumab" = "Pembrolizumab",
+                                            "Fluorouracil, Irinotecan, Bevacizumab" = "FOLFIRI-B",
+                                            "Fluorouracil, Panitumumab, Oxaliplatin" = "FOLFOX-P",
+                                            "Fluorouracil, Irinotecan, Oxaliplatin" = "FOLFOXIRI",
+                                            "Fluorouracil, Irinotecan" = "FOLFIRI",
+                                            "Systemic chemotherapy" = "Systemic chemotherapy",
+                                            "Fluorouracil, Bevacizumab" = "Fluorouracil-B",
+                                            "Systemic chemotherapy, Bevacizumab" = "Systemic chemotherapy-B"
+  )
+
+  treatment_plans <- lapply(treatments, function(treatments_raw) {
+    if (treatments_raw %in% names(treatment_plan_translation_table)) {
+      return(treatment_plan_translation_table[[treatments_raw]])
+    } else {
+      return(treatments_raw)
+    }
+  })
+  return(treatment_plans)
+}
+                                
+                                
