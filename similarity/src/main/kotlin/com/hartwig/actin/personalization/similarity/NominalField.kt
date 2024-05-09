@@ -18,11 +18,11 @@ data class NominalField<T>(
     }
 
     companion object {
-        fun <T : Enum<T>> forEnum(enum: Class<T>, function: (TumorEntry) -> T?): NominalField<T> {
+        fun <T : Enum<T>> enumField(enum: Class<T>, function: (TumorEntry) -> T?): NominalField<T> {
             return NominalField(enum.simpleName.replaceFirstChar(Char::lowercase), enum.enumConstants.toList(), function)
         }
 
-        fun forBoolean(name: String, function: (TumorEntry) -> Boolean?): NominalField<Boolean> {
+        fun booleanField(name: String, function: (TumorEntry) -> Boolean?): NominalField<Boolean> {
             return NominalField(name, listOf(false, true), function)
         }
     }
