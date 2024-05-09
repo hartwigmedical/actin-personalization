@@ -21,6 +21,7 @@ import com.hartwig.actin.personalization.ncr.datamodel.NcrTreatment
 import com.hartwig.actin.personalization.ncr.datamodel.NcrTreatmentResponse
 import java.io.File
 import java.nio.file.Files
+import kotlin.streams.toList
 
 object NcrDataReader {
 
@@ -30,7 +31,9 @@ object NcrDataReader {
         val lines = Files.readAllLines(File(tsv).toPath())
         val fields = createFields(lines[0].split(FIELD_DELIMITER).toTypedArray())
 
-        return lines.subList(1, lines.size).map { createRecord(fields, it.split(FIELD_DELIMITER).toTypedArray()) }
+        return lines.subList(1, lines.size).parallelStream()
+            .map { createRecord(fields, it.split(FIELD_DELIMITER).toTypedArray()) }
+            .toList()
     }
 
     private fun createRecord(fields: Map<String, Int>, parts: Array<String>): NcrRecord {

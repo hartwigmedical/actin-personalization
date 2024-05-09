@@ -12,6 +12,7 @@
         <module>recruitment-assignment</module>
         <module>datamodel</module>
         <module>ncr</module>
+        <module>similarity</module>
     </modules>
 
     <properties>

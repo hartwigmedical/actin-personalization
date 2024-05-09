@@ -3,6 +3,7 @@ package com.hartwig.actin.personalization.ncr.interpretation.extractor
 import com.hartwig.actin.personalization.datamodel.Diagnosis
 import com.hartwig.actin.personalization.datamodel.Episode
 import com.hartwig.actin.personalization.datamodel.PriorTumor
+import com.hartwig.actin.personalization.datamodel.TumorEntry
 import com.hartwig.actin.personalization.ncr.datamodel.NcrRecord
 import com.hartwig.actin.personalization.ncr.interpretation.DIAGNOSIS_EPISODE
 import com.hartwig.actin.personalization.ncr.interpretation.PatientRecordFactory
@@ -19,7 +20,7 @@ import org.apache.logging.log4j.Logger
 
 private val LOGGER: Logger = LogManager.getLogger(PatientRecordFactory::class)
 
-fun extractDiagnosisAndEpisodes(tumorId: Int, records: List<NcrRecord>): Pair<Diagnosis, List<Episode>> {
+fun extractTumorEntry(tumorId: Int, records: List<NcrRecord>): TumorEntry {
     val diagnosisRecord = records.single { it.identification.epis == DIAGNOSIS_EPISODE }
     val episodes = records.map(::extractEpisode)
     val locations = episodes.map(Episode::tumorLocation).toSet()
@@ -81,7 +82,7 @@ fun extractDiagnosisAndEpisodes(tumorId: Int, records: List<NcrRecord>): Pair<Di
             hasKrasG12CMutation = hasKrasG12CMutation
         )
     }
-    return diagnosis to episodes
+    return TumorEntry(diagnosis, episodes)
 }
 
 private fun extractPriorTumors(record: NcrRecord): List<PriorTumor> {

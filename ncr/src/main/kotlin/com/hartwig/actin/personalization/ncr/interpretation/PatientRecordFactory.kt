@@ -1,13 +1,12 @@
 package com.hartwig.actin.personalization.ncr.interpretation
 
-import com.hartwig.actin.personalization.datamodel.Diagnosis
-import com.hartwig.actin.personalization.datamodel.Episode
 import com.hartwig.actin.personalization.datamodel.PatientRecord
 import com.hartwig.actin.personalization.datamodel.Sex
+import com.hartwig.actin.personalization.datamodel.TumorEntry
 import com.hartwig.actin.personalization.ncr.datamodel.NcrRecord
-import com.hartwig.actin.personalization.ncr.interpretation.extractor.extractDiagnosisAndEpisodes
+import com.hartwig.actin.personalization.ncr.interpretation.extractor.extractTumorEntry
 import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrSexMapper
-import java.util.stream.Collectors
+import kotlin.streams.toList
 
 const val DIAGNOSIS_EPISODE = "DIA"
 
@@ -18,7 +17,7 @@ object PatientRecordFactory {
 
         return recordsPerPatient.values.parallelStream()
             .map(::createPatientRecord)
-            .collect(Collectors.toList())
+            .toList()
     }
 
     private fun createPatientRecord(ncrRecords: List<NcrRecord>): PatientRecord {
@@ -26,7 +25,7 @@ object PatientRecordFactory {
             ncrId = extractNcrId(ncrRecords),
             sex = extractSex(ncrRecords),
             isAlive = determineIsAlive(ncrRecords),
-            episodesPerTumorOfInterest = determineEpisodesPerTumorOfInterest(ncrRecords)
+            tumorEntries = determineEpisodesPerTumorOfInterest(ncrRecords)
         )
     }
 
@@ -61,9 +60,9 @@ object PatientRecordFactory {
         }
     }
 
-    private fun determineEpisodesPerTumorOfInterest(ncrRecords: List<NcrRecord>): Map<Diagnosis, List<Episode>> {
+    private fun determineEpisodesPerTumorOfInterest(ncrRecords: List<NcrRecord>): List<TumorEntry> {
         return ncrRecords.groupBy { it.identification.keyZid }.entries
-            .associate { (tumorId, records) -> extractDiagnosisAndEpisodes(tumorId, records) }
+            .map { (tumorId, records) -> extractTumorEntry(tumorId, records) }
     }
 
     private fun diagnosisEpisodes(ncrRecords: List<NcrRecord>): List<NcrRecord> {
