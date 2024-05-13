@@ -6,5 +6,6 @@ import weka.core.Attribute
 interface Field {
     val name: String
     fun getFor(entry: TumorEntry): Double?
-    fun toAttribute(): Attribute
+
+    fun toAttribute(): Attribute = Attribute(name)
 }
