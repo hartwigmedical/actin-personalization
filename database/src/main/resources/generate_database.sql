@@ -1,4 +1,6 @@
--- DROP TABLE IF EXISTS `patientRecord`;
+SET FOREIGN_KEY_CHECKS = 0;
+
+DROP TABLE IF EXISTS `patientRecord`;
 CREATE TABLE `patientRecord` (
     `id` int NOT NULL AUTO_INCREMENT,
     `ncrId` int NOT NULL,
@@ -7,7 +9,7 @@ CREATE TABLE `patientRecord` (
     PRIMARY KEY (`id`)
 );
 
--- DROP TABLE IF EXISTS `diagnosis`;
+DROP TABLE IF EXISTS `diagnosis`;
 CREATE TABLE `diagnosis` (
     `id` int NOT NULL AUTO_INCREMENT,
     `patientRecordId` int NOT NULL,
@@ -47,7 +49,7 @@ CREATE TABLE `diagnosis` (
     PRIMARY KEY (`id`)
 );
 
--- DROP TABLE IF EXISTS `episode`;
+DROP TABLE IF EXISTS `episode`;
 CREATE TABLE `episode` (
     `id` int NOT NULL AUTO_INCREMENT,
     `diagnosisId` int NOT NULL,
@@ -110,7 +112,7 @@ CREATE TABLE `episode` (
     PRIMARY KEY (`id`)
 );
 
--- DROP TABLE IF EXISTS `priorTumor`;
+DROP TABLE IF EXISTS `priorTumor`;
 CREATE TABLE `priorTumor` (
     `id` int NOT NULL AUTO_INCREMENT,
     `diagnosisId` int NOT NULL,
@@ -126,7 +128,7 @@ CREATE TABLE `priorTumor` (
     PRIMARY KEY (`id`)
 );
 
--- DROP TABLE IF EXISTS `labMeasurement`;
+DROP TABLE IF EXISTS `labMeasurement`;
 CREATE TABLE `labMeasurement` (
     `id` int NOT NULL AUTO_INCREMENT,
     `episodeId` int NOT NULL,
@@ -140,7 +142,7 @@ CREATE TABLE `labMeasurement` (
     PRIMARY KEY (`id`)
 );
 
--- DROP TABLE IF EXISTS `surgery`;
+DROP TABLE IF EXISTS `surgery`;
 CREATE TABLE `surgery` (
     `id` int NOT NULL AUTO_INCREMENT,
     `episodeId` int NOT NULL,
@@ -156,23 +158,7 @@ CREATE TABLE `surgery` (
     PRIMARY KEY (`id`)
 );
 
--- DROP TABLE IF EXISTS `systemicTreatmentComponent`;
-CREATE TABLE `systemicTreatmentComponent` (
-    `id` int NOT NULL AUTO_INCREMENT,
-    `systemicTreatmentSchemeId` int NOT NULL,
-    `drug` varchar(50) NOT NULL,
-    `treatmentSchemeNumber` int,
-    `treatmentNumberOfCycles` int,
-    `treatmentCyclesDetails` varchar(50),
-    `intervalTumorIncidenceTreatmentStart` int,
-    `intervalTumorIncidenceTreatmentStop` int,
-    `preSurgery` tinyint(1),
-    `postSurgery` tinyint(1),
-    FOREIGN KEY (`systemicTreatmentSchemeId`) REFERENCES `SystemicTreatmentScheme`(`id`),
-    PRIMARY KEY (`id`)
-);
-
--- DROP TABLE IF EXISTS `systemicTreatmentScheme`;
+DROP TABLE IF EXISTS `systemicTreatmentScheme`;
 CREATE TABLE `systemicTreatmentScheme` (
     `id` int NOT NULL AUTO_INCREMENT,
     `episodeId` int NOT NULL,
@@ -191,8 +177,24 @@ CREATE TABLE `systemicTreatmentScheme` (
     PRIMARY KEY (`id`)
 );
 
--- DROP TABLE IF EXISTS `PfsMeasure`;
-CREATE TABLE `PfsMeasure` (
+DROP TABLE IF EXISTS `systemicTreatmentComponent`;
+CREATE TABLE `systemicTreatmentComponent` (
+    `id` int NOT NULL AUTO_INCREMENT,
+    `systemicTreatmentSchemeId` int NOT NULL,
+    `drug` varchar(50) NOT NULL,
+    `treatmentSchemeNumber` int,
+    `treatmentNumberOfCycles` int,
+    `treatmentCyclesDetails` varchar(50),
+    `intervalTumorIncidenceTreatmentStart` int,
+    `intervalTumorIncidenceTreatmentStop` int,
+    `preSurgery` tinyint(1),
+    `postSurgery` tinyint(1),
+    FOREIGN KEY (`systemicTreatmentSchemeId`) REFERENCES `SystemicTreatmentScheme`(`id`),
+    PRIMARY KEY (`id`)
+);
+
+DROP TABLE IF EXISTS `pfsMeasure`;
+CREATE TABLE `pfsMeasure` (
     `id` int NOT NULL AUTO_INCREMENT,
     `systemicTreatmentSchemeId` int NOT NULL,
     `pfsMeasureType` varchar(50) NOT NULL,
@@ -200,9 +202,9 @@ CREATE TABLE `PfsMeasure` (
     `intervalTumorIncidencePfsMeasureDate` int,
     FOREIGN KEY (`systemicTreatmentSchemeId`) REFERENCES `SystemicTreatmentScheme`(`id`),
     PRIMARY KEY (`id`)
-)
+);
 
--- DROP TABLE IF EXISTS `drug`;
+DROP TABLE IF EXISTS `drug`;
 CREATE TABLE `drug` (
     `id` int NOT NULL AUTO_INCREMENT,
     `name` varchar(255) NOT NULL,
@@ -210,10 +212,12 @@ CREATE TABLE `drug` (
     PRIMARY KEY (`id`)
 );
 
--- DROP TABLE IF EXISTS `location`;
+DROP TABLE IF EXISTS `location`;
 CREATE TABLE `location` (
     `id` int NOT NULL AUTO_INCREMENT,
     `name` varchar(255) NOT NULL,
     `group` varchar(255) NOT NULL,
     PRIMARY KEY (`id`)
 );
+
+SET FOREIGN_KEY_CHECKS = 1;
