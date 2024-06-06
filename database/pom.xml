@@ -1,28 +1,38 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-
     <parent>
-        <artifactId>actin-personalization</artifactId>
         <groupId>com.hartwig.actin.personalization</groupId>
+        <artifactId>actin-personalization</artifactId>
         <version>local-SNAPSHOT</version>
     </parent>
 
-    <artifactId>datamodel</artifactId>
+    <artifactId>database</artifactId>
     <packaging>jar</packaging>
     <version>local-SNAPSHOT</version>
-    <name>HMF ACTIN Personalization - Datamodel</name>
+    <name>HMF ACTIN Personalization - Database</name>
 
     <dependencies>
         <dependency>
+            <groupId>com.hartwig.actin.personalization</groupId>
+            <artifactId>datamodel</artifactId>
+        </dependency>
+
+        <dependency>
             <groupId>org.jetbrains.kotlin</groupId>
             <artifactId>kotlin-stdlib</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-core</artifactId>
         </dependency>
     </dependencies>
 
     <build>
         <sourceDirectory>src/main/kotlin</sourceDirectory>
-
+        <testSourceDirectory>src/test/kotlin</testSourceDirectory>
         <plugins>
             <plugin>
                 <groupId>org.jetbrains.kotlin</groupId>
