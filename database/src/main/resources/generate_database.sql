@@ -189,7 +189,7 @@ CREATE TABLE `systemicTreatmentComponent` (
     `intervalTumorIncidenceTreatmentStop` int,
     `preSurgery` tinyint(1),
     `postSurgery` tinyint(1),
-    FOREIGN KEY (`systemicTreatmentSchemeId`) REFERENCES `SystemicTreatmentScheme`(`id`),
+    FOREIGN KEY (`systemicTreatmentSchemeId`) REFERENCES `systemicTreatmentScheme`(`id`),
     PRIMARY KEY (`id`)
 );
 
@@ -200,7 +200,7 @@ CREATE TABLE `pfsMeasure` (
     `pfsMeasureType` varchar(50) NOT NULL,
     `pfsMeasureFollowupEvent` varchar(50),
     `intervalTumorIncidencePfsMeasureDate` int,
-    FOREIGN KEY (`systemicTreatmentSchemeId`) REFERENCES `SystemicTreatmentScheme`(`id`),
+    FOREIGN KEY (`systemicTreatmentSchemeId`) REFERENCES `systemicTreatmentScheme`(`id`),
     PRIMARY KEY (`id`)
 );
 
