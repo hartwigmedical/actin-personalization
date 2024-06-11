@@ -7,17 +7,17 @@ import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import kotlin.system.exitProcess
 
-class PersonalizationLoaderApplication() {
-    @CommandLine.Option(names = ["--ncr_file"], required = true)
+class PersonalizationLoaderApplication {
+    @CommandLine.Option(names = ["-ncr_file"], required = true)
     lateinit var ncrFile: String
 
-    @CommandLine.Option(names = ["--db_user"], required = true)
+    @CommandLine.Option(names = ["-db_user"], required = true)
     lateinit var dbUser: String
 
-    @CommandLine.Option(names = ["--db_pass"], required = true)
+    @CommandLine.Option(names = ["-db_pass"], required = true)
     lateinit var dbPass: String
 
-    @CommandLine.Option(names = ["--db_url"], required = true)
+    @CommandLine.Option(names = ["-db_url"], required = true)
     lateinit var dbUrl: String
 
     fun run() {
@@ -34,6 +34,7 @@ class PersonalizationLoaderApplication() {
         val access: DatabaseAccess = DatabaseAccess.fromCredentials(dbUser, dbPass, dbUrl)
 
         LOGGER.info("Writing {} patient records to database", patients.size)
+        access.writePatientRecords(patients)
 
         LOGGER.info("Done!")
     }

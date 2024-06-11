@@ -2,7 +2,7 @@ SET FOREIGN_KEY_CHECKS = 0;
 
 DROP TABLE IF EXISTS `patientRecord`;
 CREATE TABLE `patientRecord` (
-    `id` int NOT NULL AUTO_INCREMENT,
+    `id` int NOT NULL,
     `ncrId` int NOT NULL,
     `sex` varchar(50) NOT NULL,
     `isAlive` tinyint(1),
