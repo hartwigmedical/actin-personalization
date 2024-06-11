@@ -31,6 +31,7 @@ class DatabaseAccess(private val context: DSLContext) {
         ).forEach { context.truncate(it).execute() }
         context.execute("SET FOREIGN_KEY_CHECKS = 1;")
         
+        LOGGER.info(" Writing patient records")
         val dbRecords = patientRecords.mapIndexed { id, record ->
             val dbRecord = context.newRecord(Tables.PATIENTRECORD)
             dbRecord.from(record)

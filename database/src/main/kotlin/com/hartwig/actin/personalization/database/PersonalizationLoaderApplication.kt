@@ -6,8 +6,9 @@ import picocli.CommandLine
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import kotlin.system.exitProcess
+import java.util.concurrent.Callable
 
-class PersonalizationLoaderApplication {
+class PersonalizationLoaderApplication : Callable<Int> {
     @CommandLine.Option(names = ["-ncr_file"], required = true)
     lateinit var ncrFile: String
 
@@ -20,7 +21,7 @@ class PersonalizationLoaderApplication {
     @CommandLine.Option(names = ["-db_url"], required = true)
     lateinit var dbUrl: String
 
-    fun run() {
+    override fun call(): Int {
         LOGGER.info("Running {} v{}", APPLICATION, VERSION)
 
         LOGGER.info("Loading NCR records from file $ncrFile")
@@ -37,6 +38,7 @@ class PersonalizationLoaderApplication {
         access.writePatientRecords(patients)
 
         LOGGER.info("Done!")
+        return 0
     }
 
     companion object {
