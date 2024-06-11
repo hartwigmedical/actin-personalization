@@ -1,10 +1,14 @@
 package com.hartwig.actin.personalization.database
 
 import com.hartwig.actin.personalization.datamodel.Diagnosis
+import com.hartwig.actin.personalization.datamodel.Episode
 import com.hartwig.actin.personalization.datamodel.PatientRecord
+import com.hartwig.actin.personalization.datamodel.TumorEntry
 
 import org.apache.logging.log4j.LogManager
 import org.jooq.DSLContext
+import org.jooq.Fields
+import org.jooq.JSON
 import org.jooq.SQLDialect
 import org.jooq.impl.DSL
 import org.jooq.Table
@@ -17,7 +21,7 @@ class DatabaseAccess(private val context: DSLContext) {
     fun writeAllToDb(patientRecords: List<PatientRecord>) {
         clearAll()
         val indexedRecords = writePatientRecords(patientRecords)
-        val diagnoses = writeDiagnosisRecords(indexedRecords)
+        val tumorEntries = writeDiagnosisRecords(indexedRecords)
     }
     
     private fun clearAll() {
@@ -52,25 +56,29 @@ class DatabaseAccess(private val context: DSLContext) {
         return indexedRecords
     }
 
-    private fun writeDiagnosisRecords(patientRecords: IndexedList<PatientRecord>): IndexedList<Diagnosis> {
+    private fun writeDiagnosisRecords(patientRecords: IndexedList<PatientRecord>): IndexedList<TumorEntry> {
         LOGGER.info(" Writing diagnosis records")
-        val (diagnosisRecords, rows) = patientRecords.flatMap { (patientId, patient) ->
-            patient.tumorEntries.map { (diagnosis, _) ->
+        val (tumorEntries, rows) = patientRecords.flatMap { (patientId, patient) ->
+            patient.tumorEntries.map { tumorEntry ->
                 val dbRecord = context.newRecord(Tables.DIAGNOSIS)
-                dbRecord.from(diagnosis)
+                dbRecord.from(tumorEntry.diagnosis)
                 dbRecord.set(Tables.DIAGNOSIS.PATIENTRECORDID, patientId)
-                diagnosis to dbRecord
+                dbRecord.set(
+                    Tables.DIAGNOSIS.TUMORLOCATIONS,
+                    JSON.json(tumorEntry.diagnosis.tumorLocations.joinToString(",", prefix = "[", postfix = "]"))
+                )
+                tumorEntry to dbRecord
             }
         }
-            .mapIndexed { index, (diagnosis, dbRecord) ->
+            .mapIndexed { index, (tumorEntry, dbRecord) ->
                 val diagnosisId = index + 1
                 dbRecord.set(Tables.DIAGNOSIS.ID, diagnosisId)
-                Pair(diagnosisId, diagnosis) to dbRecord
+                Pair(diagnosisId, tumorEntry) to dbRecord
             }
             .unzip()
         
         context.batchInsert(rows).execute()
-        return diagnosisRecords
+        return tumorEntries
     }
 
     companion object {
