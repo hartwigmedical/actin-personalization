@@ -11,7 +11,7 @@ CREATE TABLE `patientRecord` (
 
 DROP TABLE IF EXISTS `diagnosis`;
 CREATE TABLE `diagnosis` (
-    `id` int NOT NULL AUTO_INCREMENT,
+    `id` int NOT NULL,
     `patientRecordId` int NOT NULL,
     `consolidatedTumorType` varchar(255) NOT NULL,
     `tumorLocations` json NOT NULL,

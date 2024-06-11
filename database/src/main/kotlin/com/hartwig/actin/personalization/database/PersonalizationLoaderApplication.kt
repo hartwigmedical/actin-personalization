@@ -35,7 +35,7 @@ class PersonalizationLoaderApplication : Callable<Int> {
         val access: DatabaseAccess = DatabaseAccess.fromCredentials(dbUser, dbPass, dbUrl)
 
         LOGGER.info("Writing {} patient records to database", patients.size)
-        access.writePatientRecords(patients)
+        access.writeAllToDb(patients)
 
         LOGGER.info("Done!")
         return 0
