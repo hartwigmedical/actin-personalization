@@ -7,11 +7,9 @@ import com.hartwig.actin.personalization.datamodel.TumorEntry
 
 import org.apache.logging.log4j.LogManager
 import org.jooq.DSLContext
-import org.jooq.Fields
 import org.jooq.JSON
 import org.jooq.SQLDialect
 import org.jooq.impl.DSL
-import org.jooq.Table
 import java.sql.DriverManager
 
 private typealias IndexedList<T> = List<Pair<Int, T>>
@@ -22,6 +20,7 @@ class DatabaseAccess(private val context: DSLContext) {
         clearAll()
         val indexedRecords = writePatientRecords(patientRecords)
         val tumorEntries = writeDiagnosisRecords(indexedRecords)
+        val episodes = writeEpisodeRecords(tumorEntries)
     }
     
     private fun clearAll() {
@@ -65,7 +64,7 @@ class DatabaseAccess(private val context: DSLContext) {
                 dbRecord.set(Tables.DIAGNOSIS.PATIENTRECORDID, patientId)
                 dbRecord.set(
                     Tables.DIAGNOSIS.TUMORLOCATIONS,
-                    JSON.json(tumorEntry.diagnosis.tumorLocations.joinToString(",", prefix = "[", postfix = "]"))
+                    JSON.json(tumorEntry.diagnosis.tumorLocations.joinToString(",", prefix = "[", postfix = "]") { "\"$it\"" })
                 )
                 tumorEntry to dbRecord
             }
@@ -79,6 +78,31 @@ class DatabaseAccess(private val context: DSLContext) {
         
         context.batchInsert(rows).execute()
         return tumorEntries
+    }
+    
+    private fun writeEpisodeRecords(tumorEntries: IndexedList<TumorEntry>): IndexedList<Episode> {
+        LOGGER.info(" Writing episode records")
+        val (episodeRecords, rows) = tumorEntries.flatMap { (diagnosisId, tumorEntry) ->
+            tumorEntry.episodes.map { episode ->
+                val dbRecord = context.newRecord(Tables.EPISODE)
+                dbRecord.from(episode)
+                dbRecord.set(Tables.EPISODE.DIAGNOSISID, diagnosisId)
+                dbRecord.set(
+                    Tables.EPISODE.METASTASES,
+                    JSON.json(episode.metastases.joinToString(",", prefix = "[", postfix = "]") { "\"${it.metastasisLocation.toString()}\"" })
+                )
+                episode to dbRecord
+            }
+        }
+            .mapIndexed { index, (episode, dbRecord) ->
+                val episodeId = index + 1
+                dbRecord.set(Tables.EPISODE.ID, episodeId)
+                Pair(episodeId, episode) to dbRecord
+            }
+            .unzip()
+        
+        context.batchInsert(rows).execute()
+        return episodeRecords
     }
 
     companion object {
