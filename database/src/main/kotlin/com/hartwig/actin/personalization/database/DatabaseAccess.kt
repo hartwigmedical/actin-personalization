@@ -25,6 +25,7 @@ class DatabaseAccess(private val context: DSLContext) {
     
     fun writeAllToDb(patientRecords: List<PatientRecord>) {
         clearAll()
+        
         val indexedRecords = writePatientRecords(patientRecords)
         val tumorEntries = writeDiagnoses(indexedRecords)
         val episodes = writeEpisodes(tumorEntries)
@@ -32,6 +33,8 @@ class DatabaseAccess(private val context: DSLContext) {
         writeLabMeasurements(episodes)
         writeSurgeries(episodes)
         val systemicTreatmentSchemes = writeSystemicTreatmentSchemes(episodes)
+        writeSystemicTreatmentComponents(systemicTreatmentSchemes)
+        writePfsMeasures(systemicTreatmentSchemes)
     }
     
     private fun clearAll() {
@@ -184,6 +187,32 @@ class DatabaseAccess(private val context: DSLContext) {
 
         context.batchInsert(rows).execute()
         return schemeEntries
+    }
+    
+    private fun writeSystemicTreatmentComponents(schemeEntries: IndexedList<SystemicTreatmentScheme>) {
+        LOGGER.info(" Writing systemic treatment component records")
+        val rows = schemeEntries.flatMap { (schemeId, scheme) ->
+            scheme.treatmentComponents.map { component ->
+                val dbRecord = context.newRecord(Tables.SYSTEMICTREATMENTCOMPONENT)
+                dbRecord.from(component)
+                dbRecord.set(Tables.SYSTEMICTREATMENTCOMPONENT.SYSTEMICTREATMENTSCHEMEID, schemeId)
+                dbRecord
+            }
+        }
+        context.batchInsert(rows).execute()
+    }
+    
+    private fun writePfsMeasures(schemeEntries: IndexedList<SystemicTreatmentScheme>) {
+        LOGGER.info(" Writing PFS measure records")
+        val rows = schemeEntries.flatMap { (schemeId, scheme) ->
+            scheme.treatmentRawPfs.map { pfsMeasure ->
+                val dbRecord = context.newRecord(Tables.PFSMEASURE)
+                dbRecord.from(pfsMeasure)
+                dbRecord.set(Tables.PFSMEASURE.SYSTEMICTREATMENTSCHEMEID, schemeId)
+                dbRecord
+            }
+        }
+        context.batchInsert(rows).execute()
     }
 
     private fun jsonList(items: Iterable<Any>): JSON {
