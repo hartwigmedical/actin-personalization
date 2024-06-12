@@ -1,8 +1,10 @@
 package com.hartwig.actin.personalization.database
 
 import com.hartwig.actin.personalization.datamodel.Diagnosis
+import com.hartwig.actin.personalization.datamodel.Drug
 import com.hartwig.actin.personalization.datamodel.Episode
 import com.hartwig.actin.personalization.datamodel.GastroenterologyResection
+import com.hartwig.actin.personalization.datamodel.Location
 import com.hartwig.actin.personalization.datamodel.MetastasesRadiotherapy
 import com.hartwig.actin.personalization.datamodel.MetastasesSurgery
 import com.hartwig.actin.personalization.datamodel.Metastasis
@@ -43,6 +45,9 @@ class DatabaseAccess(private val context: DSLContext, private val connection: ja
         writeRecords("systemic treatment component", systemicTreatmentSchemes, ::schemeToSystemicTreatmentComponentRecords)
         writeRecords("PFS measure", systemicTreatmentSchemes, ::schemeToPfsMeasureRecords)
         
+        writeDrugs()
+        writeLocations()
+        
         connection.setAutoCommit(true)
         context.execute("SET FOREIGN_KEY_CHECKS = 1;")
     }
@@ -74,8 +79,8 @@ class DatabaseAccess(private val context: DSLContext, private val connection: ja
             dbRecord.set(Tables.PATIENTRECORD.ID, patientId)
             Pair(patientId, record) to dbRecord
         }.unzip()
-        context.batchInsert(rows).execute()
-        connection.commit()
+        
+        insertRows(rows, "patient")
         return indexedRecords
     }
 
@@ -188,6 +193,28 @@ class DatabaseAccess(private val context: DSLContext, private val connection: ja
             dbRecord.set(Tables.PFSMEASURE.SYSTEMICTREATMENTSCHEMEID, schemeId)
             dbRecord
         }
+
+    private fun writeDrugs() {
+        LOGGER.info(" Writing drug records")
+        val rows = Drug.values().map { drug ->
+            val dbRecord = context.newRecord(Tables.DRUG)
+            dbRecord.set(Tables.DRUG.NAME, drug.toString())
+            dbRecord.set(Tables.DRUG.TREATMENTCATEGORY, drug.category.toString())
+            dbRecord
+        }
+        insertRows(rows, "drug")
+    }
+
+    private fun writeLocations() {
+        LOGGER.info(" Writing location records")
+        val rows = Location.values().map { location ->
+            val dbRecord = context.newRecord(Tables.LOCATION)
+            dbRecord.set(Tables.LOCATION.NAME, location.toString())
+            dbRecord.set(Tables.LOCATION.GROUP, location.locationGroup.toString())
+            dbRecord
+        }
+        insertRows(rows, "location")
+    }
 
     private fun jsonList(items: Iterable<Any>): JSON {
         return JSON.json(items.joinToString(",", prefix = "[", postfix = "]") { "\"$it\"" })
