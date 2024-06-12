@@ -130,6 +130,7 @@ CREATE TABLE `priorTumor` (
 DROP TABLE IF EXISTS `metastasis`;
 CREATE TABLE `metastasis` (
     `id` int NOT NULL AUTO_INCREMENT,
+    `episodeId` int NOT NULL,
     `location` varchar(255) NOT NULL,
     `intervalTumorIncidenceMetastasisDetection` int,
     `progression` tinyint(1),
