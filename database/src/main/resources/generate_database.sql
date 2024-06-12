@@ -51,7 +51,7 @@ CREATE TABLE `diagnosis` (
 
 DROP TABLE IF EXISTS `episode`;
 CREATE TABLE `episode` (
-    `id` int NOT NULL AUTO_INCREMENT,
+    `id` int NOT NULL,
     `diagnosisId` int NOT NULL,
     `order` int NOT NULL,
     `whoStatusPreTreatmentStart` int,
@@ -160,7 +160,7 @@ CREATE TABLE `surgery` (
 
 DROP TABLE IF EXISTS `systemicTreatmentScheme`;
 CREATE TABLE `systemicTreatmentScheme` (
-    `id` int NOT NULL AUTO_INCREMENT,
+    `id` int NOT NULL,
     `episodeId` int NOT NULL,
     `intervalTumorIncidenceTreatmentLineStartMin` int,
     `intervalTumorIncidenceTreatmentLineStartMax` int,

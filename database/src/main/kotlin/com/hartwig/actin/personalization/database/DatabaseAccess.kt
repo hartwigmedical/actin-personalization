@@ -7,8 +7,8 @@ import com.hartwig.actin.personalization.datamodel.MetastasesRadiotherapy
 import com.hartwig.actin.personalization.datamodel.MetastasesSurgery
 import com.hartwig.actin.personalization.datamodel.Metastasis
 import com.hartwig.actin.personalization.datamodel.PatientRecord
-import com.hartwig.actin.personalization.datamodel.PriorTumor
 import com.hartwig.actin.personalization.datamodel.Radiotherapy
+import com.hartwig.actin.personalization.datamodel.SystemicTreatmentScheme
 import com.hartwig.actin.personalization.datamodel.TumorEntry
 
 import org.apache.logging.log4j.LogManager
@@ -29,6 +29,9 @@ class DatabaseAccess(private val context: DSLContext) {
         val tumorEntries = writeDiagnoses(indexedRecords)
         val episodes = writeEpisodes(tumorEntries)
         writePriorTumors(tumorEntries)
+        writeLabMeasurements(episodes)
+        writeSurgeries(episodes)
+        val systemicTreatmentSchemes = writeSystemicTreatmentSchemes(episodes)
     }
     
     private fun clearAll() {
@@ -121,27 +124,66 @@ class DatabaseAccess(private val context: DSLContext) {
         return episodeRecords
     }
     
-    private fun writePriorTumors(tumorEntries: IndexedList<TumorEntry>): IndexedList<PriorTumor> {
+    private fun writePriorTumors(tumorEntries: IndexedList<TumorEntry>) {
         LOGGER.info(" Writing prior tumor records")
-        val (priorTumors, rows) = tumorEntries.flatMap { (diagnosisId, tumorEntry) ->
+        val rows = tumorEntries.flatMap { (diagnosisId, tumorEntry) ->
             tumorEntry.diagnosis.priorTumors.map { priorTumor ->
                 val dbRecord = context.newRecord(Tables.PRIORTUMOR)
                 dbRecord.from(priorTumor)
                 dbRecord.set(Tables.PRIORTUMOR.DIAGNOSISID, diagnosisId)
                 dbRecord.set(Tables.PRIORTUMOR.TUMORLOCATIONS, jsonList(priorTumor.tumorLocations))
                 dbRecord.set(Tables.PRIORTUMOR.SYSTEMICTREATMENTS, jsonList(priorTumor.systemicTreatments))
-                priorTumor to dbRecord
+                dbRecord
             }
         }
-            .mapIndexed { index, (priorTumor, dbRecord) ->
-                val priorTumorId = index + 1
-                dbRecord.set(Tables.PRIORTUMOR.ID, priorTumorId)
-                Pair(priorTumorId, priorTumor) to dbRecord
+        context.batchInsert(rows).execute()
+    }
+    
+    private fun writeLabMeasurements(episodes: IndexedList<Episode>) {
+        LOGGER.info(" Writing lab measurement records")
+        val rows = episodes.flatMap { (episodeId, episode) ->
+            episode.labMeasurements.map { labMeasurement ->
+                val dbRecord = context.newRecord(Tables.LABMEASUREMENT)
+                dbRecord.from(labMeasurement)
+                dbRecord.set(Tables.LABMEASUREMENT.EPISODEID, episodeId)
+                dbRecord
+            }
+        }
+        context.batchInsert(rows).execute()
+    }
+    
+    private fun writeSurgeries(episodes: IndexedList<Episode>) {
+        LOGGER.info(" Writing surgery records")
+        val rows = episodes.flatMap { (episodeId, episode) ->
+            episode.surgeries.map { surgery ->
+                val dbRecord = context.newRecord(Tables.SURGERY)
+                dbRecord.from(surgery)
+                dbRecord.set(Tables.SURGERY.EPISODEID, episodeId)
+                dbRecord
+            }
+        }
+        context.batchInsert(rows).execute()
+    }
+
+    private fun writeSystemicTreatmentSchemes(episodes: IndexedList<Episode>): IndexedList<SystemicTreatmentScheme> {
+        LOGGER.info(" Writing systemic treatment scheme records")
+        val (schemeEntries, rows) = episodes.flatMap { (episodeId, episode) ->
+            episode.systemicTreatmentSchemes.map { scheme ->
+                val dbRecord = context.newRecord(Tables.SYSTEMICTREATMENTSCHEME)
+                dbRecord.from(scheme)
+                dbRecord.set(Tables.SYSTEMICTREATMENTSCHEME.EPISODEID, episodeId)
+                scheme to dbRecord
+            }
+        }
+            .mapIndexed { index, (scheme, dbRecord) ->
+                val schemeId = index + 1
+                dbRecord.set(Tables.SYSTEMICTREATMENTSCHEME.ID, schemeId)
+                Pair(schemeId, scheme) to dbRecord
             }
             .unzip()
-        
+
         context.batchInsert(rows).execute()
-        return priorTumors
+        return schemeEntries
     }
 
     private fun jsonList(items: Iterable<Any>): JSON {
