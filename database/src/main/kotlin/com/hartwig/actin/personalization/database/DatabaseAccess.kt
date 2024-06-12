@@ -16,6 +16,7 @@ import org.jooq.DSLContext
 import org.jooq.JSON
 import org.jooq.Meta
 import org.jooq.SQLDialect
+import org.jooq.Table
 import org.jooq.TableRecord
 import org.jooq.impl.DSL
 import java.sql.DriverManager
@@ -30,14 +31,18 @@ class DatabaseAccess(private val context: DSLContext, private val connection: ja
         clearAll()
         
         val indexedRecords = writePatientRecords(patientRecords)
-        val tumorEntries = writeDiagnoses(indexedRecords)
-        val episodes = writeEpisodes(tumorEntries)
+        val tumorEntries = writeRecordsAndReturnIndexedList("diagnosis", indexedRecords, Tables.DIAGNOSIS, ::patientToDiagnoses)
+        val episodes = writeRecordsAndReturnIndexedList("episode", tumorEntries, Tables.EPISODE, ::tumorEntryToEpisodes)
         writeRecords("prior tumor", tumorEntries, ::tumorEntryToPriorTumorRecords)
         writeRecords("lab measurement", episodes, ::episodeToLabMeasurementRecords)
         writeRecords("surgery", episodes, ::episodeToSurgeryRecords)
-        val systemicTreatmentSchemes = writeSystemicTreatmentSchemes(episodes)
+        
+        val systemicTreatmentSchemes = writeRecordsAndReturnIndexedList(
+            "systemic treatment scheme", episodes, Tables.SYSTEMICTREATMENTSCHEME, ::episodeToSystemicTreatmentSchemes
+        )
         writeRecords("systemic treatment component", systemicTreatmentSchemes, ::schemeToSystemicTreatmentComponentRecords)
         writeRecords("PFS measure", systemicTreatmentSchemes, ::schemeToPfsMeasureRecords)
+        
         connection.setAutoCommit(true)
         context.execute("SET FOREIGN_KEY_CHECKS = 1;")
     }
@@ -74,65 +79,65 @@ class DatabaseAccess(private val context: DSLContext, private val connection: ja
         return indexedRecords
     }
 
-    private fun writeDiagnoses(patientRecords: IndexedList<PatientRecord>): IndexedList<TumorEntry> {
-        LOGGER.info(" Writing diagnosis records")
-        val (tumorEntries, rows) = patientRecords.flatMap { (patientId, patient) ->
-            patient.tumorEntries.map { tumorEntry ->
-                val dbRecord = context.newRecord(Tables.DIAGNOSIS)
-                dbRecord.from(tumorEntry.diagnosis)
-                dbRecord.set(Tables.DIAGNOSIS.PATIENTRECORDID, patientId)
-                dbRecord.set(Tables.DIAGNOSIS.TUMORLOCATIONS, jsonList(tumorEntry.diagnosis.tumorLocations))
-                tumorEntry to dbRecord
-            }
-        }
-            .mapIndexed { index, (tumorEntry, dbRecord) ->
-                val diagnosisId = index + 1
-                dbRecord.set(Tables.DIAGNOSIS.ID, diagnosisId)
-                Pair(diagnosisId, tumorEntry) to dbRecord
+    private fun <T, U : TableRecord<*>, V> writeRecordsAndReturnIndexedList(
+        name: String, indexedRecords: IndexedList<T>, table: Table<U>, recordMapper: (Int, T) -> List<Pair<V, U>>
+    ): IndexedList<V> {
+        LOGGER.info(" Writing $name records")
+        val (outputEntries, rows) = indexedRecords.flatMap { (foreignKeyId, record) -> recordMapper(foreignKeyId, record) }
+            .mapIndexed { index, (outputEntry: V, dbRecord: U) ->
+                val id = index + 1
+                dbRecord.set(table.field("id", Int::class.java), id)
+                Pair(id, outputEntry) to dbRecord
             }
             .unzip()
-        
-        context.batchInsert(rows).execute()
-        connection.commit()
-        return tumorEntries
+
+        insertRows(rows, name)
+        return outputEntries
     }
 
+    private fun <T, U : TableRecord<*>> writeRecords(name: String, indexedRecords: IndexedList<T>, recordMapper: (Int, T) -> List<U>) {
+        LOGGER.info(" Writing $name records")
+        val rows = indexedRecords.flatMap { (foreignKeyId, record) -> recordMapper(foreignKeyId, record) }
+        insertRows(rows, name)
+    }
     
-    private fun writeEpisodes(tumorEntries: IndexedList<TumorEntry>): IndexedList<Episode> {
-        LOGGER.info(" Writing episode records")
-        val (episodeRecords, rows) = tumorEntries.flatMap { (diagnosisId, tumorEntry) ->
-            tumorEntry.episodes.map { episode ->
-                val dbRecord = context.newRecord(Tables.EPISODE)
-                dbRecord.from(episode)
-                dbRecord.set(Tables.EPISODE.DIAGNOSISID, diagnosisId)
-                dbRecord.set(Tables.EPISODE.METASTASES, jsonList(episode.metastases.map(Metastasis::metastasisLocation)))
-                dbRecord.set(
-                    Tables.EPISODE.GASTROENTEROLOGYRESECTIONS,
-                    jsonList(episode.gastroenterologyResections.map(GastroenterologyResection::gastroenterologyResectionType))
-                )
-                dbRecord.set(
-                    Tables.EPISODE.METASTASESSURGERIES,
-                    jsonList(episode.metastasesSurgeries.map(MetastasesSurgery::metastasesSurgeryType))
-                )
-                dbRecord.set(Tables.EPISODE.RADIOTHERAPIES, jsonList(episode.radiotherapies.map(Radiotherapy::radiotherapyType)))
-                dbRecord.set(
-                    Tables.EPISODE.METASTASESRADIOTHERAPIES,
-                    jsonList(episode.metastasesRadiotherapies.map(MetastasesRadiotherapy::metastasesRadiotherapyType))
-                )
-                episode to dbRecord
-            }
-        }
-            .mapIndexed { index, (episode, dbRecord) ->
-                val episodeId = index + 1
-                dbRecord.set(Tables.EPISODE.ID, episodeId)
-                Pair(episodeId, episode) to dbRecord
-            }
-            .unzip()
-        
+    private fun insertRows(rows: List<TableRecord<*>>, name: String) {
         context.batchInsert(rows).execute()
         connection.commit()
-        return episodeRecords
+        LOGGER.info("  Inserted ${rows.size} $name records")
     }
+
+    private fun patientToDiagnoses(patientId: Int, patient: PatientRecord) =
+        patient.tumorEntries.map { tumorEntry ->
+            val dbRecord = context.newRecord(Tables.DIAGNOSIS)
+            dbRecord.from(tumorEntry.diagnosis)
+            dbRecord.set(Tables.DIAGNOSIS.PATIENTRECORDID, patientId)
+            dbRecord.set(Tables.DIAGNOSIS.TUMORLOCATIONS, jsonList(tumorEntry.diagnosis.tumorLocations))
+            tumorEntry to dbRecord
+        }
+
+    
+    private fun tumorEntryToEpisodes(diagnosisId: Int, tumorEntry: TumorEntry) =
+        tumorEntry.episodes.map { episode ->
+            val dbRecord = context.newRecord(Tables.EPISODE)
+            dbRecord.from(episode)
+            dbRecord.set(Tables.EPISODE.DIAGNOSISID, diagnosisId)
+            dbRecord.set(Tables.EPISODE.METASTASES, jsonList(episode.metastases.map(Metastasis::metastasisLocation)))
+            dbRecord.set(
+                Tables.EPISODE.GASTROENTEROLOGYRESECTIONS,
+                jsonList(episode.gastroenterologyResections.map(GastroenterologyResection::gastroenterologyResectionType))
+            )
+            dbRecord.set(
+                Tables.EPISODE.METASTASESSURGERIES,
+                jsonList(episode.metastasesSurgeries.map(MetastasesSurgery::metastasesSurgeryType))
+            )
+            dbRecord.set(Tables.EPISODE.RADIOTHERAPIES, jsonList(episode.radiotherapies.map(Radiotherapy::radiotherapyType)))
+            dbRecord.set(
+                Tables.EPISODE.METASTASESRADIOTHERAPIES,
+                jsonList(episode.metastasesRadiotherapies.map(MetastasesRadiotherapy::metastasesRadiotherapyType))
+            )
+            episode to dbRecord
+        }
     
     private fun tumorEntryToPriorTumorRecords(diagnosisId: Int, tumorEntry: TumorEntry) =
         tumorEntry.diagnosis.priorTumors.map { priorTumor ->
@@ -160,27 +165,13 @@ class DatabaseAccess(private val context: DSLContext, private val connection: ja
             dbRecord
         }
 
-    private fun writeSystemicTreatmentSchemes(episodes: IndexedList<Episode>): IndexedList<SystemicTreatmentScheme> {
-        LOGGER.info(" Writing systemic treatment scheme records")
-        val (schemeEntries, rows) = episodes.flatMap { (episodeId, episode) ->
-            episode.systemicTreatmentSchemes.map { scheme ->
-                val dbRecord = context.newRecord(Tables.SYSTEMICTREATMENTSCHEME)
-                dbRecord.from(scheme)
-                dbRecord.set(Tables.SYSTEMICTREATMENTSCHEME.EPISODEID, episodeId)
-                scheme to dbRecord
-            }
+    private fun episodeToSystemicTreatmentSchemes(episodeId: Int, episode: Episode) =
+        episode.systemicTreatmentSchemes.map { scheme ->
+            val dbRecord = context.newRecord(Tables.SYSTEMICTREATMENTSCHEME)
+            dbRecord.from(scheme)
+            dbRecord.set(Tables.SYSTEMICTREATMENTSCHEME.EPISODEID, episodeId)
+            scheme to dbRecord
         }
-            .mapIndexed { index, (scheme, dbRecord) ->
-                val schemeId = index + 1
-                dbRecord.set(Tables.SYSTEMICTREATMENTSCHEME.ID, schemeId)
-                Pair(schemeId, scheme) to dbRecord
-            }
-            .unzip()
-
-        context.batchInsert(rows).execute()
-        connection.commit()
-        return schemeEntries
-    }
     
     private fun schemeToSystemicTreatmentComponentRecords(schemeId: Int, scheme: SystemicTreatmentScheme) =
         scheme.treatmentComponents.map { component ->
@@ -197,14 +188,6 @@ class DatabaseAccess(private val context: DSLContext, private val connection: ja
             dbRecord.set(Tables.PFSMEASURE.SYSTEMICTREATMENTSCHEMEID, schemeId)
             dbRecord
         }
-
-    private fun <T, U : TableRecord<*>> writeRecords(name: String, indexedRecords: IndexedList<T>, recordMapper: (Int, T) -> List<U>) {
-        LOGGER.info(" Writing $name records")
-        val rows = indexedRecords.flatMap { (foreignKeyId, record) -> recordMapper(foreignKeyId, record) }
-        context.batchInsert(rows).execute()
-        connection.commit()
-        LOGGER.info("  Inserted ${rows.size} $name records")
-    }
 
     private fun jsonList(items: Iterable<Any>): JSON {
         return JSON.json(items.joinToString(",", prefix = "[", postfix = "]") { "\"$it\"" })
