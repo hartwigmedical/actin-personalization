@@ -22,9 +22,11 @@ import java.sql.DriverManager
 
 private typealias IndexedList<T> = List<Pair<Int, T>>
 
-class DatabaseAccess(private val context: DSLContext) {
+class DatabaseAccess(private val context: DSLContext, private val connection: java.sql.Connection) {
     
     fun writeAllToDb(patientRecords: List<PatientRecord>) {
+        context.execute("SET FOREIGN_KEY_CHECKS = 0;")
+        connection.setAutoCommit(false)
         clearAll()
         
         val indexedRecords = writePatientRecords(patientRecords)
@@ -36,11 +38,12 @@ class DatabaseAccess(private val context: DSLContext) {
         val systemicTreatmentSchemes = writeSystemicTreatmentSchemes(episodes)
         writeRecords("systemic treatment component", systemicTreatmentSchemes, ::schemeToSystemicTreatmentComponentRecords)
         writeRecords("PFS measure", systemicTreatmentSchemes, ::schemeToPfsMeasureRecords)
+        connection.setAutoCommit(true)
+        context.execute("SET FOREIGN_KEY_CHECKS = 1;")
     }
     
     private fun clearAll() {
         LOGGER.info(" Clearing all patient data")
-        context.execute("SET FOREIGN_KEY_CHECKS = 0;")
         sequenceOf(
             Tables.DIAGNOSIS,
             Tables.DRUG,
@@ -54,7 +57,7 @@ class DatabaseAccess(private val context: DSLContext) {
             Tables.SYSTEMICTREATMENTCOMPONENT,
             Tables.SYSTEMICTREATMENTSCHEME
         ).forEach { context.truncate(it).execute() }
-        context.execute("SET FOREIGN_KEY_CHECKS = 1;")
+        connection.commit()
     }
     
     private fun writePatientRecords(patientRecords: List<PatientRecord>): IndexedList<PatientRecord> {
@@ -67,6 +70,7 @@ class DatabaseAccess(private val context: DSLContext) {
             Pair(patientId, record) to dbRecord
         }.unzip()
         context.batchInsert(rows).execute()
+        connection.commit()
         return indexedRecords
     }
 
@@ -89,6 +93,7 @@ class DatabaseAccess(private val context: DSLContext) {
             .unzip()
         
         context.batchInsert(rows).execute()
+        connection.commit()
         return tumorEntries
     }
 
@@ -125,6 +130,7 @@ class DatabaseAccess(private val context: DSLContext) {
             .unzip()
         
         context.batchInsert(rows).execute()
+        connection.commit()
         return episodeRecords
     }
     
@@ -172,6 +178,7 @@ class DatabaseAccess(private val context: DSLContext) {
             .unzip()
 
         context.batchInsert(rows).execute()
+        connection.commit()
         return schemeEntries
     }
     
@@ -195,7 +202,8 @@ class DatabaseAccess(private val context: DSLContext) {
         LOGGER.info(" Writing $name records")
         val rows = indexedRecords.flatMap { (foreignKeyId, record) -> recordMapper(foreignKeyId, record) }
         context.batchInsert(rows).execute()
-        LOGGER.info(" Inserted ${rows.size} $name records")
+        connection.commit()
+        LOGGER.info("  Inserted ${rows.size} $name records")
     }
 
     private fun jsonList(items: Iterable<Any>): JSON {
@@ -213,7 +221,7 @@ class DatabaseAccess(private val context: DSLContext) {
             
             LOGGER.info("Connecting to database '{}'", conn.catalog)
             val context = DSL.using(conn, SQLDialect.MYSQL)
-            return DatabaseAccess(context)
+            return DatabaseAccess(context, conn)
         }
     }
 }
