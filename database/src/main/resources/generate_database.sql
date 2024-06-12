@@ -59,7 +59,7 @@ CREATE TABLE `episode` (
 
     `tumorIncidenceYear` int NOT NULL,
     `tumorBasisOfDiagnosis` varchar(255) NOT NULL,
-    `tumorLocation` varchar(50) NOT NULL,
+    `tumorLocation` varchar(255) NOT NULL,
     `tumorDifferentiationGrade` varchar(255),
     `tnmCT` varchar(50),
     `tnmCN` varchar(50),
@@ -74,7 +74,6 @@ CREATE TABLE `episode` (
     `numberOfPositiveLymphNodes` int,
 
     `distantMetastasesStatus` varchar(50) NOT NULL,
-    `metastases` json NOT NULL,
     `numberOfLiverMetastases` varchar(50),
     `maximumSizeOfLiverMetastasisInMm` int,
 
@@ -125,6 +124,16 @@ CREATE TABLE `priorTumor` (
     `stageTNM` varchar(50),
     `systemicTreatments` json NOT NULL,
     FOREIGN KEY (`diagnosisId`) REFERENCES `diagnosis`(`id`),
+    PRIMARY KEY (`id`)
+);
+
+DROP TABLE IF EXISTS `metastasis`;
+CREATE TABLE `metastasis` (
+    `id` int NOT NULL AUTO_INCREMENT,
+    `location` varchar(255) NOT NULL,
+    `intervalTumorIncidenceMetastasisDetection` int,
+    `progression` tinyint(1),
+    FOREIGN KEY (`episodeId`) REFERENCES `episode`(`id`),
     PRIMARY KEY (`id`)
 );
 

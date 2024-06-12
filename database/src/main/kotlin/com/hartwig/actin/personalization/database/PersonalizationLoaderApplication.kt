@@ -32,10 +32,10 @@ class PersonalizationLoaderApplication : Callable<Int> {
         val patients = PatientRecordFactory.create(records)
         LOGGER.info(" Created {} patient records", patients.size)
 
-        val access: DatabaseAccess = DatabaseAccess.fromCredentials(dbUser, dbPass, dbUrl)
+        val writer = DatabaseWriter.fromCredentials(dbUser, dbPass, dbUrl)
 
         LOGGER.info("Writing {} patient records to database", patients.size)
-        access.writeAllToDb(patients)
+        writer.writeAllToDb(patients)
 
         LOGGER.info("Done!")
         return 0

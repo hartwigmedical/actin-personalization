@@ -25,7 +25,7 @@ import java.sql.DriverManager
 
 private typealias IndexedList<T> = List<Pair<Int, T>>
 
-class DatabaseAccess(private val context: DSLContext, private val connection: java.sql.Connection) {
+class DatabaseWriter(private val context: DSLContext, private val connection: java.sql.Connection) {
     
     fun writeAllToDb(patientRecords: List<PatientRecord>) {
         context.execute("SET FOREIGN_KEY_CHECKS = 0;")
@@ -36,6 +36,7 @@ class DatabaseAccess(private val context: DSLContext, private val connection: ja
         val tumorEntries = writeRecordsAndReturnIndexedList("diagnosis", indexedRecords, Tables.DIAGNOSIS, ::patientToDiagnoses)
         val episodes = writeRecordsAndReturnIndexedList("episode", tumorEntries, Tables.EPISODE, ::tumorEntryToEpisodes)
         writeRecords("prior tumor", tumorEntries, ::tumorEntryToPriorTumorRecords)
+        writeRecords("metastasis", episodes, ::episodeToMetastasisRecords)
         writeRecords("lab measurement", episodes, ::episodeToLabMeasurementRecords)
         writeRecords("surgery", episodes, ::episodeToSurgeryRecords)
         
@@ -127,7 +128,6 @@ class DatabaseAccess(private val context: DSLContext, private val connection: ja
             val dbRecord = context.newRecord(Tables.EPISODE)
             dbRecord.from(episode)
             dbRecord.set(Tables.EPISODE.DIAGNOSISID, diagnosisId)
-            dbRecord.set(Tables.EPISODE.METASTASES, jsonList(episode.metastases.map(Metastasis::metastasisLocation)))
             dbRecord.set(
                 Tables.EPISODE.GASTROENTEROLOGYRESECTIONS,
                 jsonList(episode.gastroenterologyResections.map(GastroenterologyResection::gastroenterologyResectionType))
@@ -154,21 +154,21 @@ class DatabaseAccess(private val context: DSLContext, private val connection: ja
             dbRecord
         }
 
-    private fun episodeToLabMeasurementRecords(episodeId: Int, episode: Episode) =
-        episode.labMeasurements.map { labMeasurement ->
-            val dbRecord = context.newRecord(Tables.LABMEASUREMENT)
-            dbRecord.from(labMeasurement)
-            dbRecord.set(Tables.LABMEASUREMENT.EPISODEID, episodeId)
-            dbRecord
+    private fun <T> extractSimpleRecord(table: Table<*>, item: T, foreignKeyColumnName: String, foreignKeyId: Int) =
+        context.newRecord(table).let { dbRecord ->
+            dbRecord.from(item)
+            dbRecord.set(table.field(foreignKeyColumnName, Int::class.java), foreignKeyId)
+            dbRecord as TableRecord<*>
         }
+
+    private fun episodeToMetastasisRecords(episodeId: Int, episode: Episode) =
+        episode.metastases.map { extractSimpleRecord(Tables.METASTASIS, it, "episodeId", episodeId) }
+
+    private fun episodeToLabMeasurementRecords(episodeId: Int, episode: Episode) =
+        episode.labMeasurements.map { extractSimpleRecord(Tables.LABMEASUREMENT, it, "episodeId", episodeId) }
     
     private fun episodeToSurgeryRecords(episodeId: Int, episode: Episode) =
-        episode.surgeries.map { surgery ->
-            val dbRecord = context.newRecord(Tables.SURGERY)
-            dbRecord.from(surgery)
-            dbRecord.set(Tables.SURGERY.EPISODEID, episodeId)
-            dbRecord
-        }
+        episode.surgeries.map { extractSimpleRecord(Tables.SURGERY, it, "episodeId", episodeId) }
 
     private fun episodeToSystemicTreatmentSchemes(episodeId: Int, episode: Episode) =
         episode.systemicTreatmentSchemes.map { scheme ->
@@ -179,20 +179,10 @@ class DatabaseAccess(private val context: DSLContext, private val connection: ja
         }
     
     private fun schemeToSystemicTreatmentComponentRecords(schemeId: Int, scheme: SystemicTreatmentScheme) =
-        scheme.treatmentComponents.map { component ->
-            val dbRecord = context.newRecord(Tables.SYSTEMICTREATMENTCOMPONENT)
-            dbRecord.from(component)
-            dbRecord.set(Tables.SYSTEMICTREATMENTCOMPONENT.SYSTEMICTREATMENTSCHEMEID, schemeId)
-            dbRecord
-        }
+        scheme.treatmentComponents.map { extractSimpleRecord(Tables.SYSTEMICTREATMENTCOMPONENT, it, "systemicTreatmentSchemeId", schemeId) }
     
     private fun schemeToPfsMeasureRecords(schemeId: Int, scheme: SystemicTreatmentScheme) =
-        scheme.treatmentRawPfs.map { pfsMeasure ->
-            val dbRecord = context.newRecord(Tables.PFSMEASURE)
-            dbRecord.from(pfsMeasure)
-            dbRecord.set(Tables.PFSMEASURE.SYSTEMICTREATMENTSCHEMEID, schemeId)
-            dbRecord
-        }
+        scheme.treatmentRawPfs.map { extractSimpleRecord(Tables.PFSMEASURE, it, "systemicTreatmentSchemeId", schemeId) }
 
     private fun writeDrugs() {
         LOGGER.info(" Writing drug records")
@@ -221,9 +211,9 @@ class DatabaseAccess(private val context: DSLContext, private val connection: ja
     }
 
     companion object {
-        private val LOGGER = LogManager.getLogger(DatabaseAccess::class.java)
+        private val LOGGER = LogManager.getLogger(DatabaseWriter::class.java)
 
-        fun fromCredentials(user: String, pass: String, url: String): DatabaseAccess {
+        fun fromCredentials(user: String, pass: String, url: String): DatabaseWriter {
             // Disable annoying jooq self-ad messages
             System.setProperty("org.jooq.no-logo", "true")
             System.setProperty("org.jooq.no-tips", "true")
@@ -231,7 +221,7 @@ class DatabaseAccess(private val context: DSLContext, private val connection: ja
             
             LOGGER.info("Connecting to database '{}'", conn.catalog)
             val context = DSL.using(conn, SQLDialect.MYSQL)
-            return DatabaseAccess(context, conn)
+            return DatabaseWriter(context, conn)
         }
     }
 }
