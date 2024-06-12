@@ -7,6 +7,7 @@ import com.hartwig.actin.personalization.datamodel.MetastasesRadiotherapy
 import com.hartwig.actin.personalization.datamodel.MetastasesSurgery
 import com.hartwig.actin.personalization.datamodel.Metastasis
 import com.hartwig.actin.personalization.datamodel.PatientRecord
+import com.hartwig.actin.personalization.datamodel.PriorTumor
 import com.hartwig.actin.personalization.datamodel.Radiotherapy
 import com.hartwig.actin.personalization.datamodel.TumorEntry
 
@@ -25,8 +26,9 @@ class DatabaseAccess(private val context: DSLContext) {
     fun writeAllToDb(patientRecords: List<PatientRecord>) {
         clearAll()
         val indexedRecords = writePatientRecords(patientRecords)
-        val tumorEntries = writeDiagnosisRecords(indexedRecords)
-        val episodes = writeEpisodeRecords(tumorEntries)
+        val tumorEntries = writeDiagnoses(indexedRecords)
+        val episodes = writeEpisodes(tumorEntries)
+        writePriorTumors(tumorEntries)
     }
     
     private fun clearAll() {
@@ -61,7 +63,7 @@ class DatabaseAccess(private val context: DSLContext) {
         return indexedRecords
     }
 
-    private fun writeDiagnosisRecords(patientRecords: IndexedList<PatientRecord>): IndexedList<TumorEntry> {
+    private fun writeDiagnoses(patientRecords: IndexedList<PatientRecord>): IndexedList<TumorEntry> {
         LOGGER.info(" Writing diagnosis records")
         val (tumorEntries, rows) = patientRecords.flatMap { (patientId, patient) ->
             patient.tumorEntries.map { tumorEntry ->
@@ -82,8 +84,9 @@ class DatabaseAccess(private val context: DSLContext) {
         context.batchInsert(rows).execute()
         return tumorEntries
     }
+
     
-    private fun writeEpisodeRecords(tumorEntries: IndexedList<TumorEntry>): IndexedList<Episode> {
+    private fun writeEpisodes(tumorEntries: IndexedList<TumorEntry>): IndexedList<Episode> {
         LOGGER.info(" Writing episode records")
         val (episodeRecords, rows) = tumorEntries.flatMap { (diagnosisId, tumorEntry) ->
             tumorEntry.episodes.map { episode ->
@@ -116,6 +119,29 @@ class DatabaseAccess(private val context: DSLContext) {
         
         context.batchInsert(rows).execute()
         return episodeRecords
+    }
+    
+    private fun writePriorTumors(tumorEntries: IndexedList<TumorEntry>): IndexedList<PriorTumor> {
+        LOGGER.info(" Writing prior tumor records")
+        val (priorTumors, rows) = tumorEntries.flatMap { (diagnosisId, tumorEntry) ->
+            tumorEntry.diagnosis.priorTumors.map { priorTumor ->
+                val dbRecord = context.newRecord(Tables.PRIORTUMOR)
+                dbRecord.from(priorTumor)
+                dbRecord.set(Tables.PRIORTUMOR.DIAGNOSISID, diagnosisId)
+                dbRecord.set(Tables.PRIORTUMOR.TUMORLOCATIONS, jsonList(priorTumor.tumorLocations))
+                dbRecord.set(Tables.PRIORTUMOR.SYSTEMICTREATMENTS, jsonList(priorTumor.systemicTreatments))
+                priorTumor to dbRecord
+            }
+        }
+            .mapIndexed { index, (priorTumor, dbRecord) ->
+                val priorTumorId = index + 1
+                dbRecord.set(Tables.PRIORTUMOR.ID, priorTumorId)
+                Pair(priorTumorId, priorTumor) to dbRecord
+            }
+            .unzip()
+        
+        context.batchInsert(rows).execute()
+        return priorTumors
     }
 
     private fun jsonList(items: Iterable<Any>): JSON {
