@@ -55,7 +55,7 @@ CREATE TABLE `episode` (
     `diagnosisId` int NOT NULL,
     `order` int NOT NULL,
     `whoStatusPreTreatmentStart` int,
-    `asaClassificationPreSurgeryOrEndoscopy` varchar(50) NOT NULL,
+    `asaClassificationPreSurgeryOrEndoscopy` varchar(50),
 
     `tumorIncidenceYear` int NOT NULL,
     `tumorBasisOfDiagnosis` varchar(255) NOT NULL,

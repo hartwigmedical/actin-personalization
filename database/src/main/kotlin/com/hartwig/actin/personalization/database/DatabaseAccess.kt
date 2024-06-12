@@ -2,12 +2,18 @@ package com.hartwig.actin.personalization.database
 
 import com.hartwig.actin.personalization.datamodel.Diagnosis
 import com.hartwig.actin.personalization.datamodel.Episode
+import com.hartwig.actin.personalization.datamodel.GastroenterologyResection
+import com.hartwig.actin.personalization.datamodel.MetastasesRadiotherapy
+import com.hartwig.actin.personalization.datamodel.MetastasesSurgery
+import com.hartwig.actin.personalization.datamodel.Metastasis
 import com.hartwig.actin.personalization.datamodel.PatientRecord
+import com.hartwig.actin.personalization.datamodel.Radiotherapy
 import com.hartwig.actin.personalization.datamodel.TumorEntry
 
 import org.apache.logging.log4j.LogManager
 import org.jooq.DSLContext
 import org.jooq.JSON
+import org.jooq.Meta
 import org.jooq.SQLDialect
 import org.jooq.impl.DSL
 import java.sql.DriverManager
@@ -62,10 +68,7 @@ class DatabaseAccess(private val context: DSLContext) {
                 val dbRecord = context.newRecord(Tables.DIAGNOSIS)
                 dbRecord.from(tumorEntry.diagnosis)
                 dbRecord.set(Tables.DIAGNOSIS.PATIENTRECORDID, patientId)
-                dbRecord.set(
-                    Tables.DIAGNOSIS.TUMORLOCATIONS,
-                    JSON.json(tumorEntry.diagnosis.tumorLocations.joinToString(",", prefix = "[", postfix = "]") { "\"$it\"" })
-                )
+                dbRecord.set(Tables.DIAGNOSIS.TUMORLOCATIONS, jsonList(tumorEntry.diagnosis.tumorLocations))
                 tumorEntry to dbRecord
             }
         }
@@ -87,9 +90,19 @@ class DatabaseAccess(private val context: DSLContext) {
                 val dbRecord = context.newRecord(Tables.EPISODE)
                 dbRecord.from(episode)
                 dbRecord.set(Tables.EPISODE.DIAGNOSISID, diagnosisId)
+                dbRecord.set(Tables.EPISODE.METASTASES, jsonList(episode.metastases.map(Metastasis::metastasisLocation)))
                 dbRecord.set(
-                    Tables.EPISODE.METASTASES,
-                    JSON.json(episode.metastases.joinToString(",", prefix = "[", postfix = "]") { "\"${it.metastasisLocation.toString()}\"" })
+                    Tables.EPISODE.GASTROENTEROLOGYRESECTIONS,
+                    jsonList(episode.gastroenterologyResections.map(GastroenterologyResection::gastroenterologyResectionType))
+                )
+                dbRecord.set(
+                    Tables.EPISODE.METASTASESSURGERIES,
+                    jsonList(episode.metastasesSurgeries.map(MetastasesSurgery::metastasesSurgeryType))
+                )
+                dbRecord.set(Tables.EPISODE.RADIOTHERAPIES, jsonList(episode.radiotherapies.map(Radiotherapy::radiotherapyType)))
+                dbRecord.set(
+                    Tables.EPISODE.METASTASESRADIOTHERAPIES,
+                    jsonList(episode.metastasesRadiotherapies.map(MetastasesRadiotherapy::metastasesRadiotherapyType))
                 )
                 episode to dbRecord
             }
@@ -103,6 +116,10 @@ class DatabaseAccess(private val context: DSLContext) {
         
         context.batchInsert(rows).execute()
         return episodeRecords
+    }
+
+    private fun jsonList(items: Iterable<Any>): JSON {
+        return JSON.json(items.joinToString(",", prefix = "[", postfix = "]") { "\"$it\"" })
     }
 
     companion object {
