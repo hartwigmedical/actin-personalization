@@ -1,9 +1,12 @@
 package com.hartwig.actin.personalization.datamodel
 
-data class SystemicTreatmentPlan( //Should be based on combination of all treatment schemes of same episode
-    val treatmentPlan: Treatment,
-    val intervalTumorIncidenceTreatmentPlanStart: Int?, //intervalTumorIncidenceTreatmentLineStartMin of scheme nr = 1
-    val intervalTumorIncidenceTreatmentPlanStop: Int?, //intervalTumorIncidenceTreatmentLineStopMax of last scheme nr
+data class SystemicTreatmentPlan(
+    val treatment: Treatment,
+    val systemicTreatmentSchemes: List<SystemicTreatmentScheme>,
+    val intervalTumorIncidenceTreatmentPlanStart: Int?,
+    val intervalTumorIncidenceTreatmentPlanStop: Int?,
 
-    val pfs: Int?, // IntervalTreatmentPlanStartResponseDate from all available PFS measures of Type PROGRESSION or DEATH (so ignore CENSOR for now), and any FollowUpEvent.
+    val pfs: Int?,
+    val response: ResponseMeasureType?,
+    val intervalTreatmentPlanStartResponseDate: Int?
 )

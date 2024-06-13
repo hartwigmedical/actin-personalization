@@ -60,7 +60,7 @@ fun extractEpisode(record: NcrRecord): Episode {
             ?.let { ResponseMeasure(it, treatmentResponse.responsInt ?: 0) }
 
         val pfsMeasures = extractPfsMeasures(treatmentResponse)
-        val systemicTreatmentSchemes = extractSystemicTreatmentSchemes(treatment.systemicTreatment, responseMeasure, pfsMeasures)
+        val systemicTreatmentPlan = extractSystemicTreatmentPlan(treatment.systemicTreatment, pfsMeasures, responseMeasure)
         val (distanceToMesorectalFascia, mesorectalFasciaIsClear) = extractDistanceToMesorectalFascia(clinicalCharacteristics.mrfAfst)
         val (hasHadPreSurgeryRadiotherapy, hasHadPostSurgeryRadiotherapy) = resolvePreAndPostSurgery(treatment.primaryRadiotherapy.rt)
         val (hasHadPreSurgeryChemoRadiotherapy, hasHadPostSurgeryChemoRadiotherapy) =
@@ -114,8 +114,6 @@ fun extractEpisode(record: NcrRecord): Episode {
             metastasesRadiotherapies = extractMetastasesRadiotherapies(treatment.metastaticRadiotherapy),
             hasHadHipecTreatment = NcrBooleanMapper.resolve(treatment.hipec.hipec) ?: false,
             intervalTumorIncidenceHipecTreatment = treatment.hipec.hipecInt1,
-            systemicTreatmentComponents = systemicTreatmentSchemes.flatMap(SystemicTreatmentScheme::treatmentComponents),
-            systemicTreatmentSchemes = systemicTreatmentSchemes,
             hasHadPreSurgeryRadiotherapy = hasHadPreSurgeryRadiotherapy,
             hasHadPostSurgeryRadiotherapy = hasHadPostSurgeryRadiotherapy,
             hasHadPreSurgeryChemoRadiotherapy = hasHadPreSurgeryChemoRadiotherapy,
@@ -125,6 +123,7 @@ fun extractEpisode(record: NcrRecord): Episode {
             hasHadPreSurgerySystemicTargetedTherapy = hasHadPreSurgerySystemicTargetedTherapy,
             hasHadPostSurgerySystemicTargetedTherapy = hasHadPostSurgerySystemicTargetedTherapy,
             responseMeasure = responseMeasure,
+            systemicTreatmentPlan = systemicTreatmentPlan,
             pfsMeasures = pfsMeasures
         )
     }

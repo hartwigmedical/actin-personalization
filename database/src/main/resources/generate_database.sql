@@ -104,9 +104,13 @@ CREATE TABLE `episode` (
     `hasHadPreSurgerySystemicTargetedTherapy` tinyint(1) NOT NULL,
     `hasHadPostSurgerySystemicTargetedTherapy` tinyint(1) NOT NULL,
 
-    `responseMeasureType` varchar(50),
+    `response` varchar(50),
     `intervalTumorIncidenceResponseDate` int,
     `systemicTreatmentPlan` varchar(50),
+    `intervalTumorIncidenceTreatmentPlanStart` int,
+    `intervalTumorIncidenceTreatmentPlanStop` int,
+    `pfs` int,
+    `intervalTreatmentPlanStartResponseDate` int,
     FOREIGN KEY (`diagnosisId`) REFERENCES `diagnosis`(`id`),
     PRIMARY KEY (`id`)
 );
@@ -177,10 +181,6 @@ CREATE TABLE `systemicTreatmentScheme` (
     `intervalTumorIncidenceTreatmentLineStopMin` int,
     `intervalTumorIncidenceTreatmentLineStopMax` int,
 
-    `responseMeasureType` varchar(50),
-    `intervalTumorIncidenceResponseDate` int,
-
-    `treatmentPfs` varchar(50),
     `intervalTreatmentStartMinResponseDate` int,
     `intervalTreatmentStartMaxResponseDate` int,
     FOREIGN KEY (`episodeId`) REFERENCES `episode`(`id`),
