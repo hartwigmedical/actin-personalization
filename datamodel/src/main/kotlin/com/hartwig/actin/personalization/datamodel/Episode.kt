@@ -62,5 +62,4 @@ data class Episode(
 
     val responseMeasure: ResponseMeasure?,
     val pfsMeasures: List<PfsMeasure>,
-    val pfs: Int?, // IntervalTreatmentPlanStartResponseDate from all available PFS measures of Type PROGRESSION or DEATH (so ignore CENSOR for now), and any FollowUpEvent.
 )
