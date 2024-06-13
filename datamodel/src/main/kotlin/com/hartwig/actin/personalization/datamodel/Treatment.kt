@@ -1,6 +1,6 @@
 package com.hartwig.actin.personalization.datamodel
 
-enum class SystemicTreatmentPlanName(val drugs: Set<Drug>?) {
+enum class Treatment(val drugs: Set<Drug>?) {
     CAPOX(setOf(Drug.CAPECITABINE, Drug.OXALIPLATIN)),
     CAPOX_B(setOf(Drug.CAPECITABINE, Drug.OXALIPLATIN, Drug.BEVACIZUMAB)),
     CAPECITABINE(setOf(Drug.CAPECITABINE)),
@@ -21,9 +21,9 @@ enum class SystemicTreatmentPlanName(val drugs: Set<Drug>?) {
     PEMBROLIZUMAB(setOf(Drug.PEMBROLIZUMAB));
 
     companion object {
-        private val plansByDrugSet = values().associateBy(SystemicTreatmentPlanName::drugs)
+        private val plansByDrugSet = values().associateBy(Treatment::drugs)
 
-        fun findForDrugs(drugs: Set<Drug>?): SystemicTreatmentPlanName {
+        fun findForDrugs(drugs: Set<Drug>?): Treatment {
             return plansByDrugSet[drugs] ?: OTHER
         }
     }
