@@ -50,6 +50,7 @@ data class Episode(
     val intervalTumorIncidenceHipecTreatment: Int?,
     val systemicTreatmentComponents: List<SystemicTreatmentComponent>,
     val systemicTreatmentSchemes: List<SystemicTreatmentScheme>,
+    val systemicTreatmentPlan: SystemicTreatmentPlan?,
     val hasHadPreSurgeryRadiotherapy: Boolean,
     val hasHadPostSurgeryRadiotherapy: Boolean,
     val hasHadPreSurgeryChemoRadiotherapy: Boolean,
@@ -61,4 +62,5 @@ data class Episode(
 
     val responseMeasure: ResponseMeasure?,
     val pfsMeasures: List<PfsMeasure>,
+    val pfs: Int?, // IntervalTreatmentPlanStartResponseDate from all available PFS measures of Type PROGRESSION or DEATH (so ignore CENSOR for now), and any FollowUpEvent.
 )
