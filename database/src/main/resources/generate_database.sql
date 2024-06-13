@@ -207,11 +207,11 @@ CREATE TABLE `systemicTreatmentComponent` (
 DROP TABLE IF EXISTS `pfsMeasure`;
 CREATE TABLE `pfsMeasure` (
     `id` int NOT NULL AUTO_INCREMENT,
-    `systemicTreatmentSchemeId` int NOT NULL,
+    `episodeId` int NOT NULL,
     `pfsMeasureType` varchar(50) NOT NULL,
     `pfsMeasureFollowupEvent` varchar(50),
     `intervalTumorIncidencePfsMeasureDate` int,
-    FOREIGN KEY (`systemicTreatmentSchemeId`) REFERENCES `systemicTreatmentScheme`(`id`),
+    FOREIGN KEY (`episodeId`) REFERENCES `episode`(`id`),
     PRIMARY KEY (`id`)
 );
 
