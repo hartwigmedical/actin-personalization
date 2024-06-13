@@ -4,7 +4,9 @@ data class SystemicTreatmentPlan( //Should be based on combination of all treatm
     val treatmentPlan: SystemicTreatmentPlanName,
     val intervalTumorIncidenceTreatmentPlanStart: Int?, //intervalTumorIncidenceTreatmentLineStartMin of scheme nr = 1
     val intervalTumorIncidenceTreatmentPlanStop: Int?, //intervalTumorIncidenceTreatmentLineStopMax of last scheme nr
+
     val treatmentPlanResponses: List<ResponseMeasure>, //All responses of the episode
+    val treatmentPlanBestResponse: ResponseMeasure?, //CR>PR>MR>SD>PD
     val treatmentPlanPfsValues: List<PfsMeasure>, //All pfs measure entries
     val treatmentPlanPfs: PfsMeasureType?, //Calculate as max pfs value of type PROGRESSION/DEATH
 )
