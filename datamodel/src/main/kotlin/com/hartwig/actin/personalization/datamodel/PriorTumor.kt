@@ -10,5 +10,4 @@ data class PriorTumor(
     val tumorLocationCategory: TumorLocationCategory,
     val stageTNM: StageTnm?,
     val systemicTreatments: List<Drug>
-
 ): Tumor
