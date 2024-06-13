@@ -8,5 +8,5 @@ data class SystemicTreatmentPlan( //Should be based on combination of all treatm
     val treatmentPlanResponses: List<ResponseMeasure>, //All responses of the episode
     val treatmentPlanBestResponse: ResponseMeasure?, //CR>PR>MR>SD>PD
     val treatmentPlanPfsValues: List<PfsMeasure>, //All pfs measure entries
-    val treatmentPlanPfs: PfsMeasureType?, // Calculate as minimal intervalTumorIncidencePfsMeasureDate from all available PFS measures of Type PROGRESSION or DEATH (so ignore CENSOR for now), and any FollowUpEvent.
+    val treatmentPlanPfs: PfsMeasureType?, // Calculate as minimal (intervalTumorIncidencePfsMeasureDate-intervalTumorIncidenceTreatmentPlanStart) from all available PFS measures of Type PROGRESSION or DEATH (so ignore CENSOR for now), and any FollowUpEvent.
 )
