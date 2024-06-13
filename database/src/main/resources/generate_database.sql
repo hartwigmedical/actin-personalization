@@ -136,6 +136,7 @@ CREATE TABLE `metastasis` (
     `id` int NOT NULL AUTO_INCREMENT,
     `episodeId` int NOT NULL,
     `location` varchar(255) NOT NULL,
+    `locationGroup` varchar(50) NOT NULL,
     `intervalTumorIncidenceMetastasisDetection` int,
     `progression` tinyint(1),
     FOREIGN KEY (`episodeId`) REFERENCES `episode`(`id`),

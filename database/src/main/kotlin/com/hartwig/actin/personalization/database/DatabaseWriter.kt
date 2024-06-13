@@ -5,6 +5,7 @@ import com.hartwig.actin.personalization.datamodel.Drug
 import com.hartwig.actin.personalization.datamodel.Episode
 import com.hartwig.actin.personalization.datamodel.GastroenterologyResection
 import com.hartwig.actin.personalization.datamodel.Location
+import com.hartwig.actin.personalization.datamodel.LocationGroup
 import com.hartwig.actin.personalization.datamodel.MetastasesRadiotherapy
 import com.hartwig.actin.personalization.datamodel.MetastasesSurgery
 import com.hartwig.actin.personalization.datamodel.Metastasis
@@ -24,6 +25,15 @@ import org.jooq.impl.DSL
 import java.sql.DriverManager
 
 private typealias IndexedList<T> = List<Pair<Int, T>>
+
+private val METASTASIS_LOCATION_GROUPS = setOf(
+    LocationGroup.BRAIN,
+    LocationGroup.COLON,
+    LocationGroup.LIVER_AND_INTRAHEPATIC_BILE_DUCTS,
+    LocationGroup.RETROPERITONEUM_AND_PERITONEUM,
+    LocationGroup.LYMPH_NODES,
+    LocationGroup.BRONCHUS_AND_LUNG
+)
 
 class DatabaseWriter(private val context: DSLContext, private val connection: java.sql.Connection) {
     
@@ -161,7 +171,16 @@ class DatabaseWriter(private val context: DSLContext, private val connection: ja
         }
 
     private fun metastasisRecordsFromEpisode(episodeId: Int, episode: Episode) =
-        episode.metastases.map { extractSimpleRecord(Tables.METASTASIS, it, "episodeId", episodeId) }
+        episode.metastases.map { metastasis ->
+            val locationGroup = metastasis.location.locationGroup.let {
+                if (it in METASTASIS_LOCATION_GROUPS) it.toString() else "OTHER"
+            }
+            val dbRecord = context.newRecord(Tables.METASTASIS)
+            dbRecord.from(metastasis)
+            dbRecord.set(Tables.METASTASIS.EPISODEID, episodeId)
+            dbRecord.set(Tables.METASTASIS.LOCATIONGROUP, locationGroup)
+            dbRecord
+        }
 
     private fun labMeasurementRecordsFromEpisode(episodeId: Int, episode: Episode) =
         episode.labMeasurements.map { extractSimpleRecord(Tables.LABMEASUREMENT, it, "episodeId", episodeId) }
