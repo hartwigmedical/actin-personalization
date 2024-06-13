@@ -1,7 +1,7 @@
 SET FOREIGN_KEY_CHECKS = 0;
 
-DROP TABLE IF EXISTS `patientRecord`;
-CREATE TABLE `patientRecord` (
+DROP TABLE IF EXISTS `patient`;
+CREATE TABLE `patient` (
     `id` int NOT NULL,
     `ncrId` int NOT NULL,
     `sex` varchar(50) NOT NULL,
@@ -12,7 +12,7 @@ CREATE TABLE `patientRecord` (
 DROP TABLE IF EXISTS `diagnosis`;
 CREATE TABLE `diagnosis` (
     `id` int NOT NULL,
-    `patientRecordId` int NOT NULL,
+    `patientId` int NOT NULL,
     `consolidatedTumorType` varchar(255) NOT NULL,
     `tumorLocations` json NOT NULL,
     `hasHadPriorTumor` tinyint(1) NOT NULL,
@@ -45,7 +45,7 @@ CREATE TABLE `diagnosis` (
     `hasBrafV600EMutation` tinyint(1),
     `hasRasMutation` tinyint(1),
     `hasKrasG12CMutation` tinyint(1),
-    FOREIGN KEY (`patientRecordId`) REFERENCES `patientRecord`(`id`),
+    FOREIGN KEY (`patientId`) REFERENCES `patient`(`id`),
     PRIMARY KEY (`id`)
 );
 

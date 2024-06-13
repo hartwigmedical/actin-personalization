@@ -61,7 +61,7 @@ class DatabaseWriter(private val context: DSLContext, private val connection: ja
             Tables.EPISODE,
             Tables.LABMEASUREMENT,
             Tables.LOCATION,
-            Tables.PATIENTRECORD,
+            Tables.PATIENT,
             Tables.PFSMEASURE,
             Tables.PRIORTUMOR,
             Tables.SURGERY,
@@ -75,9 +75,9 @@ class DatabaseWriter(private val context: DSLContext, private val connection: ja
         LOGGER.info(" Writing patient records")
         val (indexedRecords, rows) = patientRecords.mapIndexed { index, record ->
             val patientId = index + 1
-            val dbRecord = context.newRecord(Tables.PATIENTRECORD)
+            val dbRecord = context.newRecord(Tables.PATIENT)
             dbRecord.from(record)
-            dbRecord.set(Tables.PATIENTRECORD.ID, patientId)
+            dbRecord.set(Tables.PATIENT.ID, patientId)
             Pair(patientId, record) to dbRecord
         }.unzip()
         
@@ -117,7 +117,7 @@ class DatabaseWriter(private val context: DSLContext, private val connection: ja
         patient.tumorEntries.map { tumorEntry ->
             val dbRecord = context.newRecord(Tables.DIAGNOSIS)
             dbRecord.from(tumorEntry.diagnosis)
-            dbRecord.set(Tables.DIAGNOSIS.PATIENTRECORDID, patientId)
+            dbRecord.set(Tables.DIAGNOSIS.PATIENTID, patientId)
             dbRecord.set(Tables.DIAGNOSIS.TUMORLOCATIONS, jsonList(tumorEntry.diagnosis.tumorLocations))
             tumorEntry to dbRecord
         }
