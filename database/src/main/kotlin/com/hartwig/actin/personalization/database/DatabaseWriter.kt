@@ -55,19 +55,7 @@ class DatabaseWriter(private val context: DSLContext, private val connection: ja
     
     private fun clearAll() {
         LOGGER.info(" Clearing all patient data")
-        sequenceOf(
-            Tables.DIAGNOSIS,
-            Tables.DRUG,
-            Tables.EPISODE,
-            Tables.LABMEASUREMENT,
-            Tables.LOCATION,
-            Tables.PATIENT,
-            Tables.PFSMEASURE,
-            Tables.PRIORTUMOR,
-            Tables.SURGERY,
-            Tables.SYSTEMICTREATMENTCOMPONENT,
-            Tables.SYSTEMICTREATMENTSCHEME
-        ).forEach { context.truncate(it).execute() }
+        DefaultSchema.DEFAULT_SCHEMA.getTables().forEach { context.truncate(it).execute() }
         connection.commit()
     }
     
