@@ -12,13 +12,14 @@
         <module>recruitment-assignment</module>
         <module>datamodel</module>
         <module>ncr</module>
+        <module>database</module>
         <module>similarity</module>
     </modules>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-        <kotlin.version>1.8.21</kotlin.version>
+        <kotlin.version>2.0.0</kotlin.version>
         <kotlin.jvm.target>11</kotlin.jvm.target>
         <kotlin.code.style>official</kotlin.code.style>
 
@@ -29,6 +30,9 @@
         <apache.log4j-slf4j18.version>2.18.0</apache.log4j-slf4j18.version>
         <weka.version>3.8.6</weka.version>
         <jackson.version>2.16.1</jackson.version>
+        <jooq.version>3.15.5</jooq.version>
+        <picocli.version>4.7.6</picocli.version>
+	<mysqlconnector.version>8.0.31</mysqlconnector.version>
 
         <junit.version>4.13.2</junit.version>
         <assertj-core.version>3.24.2</assertj-core.version>
@@ -47,6 +51,11 @@
                     <artifactId>kotlin-maven-plugin</artifactId>
                     <version>${kotlin.version}</version>
                 </plugin>
+                <plugin>
+                    <groupId>org.jooq</groupId>
+                    <artifactId>jooq-codegen-maven</artifactId>
+                    <version>${jooq.version}</version>
+                </plugin>
             </plugins>
         </pluginManagement>
     </build>
@@ -59,8 +68,13 @@
                 <version>${project.version}</version>
             </dependency>
             <dependency>
+                <groupId>com.hartwig.actin.personalization</groupId>
+                <artifactId>ncr</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>org.jetbrains.kotlin</groupId>
-                <artifactId>kotlin-stdlib-jdk8</artifactId>
+                <artifactId>kotlin-stdlib</artifactId>
                 <version>${kotlin.version}</version>
             </dependency>
             <dependency>
@@ -97,6 +111,21 @@
                 <groupId>com.fasterxml.jackson.module</groupId>
                 <artifactId>jackson-module-kotlin</artifactId>
                 <version>${jackson.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jooq</groupId>
+                <artifactId>jooq</artifactId>
+                <version>${jooq.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>info.picocli</groupId>
+                <artifactId>picocli</artifactId>
+                <version>${picocli.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.mysql</groupId>
+                <artifactId>mysql-connector-j</artifactId>
+                <version>${mysqlconnector.version}</version>
             </dependency>
 
             <dependency>
