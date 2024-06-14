@@ -5,6 +5,7 @@ data class Diagnosis(
     override val tumorLocations: Set<Location>,
     override val hasHadTumorDirectedSystemicTherapy: Boolean,
 
+    val ageAtDiagnosis: Int,
     val hasHadPriorTumor: Boolean,
     val priorTumors: List<PriorTumor>,
     
