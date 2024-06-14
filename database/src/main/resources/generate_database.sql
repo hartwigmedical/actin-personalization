@@ -15,6 +15,7 @@ CREATE TABLE `diagnosis` (
     `patientId` int NOT NULL,
     `consolidatedTumorType` varchar(255) NOT NULL,
     `tumorLocations` json NOT NULL,
+    `ageAtDiagnosis` int NOT NULL,
     `hasHadPriorTumor` tinyint(1) NOT NULL,
     `cci` int,
     `cciNumberOfCategories` varchar(50),

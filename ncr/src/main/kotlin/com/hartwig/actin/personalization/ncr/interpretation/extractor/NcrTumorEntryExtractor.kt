@@ -51,6 +51,7 @@ fun extractTumorEntry(tumorId: Int, records: List<NcrRecord>): TumorEntry {
             consolidatedTumorType = NcrTumorTypeMapper.resolve(diagnosisRecord.primaryDiagnosis.morfCat!!),
             tumorLocations = locations,
             hasHadTumorDirectedSystemicTherapy = episodes.any(Episode::hasReceivedTumorDirectedTreatment),
+            ageAtDiagnosis = diagnosisRecord.patientCharacteristics.leeft,
             hasHadPriorTumor = priorTumors.isNotEmpty(),
             priorTumors = priorTumors,
             cci = comorbidities.cci,
