@@ -7,6 +7,5 @@ data class SystemicTreatmentPlan(
     val intervalTumorIncidenceTreatmentPlanStop: Int?,
 
     val pfs: Int?,
-    val response: ResponseMeasureType?,
     val intervalTreatmentPlanStartResponseDate: Int?
 )
