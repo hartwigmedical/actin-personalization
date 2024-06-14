@@ -1,12 +1,13 @@
 package com.hartwig.actin.personalization.ncr.interpretation.extractor
 
+import com.hartwig.actin.personalization.datamodel.Drug
 import com.hartwig.actin.personalization.datamodel.PfsMeasure
 import com.hartwig.actin.personalization.datamodel.PfsMeasureType
 import com.hartwig.actin.personalization.datamodel.ResponseMeasure
 import com.hartwig.actin.personalization.datamodel.SystemicTreatmentComponent
-import com.hartwig.actin.personalization.datamodel.Treatment
 import com.hartwig.actin.personalization.datamodel.SystemicTreatmentPlan
 import com.hartwig.actin.personalization.datamodel.SystemicTreatmentScheme
+import com.hartwig.actin.personalization.datamodel.Treatment
 import com.hartwig.actin.personalization.ncr.datamodel.NcrSystemicTreatment
 import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrTreatmentNameMapper.resolve
 import com.hartwig.actin.personalization.ncr.interpretation.mapper.resolveCyclesAndDetails
@@ -14,12 +15,14 @@ import com.hartwig.actin.personalization.ncr.interpretation.mapper.resolvePreAnd
 import kotlin.math.max
 import kotlin.math.min
 
+private val FOLLOW_UP_DRUGS_TO_IGNORE = setOf(Drug.FLUOROURACIL, Drug.CAPECITABINE, Drug.TEGAFUR_OR_GIMERACIL_OR_OTERACIL)
+
 fun extractSystemicTreatmentPlan(
     systemicTreatment: NcrSystemicTreatment, pfsMeasures: List<PfsMeasure>, responseMeasure: ResponseMeasure?
 ): SystemicTreatmentPlan? {
     val treatmentSchemes = extractSystemicTreatmentSchemes(systemicTreatment)
     val firstScheme = treatmentSchemes.firstOrNull() ?: return null
-    val treatment = Treatment.findForDrugs(firstScheme.treatmentComponents.map(SystemicTreatmentComponent::drug).toSet())
+    val treatment = extractTreatmentFromSchemes(treatmentSchemes)
     val planStart = firstScheme.intervalTumorIncidenceTreatmentLineStartMin
     val intervalTumorFirstPfsMeasure = pfsMeasures.asSequence().filter { it.pfsMeasureType != PfsMeasureType.CENSOR }
         .map(PfsMeasure::intervalTumorIncidencePfsMeasureDate)
@@ -34,13 +37,26 @@ fun extractSystemicTreatmentPlan(
         if (intervalTumorFirstPfsMeasure != null && planStart != null) {
             intervalTumorFirstPfsMeasure - planStart
         } else null,
-        responseMeasure?.responseMeasureType,
         responseMeasure?.intervalTumorIncidenceResponseMeasureDate?.let {
             if (planStart != null) {
                 it - planStart
             } else null
         }
     )
+}
+
+private fun drugsFromScheme(systemicTreatmentScheme: SystemicTreatmentScheme): List<Drug> {
+    return systemicTreatmentScheme.treatmentComponents.map(SystemicTreatmentComponent::drug)
+}
+
+private fun extractTreatmentFromSchemes(treatmentSchemes: Iterable<SystemicTreatmentScheme>): Treatment {
+    val firstSchemeDrugs = drugsFromScheme(treatmentSchemes.first()).toSet()
+    val followUpDrugs = treatmentSchemes.drop(1).flatMap(::drugsFromScheme).toSet()
+    val newDrugsToIgnore = if (firstSchemeDrugs.intersect(FOLLOW_UP_DRUGS_TO_IGNORE).isNotEmpty()) FOLLOW_UP_DRUGS_TO_IGNORE else emptySet()
+
+    return if ((followUpDrugs - firstSchemeDrugs - newDrugsToIgnore).isEmpty()) {
+        Treatment.findForDrugs(firstSchemeDrugs)
+    } else Treatment.OTHER
 }
 
 private fun extractSystemicTreatmentSchemes(systemicTreatment: NcrSystemicTreatment): List<SystemicTreatmentScheme> {
@@ -62,7 +78,7 @@ private fun extractSystemicTreatmentSchemes(systemicTreatment: NcrSystemicTreatm
             systCode14?.let { extractSystemicComponent(it, systSchemanum14, systKuren14, systStartInt14, systStopInt14, systPrepost14) }
         )
             .groupBy(SystemicTreatmentComponent::treatmentSchemeNumber)
-            .map { (_, treatments) ->
+            .map { (schemeNumber, treatments) ->
                 val (startMin, startMax, stopMin, stopMax) = treatments.map {
                     with(it) {
                         StartAndStopMinAndMax(
@@ -74,9 +90,9 @@ private fun extractSystemicTreatmentSchemes(systemicTreatment: NcrSystemicTreatm
                     }
                 }.reduce(StartAndStopMinAndMax::plus)
 
-                SystemicTreatmentScheme(treatments, startMin, startMax, stopMin, stopMax)
+                SystemicTreatmentScheme(schemeNumber, treatments, startMin, startMax, stopMin, stopMax)
             }
-            .sortedBy(SystemicTreatmentScheme::intervalTumorIncidenceTreatmentLineStartMin)
+            .sortedBy(SystemicTreatmentScheme::schemeNumber)
     }
 }
 
