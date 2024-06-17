@@ -15,7 +15,7 @@ import com.hartwig.actin.personalization.ncr.interpretation.mapper.resolvePreAnd
 import kotlin.math.max
 import kotlin.math.min
 
-private val FOLLOW_UP_DRUGS_TO_IGNORE = setOf(Drug.FLUOROURACIL, Drug.CAPECITABINE, Drug.TEGAFUR_OR_GIMERACIL_OR_OTERACIL)
+private val ALLOWED_SUBSTITUTIONS = setOf(Drug.FLUOROURACIL, Drug.CAPECITABINE, Drug.TEGAFUR, Drug.TEGAFUR_OR_GIMERACIL_OR_OTERACIL)
 
 fun extractSystemicTreatmentPlan(
     systemicTreatment: NcrSystemicTreatment, pfsMeasures: List<PfsMeasure>, responseMeasure: ResponseMeasure?
@@ -52,7 +52,7 @@ private fun drugsFromScheme(systemicTreatmentScheme: SystemicTreatmentScheme): L
 private fun extractTreatmentFromSchemes(treatmentSchemes: Iterable<SystemicTreatmentScheme>): Treatment {
     val firstSchemeDrugs = drugsFromScheme(treatmentSchemes.first()).toSet()
     val followUpDrugs = treatmentSchemes.drop(1).flatMap(::drugsFromScheme).toSet()
-    val newDrugsToIgnore = if (firstSchemeDrugs.intersect(FOLLOW_UP_DRUGS_TO_IGNORE).isNotEmpty()) FOLLOW_UP_DRUGS_TO_IGNORE else emptySet()
+    val newDrugsToIgnore = if (firstSchemeDrugs.intersect(ALLOWED_SUBSTITUTIONS).isNotEmpty()) ALLOWED_SUBSTITUTIONS else emptySet()
 
     return if ((followUpDrugs - firstSchemeDrugs - newDrugsToIgnore).isEmpty()) {
         Treatment.findForDrugs(firstSchemeDrugs)
