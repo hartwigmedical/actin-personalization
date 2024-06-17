@@ -48,8 +48,6 @@ data class Episode(
     val metastasesRadiotherapies: List<MetastasesRadiotherapy>,
     val hasHadHipecTreatment: Boolean,
     val intervalTumorIncidenceHipecTreatment: Int?,
-    val systemicTreatmentComponents: List<SystemicTreatmentComponent>,
-    val systemicTreatmentSchemes: List<SystemicTreatmentScheme>,
     val hasHadPreSurgeryRadiotherapy: Boolean,
     val hasHadPostSurgeryRadiotherapy: Boolean,
     val hasHadPreSurgeryChemoRadiotherapy: Boolean,
@@ -61,4 +59,5 @@ data class Episode(
 
     val responseMeasure: ResponseMeasure?,
     val pfsMeasures: List<PfsMeasure>,
-)
+    val systemicTreatmentPlan: SystemicTreatmentPlan?,
+    )

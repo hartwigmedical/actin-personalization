@@ -1,11 +1,13 @@
 package com.hartwig.actin.personalization.ncr.interpretation.extractor
 
+import com.hartwig.actin.personalization.datamodel.Drug
 import com.hartwig.actin.personalization.datamodel.PfsMeasure
 import com.hartwig.actin.personalization.datamodel.PfsMeasureType
 import com.hartwig.actin.personalization.datamodel.ResponseMeasure
-import com.hartwig.actin.personalization.datamodel.ResponseMeasureType
 import com.hartwig.actin.personalization.datamodel.SystemicTreatmentComponent
+import com.hartwig.actin.personalization.datamodel.SystemicTreatmentPlan
 import com.hartwig.actin.personalization.datamodel.SystemicTreatmentScheme
+import com.hartwig.actin.personalization.datamodel.Treatment
 import com.hartwig.actin.personalization.ncr.datamodel.NcrSystemicTreatment
 import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrTreatmentNameMapper.resolve
 import com.hartwig.actin.personalization.ncr.interpretation.mapper.resolveCyclesAndDetails
@@ -13,61 +15,52 @@ import com.hartwig.actin.personalization.ncr.interpretation.mapper.resolvePreAnd
 import kotlin.math.max
 import kotlin.math.min
 
-fun extractSystemicTreatmentSchemes(
-    systemicTreatment: NcrSystemicTreatment, responseMeasure: ResponseMeasure?, pfsMeasures: List<PfsMeasure>
-): List<SystemicTreatmentScheme> {
-    val rawTreatmentSchemesDescending = extractRawSystemicTreatmentSchemesDescending(systemicTreatment)
-    return augmentTreatmentSchemesWithResponseAndPfs(
-        rawTreatmentSchemesDescending,
-        responseMeasure?.responseMeasureType,
-        responseMeasure?.intervalTumorIncidenceResponseDate ?: 0,
-        pfsMeasures
-    ).reversed()
-}
+private val ALLOWED_SUBSTITUTIONS = setOf(Drug.FLUOROURACIL, Drug.CAPECITABINE, Drug.TEGAFUR, Drug.TEGAFUR_OR_GIMERACIL_OR_OTERACIL)
 
-private tailrec fun augmentTreatmentSchemesWithResponseAndPfs(
-    rawTreatmentSchemes: List<SystemicTreatmentScheme>,
-    response: ResponseMeasureType?,
-    responseInterval: Int,
-    pfsMeasures: List<PfsMeasure>,
-    augmentedTreatmentSchemes: List<SystemicTreatmentScheme> = emptyList()
-): List<SystemicTreatmentScheme> {
-    return if (rawTreatmentSchemes.isEmpty()) {
-        augmentedTreatmentSchemes
-    } else {
-        val current = rawTreatmentSchemes.first()
-        val lineStartIntervalMin = current.intervalTumorIncidenceTreatmentLineStartMin
+fun extractSystemicTreatmentPlan(
+    systemicTreatment: NcrSystemicTreatment, pfsMeasures: List<PfsMeasure>, responseMeasure: ResponseMeasure?
+): SystemicTreatmentPlan? {
+    val treatmentSchemes = extractSystemicTreatmentSchemes(systemicTreatment)
+    val firstScheme = treatmentSchemes.firstOrNull() ?: return null
+    val treatment = extractTreatmentFromSchemes(treatmentSchemes)
+    val planStart = firstScheme.intervalTumorIncidenceTreatmentLineStartMin
+    val intervalTumorFirstPfsMeasure = pfsMeasures.asSequence().filter { it.pfsMeasureType != PfsMeasureType.CENSOR }
+        .map(PfsMeasure::intervalTumorIncidencePfsMeasureDate)
+        .filterNotNull()
+        .minOrNull()
 
-        val currentResponse = if (response != null && lineStartIntervalMin != null && lineStartIntervalMin < responseInterval) {
-            ResponseMeasure(response, responseInterval)
-        } else null
-
-        val (treatmentRawPfs, remainingPfs) = pfsMeasures.partition {
-            lineStartIntervalMin != null && lineStartIntervalMin < (it.intervalTumorIncidencePfsMeasureDate ?: 0)
+    return SystemicTreatmentPlan(
+        treatment,
+        treatmentSchemes,
+        planStart,
+        treatmentSchemes.last().intervalTumorIncidenceTreatmentLineStopMax,
+        if (intervalTumorFirstPfsMeasure != null && planStart != null) {
+            intervalTumorFirstPfsMeasure - planStart
+        } else null,
+        responseMeasure?.intervalTumorIncidenceResponseMeasureDate?.let {
+            if (planStart != null) {
+                it - planStart
+            } else null
         }
-
-        val treatmentPfs = treatmentRawPfs.map(PfsMeasure::pfsMeasureType)
-            .filterNot { it == PfsMeasureType.CENSOR }
-            .maxOrNull()
-
-        val augmentedTreatmentScheme = current.copy(
-            treatmentResponse = currentResponse, treatmentPfs = treatmentPfs, treatmentRawPfs = treatmentRawPfs
-        )
-
-        augmentTreatmentSchemesWithResponseAndPfs(
-            rawTreatmentSchemes.drop(1),
-            if (currentResponse != null) null else response,
-            responseInterval,
-            remainingPfs,
-            augmentedTreatmentSchemes + augmentedTreatmentScheme
-        )
-    }
+    )
 }
 
-private fun extractRawSystemicTreatmentSchemesDescending(
-    ncrSystemicTreatment: NcrSystemicTreatment
-): List<SystemicTreatmentScheme> {
-    return with(ncrSystemicTreatment) {
+private fun drugsFromScheme(systemicTreatmentScheme: SystemicTreatmentScheme): List<Drug> {
+    return systemicTreatmentScheme.treatmentComponents.map(SystemicTreatmentComponent::drug)
+}
+
+private fun extractTreatmentFromSchemes(treatmentSchemes: Iterable<SystemicTreatmentScheme>): Treatment {
+    val firstSchemeDrugs = drugsFromScheme(treatmentSchemes.first()).toSet()
+    val followUpDrugs = treatmentSchemes.drop(1).flatMap(::drugsFromScheme).toSet()
+    val newDrugsToIgnore = if (firstSchemeDrugs.intersect(ALLOWED_SUBSTITUTIONS).isNotEmpty()) ALLOWED_SUBSTITUTIONS else emptySet()
+
+    return if ((followUpDrugs - firstSchemeDrugs - newDrugsToIgnore).isEmpty()) {
+        Treatment.findForDrugs(firstSchemeDrugs)
+    } else Treatment.OTHER
+}
+
+private fun extractSystemicTreatmentSchemes(systemicTreatment: NcrSystemicTreatment): List<SystemicTreatmentScheme> {
+    return with(systemicTreatment) {
         listOfNotNull(
             systCode1?.let { extractSystemicComponent(it, systSchemanum1, systKuren1, systStartInt1, systStopInt1, systPrepost1) },
             systCode2?.let { extractSystemicComponent(it, systSchemanum2, systKuren2, systStartInt2, systStopInt2, systPrepost2) },
@@ -85,7 +78,7 @@ private fun extractRawSystemicTreatmentSchemesDescending(
             systCode14?.let { extractSystemicComponent(it, systSchemanum14, systKuren14, systStartInt14, systStopInt14, systPrepost14) }
         )
             .groupBy(SystemicTreatmentComponent::treatmentSchemeNumber)
-            .map { (_, treatments) ->
+            .map { (schemeNumber, treatments) ->
                 val (startMin, startMax, stopMin, stopMax) = treatments.map {
                     with(it) {
                         StartAndStopMinAndMax(
@@ -97,9 +90,9 @@ private fun extractRawSystemicTreatmentSchemesDescending(
                     }
                 }.reduce(StartAndStopMinAndMax::plus)
 
-                SystemicTreatmentScheme(treatments, startMin, startMax, stopMin, stopMax, null, null, emptyList())
+                SystemicTreatmentScheme(schemeNumber, treatments, startMin, startMax, stopMin, stopMax)
             }
-            .sortedByDescending(SystemicTreatmentScheme::intervalTumorIncidenceTreatmentLineStartMin)
+            .sortedBy(SystemicTreatmentScheme::schemeNumber)
     }
 }
 

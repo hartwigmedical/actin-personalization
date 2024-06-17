@@ -105,9 +105,13 @@ CREATE TABLE `episode` (
     `hasHadPreSurgerySystemicTargetedTherapy` tinyint(1) NOT NULL,
     `hasHadPostSurgerySystemicTargetedTherapy` tinyint(1) NOT NULL,
 
-    `responseMeasureType` varchar(50),
+    `response` varchar(50),
     `intervalTumorIncidenceResponseDate` int,
     `systemicTreatmentPlan` varchar(50),
+    `intervalTumorIncidenceTreatmentPlanStart` int,
+    `intervalTumorIncidenceTreatmentPlanStop` int,
+    `pfs` int,
+    `intervalTreatmentPlanStartResponseDate` int,
     FOREIGN KEY (`diagnosisId`) REFERENCES `diagnosis`(`id`),
     PRIMARY KEY (`id`)
 );
@@ -133,6 +137,7 @@ CREATE TABLE `metastasis` (
     `id` int NOT NULL AUTO_INCREMENT,
     `episodeId` int NOT NULL,
     `location` varchar(255) NOT NULL,
+    `locationGroup` varchar(50) NOT NULL,
     `intervalTumorIncidenceMetastasisDetection` int,
     `progression` tinyint(1),
     FOREIGN KEY (`episodeId`) REFERENCES `episode`(`id`),
@@ -178,10 +183,6 @@ CREATE TABLE `systemicTreatmentScheme` (
     `intervalTumorIncidenceTreatmentLineStopMin` int,
     `intervalTumorIncidenceTreatmentLineStopMax` int,
 
-    `responseMeasureType` varchar(50),
-    `intervalTumorIncidenceResponseDate` int,
-
-    `treatmentPfs` varchar(50),
     `intervalTreatmentStartMinResponseDate` int,
     `intervalTreatmentStartMaxResponseDate` int,
     FOREIGN KEY (`episodeId`) REFERENCES `episode`(`id`),
@@ -207,11 +208,11 @@ CREATE TABLE `systemicTreatmentComponent` (
 DROP TABLE IF EXISTS `pfsMeasure`;
 CREATE TABLE `pfsMeasure` (
     `id` int NOT NULL AUTO_INCREMENT,
-    `systemicTreatmentSchemeId` int NOT NULL,
+    `episodeId` int NOT NULL,
     `pfsMeasureType` varchar(50) NOT NULL,
     `pfsMeasureFollowupEvent` varchar(50),
     `intervalTumorIncidencePfsMeasureDate` int,
-    FOREIGN KEY (`systemicTreatmentSchemeId`) REFERENCES `systemicTreatmentScheme`(`id`),
+    FOREIGN KEY (`episodeId`) REFERENCES `episode`(`id`),
     PRIMARY KEY (`id`)
 );
 
