@@ -6,6 +6,7 @@ SELECT
     e.diagnosisId,
     e.id AS episodeId,
     e.order,
+    distantMetastasesStatus,
     consolidatedTumorType,
     tumorLocations,
     ageAtDiagnosis,
