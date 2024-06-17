@@ -22,35 +22,7 @@ import com.hartwig.actin.personalization.ncr.datamodel.NcrPrimaryRadiotherapy
 import com.hartwig.actin.personalization.ncr.datamodel.NcrPrimarySurgery
 import com.hartwig.actin.personalization.ncr.datamodel.NcrRecord
 import com.hartwig.actin.personalization.ncr.datamodel.NcrTreatmentResponse
-import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrAnastomoticLeakageAfterSurgeryMapper
-import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrAsaClassificationPreSurgeryOrEndoscopyMapper
-import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrBooleanMapper
-import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrDistantMetastasesStatusMapper
-import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrExtraMuralInvasionCategoryMapper
-import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrGastroenterologyResectionTypeMapper
-import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrLocationMapper
-import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrLymphaticInvasionCategoryMapper
-import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrMetastasesRadiotherapyTypeMapper
-import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrMetastasesSurgeryTypeMapper
-import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrNumberOfLiverMetastasesMapper
-import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrPfsMeasureFollowUpEventMapper
-import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrPfsMeasureTypeMapper
-import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrRadiotherapyTypeMapper
-import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrReasonRefrainmentFromTumorDirectedTherapyMapper
-import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrStageTnmMapper
-import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrSurgeryCircumferentialResectionMarginMapper
-import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrSurgeryRadicalityMapper
-import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrSurgeryTechniqueMapper
-import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrSurgeryTypeMapper
-import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrSurgeryUrgencyMapper
-import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrTnmMMapper
-import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrTnmNMapper
-import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrTnmTMapper
-import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrTumorBasisOfDiagnosisMapper
-import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrTumorDifferentiationGradeMapper
-import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrTumorRegressionMapper
-import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrVenousInvasionCategoryMapper
-import com.hartwig.actin.personalization.ncr.interpretation.mapper.resolvePreAndPostSurgery
+import com.hartwig.actin.personalization.ncr.interpretation.mapper.*
 
 fun extractEpisode(record: NcrRecord): Episode {
     return with(record) {
@@ -73,7 +45,7 @@ fun extractEpisode(record: NcrRecord): Episode {
         Episode(
             id = identification.keyEid,
             order = identification.teller,
-            whoStatusPreTreatmentStart = patientCharacteristics.perfStat,
+            whoStatusPreTreatmentStart = NcrIntegerMapper.resolve(patientCharacteristics.perfStat),
             asaClassificationPreSurgeryOrEndoscopy =
             NcrAsaClassificationPreSurgeryOrEndoscopyMapper.resolve(patientCharacteristics.asa),
             tumorIncidenceYear = primaryDiagnosis.incjr,
