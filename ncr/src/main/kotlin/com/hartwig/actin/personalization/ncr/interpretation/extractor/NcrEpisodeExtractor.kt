@@ -50,6 +50,7 @@ import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrTumorBasis
 import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrTumorDifferentiationGradeMapper
 import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrTumorRegressionMapper
 import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrVenousInvasionCategoryMapper
+import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrWhoStatusMapper
 import com.hartwig.actin.personalization.ncr.interpretation.mapper.resolvePreAndPostSurgery
 
 fun extractEpisode(record: NcrRecord): Episode {
@@ -73,7 +74,7 @@ fun extractEpisode(record: NcrRecord): Episode {
         Episode(
             id = identification.keyEid,
             order = identification.teller,
-            whoStatusPreTreatmentStart = patientCharacteristics.perfStat,
+            whoStatusPreTreatmentStart = NcrWhoStatusMapper.resolve(patientCharacteristics.perfStat),
             asaClassificationPreSurgeryOrEndoscopy =
             NcrAsaClassificationPreSurgeryOrEndoscopyMapper.resolve(patientCharacteristics.asa),
             tumorIncidenceYear = primaryDiagnosis.incjr,
