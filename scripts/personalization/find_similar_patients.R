@@ -111,11 +111,11 @@ dfs_pfs_disp <- dfs_pfs_disp[match(dfs_td_disp$systemicTreatmentPlan, dfs_pfs_di
 median_columns <- grep("^median_", names(dfs_pfs_disp), value=T)
 dfs_pfs_disp <- dfs_pfs_disp %>%
   rowwise() %>%
-  mutate(across(all_of(median_columns), ~ paste0(.x, " (n=", get(paste0("n_", substring(cur_column(), 8))), ")"))) %>%
+  mutate(across(all_of(median_columns), ~ paste0(.x, " (", get(paste0("min_",substring(cur_column(), 8))),"-",get(paste0("max_",substring(cur_column(), 8))),")", " (n=", get(paste0("n_", substring(cur_column(), 8))), ")"))) %>%
   ungroup()
 
 n_sums <- sapply(dfs_pfs_disp[, grep("^n_", names(dfs_pfs_disp))], sum)
-intended_names <- c("PFS general (mdn)",paste0("PFS age=",patient_age-range,"-",patient_age+range,"y (mdn)"),paste0("PFS WHO=",patient_who, " (mdn)"),paste0("PFS RAS status=",if (patient_ras_status==1) {"positive"} else {"negative"}, " (mdn)"))
+intended_names <- c("PFS general (mdn, range)",paste0("PFS age=",patient_age-range,"-",patient_age+range,"y (mdn, range)"),paste0("PFS WHO=",patient_who, " (mdn, range)"),paste0("PFS RAS status=",if (patient_ras_status==1) {"positive"} else {"negative"}, " (mdn, range)"))
 new_median_column_names <- paste0(intended_names, " (n=", n_sums, ")")
 names(dfs_pfs_disp)[grep("^median", names(dfs_pfs_disp))] <- new_median_column_names
 
