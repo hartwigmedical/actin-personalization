@@ -18,7 +18,10 @@ import kotlin.math.min
 private val ALLOWED_SUBSTITUTIONS = setOf(Drug.FLUOROURACIL, Drug.CAPECITABINE, Drug.TEGAFUR, Drug.TEGAFUR_OR_GIMERACIL_OR_OTERACIL)
 
 fun extractSystemicTreatmentPlan(
-    systemicTreatment: NcrSystemicTreatment, pfsMeasures: List<PfsMeasure>, responseMeasure: ResponseMeasure?
+    systemicTreatment: NcrSystemicTreatment,
+    pfsMeasures: List<PfsMeasure>,
+    responseMeasure: ResponseMeasure?,
+    intervalTumorIncidenceLatestAliveStatus: Int
 ): SystemicTreatmentPlan? {
     val treatmentSchemes = extractSystemicTreatmentSchemes(systemicTreatment)
     val firstScheme = treatmentSchemes.firstOrNull() ?: return null
@@ -27,17 +30,18 @@ fun extractSystemicTreatmentPlan(
     val intervalTumorFirstPfsMeasure = pfsMeasures.asSequence().filter { it.pfsMeasureType != PfsMeasureType.CENSOR }
         .map(PfsMeasure::intervalTumorIncidencePfsMeasureDate)
         .filterNotNull()
+        .filter { planStart == null || it >= planStart }
         .minOrNull()
 
     return SystemicTreatmentPlan(
-        treatment,
-        treatmentSchemes,
-        planStart,
-        treatmentSchemes.last().intervalTumorIncidenceTreatmentLineStopMax,
-        if (intervalTumorFirstPfsMeasure != null && planStart != null) {
-            intervalTumorFirstPfsMeasure - planStart
-        } else null,
-        responseMeasure?.intervalTumorIncidenceResponseMeasureDate?.let {
+        treatment = treatment,
+        systemicTreatmentSchemes = treatmentSchemes,
+        intervalTumorIncidenceTreatmentPlanStart = planStart,
+        intervalTumorIncidenceTreatmentPlanStop = treatmentSchemes.last().intervalTumorIncidenceTreatmentLineStopMax,
+        intervalTreatmentPlanStartLatestAliveStatus = planStart?.let { intervalTumorIncidenceLatestAliveStatus - it }
+            ?.takeIf { it >= 0 },
+        pfs = intervalTumorFirstPfsMeasure?.let { firstPfsInt -> planStart?.let { firstPfsInt - it } },
+        intervalTreatmentPlanStartResponseDate = responseMeasure?.intervalTumorIncidenceResponseMeasureDate?.let {
             if (planStart != null) {
                 it - planStart
             } else null

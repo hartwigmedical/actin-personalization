@@ -21,7 +21,7 @@ enum class Treatment(val drugs: Set<Drug>?) {
     PEMBROLIZUMAB(setOf(Drug.PEMBROLIZUMAB));
 
     companion object {
-        private val plansByDrugSet = values().associateBy(Treatment::drugs)
+        private val plansByDrugSet = Treatment.entries.associateBy(Treatment::drugs)
 
         fun findForDrugs(drugs: Set<Drug>?): Treatment {
             return plansByDrugSet[drugs] ?: OTHER

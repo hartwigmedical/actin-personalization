@@ -22,7 +22,8 @@ private val LOGGER: Logger = LogManager.getLogger(PatientRecordFactory::class)
 
 fun extractTumorEntry(tumorId: Int, records: List<NcrRecord>): TumorEntry {
     val diagnosisRecord = records.single { it.identification.epis == DIAGNOSIS_EPISODE }
-    val episodes = records.map(::extractEpisode)
+    val intervalTumorIncidenceLatestAliveStatus = diagnosisRecord.patientCharacteristics.vitStatInt!!
+    val episodes = records.map { record -> extractEpisode(record, intervalTumorIncidenceLatestAliveStatus) }
     val locations = episodes.map(Episode::tumorLocation).toSet()
     if (locations.size > 1) {
         LOGGER.warn("Multiple tumor locations found for tumor $tumorId with NCR ID ${diagnosisRecord.identification.keyNkr}: $locations")
@@ -52,6 +53,7 @@ fun extractTumorEntry(tumorId: Int, records: List<NcrRecord>): TumorEntry {
             tumorLocations = locations,
             hasHadTumorDirectedSystemicTherapy = episodes.any(Episode::hasReceivedTumorDirectedTreatment),
             ageAtDiagnosis = diagnosisRecord.patientCharacteristics.leeft,
+            intervalTumorIncidenceLatestAliveStatus = intervalTumorIncidenceLatestAliveStatus,
             hasHadPriorTumor = priorTumors.isNotEmpty(),
             priorTumors = priorTumors,
             cci = comorbidities.cci,

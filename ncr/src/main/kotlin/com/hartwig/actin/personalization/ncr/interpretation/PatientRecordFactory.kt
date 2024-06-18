@@ -46,14 +46,11 @@ object PatientRecordFactory {
         return NcrSexMapper.resolve(sexes.single())
     }
 
-    private fun determineIsAlive(ncrRecords: List<NcrRecord>): Boolean? {
+    private fun determineIsAlive(ncrRecords: List<NcrRecord>): Boolean {
         // Vital status is only collect on diagnosis episodes.
-        val vitalStatuses: List<Int?> = diagnosisEpisodes(ncrRecords).map { it.patientCharacteristics.vitStat }.distinct()
-        if (vitalStatuses.count() != 1) {
-            throw IllegalStateException("Non-unique or missing vital statuses when creating a single patient record: $vitalStatuses")
-        }
-        return when (val vitalStatus = vitalStatuses[0]) {
-            null -> return null
+        val vitalStatus = diagnosisEpisodes(ncrRecords).map { it.patientCharacteristics.vitStat }.distinct().single()
+       
+        return when (vitalStatus) {
             0 -> true
             1 -> false
             else -> throw IllegalStateException("Cannot convert vital status: $vitalStatus")
