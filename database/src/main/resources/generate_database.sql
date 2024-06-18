@@ -5,7 +5,7 @@ CREATE TABLE `patient` (
     `id` int NOT NULL,
     `ncrId` int NOT NULL,
     `sex` varchar(50) NOT NULL,
-    `isAlive` tinyint(1),
+    `isAlive` tinyint(1) NOT NULL,
     PRIMARY KEY (`id`)
 );
 
@@ -16,6 +16,7 @@ CREATE TABLE `diagnosis` (
     `consolidatedTumorType` varchar(255) NOT NULL,
     `tumorLocations` json NOT NULL,
     `ageAtDiagnosis` int NOT NULL,
+    `intervalTumorIncidenceLatestAliveStatus` int NOT NULL,
     `hasHadPriorTumor` tinyint(1) NOT NULL,
     `cci` int,
     `cciNumberOfCategories` varchar(50),
@@ -110,6 +111,7 @@ CREATE TABLE `episode` (
     `systemicTreatmentPlan` varchar(50),
     `intervalTumorIncidenceTreatmentPlanStart` int,
     `intervalTumorIncidenceTreatmentPlanStop` int,
+    `intervalTreatmentPlanStartLatestAliveStatus` int,
     `pfs` int,
     `intervalTreatmentPlanStartResponseDate` int,
     FOREIGN KEY (`diagnosisId`) REFERENCES `diagnosis`(`id`),

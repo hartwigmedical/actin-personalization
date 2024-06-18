@@ -147,6 +147,7 @@ class DatabaseWriter(private val context: DSLContext, private val connection: ja
                 dbRecord.set(table.SYSTEMICTREATMENTPLAN, plan.treatment.name)
                 dbRecord.set(table.INTERVALTUMORINCIDENCETREATMENTPLANSTART, plan.intervalTumorIncidenceTreatmentPlanStart)
                 dbRecord.set(table.INTERVALTUMORINCIDENCETREATMENTPLANSTOP, plan.intervalTumorIncidenceTreatmentPlanStop)
+                dbRecord.set(table.INTERVALTREATMENTPLANSTARTLATESTALIVESTATUS, plan.intervalTreatmentPlanStartLatestAliveStatus)
                 dbRecord.set(table.PFS, plan.pfs)
                 dbRecord.set(table.INTERVALTREATMENTPLANSTARTRESPONSEDATE, plan.intervalTreatmentPlanStartResponseDate)
             }
