@@ -5,6 +5,7 @@ data class SystemicTreatmentPlan(
     val systemicTreatmentSchemes: List<SystemicTreatmentScheme>,
     val intervalTumorIncidenceTreatmentPlanStart: Int?,
     val intervalTumorIncidenceTreatmentPlanStop: Int?,
+    val intervalTreatmentPlanStartLatestAliveStatus: Int?,
 
     val pfs: Int?,
     val intervalTreatmentPlanStartResponseDate: Int?
