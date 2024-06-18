@@ -1,5 +1,7 @@
 library(dplyr)
 library(tibble)
+library(RMySQL)
+library(DBI)
 
 rm(list=ls())
 
