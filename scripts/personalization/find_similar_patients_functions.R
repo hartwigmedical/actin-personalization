@@ -81,6 +81,13 @@ filter_lesions <- function(data, lesion_list, column_name) {
   return(filtered_data)
 }
 
+format_lesions <- function(lesions) {
+  if (length(lesions) == 1) {
+    return(lesions)
+  } else {
+    return(paste(lesions, collapse = " & "))
+  }
+}  
 
 
 

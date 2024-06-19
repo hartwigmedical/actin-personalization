@@ -56,8 +56,10 @@ df_td_ras <- ref_ras %>%
 
 df_td_lesions <- ref_lesions %>%
   dplyr::filter(!systemicTreatmentPlan %in% treatments_to_exclude) %>%
-  count(systemicTreatmentPlan) %>%
-  mutate(perc_lesions = round(n/sum(n)*100,1)) %>%
+  count(systemicTreatmentPlan)
+sum <- sum(df_td_lesions$n)
+df_td_lesions <- df_td_lesions %>%
+  mutate(perc_lesions =round(n/sum*100,1)) %>%
   rename(n_lesions=n)
 
 dfs_td <- merge(df_td_gen, df_td_age, by="systemicTreatmentPlan", all.x=T) %>%
@@ -115,7 +117,8 @@ dfs_td_disp <- dfs_td %>%
 n_sums <- sapply(dfs_td_disp[, grep("^n_", names(dfs_td_disp))], sum)
 perc_columns <- grep("^perc_", names(dfs_td_disp), value=T)
 
-intended_names <- c("General",paste0("Age=",patient_age-range,"-",patient_age+range,"y"),paste0("WHO=",patient_who),paste0("RAS status=",if (patient_ras_status==1) {"positive"} else {"negative"}), paste0("Lesions=",patient_lesion_list))
+patient_formatted_lesions <- format_lesions(patient_lesion_list)
+intended_names <- c("General",paste0("Age=",patient_age-range,"-",patient_age+range,"y"),paste0("WHO=",patient_who),paste0("RAS status=",if (patient_ras_status==1) {"positive"} else {"negative"}), paste0("Lesions=",patient_formatted_lesions))
 new_perc_column_names <- paste0(intended_names, " (n=", n_sums, ")")
 names(dfs_td_disp)[grep("^perc", names(dfs_td_disp))] <- new_perc_column_names
 
