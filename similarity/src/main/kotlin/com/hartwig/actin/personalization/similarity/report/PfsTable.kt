@@ -1,0 +1,59 @@
+package com.hartwig.actin.personalization.similarity.report
+
+import com.hartwig.actin.personalization.datamodel.Treatment
+import com.hartwig.actin.personalization.similarity.DiagnosisAndEpisode
+import kotlin.collections.count
+import kotlin.collections.filter
+import kotlin.collections.first
+import kotlin.collections.flatMap
+import kotlin.collections.map
+import kotlin.collections.mapNotNull
+import kotlin.collections.plus
+import kotlin.collections.sorted
+import kotlin.collections.sortedByDescending
+import kotlin.let
+import kotlin.to
+
+object PfsTable {
+
+    fun pfsTable(
+        patientsByTreatment: Map<Treatment, List<DiagnosisAndEpisode>>,
+        columnDefinitions: List<Pair<String, (DiagnosisAndEpisode) -> Boolean>>
+    ): TableContent {
+        val sortedPatients = patientsByTreatment.entries.map { (treatment, patients) ->
+            treatment to patients.filter { (_, episode) -> episode.systemicTreatmentPlan?.pfs != null }
+        }
+            .sortedByDescending { it.second.size }
+
+        val entries = sortedPatients.map { (treatment, patients) ->
+            val rowValues = columnDefinitions.map { (_, criteria) -> pfsForPopulation(patients.filter(criteria)) }
+            listOf(treatment.toString()) + rowValues
+        }
+
+        val filteredPatients = sortedPatients.flatMap { it.second }
+        val dataLabels = columnDefinitions.map { (title, criteria) -> "$title (n=${filteredPatients.count(criteria)})" }
+        return TableContent("PFS outcomes in real-world data set (NCR)", listOf("Treatment") + dataLabels, entries)
+    }
+
+    private fun pfsForPopulation(population: List<DiagnosisAndEpisode>): String {
+        val filteredPopulation = population.mapNotNull { (_, episode) -> episode.systemicTreatmentPlan?.pfs }
+        val medianPfs = median(filteredPopulation)
+        return "$medianPfs (n=${filteredPopulation.size})"
+    }
+
+    private fun median(list: List<Int>): Double {
+        return when (list.size) {
+            0 -> Double.NaN
+            1 -> list.first().toDouble()
+            else -> {
+                val midPoint = list.size / 2
+                list.sorted().let {
+                    if (it.size % 2 == 0)
+                        (it[midPoint] + it[midPoint - 1]) / 2.0
+                    else
+                        it[midPoint].toDouble()
+                }
+            }
+        }
+    }
+}
