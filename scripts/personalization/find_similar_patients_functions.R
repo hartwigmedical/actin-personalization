@@ -56,7 +56,7 @@ filter_lesions <- function(data, lesion_list, column_name) {
     if (is.na(x) || x == "") {
       return(NA)
     } else {
-      return(paste(sort(unlist(strsplit(x, ","))), collapse = ","))
+      return(unique(sort(unlist(strsplit(x, ","))), collapse = ","))
     }
   }
   
@@ -69,9 +69,10 @@ filter_lesions <- function(data, lesion_list, column_name) {
     filtered_data <- data %>%
       dplyr::filter(is.na(!!column_name_sym) | !!column_name_sym == "")
   } else {
-    target <- paste(sort(lesion_list), collapse = ",")
+    target <- paste(sort(lesion_list))
     filtered_data <- data %>%
-      dplyr::filter(sorted_lesions == target)
+      rowwise %>%
+      dplyr::filter(all(sorted_lesions %in% target))
   }
   
   filtered_data <- filtered_data %>%
