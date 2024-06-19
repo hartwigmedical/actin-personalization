@@ -18,12 +18,14 @@ dbDisconnect(dbActinPersonalization)
 patient_age<-X
 patient_who<-X
 patient_ras_status<-X
+patient_lesion_list <-X
 
 ref_general <- find_similar_patients_general(ref)
 range<-5
 ref_age <- find_similar_patients_age(ref, patient_age=patient_age, range=range)
 ref_who <- find_similar_patients_who(ref, patient_who=patient_who)
 ref_ras <- find_similar_patients_ras(ref, patient_ras_status=patient_ras_status)
+ref_lesions <- find_similar_patients_lesions(ref, patient_lesions=patient_lesion_list)
 
 # Generate data for treatment decision table--------------------------------------
 treatments_to_exclude <- c("NA","OTHER")
@@ -52,9 +54,16 @@ df_td_ras <- ref_ras %>%
   mutate(perc_ras = round(n/sum(n)*100,1)) %>%
   rename(n_ras=n)
 
+df_td_lesions <- ref_lesions %>%
+  dplyr::filter(!systemicTreatmentPlan %in% treatments_to_exclude) %>%
+  count(systemicTreatmentPlan) %>%
+  mutate(perc_lesions = round(n/sum(n)*100,1)) %>%
+  rename(n_lesions=n)
+
 dfs_td <- merge(df_td_gen, df_td_age, by="systemicTreatmentPlan", all.x=T) %>%
   merge(df_td_who, by="systemicTreatmentPlan", all.x=T) %>%
   merge(df_td_ras, by="systemicTreatmentPlan", all.x=T) %>%
+  merge(df_td_lesions, by="systemicTreatmentPlan", all.x=T) %>%
   replace(is.na(.), 0) 
 
 # Generate data for PFS table-----------------------------------------------------
@@ -86,9 +95,17 @@ df_pfs_ras <- ref_ras %>%
   summarize(n_ras=n(), median_ras=median(as.numeric(systemicTreatmentPlanPfs)), min_ras=min(as.numeric(systemicTreatmentPlanPfs)), max_ras=max(as.numeric(systemicTreatmentPlanPfs))) %>%
   ungroup()
 
+df_pfs_lesions <- ref_lesions %>%
+  dplyr::filter(!systemicTreatmentPlan %in% treatments_to_exclude) %>%
+  dplyr::filter(!is.na(systemicTreatmentPlanPfs)) %>%
+  group_by(systemicTreatmentPlan) %>%
+  summarize(n_lesions=n(), median_lesions=median(as.numeric(systemicTreatmentPlanPfs)), min_lesions=min(as.numeric(systemicTreatmentPlanPfs)), max_lesions=max(as.numeric(systemicTreatmentPlanPfs))) %>%
+  ungroup()
+
 dfs_pfs <- merge(df_pfs_gen, df_pfs_age, by="systemicTreatmentPlan", all.x=T) %>%
   merge(df_pfs_who, by="systemicTreatmentPlan", all.x=T) %>%
-  merge(df_pfs_ras, by="systemicTreatmentPlan", all.x=T) 
+  merge(df_pfs_ras, by="systemicTreatmentPlan", all.x=T) %>%
+  merge(df_pfs_lesions, by="systemicTreatmentPlan", all.x=T) 
 
 # Add formatting to treatment decision data----------------------------------------
 dfs_td_disp <- dfs_td %>%
