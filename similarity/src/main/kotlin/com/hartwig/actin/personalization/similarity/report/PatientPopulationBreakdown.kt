@@ -33,6 +33,10 @@ class PatientPopulationBreakdown(
         return PfsTable.pfsTable(patientsByTreatment, columnDefinitions)
     }
 
+    fun treatmentDecisionTable(): TableContent {
+        return TreatmentDecisionTable.decisionTable(patientsByTreatment, columnDefinitions)
+    }
+
     companion object {
         fun createForCriteria(
             patients: List<PatientRecord>, whoStatus: Int, age: Int, hasRasMutation: Boolean, metastasisLocationGroups: Set<LocationGroup>

@@ -1,17 +1,6 @@
 package com.hartwig.actin.personalization.similarity.report
 
 import com.hartwig.actin.personalization.datamodel.Treatment
-import kotlin.collections.count
-import kotlin.collections.filter
-import kotlin.collections.first
-import kotlin.collections.flatMap
-import kotlin.collections.map
-import kotlin.collections.mapNotNull
-import kotlin.collections.plus
-import kotlin.collections.sorted
-import kotlin.collections.sortedByDescending
-import kotlin.let
-import kotlin.to
 
 object PfsTable {
 

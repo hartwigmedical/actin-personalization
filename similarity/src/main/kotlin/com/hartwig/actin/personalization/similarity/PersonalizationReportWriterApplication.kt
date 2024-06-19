@@ -43,12 +43,11 @@ class PersonalizationReportWriterApplication : Callable<Int> {
         val breakdown = PatientPopulationBreakdown.createForCriteria(
             patients, whoStatus, age, hasRasMutation!!, metastasisLocationString.split(";").map(LocationGroup::valueOf).toSet()
         )
+        val tables = listOf(breakdown.pfsTable(), breakdown.treatmentDecisionTable())
 
         LOGGER.info("Writing PDF report to {}", outputPath)
         val writer = ReportWriter.create(outputPath)
-
-        LOGGER.info("Writing {} patient records to database", patients.size)
-        writer.writeReport("SOC personalized real-world evidence annotation", listOf(breakdown.pfsTable()))
+        writer.writeReport("SOC personalized real-world evidence annotation", tables)
 
         LOGGER.info("Done!")
         return 0
