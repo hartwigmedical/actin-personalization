@@ -119,7 +119,7 @@ intended_names <- c("General",paste0("Age=",patient_age-range,"-",patient_age+ra
 new_perc_column_names <- paste0(intended_names, " (n=", n_sums, ")")
 names(dfs_td_disp)[grep("^perc", names(dfs_td_disp))] <- new_perc_column_names
 
-dfs_td_disp <- dfs_td_disp[, !names(dfs_td_disp) %in% c("n_age", "n_who", "n_gen", "n_ras")]
+dfs_td_disp <- dfs_td_disp[, !names(dfs_td_disp) %in% c("n_age", "n_who", "n_gen", "n_ras", "n_lesions")]
 
 # Add formatting to PFS data----------------------------------------
 dfs_pfs_disp <- dfs_pfs %>%
