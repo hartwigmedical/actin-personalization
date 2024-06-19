@@ -1,9 +1,9 @@
-package com.hartwig.actin.personalization.database
+package com.hartwig.actin.personalization.similarity
 
 import com.hartwig.actin.personalization.datamodel.LocationGroup
 import com.hartwig.actin.personalization.ncr.interpretation.PatientRecordFactory
 import com.hartwig.actin.personalization.ncr.serialization.NcrDataReader
-import com.hartwig.actin.personalization.similarity.PatientPopulationBreakdown
+import com.hartwig.actin.personalization.similarity.report.PatientPopulationBreakdown
 import com.hartwig.actin.personalization.similarity.report.ReportWriter
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
@@ -56,7 +56,7 @@ class PersonalizationReportWriterApplication : Callable<Int> {
 
     companion object {
         val LOGGER: Logger = LogManager.getLogger(PersonalizationReportWriterApplication::class.java)
-        const val APPLICATION = "ACTIN-Personalization Loader"
+        const val APPLICATION = "ACTIN-Personalization Report Writer"
         val VERSION = PersonalizationReportWriterApplication::class.java.getPackage().implementationVersion
     }
 }

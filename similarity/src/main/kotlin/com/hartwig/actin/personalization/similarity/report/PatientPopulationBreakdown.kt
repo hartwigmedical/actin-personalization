@@ -1,4 +1,4 @@
-package com.hartwig.actin.personalization.similarity
+package com.hartwig.actin.personalization.similarity.report
 
 import com.hartwig.actin.personalization.datamodel.Diagnosis
 import com.hartwig.actin.personalization.datamodel.DistantMetastasesStatus
@@ -6,8 +6,15 @@ import com.hartwig.actin.personalization.datamodel.Episode
 import com.hartwig.actin.personalization.datamodel.LocationGroup
 import com.hartwig.actin.personalization.datamodel.PatientRecord
 import com.hartwig.actin.personalization.datamodel.Treatment
-import com.hartwig.actin.personalization.similarity.report.PfsTable
-import com.hartwig.actin.personalization.similarity.report.TableContent
+import kotlin.collections.filter
+import kotlin.collections.flatMap
+import kotlin.collections.groupBy
+import kotlin.collections.joinToString
+import kotlin.collections.map
+import kotlin.collections.single
+import kotlin.collections.toSet
+import kotlin.let
+import kotlin.to
 
 typealias DiagnosisAndEpisode = Pair<Diagnosis, Episode>
 
@@ -36,8 +43,8 @@ class PatientPopulationBreakdown(
                 "All" to { true },
                 "WHO=$whoStatus" to { it.second.whoStatusPreTreatmentStart == whoStatus },
                 "Age $minAge-${maxAge}y" to { it.first.ageAtDiagnosis in minAge..maxAge },
-                "KRAS mut" to { it.first.hasRasMutation == hasRasMutation },
-                "${metastasisLocationGroups.joinToString("/")} metastases" to { (_, episode) ->
+                "RAS ${if (hasRasMutation) "positive" else "negative"}" to { it.first.hasRasMutation == hasRasMutation },
+                "${metastasisLocationGroups.joinToString(", ")} metastases" to { (_, episode) ->
                     episode.systemicTreatmentPlan?.intervalTumorIncidenceTreatmentPlanStart?.let { planStart ->
                         val groups = episode.metastases.filter { metastasis ->
                             metastasis.intervalTumorIncidenceMetastasisDetection?.let { it < planStart } == true
