@@ -1,27 +1,8 @@
 package com.hartwig.actin.personalization.ncr.serialization
 
-import com.hartwig.actin.personalization.ncr.datamodel.NcrCharlsonComorbidities
-import com.hartwig.actin.personalization.ncr.datamodel.NcrClinicalCharacteristics
-import com.hartwig.actin.personalization.ncr.datamodel.NcrGastroenterologyResection
-import com.hartwig.actin.personalization.ncr.datamodel.NcrHipec
-import com.hartwig.actin.personalization.ncr.datamodel.NcrIdentification
-import com.hartwig.actin.personalization.ncr.datamodel.NcrLabValues
-import com.hartwig.actin.personalization.ncr.datamodel.NcrMetastaticDiagnosis
-import com.hartwig.actin.personalization.ncr.datamodel.NcrMetastaticRadiotherapy
-import com.hartwig.actin.personalization.ncr.datamodel.NcrMetastaticSurgery
-import com.hartwig.actin.personalization.ncr.datamodel.NcrMolecularCharacteristics
-import com.hartwig.actin.personalization.ncr.datamodel.NcrPatientCharacteristics
-import com.hartwig.actin.personalization.ncr.datamodel.NcrPrimaryDiagnosis
-import com.hartwig.actin.personalization.ncr.datamodel.NcrPrimaryRadiotherapy
-import com.hartwig.actin.personalization.ncr.datamodel.NcrPrimarySurgery
-import com.hartwig.actin.personalization.ncr.datamodel.NcrPriorMalignancies
-import com.hartwig.actin.personalization.ncr.datamodel.NcrRecord
-import com.hartwig.actin.personalization.ncr.datamodel.NcrSystemicTreatment
-import com.hartwig.actin.personalization.ncr.datamodel.NcrTreatment
-import com.hartwig.actin.personalization.ncr.datamodel.NcrTreatmentResponse
+import com.hartwig.actin.personalization.ncr.datamodel.*
 import java.io.File
 import java.nio.file.Files
-import kotlin.streams.toList
 
 object NcrDataReader {
 
