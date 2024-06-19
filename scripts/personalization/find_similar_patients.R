@@ -22,10 +22,10 @@ patient_lesion_list <- X #Eg c("Lung")
 
 ref_general <- find_similar_patients_general(ref)
 range<-5
-ref_age <- find_similar_patients_age(ref, patient_age=patient_age, range=range)
-ref_who <- find_similar_patients_who(ref, patient_who=patient_who)
-ref_ras <- find_similar_patients_ras(ref, patient_ras_status=patient_ras_status)
-ref_lesions <- find_similar_patients_lesions(ref, patient_lesions=patient_lesion_list)
+ref_age <- find_similar_patients_age(ref_general, patient_age=patient_age, range=range)
+ref_who <- find_similar_patients_who(ref_general, patient_who=patient_who)
+ref_ras <- find_similar_patients_ras(ref_general, patient_ras_status=patient_ras_status)
+ref_lesions <- find_similar_patients_lesions(ref_general, patient_lesions=patient_lesion_list)
 
 # Generate data for treatment decision table--------------------------------------
 treatments_to_exclude <- c("NA","OTHER")
