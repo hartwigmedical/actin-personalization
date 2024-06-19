@@ -137,7 +137,7 @@ dfs_pfs_disp <- dfs_pfs_disp %>%
   ungroup()
 
 n_sums <- sapply(dfs_pfs_disp[, grep("^n_", names(dfs_pfs_disp))], sum)
-intended_names <- c("PFS general (mdn, range)",paste0("PFS age=",patient_age-range,"-",patient_age+range,"y (mdn, range)"),paste0("PFS WHO=",patient_who, " (mdn, range)"),paste0("PFS RAS status=",if (patient_ras_status==1) {"positive"} else {"negative"}, " (mdn, range)"), paste0("PFS lesions=",patient_lesion_list, " (mdn, range)"))
+intended_names <- c("PFS general (mdn, range)",paste0("PFS age=",patient_age-range,"-",patient_age+range,"y (mdn, range)"),paste0("PFS WHO=",patient_who, " (mdn, range)"),paste0("PFS RAS status=",if (patient_ras_status==1) {"positive"} else {"negative"}, " (mdn, range)"), paste0("PFS lesions=",patient_formatted_lesions, " (mdn, range)"))
 new_median_column_names <- paste0(intended_names, " (n=", n_sums, ")")
 names(dfs_pfs_disp)[grep("^median", names(dfs_pfs_disp))] <- new_median_column_names
 
