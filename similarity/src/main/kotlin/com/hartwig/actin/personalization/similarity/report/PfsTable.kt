@@ -1,7 +1,6 @@
 package com.hartwig.actin.personalization.similarity.report
 
 import com.hartwig.actin.personalization.datamodel.Treatment
-import com.hartwig.actin.personalization.similarity.DiagnosisAndEpisode
 import kotlin.collections.count
 import kotlin.collections.filter
 import kotlin.collections.first

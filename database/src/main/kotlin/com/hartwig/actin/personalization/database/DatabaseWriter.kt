@@ -1,6 +1,5 @@
 package com.hartwig.actin.personalization.database
 
-import com.hartwig.actin.personalization.datamodel.Diagnosis
 import com.hartwig.actin.personalization.datamodel.Drug
 import com.hartwig.actin.personalization.datamodel.Episode
 import com.hartwig.actin.personalization.datamodel.GastroenterologyResection
@@ -8,7 +7,6 @@ import com.hartwig.actin.personalization.datamodel.Location
 import com.hartwig.actin.personalization.datamodel.LocationGroup
 import com.hartwig.actin.personalization.datamodel.MetastasesRadiotherapy
 import com.hartwig.actin.personalization.datamodel.MetastasesSurgery
-import com.hartwig.actin.personalization.datamodel.Metastasis
 import com.hartwig.actin.personalization.datamodel.PatientRecord
 import com.hartwig.actin.personalization.datamodel.Radiotherapy
 import com.hartwig.actin.personalization.datamodel.SystemicTreatmentScheme
@@ -17,7 +15,6 @@ import com.hartwig.actin.personalization.datamodel.TumorEntry
 import org.apache.logging.log4j.LogManager
 import org.jooq.DSLContext
 import org.jooq.JSON
-import org.jooq.Meta
 import org.jooq.SQLDialect
 import org.jooq.Table
 import org.jooq.TableRecord

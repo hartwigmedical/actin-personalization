@@ -1,6 +1,6 @@
 package com.hartwig.actin.personalization.similarity.report
 
-import com.hartwig.actin.personalization.database.PersonalizationReportWriterApplication
+import com.hartwig.actin.personalization.similarity.PersonalizationReportWriterApplication
 import com.itextpdf.io.exceptions.IOException
 import com.itextpdf.io.font.FontProgram
 import com.itextpdf.io.font.FontProgramFactory
