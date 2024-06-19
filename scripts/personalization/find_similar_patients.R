@@ -15,10 +15,10 @@ ref <- dbGetQuery(dbActinPersonalization, query_ref)
 dbDisconnect(dbActinPersonalization)
 
 # Find similar patients -----------------------------------------------------------
-patient_age<-X
-patient_who<-X
-patient_ras_status<-X
-patient_lesion_list <-X
+patient_age <- X #Eg 85
+patient_who <- X #Eg 2
+patient_ras_status <- X #Eg 1
+patient_lesion_list <- X #Eg c("Lung")
 
 ref_general <- find_similar_patients_general(ref)
 range<-5
@@ -115,7 +115,7 @@ dfs_td_disp <- dfs_td %>%
 n_sums <- sapply(dfs_td_disp[, grep("^n_", names(dfs_td_disp))], sum)
 perc_columns <- grep("^perc_", names(dfs_td_disp), value=T)
 
-intended_names <- c("General",paste0("Age=",patient_age-range,"-",patient_age+range,"y"),paste0("WHO=",patient_who),paste0("RAS status=",if (patient_ras_status==1) {"positive"} else {"negative"}))
+intended_names <- c("General",paste0("Age=",patient_age-range,"-",patient_age+range,"y"),paste0("WHO=",patient_who),paste0("RAS status=",if (patient_ras_status==1) {"positive"} else {"negative"}), paste0("Lesions=",patient_lesion_list))
 new_perc_column_names <- paste0(intended_names, " (n=", n_sums, ")")
 names(dfs_td_disp)[grep("^perc", names(dfs_td_disp))] <- new_perc_column_names
 
@@ -134,7 +134,7 @@ dfs_pfs_disp <- dfs_pfs_disp %>%
   ungroup()
 
 n_sums <- sapply(dfs_pfs_disp[, grep("^n_", names(dfs_pfs_disp))], sum)
-intended_names <- c("PFS general (mdn, range)",paste0("PFS age=",patient_age-range,"-",patient_age+range,"y (mdn, range)"),paste0("PFS WHO=",patient_who, " (mdn, range)"),paste0("PFS RAS status=",if (patient_ras_status==1) {"positive"} else {"negative"}, " (mdn, range)"))
+intended_names <- c("PFS general (mdn, range)",paste0("PFS age=",patient_age-range,"-",patient_age+range,"y (mdn, range)"),paste0("PFS WHO=",patient_who, " (mdn, range)"),paste0("PFS RAS status=",if (patient_ras_status==1) {"positive"} else {"negative"}, " (mdn, range)"), paste0("PFS lesions=",patient_lesion_list, " (mdn, range)"))
 new_median_column_names <- paste0(intended_names, " (n=", n_sums, ")")
 names(dfs_pfs_disp)[grep("^median", names(dfs_pfs_disp))] <- new_median_column_names
 

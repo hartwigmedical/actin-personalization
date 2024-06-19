@@ -40,11 +40,23 @@ find_similar_patients_ras <- function(ref_data, patient_ras_status) {
 
 find_similar_patients_lesions <- function(ref_data, patient_lesions) {
   
+  translation_vector <- c("Brain"="BRAIN","Lung"="BRONCHUS_AND_LUNG", "Liver"="LIVER_AND_INTRAHEPATIC_BILE_DUCTS", "Lymph node"="LYMPH_NODES", "Other"="OTHER", "Peritoneal"="RETROPERITONEUM_AND_PERITONEUM")
+  
+  translate_lesions <- function(patient_lesions) {
+    if (patient_lesions %in% names(translation_vector)) {
+      return(translation_vector[patient_lesions])
+    } else {
+      return(NA) 
+    }
+  }
+  
+  translated_patient_lesions <- sapply(patient_lesions, translate_lesions)
+  
   out <- ref_data %>% 
     dplyr::filter(distantMetastasesStatus == 'AT_START' &
                  !is.na(systemicTreatmentPlan) &
                   is.na(surgeries)) %>%
-    filter_lesions(lesion_list=patient_lesions, column_name="metastasisLocationGroupsPriorToSystemicTreatment")
+    filter_lesions(lesion_list=translated_patient_lesions, column_name="metastasisLocationGroupsPriorToSystemicTreatment")
   
   return(out)
 }
