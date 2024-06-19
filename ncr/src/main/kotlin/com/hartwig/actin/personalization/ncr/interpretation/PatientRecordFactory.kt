@@ -6,6 +6,7 @@ import com.hartwig.actin.personalization.datamodel.TumorEntry
 import com.hartwig.actin.personalization.ncr.datamodel.NcrRecord
 import com.hartwig.actin.personalization.ncr.interpretation.extractor.extractTumorEntry
 import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrSexMapper
+import kotlin.streams.toList
 
 const val DIAGNOSIS_EPISODE = "DIA"
 

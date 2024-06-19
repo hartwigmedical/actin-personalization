@@ -1,10 +1,11 @@
 package com.hartwig.actin.personalization.database
 
-import com.hartwig.actin.personalization.ncr.interpretation.PatientRecordFactory
 import com.hartwig.actin.personalization.ncr.serialization.NcrDataReader
+import com.hartwig.actin.personalization.ncr.interpretation.PatientRecordFactory
+import picocli.CommandLine
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
-import picocli.CommandLine
+import kotlin.system.exitProcess
 import java.util.concurrent.Callable
 
 class PersonalizationLoaderApplication : Callable<Int> {
