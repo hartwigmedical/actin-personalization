@@ -12,7 +12,6 @@ import com.hartwig.actin.personalization.datamodel.Radiotherapy
 import com.hartwig.actin.personalization.datamodel.ResponseMeasure
 import com.hartwig.actin.personalization.datamodel.ResponseMeasureType
 import com.hartwig.actin.personalization.datamodel.Surgery
-import com.hartwig.actin.personalization.datamodel.SystemicTreatmentScheme
 import com.hartwig.actin.personalization.ncr.datamodel.NcrGastroenterologyResection
 import com.hartwig.actin.personalization.ncr.datamodel.NcrLabValues
 import com.hartwig.actin.personalization.ncr.datamodel.NcrMetastaticDiagnosis
@@ -53,7 +52,7 @@ import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrVenousInva
 import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrWhoStatusMapper
 import com.hartwig.actin.personalization.ncr.interpretation.mapper.resolvePreAndPostSurgery
 
-fun extractEpisode(record: NcrRecord): Episode {
+fun extractEpisode(record: NcrRecord, intervalTumorIncidenceLatestAliveStatus: Int): Episode {
     return with(record) {
         val responseMeasure = treatmentResponse.responsUitslag?.let {
             if (it == "99" || it == "0") null else enumValueOf<ResponseMeasureType>(it)
@@ -61,7 +60,9 @@ fun extractEpisode(record: NcrRecord): Episode {
             ?.let { ResponseMeasure(it, treatmentResponse.responsInt ?: 0) }
 
         val pfsMeasures = extractPfsMeasures(treatmentResponse)
-        val systemicTreatmentPlan = extractSystemicTreatmentPlan(treatment.systemicTreatment, pfsMeasures, responseMeasure)
+        val systemicTreatmentPlan = extractSystemicTreatmentPlan(
+            treatment.systemicTreatment, pfsMeasures, responseMeasure, intervalTumorIncidenceLatestAliveStatus
+        )
         val (distanceToMesorectalFascia, mesorectalFasciaIsClear) = extractDistanceToMesorectalFascia(clinicalCharacteristics.mrfAfst)
         val (hasHadPreSurgeryRadiotherapy, hasHadPostSurgeryRadiotherapy) = resolvePreAndPostSurgery(treatment.primaryRadiotherapy.rt)
         val (hasHadPreSurgeryChemoRadiotherapy, hasHadPostSurgeryChemoRadiotherapy) =

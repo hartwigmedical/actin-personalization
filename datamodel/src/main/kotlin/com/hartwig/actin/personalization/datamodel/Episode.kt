@@ -60,4 +60,4 @@ data class Episode(
     val responseMeasure: ResponseMeasure?,
     val pfsMeasures: List<PfsMeasure>,
     val systemicTreatmentPlan: SystemicTreatmentPlan?,
-    )
+)

@@ -6,6 +6,7 @@ data class Diagnosis(
     override val hasHadTumorDirectedSystemicTherapy: Boolean,
 
     val ageAtDiagnosis: Int,
+    val intervalTumorIncidenceLatestAliveStatus: Int,
     val hasHadPriorTumor: Boolean,
     val priorTumors: List<PriorTumor>,
     
