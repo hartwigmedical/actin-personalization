@@ -15,7 +15,7 @@ object PfsTable {
 
         val entries = sortedPatients.map { (treatment, patients) ->
             val rowValues = columnDefinitions.map { (_, criteria) -> pfsForPopulation(patients.filter(criteria)) }
-            listOf(treatment.display.toString()) + rowValues
+            listOf(treatment.display) + rowValues
         }
 
         val filteredPatients = sortedPatients.flatMap { it.second }
@@ -29,7 +29,19 @@ object PfsTable {
         val minPfs = filteredPopulation.minOrNull()
         val maxPfs = filteredPopulation.maxOrNull()
 
-        return if (medianPfs.isNaN()) "-" else if (filteredPopulation.size <= 5) "n≤5" else "$medianPfs ($minPfs-$maxPfs) \n(n=${filteredPopulation.size})"
+        return when {
+            medianPfs.isNaN() -> {
+                "-"
+            }
+
+            filteredPopulation.size <= 5 -> {
+                "n≤5"
+            }
+
+            else -> {
+                "$medianPfs ($minPfs-$maxPfs) \n(n=${filteredPopulation.size})"
+            }
+        }
     }
 
     private fun median(list: List<Int>): Double {
