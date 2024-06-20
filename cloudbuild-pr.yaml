@@ -1,0 +1,7 @@
+steps:
+  - id: 'Maven build using cache'
+    name: 'eu.gcr.io/hmf-build/maven-cache'
+    args: [ '-T 1C test --batch-mode' ]
+
+options:
+  machineType: 'E2_HIGHCPU_8'
