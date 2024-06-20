@@ -1,6 +1,7 @@
 steps:
   - id: 'Maven build using cache'
     name: 'maven:3.9.7'
+    entrypoint: mvn
     args: [ '-T 1C test --batch-mode' ]
 
 options:
