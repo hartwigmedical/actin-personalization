@@ -2,7 +2,10 @@ find_similar_patients_general <- function(ref_data) {
   
   out <- ref_data %>% dplyr::filter(distantMetastasesStatus == 'AT_START' &
                                     !is.na(systemicTreatmentPlan) &
-                                    is.na(surgeries))
+                                    hasHadPreSurgerySystemicChemotherapy == 0 &
+                                    hasHadPostSurgerySystemicChemotherapy == 0 &
+                                    hasHadPreSurgerySystemicTargetedTherapy == 0 &
+                                    hasHadPostSurgerySystemicTargetedTherapy == 0)
   
   return(out)
 }
@@ -10,7 +13,7 @@ find_similar_patients_general <- function(ref_data) {
 find_similar_patients_age <- function(ref_data_general, patient_age, range) {
   
   out <- ref_data_general %>% dplyr::filter(ageAtDiagnosis >= patient_age - range &
-                                    ageAtDiagnosis <= patient_age + range)
+                                            ageAtDiagnosis <= patient_age + range)
   
   return(out)
 }
@@ -31,7 +34,7 @@ find_similar_patients_ras <- function(ref_data_general, patient_ras_status) {
 
 find_similar_patients_lesions <- function(ref_data_general, patient_lesions) {
   
-  translation_vector <- c("Brain"="BRAIN","Lung"="BRONCHUS_AND_LUNG", "Liver"="LIVER_AND_INTRAHEPATIC_BILE_DUCTS", "Lymph node"="LYMPH_NODES", "Other"="OTHER", "Peritoneal"="RETROPERITONEUM_AND_PERITONEUM")
+  translation_vector <- c("Brain"="BRAIN", "Colon"="COLON", "Lung"="BRONCHUS_AND_LUNG", "Liver"="LIVER_AND_INTRAHEPATIC_BILE_DUCTS", "Lymph node"="LYMPH_NODES", "Other"="OTHER", "Peritoneal"="RETROPERITONEUM_AND_PERITONEUM")
   
   translate_lesions <- function(patient_lesions) {
     if (patient_lesions %in% names(translation_vector)) {
@@ -82,7 +85,10 @@ filter_lesions <- function(data, lesion_list, column_name) {
 }
 
 format_lesions <- function(lesions) {
-  if (length(lesions) == 1) {
+  
+  if (length(lesions) == 0) {
+    return(paste("None"))
+    } else if (length(lesions) == 1) {
     return(paste0(lesions, " only"))
   } else {
     return(paste(lesions, collapse = " & "))
