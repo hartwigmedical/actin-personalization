@@ -1,0 +1,8 @@
+steps:
+  - id: 'Maven build using cache'
+    name: 'maven:3.9.7'
+    entrypoint: mvn
+    args: [ 'test' ]
+
+options:
+  machineType: 'E2_HIGHCPU_8'
