@@ -16,6 +16,7 @@ import com.itextpdf.kernel.pdf.WriterProperties
 import com.itextpdf.layout.Document
 import com.itextpdf.layout.Style
 import com.itextpdf.layout.borders.Border
+import com.itextpdf.layout.borders.SolidBorder
 import com.itextpdf.layout.element.Cell
 import com.itextpdf.layout.element.IBlockElement
 import com.itextpdf.layout.element.Paragraph
@@ -28,6 +29,7 @@ private val FONT_BOLD_PATH = "fonts/nimbus-sans/NimbusSansL-Bold.ttf";
 private val PALETTE_BLACK = DeviceRgb(0, 0, 0)
 private val PALETTE_BLUE = DeviceRgb(74, 134, 232)
 private val PALETTE_MID_GREY = DeviceRgb(101, 106, 108)
+private val BORDER = SolidBorder(PALETTE_MID_GREY, 0.25f)
 private val METADATA_TITLE = "ACTIN Personalization Report v${PersonalizationReportWriterApplication.VERSION}"
 private val PAGE_SIZE = PageSize.A4
 private const val METADATA_AUTHOR = "Hartwig ACTIN System"
@@ -68,7 +70,9 @@ class ReportWriter(private val fontRegular: PdfFont, private val fontBold: PdfFo
                 ?: UnitValue.createPercentArray(content.headers.size)
         )
         content.headers.map(::headerCellWithText).forEach(table::addHeaderCell)
-        content.rows.flatten().map(::cellWithTableElement).forEach(table::addCell)
+        content.rows.flatMap { rowElements ->
+            rowElements.map(::cellWithTableElement).let { listOf(it.first().setBorderRight(BORDER)) + it.drop(1) }
+        }.forEach(table::addCell)
         return table
     }
 
@@ -110,7 +114,9 @@ class ReportWriter(private val fontRegular: PdfFont, private val fontBold: PdfFo
     }
 
     private fun headerCellWithText(text: String): Cell {
-        return textCellWithStyle(text, tableHeaderStyle)
+        val cell = textCellWithStyle(text, tableHeaderStyle)
+        cell.setBorderBottom(BORDER)
+        return cell
     }
 
     private fun textCellWithStyle(text: String, style: Style): Cell {
