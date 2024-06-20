@@ -53,7 +53,7 @@ class PatientPopulationBreakdown(
                         val groups = episode.metastases.filter { metastasis ->
                             metastasis.intervalTumorIncidenceMetastasisDetection?.let { it < planStart } == true
                         }
-                            .map { it.location.locationGroup }
+                            .map { it.location.locationGroup.topLevelGroup() }
                             .toSet()
                         groups == metastasisLocationGroups
 
