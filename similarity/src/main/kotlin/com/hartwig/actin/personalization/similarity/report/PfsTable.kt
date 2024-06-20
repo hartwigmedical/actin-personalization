@@ -26,7 +26,10 @@ object PfsTable {
     private fun pfsForPopulation(population: List<DiagnosisAndEpisode>): String {
         val filteredPopulation = population.mapNotNull { (_, episode) -> episode.systemicTreatmentPlan?.pfs }
         val medianPfs = median(filteredPopulation)
-        return "$medianPfs (n=${filteredPopulation.size})"
+        val minPfs = filteredPopulation.minOrNull()
+        val maxPfs = filteredPopulation.maxOrNull()
+
+        return "$medianPfs ($minPfs-$maxPfs) \n(n=${filteredPopulation.size})"
     }
 
     private fun median(list: List<Int>): Double {
