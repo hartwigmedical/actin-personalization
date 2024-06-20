@@ -22,7 +22,7 @@ object PfsTable {
         val dataLabels = columnDefinitions.map { (title, criteria) -> "$title (n=${filteredPatients.count(criteria)})" }
         return TableContent(
             "Progression-free survival (median (range)) in NCR real-world data set",
-            listOf("Treatment") + dataLabels,
+            listOf("") + dataLabels,
             entries
         )
     }

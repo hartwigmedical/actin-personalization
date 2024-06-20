@@ -22,7 +22,7 @@ object TreatmentDecisionTable {
         val dataLabels = columnDefinitions.map { (title, _) -> "$title (n=${subPopulationSizes[title]!!})" }
         return TableContent(
             "Treatment decisions (percentage of population assigned to systemic treatment) in NCR real-world data set",
-            listOf("Treatment") + dataLabels,
+            listOf("") + dataLabels,
             entries
         )
     }
