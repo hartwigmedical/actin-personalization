@@ -1,6 +1,6 @@
 steps:
   - id: 'Maven build using cache'
-    name: 'eu.gcr.io/hmf-build/maven-cache'
+    name: 'maven:3.9.7'
     args: [ '-T 1C test --batch-mode' ]
 
 options:
