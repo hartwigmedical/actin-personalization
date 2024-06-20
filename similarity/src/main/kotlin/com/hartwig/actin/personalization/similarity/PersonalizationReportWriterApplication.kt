@@ -41,7 +41,7 @@ class PersonalizationReportWriterApplication : Callable<Int> {
         LOGGER.info(" Created {} patient records", patients.size)
 
         val breakdown = PatientPopulationBreakdown.createForCriteria(
-            patients, age, whoStatus, hasRasMutation!!, extractLocationGroups(metastasisLocationString)
+            patients, age, whoStatus, hasRasMutation!!, extractTopLevelLocationGroups(metastasisLocationString)
         )
         val tables = listOf(breakdown.treatmentDecisionTable(), breakdown.pfsTable())
 
@@ -53,8 +53,10 @@ class PersonalizationReportWriterApplication : Callable<Int> {
         return 0
     }
 
-    private fun extractLocationGroups(locationString: String): Set<LocationGroup> {
-        return if (locationString.isEmpty()) emptySet() else locationString.split(";").map(LocationGroup::valueOf).toSet()
+    private fun extractTopLevelLocationGroups(locationString: String): Set<LocationGroup> {
+        return if (locationString.isEmpty()) emptySet() else {
+            locationString.split(";").map { LocationGroup.valueOf(it).topLevelGroup() }.toSet()
+        }
     }
 
     companion object {

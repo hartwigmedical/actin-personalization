@@ -23,15 +23,6 @@ import java.sql.DriverManager
 
 private typealias IndexedList<T> = List<Pair<Int, T>>
 
-private val METASTASIS_LOCATION_GROUPS = setOf(
-    LocationGroup.BRAIN,
-    LocationGroup.COLON,
-    LocationGroup.LIVER_AND_INTRAHEPATIC_BILE_DUCTS,
-    LocationGroup.RETROPERITONEUM_AND_PERITONEUM,
-    LocationGroup.LYMPH_NODES,
-    LocationGroup.BRONCHUS_AND_LUNG
-)
-
 class DatabaseWriter(private val context: DSLContext, private val connection: java.sql.Connection) {
     
     fun writeAllToDb(patientRecords: List<PatientRecord>) {
@@ -170,9 +161,7 @@ class DatabaseWriter(private val context: DSLContext, private val connection: ja
 
     private fun metastasisRecordsFromEpisode(episodeId: Int, episode: Episode) =
         episode.metastases.map { metastasis ->
-            val locationGroup = metastasis.location.locationGroup.let {
-                if (it in METASTASIS_LOCATION_GROUPS) it.toString() else "OTHER"
-            }
+            val locationGroup = metastasis.location.locationGroup.topLevelGroup().toString() 
             val dbRecord = context.newRecord(Tables.METASTASIS)
             dbRecord.from(metastasis)
             dbRecord.set(Tables.METASTASIS.EPISODEID, episodeId)

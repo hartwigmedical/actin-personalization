@@ -34,6 +34,7 @@ enum class LocationGroup {
     NASAL_CAVITY_AND_MIDDLE_EAR,
     NASOPHARYNX,
     OROPHARYNX,
+    OTHER,
     OTHER_AND_ILL_DEFINED_LOCALIZATIONS,
     OTHER_CENTRAL_NERVOUS_SYSTEM,
     OTHER_FEMALE_GENITALIA,
@@ -65,5 +66,18 @@ enum class LocationGroup {
     URETER,
     UTERUS_NOS,
     VAGINA,
-    VULVA,
+    VULVA;
+
+    fun topLevelGroup() = if (this in TOP_LEVEL_GROUPS) this else OTHER
+
+    companion object {
+        private val TOP_LEVEL_GROUPS = setOf(
+            BRAIN,
+            BRONCHUS_AND_LUNG,
+            COLON,
+            LIVER_AND_INTRAHEPATIC_BILE_DUCTS,
+            LYMPH_NODES,
+            RETROPERITONEUM_AND_PERITONEUM
+        )
+    }
 }
