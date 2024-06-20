@@ -15,15 +15,19 @@ object PfsTable {
 
         val entries = sortedPatients.map { (treatment, patients) ->
             val rowValues = columnDefinitions.map { (_, criteria) -> pfsForPopulation(patients.filter(criteria)) }
-            listOf(treatment.display) + rowValues
+            listOf(TableElement.regular(treatment.display)) + rowValues
         }
 
         val filteredPatients = sortedPatients.flatMap { it.second }
         val dataLabels = columnDefinitions.map { (title, criteria) -> "$title (n=${filteredPatients.count(criteria)})" }
-        return TableContent("Progression-free survival (median (range)) in NCR real-world data set", listOf("Treatment") + dataLabels, entries)
+        return TableContent(
+            "Progression-free survival (median (range)) in NCR real-world data set",
+            listOf("Treatment") + dataLabels,
+            entries
+        )
     }
 
-    private fun pfsForPopulation(population: List<DiagnosisAndEpisode>): String {
+    private fun pfsForPopulation(population: List<DiagnosisAndEpisode>): TableElement {
         val filteredPopulation = population.mapNotNull { (_, episode) -> episode.systemicTreatmentPlan?.pfs }
         val medianPfs = median(filteredPopulation)
         val minPfs = filteredPopulation.minOrNull()
@@ -31,15 +35,15 @@ object PfsTable {
 
         return when {
             medianPfs.isNaN() -> {
-                "-"
+                TableElement.regular("-")
             }
 
             filteredPopulation.size <= 5 -> {
-                "n≤5"
+                TableElement.regular("n≤5")
             }
 
             else -> {
-                "$medianPfs ($minPfs-$maxPfs) \n(n=${filteredPopulation.size})"
+                TableElement(medianPfs.toString(), " ($minPfs-$maxPfs) \n(n=${filteredPopulation.size})")
             }
         }
     }

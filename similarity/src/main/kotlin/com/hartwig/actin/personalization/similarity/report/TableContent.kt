@@ -3,7 +3,15 @@ package com.hartwig.actin.personalization.similarity.report
 import java.lang.IllegalArgumentException
 import kotlin.collections.any
 
-data class TableContent(val title: String, val headers: List<String>, val rows: List<List<String>>, val sizes: List<Float>? = null) {
+data class TableElement(val boldContent: String? = null, val content: String? = null) {
+    companion object {
+        fun bold(content: String) = TableElement(boldContent = content)
+
+        fun regular(content: String) = TableElement(content = content)
+    }
+}
+
+data class TableContent(val title: String, val headers: List<String>, val rows: List<List<TableElement>>, val sizes: List<Float>? = null) {
 
     fun check() {
         if (sizes?.let { it.size == headers.size } == false) {

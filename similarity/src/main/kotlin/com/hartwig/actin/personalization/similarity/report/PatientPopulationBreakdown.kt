@@ -6,15 +6,6 @@ import com.hartwig.actin.personalization.datamodel.Episode
 import com.hartwig.actin.personalization.datamodel.LocationGroup
 import com.hartwig.actin.personalization.datamodel.PatientRecord
 import com.hartwig.actin.personalization.datamodel.Treatment
-import kotlin.collections.filter
-import kotlin.collections.flatMap
-import kotlin.collections.groupBy
-import kotlin.collections.joinToString
-import kotlin.collections.map
-import kotlin.collections.single
-import kotlin.collections.toSet
-import kotlin.let
-import kotlin.to
 
 typealias DiagnosisAndEpisode = Pair<Diagnosis, Episode>
 

@@ -17,8 +17,10 @@ import com.itextpdf.layout.Document
 import com.itextpdf.layout.Style
 import com.itextpdf.layout.borders.Border
 import com.itextpdf.layout.element.Cell
+import com.itextpdf.layout.element.IBlockElement
 import com.itextpdf.layout.element.Paragraph
 import com.itextpdf.layout.element.Table
+import com.itextpdf.layout.element.Text
 import com.itextpdf.layout.properties.UnitValue
 
 private val FONT_REGULAR_PATH = "fonts/nimbus-sans/NimbusSansL-Regular.ttf";
@@ -38,6 +40,7 @@ class ReportWriter(private val fontRegular: PdfFont, private val fontBold: PdfFo
     private val chapterTitleStyle = Style().setFont(fontBold).setFontSize(11f).setFontColor(PALETTE_BLACK)
     private val tableTitleStyle = Style().setFont(fontBold).setFontSize(9f).setFontColor(PALETTE_BLUE)
     private val tableHeaderStyle = Style().setFont(fontBold).setFontSize(8f).setFontColor(PALETTE_MID_GREY)
+    private val tableBoldContentStyle = Style().setFont(fontBold).setFontSize(8f).setFontColor(PALETTE_BLACK)
     private val tableContentStyle = Style().setFont(fontRegular).setFontSize(8f).setFontColor(PALETTE_BLACK)
 
     fun writeReport(title: String, tables: List<TableContent>) {
@@ -65,7 +68,7 @@ class ReportWriter(private val fontRegular: PdfFont, private val fontBold: PdfFo
                 ?: UnitValue.createPercentArray(content.headers.size)
         )
         content.headers.map(::headerCellWithText).forEach(table::addHeaderCell)
-        content.rows.flatten().map(::cellWithText).forEach(table::addCell)
+        content.rows.flatten().map(::cellWithTableElement).forEach(table::addCell)
         return table
     }
 
@@ -92,8 +95,14 @@ class ReportWriter(private val fontRegular: PdfFont, private val fontBold: PdfFo
         return document
     }
 
-    private fun cellWithText(text: String): Cell {
-        return textCellWithStyle(text, tableContentStyle)
+    private fun cellWithTableElement(element: TableElement): Cell {
+        val textElements = listOfNotNull(
+            element.boldContent?.let { Text(it).addStyle(tableBoldContentStyle) },
+            element.content?.let { Text(it).addStyle(tableContentStyle) },
+        )
+        val paragraph = Paragraph()
+        paragraph.addAll(textElements)
+        return borderlessCellWithElement(paragraph)
     }
 
     private fun titleCellWithText(text: String): Cell {
@@ -111,9 +120,13 @@ class ReportWriter(private val fontRegular: PdfFont, private val fontBold: PdfFo
     }
 
     private fun borderlessCellWithText(text: String): Cell {
+        return borderlessCellWithElement(Paragraph(text))
+    }
+
+    private fun borderlessCellWithElement(element: IBlockElement): Cell {
         val cell = Cell(1, 1)
         cell.setBorder(Border.NO_BORDER)
-        cell.add(Paragraph(text))
+        cell.add(element)
         return cell
     }
 

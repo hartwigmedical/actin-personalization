@@ -16,14 +16,18 @@ object TreatmentDecisionTable {
             val rowValues = columnDefinitions.map { (title, criteria) ->
                 treatmentDecisionForSubPopulation(patients.count(criteria), subPopulationSizes[title]!!)
             }
-            listOf(treatment.display) + rowValues
+            listOf(TableElement.regular(treatment.display)) + rowValues
         }
 
         val dataLabels = columnDefinitions.map { (title, _) -> "$title (n=${subPopulationSizes[title]!!})" }
-        return TableContent("Treatment decisions (percentage of population assigned to systemic treatment) in NCR real-world data set", listOf("Treatment") + dataLabels, entries)
+        return TableContent(
+            "Treatment decisions (percentage of population assigned to systemic treatment) in NCR real-world data set",
+            listOf("Treatment") + dataLabels,
+            entries
+        )
     }
 
-    fun treatmentDecisionForSubPopulation(filteredSubPopulationSize: Int, subPopulationSize: Int): String {
-        return String.format("%.1f%%", 100.0 * filteredSubPopulationSize / subPopulationSize)
+    fun treatmentDecisionForSubPopulation(filteredSubPopulationSize: Int, subPopulationSize: Int): TableElement {
+        return TableElement.regular(String.format("%.1f%%", 100.0 * filteredSubPopulationSize / subPopulationSize))
     }
 }
