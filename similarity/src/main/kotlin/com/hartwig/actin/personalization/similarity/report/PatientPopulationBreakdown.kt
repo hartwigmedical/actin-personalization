@@ -72,7 +72,7 @@ class PatientPopulationBreakdown(
             return when (locationNames.size) {
                 0 -> "No"
                 1 -> "${locationNames.single()} only"
-                else -> (locationNames.dropLast(2) + locationNames.takeLast(2).joinToString("&")).joinToString(separator = ", ")
+                else -> (locationNames.dropLast(2) + locationNames.takeLast(2).joinToString(" & ")).joinToString(separator = ", ")
             }
             return locationNames.joinToString(separator = ", ")
         }
