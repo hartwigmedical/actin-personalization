@@ -69,6 +69,7 @@ class ReportWriter(private val fontRegular: PdfFont, private val fontBold: PdfFo
             content.sizes?.let { UnitValue.createPointArray(it.toTypedArray().toFloatArray()) }
                 ?: UnitValue.createPercentArray(content.headers.size)
         )
+        table.setBorder(Border.NO_BORDER)
         content.headers.map(::headerCellWithText).forEach(table::addHeaderCell)
         content.rows.flatMap { rowElements ->
             rowElements.map(::cellWithTableElement).let { listOf(it.first().setBorderRight(BORDER)) + it.drop(1) }
