@@ -29,7 +29,7 @@ object PfsTable {
         val minPfs = filteredPopulation.minOrNull()
         val maxPfs = filteredPopulation.maxOrNull()
 
-        return "$medianPfs ($minPfs-$maxPfs) \n(n=${filteredPopulation.size})"
+        return if (medianPfs.isNaN()) "-" else "$medianPfs ($minPfs-$maxPfs) \n(n=${filteredPopulation.size})"
     }
 
     private fun median(list: List<Int>): Double {
