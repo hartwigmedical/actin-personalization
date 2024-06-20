@@ -1,6 +1,6 @@
 package com.hartwig.actin.personalization.datamodel
 
-enum class Treatment(val drugs: Set<Drug>?, val display: String? = null) {
+enum class Treatment(val drugs: Set<Drug>?, val display: String) {
     CAPOX(setOf(Drug.CAPECITABINE, Drug.OXALIPLATIN), "CAPOX"),
     CAPOX_B(setOf(Drug.CAPECITABINE, Drug.OXALIPLATIN, Drug.BEVACIZUMAB), "CAPOX-B"),
     CAPECITABINE(setOf(Drug.CAPECITABINE), "Capecitabine"),
@@ -17,7 +17,7 @@ enum class Treatment(val drugs: Set<Drug>?, val display: String? = null) {
     FLUOROURACIL_BEVACIZUMAB(setOf(Drug.FLUOROURACIL, Drug.BEVACIZUMAB), "Fluorouracil-B"),
     IRINOTECAN(setOf(Drug.IRINOTECAN), "Irinotecan"),
     NIVOLUMAB(setOf(Drug.NIVOLUMAB), "Nivolumab"),
-    OTHER(null, null),
+    OTHER(null, "Other"),
     PEMBROLIZUMAB(setOf(Drug.PEMBROLIZUMAB), "Pembrolizumab");
 
     companion object {
