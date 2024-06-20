@@ -41,9 +41,9 @@ class PersonalizationReportWriterApplication : Callable<Int> {
         LOGGER.info(" Created {} patient records", patients.size)
 
         val breakdown = PatientPopulationBreakdown.createForCriteria(
-            patients, whoStatus, age, hasRasMutation!!, metastasisLocationString.split(";").map(LocationGroup::valueOf).toSet()
+            patients, age, whoStatus, hasRasMutation!!, metastasisLocationString.split(";").map(LocationGroup::valueOf).toSet()
         )
-        val tables = listOf(breakdown.pfsTable(), breakdown.treatmentDecisionTable())
+        val tables = listOf(breakdown.treatmentDecisionTable(), breakdown.pfsTable())
 
         LOGGER.info("Writing PDF report to {}", outputPath)
         val writer = ReportWriter.create(outputPath)

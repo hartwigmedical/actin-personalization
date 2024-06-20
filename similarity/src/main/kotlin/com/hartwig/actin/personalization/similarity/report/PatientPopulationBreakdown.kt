@@ -29,24 +29,24 @@ class PatientPopulationBreakdown(
     private val patientsByTreatment: Map<Treatment, List<DiagnosisAndEpisode>>,
     private val columnDefinitions: List<Pair<String, (DiagnosisAndEpisode) -> Boolean>>
 ) {
-    fun pfsTable(): TableContent {
-        return PfsTable.pfsTable(patientsByTreatment, columnDefinitions)
-    }
-
     fun treatmentDecisionTable(): TableContent {
         return TreatmentDecisionTable.decisionTable(patientsByTreatment, columnDefinitions)
     }
 
+    fun pfsTable(): TableContent {
+        return PfsTable.pfsTable(patientsByTreatment, columnDefinitions)
+    }
+
     companion object {
         fun createForCriteria(
-            patients: List<PatientRecord>, whoStatus: Int, age: Int, hasRasMutation: Boolean, metastasisLocationGroups: Set<LocationGroup>
+            patients: List<PatientRecord>, age: Int, whoStatus: Int, hasRasMutation: Boolean, metastasisLocationGroups: Set<LocationGroup>
         ): PatientPopulationBreakdown {
             val minAge = age - 5
             val maxAge = age + 5
             val columnDefinitions: List<Pair<String, (DiagnosisAndEpisode) -> Boolean>> = listOf(
                 "All" to { true },
-                "WHO=$whoStatus" to { it.second.whoStatusPreTreatmentStart == whoStatus },
                 "Age $minAge-${maxAge}y" to { it.first.ageAtDiagnosis in minAge..maxAge },
+                "WHO=$whoStatus" to { it.second.whoStatusPreTreatmentStart == whoStatus },
                 "RAS ${if (hasRasMutation) "positive" else "negative"}" to { it.first.hasRasMutation == hasRasMutation },
                 "${metastasisLocationGroups.joinToString(", ")} metastases" to { (_, episode) ->
                     episode.systemicTreatmentPlan?.intervalTumorIncidenceTreatmentPlanStart?.let { planStart ->
