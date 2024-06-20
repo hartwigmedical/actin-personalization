@@ -46,7 +46,7 @@ class PatientPopulationBreakdown(
             val columnDefinitions: List<Pair<String, (DiagnosisAndEpisode) -> Boolean>> = listOf(
                 "All" to { true },
                 "Age $minAge-${maxAge}y" to { it.first.ageAtDiagnosis in minAge..maxAge },
-                "WHO=$whoStatus" to { it.second.whoStatusPreTreatmentStart == whoStatus },
+                "WHO $whoStatus" to { it.second.whoStatusPreTreatmentStart == whoStatus },
                 "RAS ${if (hasRasMutation) "positive" else "negative"}" to { it.first.hasRasMutation == hasRasMutation },
                 "${metastasisLocationGroups.joinToString(", ")} metastases" to { (_, episode) ->
                     episode.systemicTreatmentPlan?.intervalTumorIncidenceTreatmentPlanStart?.let { planStart ->
