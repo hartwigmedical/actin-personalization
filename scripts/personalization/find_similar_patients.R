@@ -18,7 +18,7 @@ dbDisconnect(dbActinPersonalization)
 patient_age <- X #Eg 85
 patient_who <- X #Eg 2
 patient_ras_status <- X #Eg 1
-patient_lesion_list <- X #Eg c("Lung")
+patient_lesion_list <- X #Eg c("Lung") or c("Lung","Lymph node")
 
 ref_general <- find_similar_patients_general(ref)
 range<-5

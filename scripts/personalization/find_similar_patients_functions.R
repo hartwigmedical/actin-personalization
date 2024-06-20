@@ -1,11 +1,11 @@
 find_similar_patients_general <- function(ref_data) {
   
   out <- ref_data %>% dplyr::filter(distantMetastasesStatus == 'AT_START' &
-                                    !is.na(systemicTreatmentPlan) &
-                                    hasHadPreSurgerySystemicChemotherapy == 0 &
-                                    hasHadPostSurgerySystemicChemotherapy == 0 &
-                                    hasHadPreSurgerySystemicTargetedTherapy == 0 &
-                                    hasHadPostSurgerySystemicTargetedTherapy == 0)
+                                      !is.na(systemicTreatmentPlan) &
+                                      hasHadPreSurgerySystemicChemotherapy == 0 &
+                                      hasHadPostSurgerySystemicChemotherapy == 0 &
+                                      hasHadPreSurgerySystemicTargetedTherapy == 0 &
+                                      hasHadPostSurgerySystemicTargetedTherapy == 0)
   
   return(out)
 }
@@ -13,7 +13,7 @@ find_similar_patients_general <- function(ref_data) {
 find_similar_patients_age <- function(ref_data_general, patient_age, range) {
   
   out <- ref_data_general %>% dplyr::filter(ageAtDiagnosis >= patient_age - range &
-                                            ageAtDiagnosis <= patient_age + range)
+                                              ageAtDiagnosis <= patient_age + range)
   
   return(out)
 }
@@ -54,8 +54,8 @@ find_similar_patients_lesions <- function(ref_data_general, patient_lesions) {
 
 
 filter_lesions <- function(data, lesion_list, column_name) {
-
-    sort_and_collapse <- function(x) {
+  
+  sort_and_collapse <- function(x) {
     if (is.na(x) || x == "") {
       return(NA)
     } else {
@@ -64,7 +64,7 @@ filter_lesions <- function(data, lesion_list, column_name) {
   }
   
   column_name_sym <- sym(column_name)  
-    
+  
   data <- data %>%
     mutate(sorted_lesions = sapply(!!column_name_sym, sort_and_collapse))
   
@@ -75,7 +75,7 @@ filter_lesions <- function(data, lesion_list, column_name) {
     target <- paste(sort(lesion_list))
     filtered_data <- data %>%
       rowwise %>%
-      dplyr::filter(all(sorted_lesions %in% target))
+      dplyr::filter(all(target %in% sorted_lesions) && all(sorted_lesions %in% target))
   }
   
   filtered_data <- filtered_data %>%
@@ -88,7 +88,7 @@ format_lesions <- function(lesions) {
   
   if (length(lesions) == 0) {
     return(paste("None"))
-    } else if (length(lesions) == 1) {
+  } else if (length(lesions) == 1) {
     return(paste0(lesions, " only"))
   } else {
     return(paste(lesions, collapse = " & "))
