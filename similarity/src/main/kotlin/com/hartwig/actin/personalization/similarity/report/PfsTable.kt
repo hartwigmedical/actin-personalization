@@ -15,7 +15,7 @@ object PfsTable {
 
         val entries = sortedPatients.map { (treatment, patients) ->
             val rowValues = columnDefinitions.map { (_, criteria) -> pfsForPopulation(patients.filter(criteria)) }
-            listOf(treatment.toString()) + rowValues
+            listOf(treatment.display.toString()) + rowValues
         }
 
         val filteredPatients = sortedPatients.flatMap { it.second }

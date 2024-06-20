@@ -16,7 +16,7 @@ object TreatmentDecisionTable {
             val rowValues = columnDefinitions.map { (title, criteria) ->
                 treatmentDecisionForSubPopulation(patients.count(criteria), subPopulationSizes[title]!!)
             }
-            listOf(treatment.toString()) + rowValues
+            listOf(treatment.display.toString()) + rowValues
         }
 
         val dataLabels = columnDefinitions.map { (title, _) -> "$title (n=${subPopulationSizes[title]!!})" }
