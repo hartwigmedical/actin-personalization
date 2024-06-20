@@ -20,7 +20,7 @@ object PfsTable {
 
         val filteredPatients = sortedPatients.flatMap { it.second }
         val dataLabels = columnDefinitions.map { (title, criteria) -> "$title (n=${filteredPatients.count(criteria)})" }
-        return TableContent("PFS outcomes in real-world data set (NCR)", listOf("Treatment") + dataLabels, entries)
+        return TableContent("Progression-free survival (median (range)) in NCR real-world data set", listOf("Treatment") + dataLabels, entries)
     }
 
     private fun pfsForPopulation(population: List<DiagnosisAndEpisode>): String {
