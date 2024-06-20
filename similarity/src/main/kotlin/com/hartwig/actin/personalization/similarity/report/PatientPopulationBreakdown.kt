@@ -48,7 +48,7 @@ class PatientPopulationBreakdown(
                 "Age $minAge-${maxAge}y" to { it.first.ageAtDiagnosis in minAge..maxAge },
                 "WHO $whoStatus" to { it.second.whoStatusPreTreatmentStart == whoStatus },
                 "RAS ${if (hasRasMutation) "positive" else "negative"}" to { it.first.hasRasMutation == hasRasMutation },
-                "${metastasisLocationGroups.joinToString(", ")} metastases" to { (_, episode) ->
+                "${formatLocationGroups(metastasisLocationGroups)} lesions" to { (_, episode) ->
                     episode.systemicTreatmentPlan?.intervalTumorIncidenceTreatmentPlanStart?.let { planStart ->
                         val groups = episode.metastases.filter { metastasis ->
                             metastasis.intervalTumorIncidenceMetastasisDetection?.let { it < planStart } == true
@@ -74,6 +74,16 @@ class PatientPopulationBreakdown(
             val patientsByTreatment = referencePop.groupBy { (_, episode) -> episode.systemicTreatmentPlan!!.treatment }
 
             return PatientPopulationBreakdown(patientsByTreatment, columnDefinitions)
+        }
+
+        private fun formatLocationGroups(locationGroups: Set<LocationGroup>): String {
+            val locationNames = locationGroups.map(LocationGroup::display)
+            return when (locationNames.size) {
+                0 -> "No"
+                1 -> "${locationNames.single()} only"
+                else -> (locationNames.dropLast(2) + locationNames.takeLast(2).joinToString("&")).joinToString(separator = ", ")
+            }
+            return locationNames.joinToString(separator = ", ")
         }
     }
 }

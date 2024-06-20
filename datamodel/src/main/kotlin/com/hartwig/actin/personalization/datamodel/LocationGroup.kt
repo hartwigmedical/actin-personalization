@@ -1,15 +1,15 @@
 package com.hartwig.actin.personalization.datamodel
 
-enum class LocationGroup {
+enum class LocationGroup(val displayOverride: String? = null) {
     ADRENAL,
     ANUS_AND_ANAL_CANAL,
     BILE_DUCTS,
     BLADDER,
     BONE_JOINTS_CARTILAGE_OF_EXTREMITIES,
-    BONE_JOINTS_CARTILAGE_OTHER_AND_NOS_LOC,
+    BONE_JOINTS_CARTILAGE_OTHER_AND_NOS_LOC("Bone"),
     BRAIN,
     BREAST,
-    BRONCHUS_AND_LUNG,
+    BRONCHUS_AND_LUNG("Lung"),
     CERVIX_UTERI,
     COLON,
     CORPUS_UTERI,
@@ -26,7 +26,7 @@ enum class LocationGroup {
     LARYNX,
     LIP,
     LIP_MOUTH_AND_THROAT,
-    LIVER_AND_INTRAHEPATIC_BILE_DUCTS,
+    LIVER_AND_INTRAHEPATIC_BILE_DUCTS("Liver"),
     LYMPH_NODES,
     MAJOR_SALIVARY_GLANDS,
     MENINGES,
@@ -51,7 +51,7 @@ enum class LocationGroup {
     RECTOSIGMOID,
     RECTUM,
     RENAL_PELVIS,
-    RETROPERITONEUM_AND_PERITONEUM,
+    RETROPERITONEUM_AND_PERITONEUM("Peritoneal"),
     SINUS_PYRIFORM,
     SKIN,
     SMALL_INTESTINE,
@@ -64,11 +64,13 @@ enum class LocationGroup {
     TONGUE_BASE,
     TONSIL,
     URETER,
-    UTERUS_NOS,
+    UTERUS_NOS("Uterus"),
     VAGINA,
     VULVA;
 
     fun topLevelGroup() = if (this in TOP_LEVEL_GROUPS) this else OTHER
+
+    fun display() = displayOverride ?: name.replace("_", " ").lowercase().replaceFirstChar { it.uppercase() }
 
     companion object {
         private val TOP_LEVEL_GROUPS = setOf(
