@@ -3,8 +3,10 @@ package com.hartwig.actin.personalization.similarity
 import com.hartwig.actin.personalization.datamodel.LocationGroup
 import com.hartwig.actin.personalization.ncr.interpretation.PatientRecordFactory
 import com.hartwig.actin.personalization.ncr.serialization.NcrDataReader
-import com.hartwig.actin.personalization.similarity.report.PatientPopulationBreakdown
+import com.hartwig.actin.personalization.similarity.population.MeasurementType
+import com.hartwig.actin.personalization.similarity.population.PatientPopulationBreakdown
 import com.hartwig.actin.personalization.similarity.report.ReportWriter
+import com.hartwig.actin.personalization.similarity.report.TableContent
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import picocli.CommandLine
@@ -43,7 +45,10 @@ class PersonalizationReportWriterApplication : Callable<Int> {
         val breakdown = PatientPopulationBreakdown.createForCriteria(
             patients, age, whoStatus, hasRasMutation!!, extractTopLevelLocationGroups(metastasisLocationString)
         )
-        val tables = listOf(breakdown.treatmentDecisionTable(), breakdown.pfsTable())
+        val analyses = breakdown.analyze()
+        val tables = listOf(MeasurementType.TREATMENT_DECISION, MeasurementType.PROGRESSION_FREE_SURVIVAL).map { measure ->
+            TableContent.fromSubPopulationAnalyses(analyses, measure)
+        }
 
         LOGGER.info("Writing PDF report to {}", outputPath)
         val writer = ReportWriter.create(outputPath)
