@@ -1,10 +1,7 @@
 package com.hartwig.actin.personalization.similarity
 
 import com.hartwig.actin.personalization.datamodel.LocationGroup
-import com.hartwig.actin.personalization.ncr.interpretation.PatientRecordFactory
-import com.hartwig.actin.personalization.ncr.serialization.NcrDataReader
 import com.hartwig.actin.personalization.similarity.population.MeasurementType
-import com.hartwig.actin.personalization.similarity.population.PatientPopulationBreakdown
 import com.hartwig.actin.personalization.similarity.report.ReportWriter
 import com.hartwig.actin.personalization.similarity.report.TableContent
 import org.apache.logging.log4j.LogManager
@@ -34,18 +31,9 @@ class PersonalizationReportWriterApplication : Callable<Int> {
     override fun call(): Int {
         LOGGER.info("Running {} v{}", APPLICATION, VERSION)
 
-        LOGGER.info("Loading NCR records from file $ncrFile")
-        val records = NcrDataReader.read(ncrFile)
-        LOGGER.info(" Loaded {} NCR records", records.size)
-
-        LOGGER.info("Creating patient records")
-        val patients = PatientRecordFactory.create(records)
-        LOGGER.info(" Created {} patient records", patients.size)
-
-        val breakdown = PatientPopulationBreakdown.createForCriteria(
-            patients, age, whoStatus, hasRasMutation!!, extractTopLevelLocationGroups(metastasisLocationString)
-        )
-        val analyses = breakdown.analyze()
+        val analyses = PersonalizedDataInterpreter.createFromFile(ncrFile)
+            .analyzePatient(age, whoStatus, hasRasMutation!!, extractTopLevelLocationGroups(metastasisLocationString))
+        
         val tables = listOf(MeasurementType.TREATMENT_DECISION, MeasurementType.PROGRESSION_FREE_SURVIVAL).map { measure ->
             TableContent.fromSubPopulationAnalyses(analyses, measure)
         }
