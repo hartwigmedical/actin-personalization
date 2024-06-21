@@ -6,7 +6,6 @@ import com.hartwig.actin.personalization.datamodel.PriorTumor
 import com.hartwig.actin.personalization.datamodel.TumorEntry
 import com.hartwig.actin.personalization.ncr.datamodel.NcrRecord
 import com.hartwig.actin.personalization.ncr.interpretation.DIAGNOSIS_EPISODE
-import com.hartwig.actin.personalization.ncr.interpretation.PatientRecordFactory
 import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrAnorectalVergeDistanceCategoryMapper
 import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrBooleanMapper
 import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrCciNumberOfCategoriesMapper
@@ -15,19 +14,12 @@ import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrStageTnmMa
 import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrTreatmentNameMapper
 import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrTumorLocationCategoryMapper
 import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrTumorTypeMapper
-import org.apache.logging.log4j.LogManager
-import org.apache.logging.log4j.Logger
 
-private val LOGGER: Logger = LogManager.getLogger(PatientRecordFactory::class)
-
-fun extractTumorEntry(tumorId: Int, records: List<NcrRecord>): TumorEntry {
+fun extractTumorEntry(records: List<NcrRecord>): TumorEntry {
     val diagnosisRecord = records.single { it.identification.epis == DIAGNOSIS_EPISODE }
     val intervalTumorIncidenceLatestAliveStatus = diagnosisRecord.patientCharacteristics.vitStatInt!!
     val episodes = records.map { record -> extractEpisode(record, intervalTumorIncidenceLatestAliveStatus) }
     val locations = episodes.map(Episode::tumorLocation).toSet()
-    if (locations.size > 1) {
-        LOGGER.warn("Multiple tumor locations found for tumor $tumorId with NCR ID ${diagnosisRecord.identification.keyNkr}: $locations")
-    }
     val priorTumors = extractPriorTumors(diagnosisRecord)
 
     val diagnosis = with(diagnosisRecord) {

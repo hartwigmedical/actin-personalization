@@ -59,7 +59,7 @@ object PatientRecordFactory {
 
     private fun determineEpisodesPerTumorOfInterest(ncrRecords: List<NcrRecord>): List<TumorEntry> {
         return ncrRecords.groupBy { it.identification.keyZid }.entries
-            .map { (tumorId, records) -> extractTumorEntry(tumorId, records) }
+            .map { (tumorId, records) -> extractTumorEntry(records) }
     }
 
     private fun diagnosisEpisodes(ncrRecords: List<NcrRecord>): List<NcrRecord> {
