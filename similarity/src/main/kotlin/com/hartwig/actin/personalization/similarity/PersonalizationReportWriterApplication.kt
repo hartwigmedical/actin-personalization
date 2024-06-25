@@ -19,8 +19,8 @@ class PersonalizationReportWriterApplication : Callable<Int> {
     @CommandLine.Option(names = ["-who_status"], required = true)
     var whoStatus: Int = -1
 
-    @CommandLine.Option(names = ["-has_ras_mutation"], required = true)
-    var hasRasMutation: Boolean? = null
+    @CommandLine.Option(names = ["-has_ras_mutation"])
+    var hasRasMutation: Boolean = false
 
     @CommandLine.Option(names = ["-metastasis_locations"], required = true)
     lateinit var metastasisLocationString: String
@@ -32,7 +32,7 @@ class PersonalizationReportWriterApplication : Callable<Int> {
         LOGGER.info("Running {} v{}", APPLICATION, VERSION)
 
         val analyses = PersonalizedDataInterpreter.createFromFile(ncrFile)
-            .analyzePatient(age, whoStatus, hasRasMutation!!, extractTopLevelLocationGroups(metastasisLocationString))
+            .analyzePatient(age, whoStatus, hasRasMutation, extractTopLevelLocationGroups(metastasisLocationString))
         
         val tables = listOf(MeasurementType.TREATMENT_DECISION, MeasurementType.PROGRESSION_FREE_SURVIVAL).map { measure ->
             TableContent.fromSubPopulationAnalyses(analyses, measure)

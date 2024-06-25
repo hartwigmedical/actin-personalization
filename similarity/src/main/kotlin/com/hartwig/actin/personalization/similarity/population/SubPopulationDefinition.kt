@@ -3,6 +3,8 @@ package com.hartwig.actin.personalization.similarity.population
 import com.hartwig.actin.personalization.datamodel.Episode
 import com.hartwig.actin.personalization.datamodel.LocationGroup
 
+const val ALL_PATIENTS_SUB_POPULATION_NAME = "All"
+
 data class SubPopulationDefinition(val name: String, val criteria: (DiagnosisAndEpisode) -> Boolean) {
 
     companion object {
@@ -13,7 +15,7 @@ data class SubPopulationDefinition(val name: String, val criteria: (DiagnosisAnd
             val maxAge = age + 5
 
             return listOf(
-                SubPopulationDefinition("All") { true },
+                SubPopulationDefinition(ALL_PATIENTS_SUB_POPULATION_NAME) { true },
                 SubPopulationDefinition("Age $minAge-${maxAge}y") { it.first.ageAtDiagnosis in minAge..maxAge },
                 SubPopulationDefinition("WHO $whoStatus") { it.second.whoStatusPreTreatmentStart == whoStatus },
                 SubPopulationDefinition(
