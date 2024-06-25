@@ -19,7 +19,7 @@ class PersonalizationReportWriterApplication : Callable<Int> {
     @CommandLine.Option(names = ["-who_status"], required = true)
     var whoStatus: Int = -1
 
-    @CommandLine.Option(names = ["-has_ras_mutation"])
+    @CommandLine.Option(names = ["-has_ras_mutation"], required = true, arity = "1")
     var hasRasMutation: Boolean = false
 
     @CommandLine.Option(names = ["-metastasis_locations"], required = true)
