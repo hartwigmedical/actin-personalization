@@ -1,8 +1,13 @@
-package com.hartwig.actin.personalization.similarity.report
+package com.hartwig.actin.personalization.similarity.population
 
-import com.hartwig.actin.personalization.similarity.population.Calculation
-import com.hartwig.actin.personalization.similarity.population.DiagnosisAndEpisode
-import com.hartwig.actin.personalization.similarity.population.Measurement
+import com.hartwig.actin.personalization.similarity.report.TableElement
+import kotlin.collections.first
+import kotlin.collections.mapNotNull
+import kotlin.collections.maxOrNull
+import kotlin.collections.minOrNull
+import kotlin.collections.sorted
+import kotlin.isNaN
+import kotlin.let
 import kotlin.math.min
 
 object PfsCalculation : Calculation {
@@ -39,7 +44,7 @@ object PfsCalculation : Calculation {
                     } else ""
                     TableElement(
                         value.toString(),
-                        " (r: $min-$max)\n(${iqrString}n=$numPatients})"
+                        " (r: $min-$max)\n(${iqrString}n=$numPatients)"
                     )
                 }
             }
