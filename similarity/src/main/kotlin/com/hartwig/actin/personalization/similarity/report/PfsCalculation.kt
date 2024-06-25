@@ -3,14 +3,18 @@ package com.hartwig.actin.personalization.similarity.report
 import com.hartwig.actin.personalization.similarity.population.Calculation
 import com.hartwig.actin.personalization.similarity.population.DiagnosisAndEpisode
 import com.hartwig.actin.personalization.similarity.population.Measurement
+import kotlin.math.min
 
 object PfsCalculation : Calculation {
     override fun isEligible(patient: DiagnosisAndEpisode) = patient.second.systemicTreatmentPlan?.pfs != null
 
     override fun calculate(patients: List<DiagnosisAndEpisode>, eligibleSubPopulationSize: Int): Measurement {
-        val pfsList = patients.mapNotNull { (_, episode) -> episode.systemicTreatmentPlan?.pfs }
+        val pfsList = patients.mapNotNull { (_, episode) -> episode.systemicTreatmentPlan?.pfs }.sorted()
+        val midPoint = pfsList.size / 2 + 1
+        val q1 = median(pfsList.subList(0, midPoint))
+        val q3 = median(pfsList.subList(min(midPoint, pfsList.size), pfsList.size))
         return Measurement(
-            median(pfsList), pfsList.size, pfsList.minOrNull(), pfsList.maxOrNull()
+            median(pfsList), pfsList.size, pfsList.minOrNull(), pfsList.maxOrNull(), q3 - q1
         )
     }
 
@@ -25,7 +29,15 @@ object PfsCalculation : Calculation {
             }
 
             else -> {
-                TableElement(measurement.value.toString(), " (${measurement.min}-${measurement.max}) \n(n=${measurement.numPatients})")
+                with(measurement) {
+                    val iqrString = if (iqr != null && iqr != Double.NaN) {
+                        "IQR: $iqr, "
+                    } else ""
+                    TableElement(
+                        value.toString(),
+                        " (r: $min-$max)\n(${iqrString}n=$numPatients})"
+                    )
+                }
             }
         }
     }
@@ -34,13 +46,13 @@ object PfsCalculation : Calculation {
         return "Progression-free survival (median (range)) in NCR real-world data set"
     }
 
-    private fun median(list: List<Int>): Double {
-        return when (list.size) {
+    private fun median(sortedList: List<Int>): Double {
+        return when (sortedList.size) {
             0 -> Double.NaN
-            1 -> list.first().toDouble()
+            1 -> sortedList.first().toDouble()
             else -> {
-                val midPoint = list.size / 2
-                list.sorted().let {
+                val midPoint = sortedList.size / 2
+                sortedList.let {
                     if (it.size % 2 == 0)
                         (it[midPoint] + it[midPoint - 1]) / 2.0
                     else
