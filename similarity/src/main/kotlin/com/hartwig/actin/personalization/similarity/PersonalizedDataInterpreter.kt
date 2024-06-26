@@ -54,7 +54,7 @@ class PersonalizedDataInterpreter(private val patientsByTreatment: List<Map.Entr
                             episode.doesNotIncludeAdjuvantOrNeoadjuvantTreatment()
                 }
 
-            val patientsByTreatment = referencePop.groupBy { (_, episode) -> episode.systemicTreatmentPlan!!.treatment }.entries
+            val patientsByTreatment = referencePop.groupBy { (_, episode) -> episode.systemicTreatmentPlan!!.treatment.group() }.entries
                 .sortedByDescending { it.value.size }
 
             return PersonalizedDataInterpreter(patientsByTreatment)
