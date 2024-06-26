@@ -6,7 +6,7 @@ import com.hartwig.actin.personalization.datamodel.TumorEntry
 import com.hartwig.actin.personalization.ncr.datamodel.NcrRecord
 import com.hartwig.actin.personalization.ncr.interpretation.extractor.extractTumorEntry
 import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrSexMapper
-import kotlin.streams.toList
+import java.util.stream.Collectors
 
 const val DIAGNOSIS_EPISODE = "DIA"
 
@@ -17,7 +17,7 @@ object PatientRecordFactory {
 
         return recordsPerPatient.values.parallelStream()
             .map(::createPatientRecord)
-            .toList()
+            .collect(Collectors.toList())
     }
 
     private fun createPatientRecord(ncrRecords: List<NcrRecord>): PatientRecord {
