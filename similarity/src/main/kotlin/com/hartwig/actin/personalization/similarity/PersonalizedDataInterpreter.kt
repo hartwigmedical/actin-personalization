@@ -1,0 +1,63 @@
+package com.hartwig.actin.personalization.similarity
+
+import com.hartwig.actin.personalization.datamodel.DistantMetastasesStatus
+import com.hartwig.actin.personalization.datamodel.Episode
+import com.hartwig.actin.personalization.datamodel.LocationGroup
+import com.hartwig.actin.personalization.datamodel.PatientRecord
+import com.hartwig.actin.personalization.datamodel.Treatment
+import com.hartwig.actin.personalization.ncr.interpretation.PatientRecordFactory
+import com.hartwig.actin.personalization.ncr.serialization.NcrDataReader
+import com.hartwig.actin.personalization.similarity.population.DiagnosisAndEpisode
+import com.hartwig.actin.personalization.similarity.population.PatientPopulationBreakdown
+import com.hartwig.actin.personalization.similarity.population.SubPopulationAnalysis
+import com.hartwig.actin.personalization.similarity.population.SubPopulationDefinition
+import org.apache.logging.log4j.LogManager
+import org.apache.logging.log4j.Logger
+
+private fun Episode.doesNotIncludeAdjuvantOrNeoadjuvantTreatment(): Boolean {
+    return !hasHadPreSurgerySystemicChemotherapy &&
+            !hasHadPostSurgerySystemicChemotherapy &&
+            !hasHadPreSurgerySystemicTargetedTherapy &&
+            !hasHadPostSurgerySystemicTargetedTherapy
+}
+
+class PersonalizedDataInterpreter(private val patientsByTreatment: List<Map.Entry<Treatment, List<DiagnosisAndEpisode>>>) {
+
+    fun analyzePatient(
+        age: Int, whoStatus: Int, hasRasMutation: Boolean, metastasisLocationGroups: Set<LocationGroup>
+    ): List<SubPopulationAnalysis> {
+        val subPopulationDefinitions =
+            SubPopulationDefinition.createAllForPatientProfile(age, whoStatus, hasRasMutation, metastasisLocationGroups)
+       
+        return PatientPopulationBreakdown.createForCriteria(patientsByTreatment, subPopulationDefinitions).analyze()
+    }
+
+    companion object {
+        val LOGGER: Logger = LogManager.getLogger(PersonalizedDataInterpreter::class.java)
+
+        fun createFromFile(path: String): PersonalizedDataInterpreter {
+            LOGGER.info("Loading NCR records from file $path")
+            val records = NcrDataReader.read(path)
+            LOGGER.info(" Loaded {} NCR records", records.size)
+
+            LOGGER.info("Creating patient records")
+            val patients = PatientRecordFactory.create(records)
+            LOGGER.info(" Created {} patient records", patients.size)
+
+            val referencePop = patients.flatMap(PatientRecord::tumorEntries).map { (diagnosis, episodes) ->
+                diagnosis to episodes.single { it.order == 1 }
+            }
+                .filter { (_, episode) ->
+                    episode.distantMetastasesStatus == DistantMetastasesStatus.AT_START &&
+                            episode.systemicTreatmentPlan?.treatment?.let { it != Treatment.OTHER } == true &&
+                            episode.surgeries.isEmpty() &&
+                            episode.doesNotIncludeAdjuvantOrNeoadjuvantTreatment()
+                }
+
+            val patientsByTreatment = referencePop.groupBy { (_, episode) -> episode.systemicTreatmentPlan!!.treatment }.entries
+                .sortedByDescending { it.value.size }
+
+            return PersonalizedDataInterpreter(patientsByTreatment)
+        }
+    }
+}
