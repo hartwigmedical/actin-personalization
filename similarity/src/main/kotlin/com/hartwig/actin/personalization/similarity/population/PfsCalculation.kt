@@ -11,6 +11,8 @@ import kotlin.let
 import kotlin.math.min
 
 object PfsCalculation : Calculation {
+    const val MIN_PATIENT_COUNT = 20
+    
     override fun isEligible(patient: DiagnosisAndEpisode) = patient.second.systemicTreatmentPlan?.pfs != null
 
     override fun calculate(patients: List<DiagnosisAndEpisode>, eligibleSubPopulationSize: Int): Measurement {
@@ -33,8 +35,8 @@ object PfsCalculation : Calculation {
                 TableElement.regular("-")
             }
 
-            measurement.numPatients <= 5 -> {
-                TableElement.regular("n≤5")
+            measurement.numPatients <= MIN_PATIENT_COUNT -> {
+                TableElement.regular("n≤$MIN_PATIENT_COUNT")
             }
 
             else -> {
@@ -44,7 +46,7 @@ object PfsCalculation : Calculation {
                     } else ""
                     TableElement(
                         value.toString(),
-                        " (r: $min-$max)\n(${iqrString}n=$numPatients)"
+                        "\n(${iqrString}n=$numPatients)"
                     )
                 }
             }
