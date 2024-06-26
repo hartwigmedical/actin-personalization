@@ -1,10 +1,10 @@
 package com.hartwig.actin.personalization.datamodel
 
 enum class Treatment(val drugs: Set<Drug>?, val display: String, private val parentGroup: Treatment? = null) {
-    CAPECITABINE_OR_FLUOROURACIL(null, "Capecitabine/Fluorouracil"),
-    CAPECITABINE_B_OR_FLUOROURACIL_B(null, "Capecitabine-B/Fluorouracil-B"),
-    CAPOX_OR_FOLFOX(null, "CAPOX/FOLFOX"),
-    CAPOX_B_OR_FOLFOX_B(null, "CAPOX-B/FOLFOX-B"),
+    CAPECITABINE_OR_FLUOROURACIL(null, "Capecitabine / Fluorouracil"),
+    CAPECITABINE_B_OR_FLUOROURACIL_B(null, "Capecitabine-B / Fluorouracil-B"),
+    CAPOX_OR_FOLFOX(null, "CAPOX / FOLFOX"),
+    CAPOX_B_OR_FOLFOX_B(null, "CAPOX-B / FOLFOX-B"),
     CAPECITABINE(setOf(Drug.CAPECITABINE), "Capecitabine", CAPECITABINE_OR_FLUOROURACIL),
     CAPECITABINE_BEVACIZUMAB(setOf(Drug.CAPECITABINE, Drug.BEVACIZUMAB), "Capecitabine-B", CAPECITABINE_B_OR_FLUOROURACIL_B),
     CAPOX(setOf(Drug.CAPECITABINE, Drug.OXALIPLATIN), "CAPOX", CAPOX_OR_FOLFOX),
