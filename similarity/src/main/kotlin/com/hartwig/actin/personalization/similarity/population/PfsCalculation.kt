@@ -36,11 +36,11 @@ object PfsCalculation : Calculation {
             else -> {
                 with(measurement) {
                     val iqrString = if (iqr != null && !iqr.isNaN()) {
-                        "IQR: $iqr, "
+                        ", IQR: $iqr"
                     } else ""
                     TableElement(
                         value.toString(),
-                        "\n(${iqrString}n=$numPatients)"
+                        "${iqrString}\n(n=$numPatients)"
                     )
                 }
             }
@@ -48,7 +48,7 @@ object PfsCalculation : Calculation {
     }
 
     override fun title(): String {
-        return "Progression-free survival (median (range)) in NCR real-world data set"
+        return "Progression-free survival (median, IQR) in NCR real-world data set"
     }
 
     private fun median(sortedList: List<Int>): Double {
