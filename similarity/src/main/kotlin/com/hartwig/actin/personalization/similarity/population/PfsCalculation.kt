@@ -1,17 +1,11 @@
 package com.hartwig.actin.personalization.similarity.population
 
 import com.hartwig.actin.personalization.similarity.report.TableElement
-import kotlin.collections.first
-import kotlin.collections.mapNotNull
-import kotlin.collections.maxOrNull
-import kotlin.collections.minOrNull
-import kotlin.collections.sorted
-import kotlin.isNaN
-import kotlin.let
 import kotlin.math.min
 
 object PfsCalculation : Calculation {
-    const val MIN_PATIENT_COUNT = 20
+
+    private const val MIN_PATIENT_COUNT = 20
     
     override fun isEligible(patient: DiagnosisAndEpisode) = patient.second.systemicTreatmentPlan?.pfs != null
 
@@ -41,7 +35,7 @@ object PfsCalculation : Calculation {
 
             else -> {
                 with(measurement) {
-                    val iqrString = if (iqr != null && iqr != Double.NaN) {
+                    val iqrString = if (iqr != null && !iqr.isNaN()) {
                         "IQR: $iqr, "
                     } else ""
                     TableElement(

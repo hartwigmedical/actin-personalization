@@ -33,7 +33,7 @@ class PersonalizedDataInterpreter(private val patientsByTreatment: List<Map.Entr
     }
 
     companion object {
-        val LOGGER: Logger = LogManager.getLogger(PersonalizedDataInterpreter::class.java)
+        private val LOGGER: Logger = LogManager.getLogger(PersonalizedDataInterpreter::class.java)
 
         fun createFromFile(path: String): PersonalizedDataInterpreter {
             LOGGER.info("Loading NCR records from file $path")

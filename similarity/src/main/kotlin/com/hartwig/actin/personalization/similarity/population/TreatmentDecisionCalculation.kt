@@ -1,9 +1,9 @@
 package com.hartwig.actin.personalization.similarity.population
 
 import com.hartwig.actin.personalization.similarity.report.TableElement
-import kotlin.text.format
 
 object TreatmentDecisionCalculation : Calculation {
+
     override fun isEligible(patient: DiagnosisAndEpisode) = true
 
     override fun calculate(patients: List<DiagnosisAndEpisode>, eligibleSubPopulationSize: Int): Measurement {
