@@ -14,6 +14,7 @@
         <module>ncr</module>
         <module>database</module>
         <module>similarity</module>
+        <module>system</module>
     </modules>
 
     <properties>
@@ -107,6 +108,16 @@
             <dependency>
                 <groupId>com.hartwig.actin.personalization</groupId>
                 <artifactId>ncr</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.hartwig.actin.personalization</groupId>
+                <artifactId>database</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.hartwig.actin.personalization</groupId>
+                <artifactId>similarity</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
