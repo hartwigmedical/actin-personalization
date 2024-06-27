@@ -1,4 +1,4 @@
-package com.hartwig.actin.personalization.similarity
+package com.hartwig.actin.personalization.similarity.weka
 
 import com.hartwig.actin.personalization.datamodel.TumorEntry
 import weka.core.Attribute

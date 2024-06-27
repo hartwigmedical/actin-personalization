@@ -14,6 +14,7 @@
         <module>ncr</module>
         <module>database</module>
         <module>similarity</module>
+        <module>system</module>
     </modules>
 
     <properties>
@@ -23,6 +24,7 @@
         <kotlin.jvm.target>11</kotlin.jvm.target>
         <kotlin.code.style>official</kotlin.code.style>
 
+        <!-- KD: Even though all code is in kotlin, the jooq code generator generates java code that needs to be compiled -->
         <maven.compiler.plugin.version>3.13.0</maven.compiler.plugin.version>
         <maven.assembly.plugin.version>3.3.0</maven.assembly.plugin.version>
 
@@ -110,6 +112,16 @@
             <dependency>
                 <groupId>com.hartwig.actin.personalization</groupId>
                 <artifactId>ncr</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.hartwig.actin.personalization</groupId>
+                <artifactId>database</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.hartwig.actin.personalization</groupId>
+                <artifactId>similarity</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>

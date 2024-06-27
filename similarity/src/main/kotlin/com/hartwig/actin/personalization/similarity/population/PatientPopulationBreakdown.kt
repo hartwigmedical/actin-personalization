@@ -30,7 +30,6 @@ class PatientPopulationBreakdown(
         )
     }
 
-
     companion object {
         fun createForCriteria(
             patientsByTreatment: List<Map.Entry<Treatment, List<DiagnosisAndEpisode>>>,
@@ -43,5 +42,4 @@ class PatientPopulationBreakdown(
             return PatientPopulationBreakdown(subPopulations)
         }
     }
-
 }

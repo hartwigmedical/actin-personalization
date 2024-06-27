@@ -24,14 +24,16 @@ import com.itextpdf.layout.element.Table
 import com.itextpdf.layout.element.Text
 import com.itextpdf.layout.properties.UnitValue
 
-private val FONT_REGULAR_PATH = "fonts/nimbus-sans/NimbusSansL-Regular.ttf";
-private val FONT_BOLD_PATH = "fonts/nimbus-sans/NimbusSansL-Bold.ttf";
+private const val FONT_REGULAR_PATH = "fonts/nimbus-sans/NimbusSansL-Regular.ttf"
+private const val FONT_BOLD_PATH = "fonts/nimbus-sans/NimbusSansL-Bold.ttf"
+
 private val PALETTE_BLACK = DeviceRgb(0, 0, 0)
 private val PALETTE_BLUE = DeviceRgb(74, 134, 232)
 private val PALETTE_MID_GREY = DeviceRgb(101, 106, 108)
 private val BORDER = SolidBorder(PALETTE_MID_GREY, 0.25f)
 private val METADATA_TITLE = "ACTIN Personalization Report v${PersonalizationReportWriterApplication.VERSION}"
 private val PAGE_SIZE = PageSize.A4
+
 private const val METADATA_AUTHOR = "Hartwig ACTIN System"
 private const val PAGE_MARGIN_TOP = 100f // Top margin also excludes the chapter title, which is rendered in the header
 private const val PAGE_MARGIN_LEFT = 30f
@@ -39,6 +41,7 @@ private const val PAGE_MARGIN_RIGHT = 30f
 private const val PAGE_MARGIN_BOTTOM = 40f
 
 class ReportWriter(private val fontRegular: PdfFont, private val fontBold: PdfFont, private val writer: PdfWriter) {
+
     private val chapterTitleStyle = Style().setFont(fontBold).setFontSize(11f).setFontColor(PALETTE_BLACK)
     private val tableTitleStyle = Style().setFont(fontBold).setFontSize(9f).setFontColor(PALETTE_BLUE)
     private val tableHeaderStyle = Style().setFont(fontBold).setFontSize(8f).setFontColor(PALETTE_MID_GREY)

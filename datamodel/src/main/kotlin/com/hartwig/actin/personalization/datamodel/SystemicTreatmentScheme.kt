@@ -7,6 +7,5 @@ data class SystemicTreatmentScheme(
     val intervalTumorIncidenceTreatmentLineStartMin: Int?,
     val intervalTumorIncidenceTreatmentLineStartMax: Int?,
     val intervalTumorIncidenceTreatmentLineStopMin: Int?,
-    val intervalTumorIncidenceTreatmentLineStopMax: Int?,
-
-    )
+    val intervalTumorIncidenceTreatmentLineStopMax: Int?
+)

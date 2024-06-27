@@ -1,6 +1,6 @@
 package com.hartwig.actin.personalization.datamodel
 
-enum class LocationGroup(val displayOverride: String? = null) {
+enum class LocationGroup(private val displayOverride: String? = null) {
     ADRENAL,
     ANUS_AND_ANAL_CANAL,
     BILE_DUCTS,
