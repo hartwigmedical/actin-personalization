@@ -10,6 +10,7 @@ import picocli.CommandLine
 import java.util.concurrent.Callable
 
 class PersonalizationReportWriterApplication : Callable<Int> {
+
     @CommandLine.Option(names = ["-ncr_file"], required = true)
     lateinit var ncrFile: String
 
