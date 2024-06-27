@@ -1,14 +1,14 @@
 package com.hartwig.actin.personalization.database
 
-import com.hartwig.actin.personalization.ncr.serialization.NcrDataReader
 import com.hartwig.actin.personalization.ncr.interpretation.PatientRecordFactory
-import picocli.CommandLine
+import com.hartwig.actin.personalization.ncr.serialization.NcrDataReader
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
-import kotlin.system.exitProcess
+import picocli.CommandLine
 import java.util.concurrent.Callable
 
 class PersonalizationLoaderApplication : Callable<Int> {
+
     @CommandLine.Option(names = ["-ncr_file"], required = true)
     lateinit var ncrFile: String
 
