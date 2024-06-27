@@ -27,6 +27,7 @@
         <!-- KD: Even though all code is in kotlin, the jooq code generator generates java code that needs to be compiled -->
         <maven.compiler.plugin.version>3.13.0</maven.compiler.plugin.version>
         <maven.assembly.plugin.version>3.3.0</maven.assembly.plugin.version>
+        <maven.surefire.plugin.version>3.1.2</maven.surefire.plugin.version>
 
         <commons.cli.version>1.5.0</commons.cli.version>
         <apache.log4j.version>2.18.0</apache.log4j.version>
@@ -37,10 +38,10 @@
         <picocli.version>4.7.6</picocli.version>
         <mysqlconnector.version>8.0.31</mysqlconnector.version>
         <itext.version>7.2.4</itext.version>
-
-        <junit.version>4.13.2</junit.version>
-        <assertj-core.version>3.24.2</assertj-core.version>
         <google.artifactregistry.version>2.1.0</google.artifactregistry.version>
+
+        <junit-jupiter.version>5.10.3</junit-jupiter.version>
+        <assertj-core.version>3.24.2</assertj-core.version>
     </properties>
 
     <distributionManagement>
@@ -97,6 +98,11 @@
                     <groupId>org.jooq</groupId>
                     <artifactId>jooq-codegen-maven</artifactId>
                     <version>${jooq.version}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                    <version>${maven.surefire.plugin.version}</version>
                 </plugin>
             </plugins>
         </pluginManagement>
@@ -198,9 +204,9 @@
             </dependency>
 
             <dependency>
-                <groupId>junit</groupId>
-                <artifactId>junit</artifactId>
-                <version>${junit.version}</version>
+                <groupId>org.junit.jupiter</groupId>
+                <artifactId>junit-jupiter</artifactId>
+                <version>${junit-jupiter.version}</version>
                 <scope>test</scope>
             </dependency>
             <dependency>
