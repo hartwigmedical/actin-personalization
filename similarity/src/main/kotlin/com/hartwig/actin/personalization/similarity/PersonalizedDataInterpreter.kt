@@ -5,6 +5,7 @@ import com.hartwig.actin.personalization.datamodel.Episode
 import com.hartwig.actin.personalization.datamodel.LocationGroup
 import com.hartwig.actin.personalization.datamodel.PatientRecord
 import com.hartwig.actin.personalization.datamodel.Treatment
+import com.hartwig.actin.personalization.datamodel.TreatmentGroup
 import com.hartwig.actin.personalization.ncr.interpretation.PatientRecordFactory
 import com.hartwig.actin.personalization.ncr.serialization.NcrDataReader
 import com.hartwig.actin.personalization.similarity.population.DiagnosisAndEpisode
@@ -21,7 +22,7 @@ private fun Episode.doesNotIncludeAdjuvantOrNeoadjuvantTreatment(): Boolean {
             !hasHadPostSurgerySystemicTargetedTherapy
 }
 
-class PersonalizedDataInterpreter(private val patientsByTreatment: List<Map.Entry<Treatment, List<DiagnosisAndEpisode>>>) {
+class PersonalizedDataInterpreter(private val patientsByTreatment: List<Map.Entry<TreatmentGroup, List<DiagnosisAndEpisode>>>) {
 
     fun analyzePatient(
         age: Int, whoStatus: Int, hasRasMutation: Boolean, metastasisLocationGroups: Set<LocationGroup>
@@ -43,7 +44,10 @@ class PersonalizedDataInterpreter(private val patientsByTreatment: List<Map.Entr
             LOGGER.info("Creating patient records")
             val patients = PatientRecordFactory.create(records)
             LOGGER.info(" Created {} patient records", patients.size)
+            return createFromPatientRecords(patients)
+        }
 
+        fun createFromPatientRecords(patients: List<PatientRecord>): PersonalizedDataInterpreter {
             val referencePop = patients.flatMap(PatientRecord::tumorEntries).map { (diagnosis, episodes) ->
                 diagnosis to episodes.single { it.order == 1 }
             }
@@ -54,7 +58,10 @@ class PersonalizedDataInterpreter(private val patientsByTreatment: List<Map.Entr
                             episode.doesNotIncludeAdjuvantOrNeoadjuvantTreatment()
                 }
 
-            val patientsByTreatment = referencePop.groupBy { (_, episode) -> episode.systemicTreatmentPlan!!.treatment.group() }.entries
+            val patientsByTreatment = referencePop.groupBy { (_, episode) ->
+                episode.systemicTreatmentPlan!!.treatment.treatmentGroup
+            }
+                .entries
                 .sortedByDescending { it.value.size }
 
             return PersonalizedDataInterpreter(patientsByTreatment)

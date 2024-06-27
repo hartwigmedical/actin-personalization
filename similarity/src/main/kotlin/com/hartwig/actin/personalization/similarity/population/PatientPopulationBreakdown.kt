@@ -2,7 +2,7 @@ package com.hartwig.actin.personalization.similarity.population
 
 import com.hartwig.actin.personalization.datamodel.Diagnosis
 import com.hartwig.actin.personalization.datamodel.Episode
-import com.hartwig.actin.personalization.datamodel.Treatment
+import com.hartwig.actin.personalization.datamodel.TreatmentGroup
 
 typealias DiagnosisAndEpisode = Pair<Diagnosis, Episode>
 
@@ -32,7 +32,7 @@ class PatientPopulationBreakdown(
 
     companion object {
         fun createForCriteria(
-            patientsByTreatment: List<Map.Entry<Treatment, List<DiagnosisAndEpisode>>>,
+            patientsByTreatment: List<Map.Entry<TreatmentGroup, List<DiagnosisAndEpisode>>>,
             subPopulationDefinitions: List<SubPopulationDefinition>
         ): PatientPopulationBreakdown {
             val subPopulations = subPopulationDefinitions.map { (title, criteria) ->
