@@ -4,13 +4,15 @@ import com.hartwig.actin.personalization.datamodel.PatientRecord
 import com.hartwig.actin.personalization.datamodel.Sex
 import com.hartwig.actin.personalization.datamodel.TumorEntry
 import com.hartwig.actin.personalization.ncr.datamodel.NcrRecord
-import com.hartwig.actin.personalization.ncr.interpretation.extractor.extractTumorEntry
+import com.hartwig.actin.personalization.ncr.interpretation.extractor.NcrEpisodeExtractor
+import com.hartwig.actin.personalization.ncr.interpretation.extractor.NcrSystemicTreatmentPlanExtractor
+import com.hartwig.actin.personalization.ncr.interpretation.extractor.NcrTumorEntryExtractor
 import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrSexMapper
 import kotlin.streams.toList
 
 const val DIAGNOSIS_EPISODE = "DIA"
 
-object PatientRecordFactory {
+class PatientRecordFactory(private val tumorEntryExtractor: NcrTumorEntryExtractor) {
 
     fun create(ncrRecords: List<NcrRecord>): List<PatientRecord> {
         val recordsPerPatient: Map<Int, List<NcrRecord>> = ncrRecords.groupBy { it.identification.keyNkr }
@@ -59,10 +61,16 @@ object PatientRecordFactory {
 
     private fun determineEpisodesPerTumorOfInterest(ncrRecords: List<NcrRecord>): List<TumorEntry> {
         return ncrRecords.groupBy { it.identification.keyZid }.entries
-            .map { (_, records) -> extractTumorEntry(records) }
+            .map { (_, records) -> tumorEntryExtractor.extractTumorEntry(records) }
     }
 
     private fun diagnosisEpisodes(ncrRecords: List<NcrRecord>): List<NcrRecord> {
         return ncrRecords.filter { it.identification.epis == DIAGNOSIS_EPISODE }
+    }
+
+    companion object {
+        fun default(): PatientRecordFactory {
+            return PatientRecordFactory(NcrTumorEntryExtractor(NcrEpisodeExtractor(NcrSystemicTreatmentPlanExtractor())))
+        }
     }
 }
