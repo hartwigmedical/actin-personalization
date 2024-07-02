@@ -21,11 +21,20 @@ import com.hartwig.actin.personalization.ncr.datamodel.NcrTreatment
 import com.hartwig.actin.personalization.ncr.datamodel.NcrTreatmentResponse
 
 const val EPISODE_ID = 123
-const val EPISODE_ORDER = 1
+const val EPISODE_ORDER = 2
 const val WHO_STATUS = 1
 const val INCIDENCE_YEAR = 2020
 const val INVESTIGATED_LYMPH_NODES = 3
 const val POSITIVE_LYMPH_NODES = 1
+
+val NCR_IDENTIFICATION = NcrIdentification(
+    keyNkr = 5,
+    keyZid = 6,
+    keyEid = EPISODE_ID,
+    teller = EPISODE_ORDER,
+    epis = "EPI",
+    metaEpis = 1
+)
 
 val NCR_LAB_VALUES = NcrLabValues(
     prechirCea = 0.1,
@@ -97,15 +106,25 @@ val NCR_METASTATIC_DIAGNOSIS = NcrMetastaticDiagnosis(
     metaLeverAfm = 15,
 )
 
+val NCR_PRIOR_MALIGNANCIES = NcrPriorMalignancies(
+    mal1Morf = 8720,
+    mal1TopoSublok = "C446",
+    mal1Syst = 1,
+    mal1Int = 20,
+    mal1Tumsoort = 400000,
+    mal1Stadium = "2C",
+    mal1SystCode1 = "214000"
+)
+
+val NCR_CHARLSON_COMORBIDITIES = NcrCharlsonComorbidities(
+    cci = 1,
+    cciCat = 1,
+    cciChf = 1,
+    cciCopd = 0
+)
+
 val NCR_RECORD = NcrRecord(
-    identification = NcrIdentification(
-        keyNkr = 5,
-        keyZid = 6,
-        keyEid = EPISODE_ID,
-        teller = EPISODE_ORDER,
-        epis = "EPI",
-        metaEpis = 1
-    ),
+    identification = NCR_IDENTIFICATION,
     patientCharacteristics = NcrPatientCharacteristics(
         gesl = 1,
         leeft = 50,
@@ -125,8 +144,12 @@ val NCR_RECORD = NcrRecord(
         emi = 1,
         tumregres = 4
     ),
-    molecularCharacteristics = NcrMolecularCharacteristics(),
-    priorMalignancies = NcrPriorMalignancies(),
+    molecularCharacteristics = NcrMolecularCharacteristics(
+        msiStat = 1,
+        brafMut = 1,
+        rasMut = 3
+    ),
+    priorMalignancies = NCR_PRIOR_MALIGNANCIES,
     primaryDiagnosis = NcrPrimaryDiagnosis(
         incjr = INCIDENCE_YEAR,
         topoSublok = "C182",
@@ -146,7 +169,7 @@ val NCR_RECORD = NcrRecord(
         posLymf = POSITIVE_LYMPH_NODES
     ),
     metastaticDiagnosis = NCR_METASTATIC_DIAGNOSIS,
-    comorbidities = NcrCharlsonComorbidities(),
+    comorbidities = NCR_CHARLSON_COMORBIDITIES,
     labValues = NCR_LAB_VALUES,
     treatment = NcrTreatment(
         deelnameStudie = 1,

@@ -99,9 +99,9 @@ class NcrEpisodeExtractorTest {
                 PfsMeasure(PfsMeasureType.DEATH, PfsMeasureFollowUpEvent.REGIONAL, 80),
             )
         )
-        val episode = NcrEpisodeExtractor(NcrSystemicTreatmentPlanExtractor()).extractEpisode(NCR_RECORD, 80)
-            .copy(systemicTreatmentPlan = null)  // treatment plan extraction tested elsewhere
 
-        assertThat(episode).isEqualTo(expectedEpisode)
+        val episode = NcrEpisodeExtractor(NcrSystemicTreatmentPlanExtractor()).extractEpisode(NCR_RECORD, 80)
+        assertThat(episode.systemicTreatmentPlan).isNotNull
+        assertThat(episode.copy(systemicTreatmentPlan = null)).isEqualTo(expectedEpisode)
     }
 }

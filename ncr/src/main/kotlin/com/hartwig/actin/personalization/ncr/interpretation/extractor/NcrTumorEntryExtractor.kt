@@ -85,63 +85,55 @@ class NcrTumorEntryExtractor(private val episodeExtractor: NcrEpisodeExtractor) 
     private fun extractPriorTumors(record: NcrRecord): List<PriorTumor> {
         return with(record.priorMalignancies) {
             listOfNotNull(
-                mal1Morf?.let {
-                    extractPriorTumor(
-                        it,
-                        mal1TopoSublok,
-                        mal1Syst,
-                        mal1Int,
-                        1,
-                        mal1Tumsoort,
-                        mal1Stadium,
-                        listOfNotNull(
-                            mal1SystCode1,
-                            mal1SystCode2,
-                            mal1SystCode3,
-                            mal1SystCode4,
-                            mal1SystCode5,
-                            mal1SystCode6,
-                            mal1SystCode7,
-                            mal1SystCode8,
-                            mal1SystCode9
-                        )
+                extractPriorTumor(
+                    mal1Morf,
+                    mal1TopoSublok,
+                    mal1Syst,
+                    mal1Int,
+                    1,
+                    mal1Tumsoort,
+                    mal1Stadium,
+                    listOfNotNull(
+                        mal1SystCode1,
+                        mal1SystCode2,
+                        mal1SystCode3,
+                        mal1SystCode4,
+                        mal1SystCode5,
+                        mal1SystCode6,
+                        mal1SystCode7,
+                        mal1SystCode8,
+                        mal1SystCode9
                     )
-                },
-                mal2Morf?.let {
-                    extractPriorTumor(
-                        it,
-                        mal2TopoSublok,
-                        mal2Syst,
-                        mal2Int,
-                        2,
-                        mal2Tumsoort,
-                        mal2Stadium,
-                        listOfNotNull(mal2SystCode1, mal2SystCode2, mal2SystCode3, mal2SystCode4, mal2SystCode5)
-                    )
-                },
-                mal3Morf?.let {
-                    extractPriorTumor(
-                        it,
-                        mal3TopoSublok,
-                        mal3Syst,
-                        mal3Int,
-                        3,
-                        mal3Tumsoort,
-                        mal3Stadium,
-                        listOfNotNull(mal3SystCode1, mal3SystCode2, mal3SystCode3, mal3SystCode4)
-                    )
-                },
-                mal4Morf?.let {
-                    extractPriorTumor(
-                        it, mal4TopoSublok, mal4Syst, mal4Int, 4, mal4Tumsoort, mal4Stadium, emptyList()
-                    )
-                }
+                ),
+                extractPriorTumor(
+                    mal2Morf,
+                    mal2TopoSublok,
+                    mal2Syst,
+                    mal2Int,
+                    2,
+                    mal2Tumsoort,
+                    mal2Stadium,
+                    listOfNotNull(mal2SystCode1, mal2SystCode2, mal2SystCode3, mal2SystCode4, mal2SystCode5)
+                ),
+                extractPriorTumor(
+                    mal3Morf,
+                    mal3TopoSublok,
+                    mal3Syst,
+                    mal3Int,
+                    3,
+                    mal3Tumsoort,
+                    mal3Stadium,
+                    listOfNotNull(mal3SystCode1, mal3SystCode2, mal3SystCode3, mal3SystCode4)
+                ),
+                extractPriorTumor(
+                    mal4Morf, mal4TopoSublok, mal4Syst, mal4Int, 4, mal4Tumsoort, mal4Stadium, emptyList()
+                )
             )
         }
     }
 
     private fun extractPriorTumor(
-        type: Int,
+        type: Int?,
         location: String?,
         hadSystemic: Int?,
         interval: Int?,
@@ -149,19 +141,21 @@ class NcrTumorEntryExtractor(private val episodeExtractor: NcrEpisodeExtractor) 
         category: Int?,
         stage: String?,
         treatments: List<String>
-    ): PriorTumor {
-        if (location == null || category == null) {
-            throw IllegalStateException("Missing location information for prior tumor with ID $id")
+    ): PriorTumor? {
+        return type?.let {
+            if (location == null || category == null) {
+                throw IllegalStateException("Missing location information for prior tumor with ID $id")
+            }
+            PriorTumor(
+                consolidatedTumorType = NcrTumorTypeMapper.resolve(type),
+                tumorLocations = setOf(NcrLocationMapper.resolveLocation(location)),
+                hasHadTumorDirectedSystemicTherapy = NcrBooleanMapper.resolve(hadSystemic) == true,
+                incidenceIntervalPrimaryTumor = interval,
+                tumorPriorId = id,
+                tumorLocationCategory = NcrTumorLocationCategoryMapper.resolve(category),
+                stageTNM = NcrStageTnmMapper.resolveNullable(stage),
+                systemicTreatments = treatments.map(NcrTreatmentNameMapper::resolve)
+            )
         }
-        return PriorTumor(
-            consolidatedTumorType = NcrTumorTypeMapper.resolve(type),
-            tumorLocations = setOf(NcrLocationMapper.resolveLocation(location)),
-            hasHadTumorDirectedSystemicTherapy = NcrBooleanMapper.resolve(hadSystemic) ?: false,
-            incidenceIntervalPrimaryTumor = interval,
-            tumorPriorId = id,
-            tumorLocationCategory = NcrTumorLocationCategoryMapper.resolve(category),
-            stageTNM = NcrStageTnmMapper.resolveNullable(stage),
-            systemicTreatments = treatments.map(NcrTreatmentNameMapper::resolve)
-        )
     }
 }
