@@ -22,7 +22,7 @@ private fun Episode.doesNotIncludeAdjuvantOrNeoadjuvantTreatment(): Boolean {
             !hasHadPostSurgerySystemicTargetedTherapy
 }
 
-class PersonalizedDataInterpreter(private val patientsByTreatment: List<Map.Entry<TreatmentGroup, List<DiagnosisAndEpisode>>>) {
+class PersonalizedDataInterpreter(val patientsByTreatment: List<Map.Entry<TreatmentGroup, List<DiagnosisAndEpisode>>>) {
 
     fun analyzePatient(
         age: Int, whoStatus: Int, hasRasMutation: Boolean, metastasisLocationGroups: Set<LocationGroup>

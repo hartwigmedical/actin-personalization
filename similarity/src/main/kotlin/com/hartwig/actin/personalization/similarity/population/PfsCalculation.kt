@@ -12,10 +12,10 @@ object PfsCalculation : Calculation {
     override fun calculate(patients: List<DiagnosisAndEpisode>, eligibleSubPopulationSize: Int): Measurement {
         val pfsList = patients.mapNotNull { (_, episode) -> episode.systemicTreatmentPlan?.pfs }.sorted()
         val (q1, q3) = if (pfsList.isEmpty()) Pair(Double.NaN, Double.NaN) else {
-            val midPoint = pfsList.size / 2 + 1
+            val midPoint = pfsList.size / 2
             Pair(
                 median(pfsList.subList(0, midPoint)),
-                median(pfsList.subList(min(midPoint, pfsList.size), pfsList.size))
+                median(pfsList.subList(min(midPoint + 1, pfsList.size - 1), pfsList.size))
             )
         }
         return Measurement(
