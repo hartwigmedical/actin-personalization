@@ -1,0 +1,70 @@
+package com.hartwig.actin.personalization.similarity.population
+
+import com.hartwig.actin.personalization.datamodel.Treatment
+import com.hartwig.actin.personalization.datamodel.TreatmentGroup
+import com.hartwig.actin.personalization.similarity.DIAGNOSIS
+import com.hartwig.actin.personalization.similarity.episodeWithTreatment
+import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.Test
+
+class PatientPopulationBreakdownTest {
+
+    @Test
+    fun `Should analyze treatments for each sub-population`() {
+        val fluourouracilPatient = DIAGNOSIS to episodeWithTreatment(Treatment.FLUOROURACIL, pfs = 70)
+        val capecitabinePatient = DIAGNOSIS to episodeWithTreatment(Treatment.CAPECITABINE)
+        val capoxPatient = DIAGNOSIS.copy(ageAtDiagnosis = 85) to episodeWithTreatment(Treatment.CAPOX, pfs = 100)
+        val patientsByTreatment = listOf(
+            TreatmentGroup.CAPECITABINE_OR_FLUOROURACIL to listOf(fluourouracilPatient, capecitabinePatient),
+            TreatmentGroup.CAPOX_OR_FOLFOX to listOf(capoxPatient)
+        )
+        val ageSubPopulation = "Age 45-55"
+        val subPopulationDefinitions = listOf(
+            SubPopulationDefinition(ALL_PATIENTS_SUB_POPULATION_NAME) { true },
+            SubPopulationDefinition(ageSubPopulation) { it.first.ageAtDiagnosis in 45..55 }
+        )
+
+        val analysis = PatientPopulationBreakdown(patientsByTreatment, subPopulationDefinitions).analyze()
+        assertThat(analysis.subPopulations).containsExactly(
+            SubPopulation(
+                ALL_PATIENTS_SUB_POPULATION_NAME, mapOf(
+                    MeasurementType.TREATMENT_DECISION to listOf(fluourouracilPatient, capecitabinePatient, capoxPatient),
+                    MeasurementType.PROGRESSION_FREE_SURVIVAL to listOf(fluourouracilPatient, capoxPatient)
+                )
+            ),
+            SubPopulation(
+                ageSubPopulation, mapOf(
+                    MeasurementType.TREATMENT_DECISION to listOf(fluourouracilPatient, capecitabinePatient),
+                    MeasurementType.PROGRESSION_FREE_SURVIVAL to listOf(fluourouracilPatient)
+                )
+            )
+        )
+
+        assertThat(analysis.treatmentAnalyses).containsExactly(
+            TreatmentAnalysis(
+                TreatmentGroup.CAPECITABINE_OR_FLUOROURACIL, mapOf(
+                    MeasurementType.TREATMENT_DECISION to mapOf(
+                        ALL_PATIENTS_SUB_POPULATION_NAME to Measurement(2.0 / 3, 2),
+                        ageSubPopulation to Measurement(1.0, 2)
+                    ),
+                    MeasurementType.PROGRESSION_FREE_SURVIVAL to mapOf(
+                        ALL_PATIENTS_SUB_POPULATION_NAME to Measurement(70.0, 1, 70, 70, Double.NaN),
+                        ageSubPopulation to Measurement(70.0, 1, 70, 70, Double.NaN)
+                    )
+                )
+            ),
+            TreatmentAnalysis(
+                TreatmentGroup.CAPOX_OR_FOLFOX, mapOf(
+                    MeasurementType.TREATMENT_DECISION to mapOf(
+                        ALL_PATIENTS_SUB_POPULATION_NAME to Measurement(1.0 / 3, 1),
+                        ageSubPopulation to Measurement(0.0, 0)
+                    ),
+                    MeasurementType.PROGRESSION_FREE_SURVIVAL to mapOf(
+                        ALL_PATIENTS_SUB_POPULATION_NAME to Measurement(100.0, 1, 100, 100, Double.NaN),
+                        ageSubPopulation to Measurement(Double.NaN, 0, null, null, Double.NaN)
+                    )
+                )
+            )
+        )
+    }
+}

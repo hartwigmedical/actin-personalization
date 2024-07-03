@@ -6,6 +6,8 @@ import com.hartwig.actin.personalization.datamodel.Episode
 import com.hartwig.actin.personalization.datamodel.Location
 import com.hartwig.actin.personalization.datamodel.PatientRecord
 import com.hartwig.actin.personalization.datamodel.Sex
+import com.hartwig.actin.personalization.datamodel.SystemicTreatmentPlan
+import com.hartwig.actin.personalization.datamodel.Treatment
 import com.hartwig.actin.personalization.datamodel.TumorBasisOfDiagnosis
 import com.hartwig.actin.personalization.datamodel.TumorEntry
 import com.hartwig.actin.personalization.datamodel.TumorType
@@ -48,3 +50,13 @@ val PATIENT_RECORD = PatientRecord(
     isAlive = true,
     tumorEntries = listOf(TumorEntry(DIAGNOSIS, listOf(EPISODE))),
 )
+
+fun recordWithEpisode(episode: Episode): PatientRecord {
+    return PATIENT_RECORD.copy(tumorEntries = PATIENT_RECORD.tumorEntries.map { it.copy(episodes = listOf(episode)) })
+}
+
+fun episodeWithTreatment(treatment: Treatment, pfs: Int? = null): Episode {
+    return EPISODE.copy(
+        systemicTreatmentPlan = SystemicTreatmentPlan(treatment = treatment, systemicTreatmentSchemes = emptyList(), pfs = pfs)
+    )
+}

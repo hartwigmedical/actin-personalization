@@ -10,7 +10,7 @@ import com.hartwig.actin.personalization.ncr.interpretation.PatientRecordFactory
 import com.hartwig.actin.personalization.ncr.serialization.NcrDataReader
 import com.hartwig.actin.personalization.similarity.population.DiagnosisAndEpisode
 import com.hartwig.actin.personalization.similarity.population.PatientPopulationBreakdown
-import com.hartwig.actin.personalization.similarity.population.SubPopulationAnalysis
+import com.hartwig.actin.personalization.similarity.population.PersonalizedDataAnalysis
 import com.hartwig.actin.personalization.similarity.population.SubPopulationDefinition
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
@@ -22,15 +22,15 @@ private fun Episode.doesNotIncludeAdjuvantOrNeoadjuvantTreatment(): Boolean {
             !hasHadPostSurgerySystemicTargetedTherapy
 }
 
-class PersonalizedDataInterpreter(val patientsByTreatment: List<Map.Entry<TreatmentGroup, List<DiagnosisAndEpisode>>>) {
+class PersonalizedDataInterpreter(val patientsByTreatment: List<Pair<TreatmentGroup, List<DiagnosisAndEpisode>>>) {
 
     fun analyzePatient(
         age: Int, whoStatus: Int, hasRasMutation: Boolean, metastasisLocationGroups: Set<LocationGroup>
-    ): List<SubPopulationAnalysis> {
+    ): PersonalizedDataAnalysis {
         val subPopulationDefinitions =
             SubPopulationDefinition.createAllForPatientProfile(age, whoStatus, hasRasMutation, metastasisLocationGroups)
-       
-        return PatientPopulationBreakdown.createForCriteria(patientsByTreatment, subPopulationDefinitions).analyze()
+
+        return PatientPopulationBreakdown(patientsByTreatment, subPopulationDefinitions).analyze()
     }
 
     companion object {
@@ -61,8 +61,8 @@ class PersonalizedDataInterpreter(val patientsByTreatment: List<Map.Entry<Treatm
             val patientsByTreatment = referencePop.groupBy { (_, episode) ->
                 episode.systemicTreatmentPlan!!.treatment.treatmentGroup
             }
-                .entries
-                .sortedByDescending { it.value.size }
+                .toList()
+                .sortedByDescending { it.second.size }
 
             return PersonalizedDataInterpreter(patientsByTreatment)
         }
