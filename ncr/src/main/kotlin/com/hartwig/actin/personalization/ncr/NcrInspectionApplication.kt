@@ -34,7 +34,7 @@ class NCRInspectionApplication(private val ncrDatasetPath: String) {
         printTreatmentResponseOverview(ncrRecords)
 
         LOGGER.info("Creating patient records from NCR records")
-        val patientRecords : List<PatientRecord> = PatientRecordFactory.create(ncrRecords)
+        val patientRecords: List<PatientRecord> = PatientRecordFactory.default().create(ncrRecords)
         LOGGER.info(" Created {} patient records from {} NCR records", patientRecords.count(), ncrRecords.count())
 
         LOGGER.info("Done!")

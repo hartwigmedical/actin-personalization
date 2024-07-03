@@ -32,11 +32,11 @@ class PersonalizationReportWriterApplication : Callable<Int> {
     override fun call(): Int {
         LOGGER.info("Running {} v{}", APPLICATION, VERSION)
 
-        val analyses = PersonalizedDataInterpreter.createFromFile(ncrFile)
+        val analysis = PersonalizedDataInterpreter.createFromFile(ncrFile)
             .analyzePatient(age, whoStatus, hasRasMutation, extractTopLevelLocationGroups(metastasisLocationString))
         
         val tables = listOf(MeasurementType.TREATMENT_DECISION, MeasurementType.PROGRESSION_FREE_SURVIVAL).map { measure ->
-            TableContent.fromSubPopulationAnalyses(analyses, measure)
+            TableContent.fromPersonalizedDataAnalysis(analysis, measure)
         }
 
         LOGGER.info("Writing PDF report to {}", outputPath)

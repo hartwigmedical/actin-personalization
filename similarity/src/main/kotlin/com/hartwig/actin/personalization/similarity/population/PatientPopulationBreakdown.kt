@@ -2,44 +2,47 @@ package com.hartwig.actin.personalization.similarity.population
 
 import com.hartwig.actin.personalization.datamodel.Diagnosis
 import com.hartwig.actin.personalization.datamodel.Episode
-import com.hartwig.actin.personalization.datamodel.Treatment
+import com.hartwig.actin.personalization.datamodel.TreatmentGroup
 
 typealias DiagnosisAndEpisode = Pair<Diagnosis, Episode>
 
 class PatientPopulationBreakdown(
-    private val subPopulations: List<SubPopulation>
+    private val patientsByTreatment: List<Pair<TreatmentGroup, List<DiagnosisAndEpisode>>>,
+    private val subPopulationDefinitions: List<SubPopulationDefinition>
 ) {
-    fun analyze(): List<SubPopulationAnalysis> {
-        val treatments = subPopulations.first().patientsByTreatment.map { it.first }
-        return subPopulations.map { subPopulation ->
-            SubPopulationAnalysis(
-                subPopulation.name,
-                MeasurementType.entries.associateWith { calculateMeasurements(it.calculation, subPopulation) },
-                treatments
-            )
+    fun analyze(): PersonalizedDataAnalysis {
+        val allPatients = patientsByTreatment.flatMap { it.second }
+        val subPopulations = subPopulationDefinitions.map { subPopulationFromDefinition(it, allPatients) }
+        val subPopulationsByName = subPopulations.associateBy(SubPopulation::name)
+
+        val treatmentAnalyses = patientsByTreatment.map { (treatment, patientsWithTreatment) ->
+            treatmentAnalysisForPatients(treatment, patientsWithTreatment, subPopulationsByName)
         }
+
+        return PersonalizedDataAnalysis(treatmentAnalyses, subPopulations)
     }
 
-    private fun calculateMeasurements(calculation: Calculation, subPopulation: SubPopulation): TreatmentMeasurementCollection {
-        val eligibleSubPopulationSize = subPopulation.patients.count(calculation::isEligible)
-        return TreatmentMeasurementCollection(
-            subPopulation.patientsByTreatment.associate { (treatment, patients) ->
-                treatment to calculation.calculate(patients, eligibleSubPopulationSize)
-            },
-            eligibleSubPopulationSize
-        )
+    private fun subPopulationFromDefinition(
+        subPopulationDefinition: SubPopulationDefinition, allPatients: List<DiagnosisAndEpisode>
+    ): SubPopulation {
+        val matchingPatients = allPatients.filter(subPopulationDefinition.criteria)
+        val patientsByMeasurementType = MeasurementType.entries.associateWith { measurementType ->
+            matchingPatients.filter(measurementType.calculation::isEligible)
+        }
+        return SubPopulation(subPopulationDefinition.name, patientsByMeasurementType)
     }
 
-    companion object {
-        fun createForCriteria(
-            patientsByTreatment: List<Map.Entry<Treatment, List<DiagnosisAndEpisode>>>,
-            subPopulationDefinitions: List<SubPopulationDefinition>
-        ): PatientPopulationBreakdown {
-            val subPopulations = subPopulationDefinitions.map { (title, criteria) ->
-                val subPopulationByTreatment = patientsByTreatment.map { (treatment, patients) -> treatment to patients.filter(criteria) }
-                SubPopulation(title, subPopulationByTreatment.flatMap { it.second }, subPopulationByTreatment)
-            }
-            return PatientPopulationBreakdown(subPopulations)
+    private fun treatmentAnalysisForPatients(
+        treatment: TreatmentGroup, patients: List<DiagnosisAndEpisode>, subPopulationsByName: Map<String, SubPopulation>
+    ): TreatmentAnalysis {
+        val treatmentMeasurements = MeasurementType.entries.associateWith { measurementType ->
+            val patientsWithTreatmentAndMeasurement = patients.filter(measurementType.calculation::isEligible)
+            subPopulationDefinitions.map { (title, criteria) ->
+                val matchingPatients = patientsWithTreatmentAndMeasurement.filter(criteria)
+                val eligibleSubPopulationSize = subPopulationsByName[title]!!.patientsByMeasurementType[measurementType]!!.size
+                title to measurementType.calculation.calculate(matchingPatients, eligibleSubPopulationSize)
+            }.toMap()
         }
+        return TreatmentAnalysis(treatment, treatmentMeasurements)
     }
 }

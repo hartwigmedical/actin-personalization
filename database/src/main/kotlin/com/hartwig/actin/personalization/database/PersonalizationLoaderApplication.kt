@@ -29,7 +29,7 @@ class PersonalizationLoaderApplication : Callable<Int> {
         LOGGER.info(" Loaded {} NCR records", records.size)
 
         LOGGER.info("Creating patient records")
-        val patients = PatientRecordFactory.create(records)
+        val patients = PatientRecordFactory.default().create(records)
         LOGGER.info(" Created {} patient records", patients.size)
 
         val writer = DatabaseWriter.fromCredentials(dbUser, dbPass, dbUrl)

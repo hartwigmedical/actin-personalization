@@ -1,13 +1,11 @@
 package com.hartwig.actin.personalization.similarity.report
 
 import com.hartwig.actin.personalization.similarity.population.MeasurementType
-import com.hartwig.actin.personalization.similarity.population.SubPopulationAnalysis
+import com.hartwig.actin.personalization.similarity.population.PersonalizedDataAnalysis
 import java.lang.IllegalArgumentException
 
 data class TableElement(val boldContent: String? = null, val content: String? = null) {
     companion object {
-        fun bold(content: String) = TableElement(boldContent = content)
-
         fun regular(content: String) = TableElement(content = content)
     }
 }
@@ -24,19 +22,15 @@ data class TableContent(val title: String, val headers: List<String>, val rows: 
     }
 
     companion object {
-        fun fromSubPopulationAnalyses(
-            subPopulationAnalyses: List<SubPopulationAnalysis>,
-            measurementType: MeasurementType,
+        fun fromPersonalizedDataAnalysis(
+            personalizedDataAnalysis: PersonalizedDataAnalysis, measurementType: MeasurementType
         ): TableContent {
-            val headers = listOf("") + subPopulationAnalyses.map {
-                "${it.name} (n=${it.treatmentMeasurements[measurementType]?.numPatients})"
+            val headers = listOf("") + personalizedDataAnalysis.subPopulations.map {
+                "${it.name} (n=${it.patientsByMeasurementType[measurementType]?.size})"
             }
-            val measurementsBySubPopulationName = subPopulationAnalyses.associate { (name, treatmentMeasurements) ->
-                name to treatmentMeasurements[measurementType]!!.measurementsByTreatment
-            }
-            val rows = subPopulationAnalyses.first().treatments.map { treatment ->
-                val rowValues = subPopulationAnalyses.map { subPopulation ->
-                    measurementType.calculation.createTableElement(measurementsBySubPopulationName[subPopulation.name]!![treatment]!!)
+            val rows = personalizedDataAnalysis.treatmentAnalyses.map { (treatment, measurements) ->
+                val rowValues = personalizedDataAnalysis.subPopulations.map { subPopulation ->
+                    measurementType.calculation.createTableElement(measurements[measurementType]!![subPopulation.name]!!)
                 }
                 listOf(TableElement.regular(treatment.display)) + rowValues
             }

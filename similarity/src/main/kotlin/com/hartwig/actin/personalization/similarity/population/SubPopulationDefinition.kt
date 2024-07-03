@@ -34,7 +34,6 @@ data class SubPopulationDefinition(val name: String, val criteria: (DiagnosisAnd
                 1 -> "${locationNames.single()} only"
                 else -> (locationNames.dropLast(2) + locationNames.takeLast(2).joinToString(" & ")).joinToString(separator = ", ")
             }
-            return locationNames.joinToString(separator = ", ")
         }
 
         private fun episodeMatchesMetastasisLocationGroups(episode: Episode, metastasisLocationGroups: Set<LocationGroup>): Boolean =

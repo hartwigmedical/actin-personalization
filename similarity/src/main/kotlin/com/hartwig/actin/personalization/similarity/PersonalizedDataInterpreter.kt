@@ -5,11 +5,12 @@ import com.hartwig.actin.personalization.datamodel.Episode
 import com.hartwig.actin.personalization.datamodel.LocationGroup
 import com.hartwig.actin.personalization.datamodel.PatientRecord
 import com.hartwig.actin.personalization.datamodel.Treatment
+import com.hartwig.actin.personalization.datamodel.TreatmentGroup
 import com.hartwig.actin.personalization.ncr.interpretation.PatientRecordFactory
 import com.hartwig.actin.personalization.ncr.serialization.NcrDataReader
 import com.hartwig.actin.personalization.similarity.population.DiagnosisAndEpisode
 import com.hartwig.actin.personalization.similarity.population.PatientPopulationBreakdown
-import com.hartwig.actin.personalization.similarity.population.SubPopulationAnalysis
+import com.hartwig.actin.personalization.similarity.population.PersonalizedDataAnalysis
 import com.hartwig.actin.personalization.similarity.population.SubPopulationDefinition
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
@@ -21,15 +22,15 @@ private fun Episode.doesNotIncludeAdjuvantOrNeoadjuvantTreatment(): Boolean {
             !hasHadPostSurgerySystemicTargetedTherapy
 }
 
-class PersonalizedDataInterpreter(private val patientsByTreatment: List<Map.Entry<Treatment, List<DiagnosisAndEpisode>>>) {
+class PersonalizedDataInterpreter(val patientsByTreatment: List<Pair<TreatmentGroup, List<DiagnosisAndEpisode>>>) {
 
     fun analyzePatient(
         age: Int, whoStatus: Int, hasRasMutation: Boolean, metastasisLocationGroups: Set<LocationGroup>
-    ): List<SubPopulationAnalysis> {
+    ): PersonalizedDataAnalysis {
         val subPopulationDefinitions =
             SubPopulationDefinition.createAllForPatientProfile(age, whoStatus, hasRasMutation, metastasisLocationGroups)
-       
-        return PatientPopulationBreakdown.createForCriteria(patientsByTreatment, subPopulationDefinitions).analyze()
+
+        return PatientPopulationBreakdown(patientsByTreatment, subPopulationDefinitions).analyze()
     }
 
     companion object {
@@ -41,9 +42,12 @@ class PersonalizedDataInterpreter(private val patientsByTreatment: List<Map.Entr
             LOGGER.info(" Loaded {} NCR records", records.size)
 
             LOGGER.info("Creating patient records")
-            val patients = PatientRecordFactory.create(records)
+            val patients = PatientRecordFactory.default().create(records)
             LOGGER.info(" Created {} patient records", patients.size)
+            return createFromPatientRecords(patients)
+        }
 
+        fun createFromPatientRecords(patients: List<PatientRecord>): PersonalizedDataInterpreter {
             val referencePop = patients.flatMap(PatientRecord::tumorEntries).map { (diagnosis, episodes) ->
                 diagnosis to episodes.single { it.order == 1 }
             }
@@ -54,8 +58,11 @@ class PersonalizedDataInterpreter(private val patientsByTreatment: List<Map.Entr
                             episode.doesNotIncludeAdjuvantOrNeoadjuvantTreatment()
                 }
 
-            val patientsByTreatment = referencePop.groupBy { (_, episode) -> episode.systemicTreatmentPlan!!.treatment }.entries
-                .sortedByDescending { it.value.size }
+            val patientsByTreatment = referencePop.groupBy { (_, episode) ->
+                episode.systemicTreatmentPlan!!.treatment.treatmentGroup
+            }
+                .toList()
+                .sortedByDescending { it.second.size }
 
             return PersonalizedDataInterpreter(patientsByTreatment)
         }
