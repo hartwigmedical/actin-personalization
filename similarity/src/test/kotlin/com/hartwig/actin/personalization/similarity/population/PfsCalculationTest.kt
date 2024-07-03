@@ -47,7 +47,7 @@ class PfsCalculationTest {
     }
 
     @Test
-    fun `Should evaluate PFS as median for patient list with multiple non-null PFS`() {
+    fun `Should evaluate PFS as median for patient list with multiple non-null PFS values`() {
         val pfsList = listOf(100, 200, 300, 400, 500, null)
         val measurement = PfsCalculation.calculate(pfsList.map(::patientWithPfs), ELIGIBLE_SUB_POPULATION_SIZE)
         assertThat(measurement.value).isEqualTo(300.0)
@@ -55,6 +55,17 @@ class PfsCalculationTest {
         assertThat(measurement.min).isEqualTo(100)
         assertThat(measurement.max).isEqualTo(500)
         assertThat(measurement.iqr).isEqualTo(300.0)
+    }
+
+    @Test
+    fun `Should evaluate PFS as median for patient list with even number of non-null PFS values`() {
+        val pfsList = listOf(100, 200, 300, 400, null)
+        val measurement = PfsCalculation.calculate(pfsList.map(::patientWithPfs), ELIGIBLE_SUB_POPULATION_SIZE)
+        assertThat(measurement.value).isEqualTo(250.0)
+        assertThat(measurement.numPatients).isEqualTo(4)
+        assertThat(measurement.min).isEqualTo(100)
+        assertThat(measurement.max).isEqualTo(400)
+        assertThat(measurement.iqr).isEqualTo(200.0)
     }
 
     @Test

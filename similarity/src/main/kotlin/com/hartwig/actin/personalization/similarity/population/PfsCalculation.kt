@@ -1,7 +1,6 @@
 package com.hartwig.actin.personalization.similarity.population
 
 import com.hartwig.actin.personalization.similarity.report.TableElement
-import kotlin.math.min
 
 object PfsCalculation : Calculation {
 
@@ -11,11 +10,11 @@ object PfsCalculation : Calculation {
 
     override fun calculate(patients: List<DiagnosisAndEpisode>, eligibleSubPopulationSize: Int): Measurement {
         val pfsList = patients.mapNotNull { (_, episode) -> episode.systemicTreatmentPlan?.pfs }.sorted()
-        val (q1, q3) = if (pfsList.isEmpty()) Pair(Double.NaN, Double.NaN) else {
+        val (q1, q3) = if (pfsList.size < 2) Pair(Double.NaN, Double.NaN) else {
             val midPoint = pfsList.size / 2
             Pair(
                 median(pfsList.subList(0, midPoint)),
-                median(pfsList.subList(min(midPoint + 1, pfsList.size - 1), pfsList.size))
+                median(pfsList.subList(pfsList.size - midPoint, pfsList.size))
             )
         }
         return Measurement(
