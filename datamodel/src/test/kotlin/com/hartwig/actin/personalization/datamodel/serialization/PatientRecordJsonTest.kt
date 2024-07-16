@@ -9,7 +9,7 @@ import com.hartwig.actin.personalization.datamodel.Sex
 import com.hartwig.actin.personalization.datamodel.TumorBasisOfDiagnosis
 import com.hartwig.actin.personalization.datamodel.TumorEntry
 import com.hartwig.actin.personalization.datamodel.TumorType
-import org.assertj.core.api.Assertions
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import kotlin.io.path.createTempFile
 import kotlin.io.path.deleteIfExists
@@ -58,7 +58,7 @@ class PatientRecordJsonTest {
     fun `Should serialize and deserialize patient records in memory without changing their contents`() {
         val serialized = PatientRecordJson.toJson(PATIENT_RECORDS)
         val deserialized = PatientRecordJson.fromJson(serialized)
-        Assertions.assertThat(deserialized).isEqualTo(PATIENT_RECORDS)
+        assertThat(deserialized).isEqualTo(PATIENT_RECORDS)
     }
 
     @Test
@@ -66,7 +66,7 @@ class PatientRecordJsonTest {
         val tempFile = createTempFile()
         val path = tempFile.toString()
         PatientRecordJson.write(PATIENT_RECORDS, path)
-        Assertions.assertThat(PatientRecordJson.read(path)).isEqualTo(PATIENT_RECORDS)
+        assertThat(PatientRecordJson.read(path)).isEqualTo(PATIENT_RECORDS)
         tempFile.deleteIfExists()
     }
 }
