@@ -33,6 +33,7 @@
         <apache.log4j.version>2.18.0</apache.log4j.version>
         <slf4j-reload4j.version>1.7.36</slf4j-reload4j.version>
         <weka.version>3.8.6</weka.version>
+        <kotlinx-serialization-json.version>1.6.3</kotlinx-serialization-json.version>
         <jackson.version>2.16.1</jackson.version>
         <jooq.version>3.15.5</jooq.version>
         <picocli.version>4.7.6</picocli.version>
@@ -149,6 +150,11 @@
                 <groupId>nz.ac.waikato.cms.weka</groupId>
                 <artifactId>weka-stable</artifactId>
                 <version>${weka.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jetbrains.kotlinx</groupId>
+                <artifactId>kotlinx-serialization-json</artifactId>
+                <version>${kotlinx-serialization-json.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.fasterxml.jackson.core</groupId>

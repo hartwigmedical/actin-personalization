@@ -1,5 +1,8 @@
 package com.hartwig.actin.personalization.datamodel
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 data class SystemicTreatmentComponent(
     val drug: Drug,
     val treatmentSchemeNumber: Int?, //Nullable because absent for prior tumors

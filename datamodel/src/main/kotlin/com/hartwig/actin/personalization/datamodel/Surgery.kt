@@ -1,5 +1,8 @@
 package com.hartwig.actin.personalization.datamodel
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 data class Surgery(
     val surgeryType: SurgeryType,
     val surgeryTechnique: SurgeryTechnique? = null,
