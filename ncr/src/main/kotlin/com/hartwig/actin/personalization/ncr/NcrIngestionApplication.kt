@@ -17,18 +17,23 @@ class NcrIngestionApplication : Callable<Int> {
     lateinit var outputFile: String
 
     override fun call(): Int {
-        LOGGER.info("Running {} v{}", APPLICATION, VERSION)
+        try {
+            LOGGER.info("Running {} v{}", APPLICATION, VERSION)
 
-        LOGGER.info("Reading NCR dataset from {}", ncrFile)
-        val ncrRecords = NcrDataReader.read(ncrFile)
-        val patientRecords = PatientRecordFactory.default().create(ncrRecords)
-        LOGGER.info(" Created {} patient records from {} NCR records", patientRecords.size, ncrRecords.size)
+            LOGGER.info("Reading NCR dataset from {}", ncrFile)
+            val ncrRecords = NcrDataReader.read(ncrFile)
+            val patientRecords = PatientRecordFactory.default().create(ncrRecords)
+            LOGGER.info(" Created {} patient records from {} NCR records", patientRecords.size, ncrRecords.size)
 
-        LOGGER.info("Writing serialized records to {}", outputFile)
-        PatientRecordJson.write(patientRecords, outputFile)
+            LOGGER.info("Writing serialized records to {}", outputFile)
+            PatientRecordJson.write(patientRecords, outputFile)
 
-        LOGGER.info("Done!")
-        return 0
+            LOGGER.info("Done!")
+            return 0
+        } catch (e: Exception) {
+            LOGGER.error("Failed to ingest NCR dataset", e)
+            return 1
+        }
     }
 
     companion object {
