@@ -1,13 +1,11 @@
 package com.hartwig.actin.personalization.ncr
 
+import com.hartwig.actin.personalization.datamodel.serialization.PatientRecordJson
 import com.hartwig.actin.personalization.ncr.interpretation.PatientRecordFactory
 import com.hartwig.actin.personalization.ncr.serialization.NcrDataReader
-import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import picocli.CommandLine
-import java.io.File
 import java.util.concurrent.Callable
 
 class NcrIngestionApplication : Callable<Int> {
@@ -27,7 +25,7 @@ class NcrIngestionApplication : Callable<Int> {
         LOGGER.info(" Created {} patient records from {} NCR records", patientRecords.size, ncrRecords.size)
 
         LOGGER.info("Writing serialized records to {}", outputFile)
-        File(outputFile).writeText(Json.encodeToString(patientRecords))
+        PatientRecordJson.write(patientRecords, outputFile)
 
         LOGGER.info("Done!")
         return 0
