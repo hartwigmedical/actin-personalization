@@ -11,8 +11,8 @@ import java.util.concurrent.Callable
 
 class PersonalizationReportWriterApplication : Callable<Int> {
 
-    @CommandLine.Option(names = ["-ncr_file"], required = true)
-    lateinit var ncrFile: String
+    @CommandLine.Option(names = ["-patient_file"], required = true)
+    lateinit var patientFile: String
 
     @CommandLine.Option(names = ["-age"], required = true)
     var age: Int = -1
@@ -32,7 +32,7 @@ class PersonalizationReportWriterApplication : Callable<Int> {
     override fun call(): Int {
         LOGGER.info("Running {} v{}", APPLICATION, VERSION)
 
-        val analysis = PersonalizedDataInterpreter.createFromFile(ncrFile)
+        val analysis = PersonalizedDataInterpreter.createFromFile(patientFile)
             .analyzePatient(age, whoStatus, hasRasMutation, extractTopLevelLocationGroups(metastasisLocationString))
         
         val tables = listOf(MeasurementType.TREATMENT_DECISION, MeasurementType.PROGRESSION_FREE_SURVIVAL).map { measure ->
