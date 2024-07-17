@@ -66,7 +66,7 @@ object NcrLocationMapper {
             "C212" -> Location.CLOACOGENIC_ZONE
             "C218" -> Location.RECTUM_AND_ANUS_OVERLAPPING
             "C220" -> Location.LIVER_PRIMARY
-            "C221" -> Location.INTRAHEPATHIC_BILE_DUCTS
+            "C221" -> Location.INTRAHEPATIC_BILE_DUCTS
             "C239" -> Location.GALL_BLADDER
             "C240" -> Location.EXTRAHEPATIC_BILE_DUCTS_NOS
             "C241" -> Location.PAPILLA_OF_VATER
