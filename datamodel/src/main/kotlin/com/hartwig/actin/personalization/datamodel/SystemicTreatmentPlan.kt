@@ -1,5 +1,8 @@
 package com.hartwig.actin.personalization.datamodel
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 data class SystemicTreatmentPlan(
     val treatment: Treatment,
     val systemicTreatmentSchemes: List<SystemicTreatmentScheme>,

@@ -1,5 +1,8 @@
 package com.hartwig.actin.personalization.datamodel
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 data class Diagnosis(
     override val consolidatedTumorType: TumorType,
     override val tumorLocations: Set<Location>,

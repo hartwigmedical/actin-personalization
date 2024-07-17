@@ -15,9 +15,7 @@ const val DIAGNOSIS_EPISODE = "DIA"
 class PatientRecordFactory(private val tumorEntryExtractor: NcrTumorEntryExtractor) {
 
     fun create(ncrRecords: List<NcrRecord>): List<PatientRecord> {
-        val recordsPerPatient: Map<Int, List<NcrRecord>> = ncrRecords.groupBy { it.identification.keyNkr }
-
-        return recordsPerPatient.values.parallelStream()
+        return ncrRecords.groupBy { it.identification.keyNkr }.values.parallelStream()
             .map(::createPatientRecord)
             .collect(Collectors.toList())
     }
@@ -32,20 +30,11 @@ class PatientRecordFactory(private val tumorEntryExtractor: NcrTumorEntryExtract
     }
 
     private fun extractNcrId(ncrRecords: List<NcrRecord>): Int {
-        val ncrIds: List<Int> = ncrRecords.map { it.identification.keyNkr }.distinct()
-        if (ncrIds.count() != 1) {
-            throw IllegalStateException("Non-unique or missing NCR ID when creating a single patient record: $ncrIds")
-        }
-        return ncrIds[0]
+        return ncrRecords.map { it.identification.keyNkr }.distinct().single()
     }
 
     private fun extractSex(ncrRecords: List<NcrRecord>): Sex {
-        val sexes: List<Int> = ncrRecords.map { it.patientCharacteristics.gesl }.distinct()
-        if (sexes.count() != 1) {
-            throw IllegalStateException("Multiple sexes found for patient with NCR ID '" + extractNcrId(ncrRecords) + "'")
-        }
-
-        return NcrSexMapper.resolve(sexes.single())
+        return NcrSexMapper.resolve(ncrRecords.map { it.patientCharacteristics.gesl }.distinct().single())
     }
 
     private fun determineIsAlive(ncrRecords: List<NcrRecord>): Boolean {

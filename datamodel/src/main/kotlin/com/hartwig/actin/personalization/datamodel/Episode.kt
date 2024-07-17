@@ -1,5 +1,8 @@
 package com.hartwig.actin.personalization.datamodel
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 data class Episode(
     val id: Int,
     val order: Int,

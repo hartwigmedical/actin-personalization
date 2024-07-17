@@ -6,8 +6,7 @@ import com.hartwig.actin.personalization.datamodel.LocationGroup
 import com.hartwig.actin.personalization.datamodel.PatientRecord
 import com.hartwig.actin.personalization.datamodel.Treatment
 import com.hartwig.actin.personalization.datamodel.TreatmentGroup
-import com.hartwig.actin.personalization.ncr.interpretation.PatientRecordFactory
-import com.hartwig.actin.personalization.ncr.serialization.NcrDataReader
+import com.hartwig.actin.personalization.datamodel.serialization.PatientRecordJson
 import com.hartwig.actin.personalization.similarity.population.DiagnosisAndEpisode
 import com.hartwig.actin.personalization.similarity.population.PatientPopulationBreakdown
 import com.hartwig.actin.personalization.similarity.population.PersonalizedDataAnalysis
@@ -37,13 +36,9 @@ class PersonalizedDataInterpreter(val patientsByTreatment: List<Pair<TreatmentGr
         private val LOGGER: Logger = LogManager.getLogger(PersonalizedDataInterpreter::class.java)
 
         fun createFromFile(path: String): PersonalizedDataInterpreter {
-            LOGGER.info("Loading NCR records from file $path")
-            val records = NcrDataReader.read(path)
-            LOGGER.info(" Loaded {} NCR records", records.size)
-
-            LOGGER.info("Creating patient records")
-            val patients = PatientRecordFactory.default().create(records)
-            LOGGER.info(" Created {} patient records", patients.size)
+            LOGGER.info("Loading patient records from file $path")
+            val patients = PatientRecordJson.read(path)
+            LOGGER.info(" Loaded {} patient records", patients.size)
             return createFromPatientRecords(patients)
         }
 

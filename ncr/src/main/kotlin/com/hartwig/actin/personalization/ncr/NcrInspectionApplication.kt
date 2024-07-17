@@ -4,15 +4,17 @@ import com.hartwig.actin.personalization.datamodel.PatientRecord
 import com.hartwig.actin.personalization.ncr.datamodel.NcrRecord
 import com.hartwig.actin.personalization.ncr.interpretation.PatientRecordFactory
 import com.hartwig.actin.personalization.ncr.serialization.NcrDataReader
-import org.apache.commons.cli.CommandLine
-import org.apache.commons.cli.DefaultParser
-import org.apache.commons.cli.Options
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
+import picocli.CommandLine
+import java.util.concurrent.Callable
 
-class NCRInspectionApplication(private val ncrDatasetPath: String) {
+class NCRInspectionApplication : Callable<Int> {
 
-    fun run() {
+    @CommandLine.Option(names = ["-ncr_dataset_csv"], required = true, description = ["File containing the NCR dataset"])
+    lateinit var ncrDatasetPath: String
+
+    override fun call(): Int {
         LOGGER.info("Running NCR inspection application")
 
         LOGGER.info("Reading NCR dataset from {}", ncrDatasetPath)
@@ -38,6 +40,7 @@ class NCRInspectionApplication(private val ncrDatasetPath: String) {
         LOGGER.info(" Created {} patient records from {} NCR records", patientRecords.count(), ncrRecords.count())
 
         LOGGER.info("Done!")
+        return 0
     }
 
     private fun printIdentificationOverview(ncrRecords: List<NcrRecord>) {
@@ -252,13 +255,4 @@ class NCRInspectionApplication(private val ncrDatasetPath: String) {
     }
 }
 
-fun main(args: Array<String>) {
-    val ncrDatasetOption = "ncr_dataset_csv"
-    val options = Options()
-    options.addOption(ncrDatasetOption, true, "File containing the NCR dataset")
-
-    val cmd: CommandLine = DefaultParser().parse(options, args)
-
-    NCRInspectionApplication(cmd.getOptionValue(ncrDatasetOption)).run()
-}
-
+fun main(args: Array<String>): Unit = kotlin.system.exitProcess(CommandLine(NCRInspectionApplication()).execute(*args))
