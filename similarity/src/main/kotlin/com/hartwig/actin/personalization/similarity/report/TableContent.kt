@@ -25,12 +25,12 @@ data class TableContent(val title: String, val headers: List<String>, val rows: 
         fun fromPersonalizedDataAnalysis(
             personalizedDataAnalysis: PersonalizedDataAnalysis, measurementType: MeasurementType
         ): TableContent {
-            val headers = listOf("") + personalizedDataAnalysis.subPopulations.map {
+            val headers = listOf("") + personalizedDataAnalysis.populations.map {
                 "${it.name} (n=${it.patientsByMeasurementType[measurementType]?.size})"
             }
             val rows = personalizedDataAnalysis.treatmentAnalyses.map { (treatment, measurements) ->
-                val rowValues = personalizedDataAnalysis.subPopulations.map { subPopulation ->
-                    measurementType.calculation.createTableElement(measurements[measurementType]!![subPopulation.name]!!)
+                val rowValues = personalizedDataAnalysis.populations.map { population ->
+                    measurementType.calculation.createTableElement(measurements[measurementType]!![population.name]!!)
                 }
                 listOf(TableElement.regular(treatment.display)) + rowValues
             }

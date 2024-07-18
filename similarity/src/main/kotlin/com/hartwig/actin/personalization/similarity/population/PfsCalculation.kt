@@ -8,7 +8,7 @@ object PfsCalculation : Calculation {
     
     override fun isEligible(patient: DiagnosisAndEpisode) = patient.second.systemicTreatmentPlan?.pfs != null
 
-    override fun calculate(patients: List<DiagnosisAndEpisode>, eligibleSubPopulationSize: Int): Measurement {
+    override fun calculate(patients: List<DiagnosisAndEpisode>, eligiblePopulationSize: Int): Measurement {
         val pfsList = patients.mapNotNull { (_, episode) -> episode.systemicTreatmentPlan?.pfs }.sorted()
         val (q1, q3) = if (pfsList.size < 2) Pair(Double.NaN, Double.NaN) else {
             val midPoint = pfsList.size / 2

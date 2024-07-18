@@ -6,8 +6,8 @@ object TreatmentDecisionCalculation : Calculation {
 
     override fun isEligible(patient: DiagnosisAndEpisode) = true
 
-    override fun calculate(patients: List<DiagnosisAndEpisode>, eligibleSubPopulationSize: Int): Measurement {
-        return Measurement(patients.size.toDouble() / eligibleSubPopulationSize, patients.size)
+    override fun calculate(patients: List<DiagnosisAndEpisode>, eligiblePopulationSize: Int): Measurement {
+        return Measurement(patients.size.toDouble() / eligiblePopulationSize, patients.size)
     }
 
     override fun createTableElement(measurement: Measurement): TableElement {

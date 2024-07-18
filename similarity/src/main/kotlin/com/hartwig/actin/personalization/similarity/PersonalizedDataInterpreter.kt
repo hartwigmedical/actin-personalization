@@ -10,7 +10,7 @@ import com.hartwig.actin.personalization.datamodel.serialization.PatientRecordJs
 import com.hartwig.actin.personalization.similarity.population.DiagnosisAndEpisode
 import com.hartwig.actin.personalization.similarity.population.PatientPopulationBreakdown
 import com.hartwig.actin.personalization.similarity.population.PersonalizedDataAnalysis
-import com.hartwig.actin.personalization.similarity.population.SubPopulationDefinition
+import com.hartwig.actin.personalization.similarity.population.PopulationDefinition
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 
@@ -26,10 +26,10 @@ class PersonalizedDataInterpreter(val patientsByTreatment: List<Pair<TreatmentGr
     fun analyzePatient(
         age: Int, whoStatus: Int, hasRasMutation: Boolean, metastasisLocationGroups: Set<LocationGroup>
     ): PersonalizedDataAnalysis {
-        val subPopulationDefinitions =
-            SubPopulationDefinition.createAllForPatientProfile(age, whoStatus, hasRasMutation, metastasisLocationGroups)
+        val populationDefinitions =
+            PopulationDefinition.createAllForPatientProfile(age, whoStatus, hasRasMutation, metastasisLocationGroups)
 
-        return PatientPopulationBreakdown(patientsByTreatment, subPopulationDefinitions).analyze()
+        return PatientPopulationBreakdown(patientsByTreatment, populationDefinitions).analyze()
     }
 
     companion object {
