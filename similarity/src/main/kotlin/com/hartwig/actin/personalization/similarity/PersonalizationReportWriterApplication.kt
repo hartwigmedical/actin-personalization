@@ -4,8 +4,7 @@ import com.hartwig.actin.personalization.datamodel.LocationGroup
 import com.hartwig.actin.personalization.similarity.population.MeasurementType
 import com.hartwig.actin.personalization.similarity.report.ReportWriter
 import com.hartwig.actin.personalization.similarity.report.TableContent
-import org.apache.logging.log4j.LogManager
-import org.apache.logging.log4j.Logger
+import io.github.oshai.kotlinlogging.KotlinLogging
 import picocli.CommandLine
 import java.util.concurrent.Callable
 
@@ -30,7 +29,7 @@ class PersonalizationReportWriterApplication : Callable<Int> {
     lateinit var outputPath: String
 
     override fun call(): Int {
-        LOGGER.info("Running {} v{}", APPLICATION, VERSION)
+        LOGGER.info { "Running $APPLICATION v$VERSION" }
 
         val analysis = PersonalizedDataInterpreter.createFromFile(patientFile)
             .analyzePatient(age, whoStatus, hasRasMutation, extractTopLevelLocationGroups(metastasisLocationString))
@@ -39,11 +38,11 @@ class PersonalizationReportWriterApplication : Callable<Int> {
             TableContent.fromPersonalizedDataAnalysis(analysis, measure)
         }
 
-        LOGGER.info("Writing PDF report to {}", outputPath)
+        LOGGER.info { "Writing PDF report to $outputPath" }
         val writer = ReportWriter.create(outputPath)
         writer.writeReport("SOC personalized real-world evidence annotation", tables)
 
-        LOGGER.info("Done!")
+        LOGGER.info { "Done!" }
         return 0
     }
 
@@ -54,7 +53,7 @@ class PersonalizationReportWriterApplication : Callable<Int> {
     }
 
     companion object {
-        val LOGGER: Logger = LogManager.getLogger(PersonalizationReportWriterApplication::class.java)
+        val LOGGER = KotlinLogging.logger {}
         const val APPLICATION = "ACTIN-Personalization Report Writer"
         val VERSION = PersonalizationReportWriterApplication::class.java.getPackage().implementationVersion
     }

@@ -1,6 +1,6 @@
 package com.hartwig.actin.personalization.ncr.interpretation
 
-import com.hartwig.actin.personalization.datamodel.PatientRecord
+import com.hartwig.actin.personalization.datamodel.ReferencePatient
 import com.hartwig.actin.personalization.datamodel.Sex
 import com.hartwig.actin.personalization.datamodel.TumorEntry
 import com.hartwig.actin.personalization.ncr.datamodel.NcrRecord
@@ -12,16 +12,16 @@ import java.util.stream.Collectors
 
 const val DIAGNOSIS_EPISODE = "DIA"
 
-class PatientRecordFactory(private val tumorEntryExtractor: NcrTumorEntryExtractor) {
+class ReferencePatientFactory(private val tumorEntryExtractor: NcrTumorEntryExtractor) {
 
-    fun create(ncrRecords: List<NcrRecord>): List<PatientRecord> {
+    fun create(ncrRecords: List<NcrRecord>): List<ReferencePatient> {
         return ncrRecords.groupBy { it.identification.keyNkr }.values.parallelStream()
-            .map(::createPatientRecord)
+            .map(::createReferencePatient)
             .collect(Collectors.toList())
     }
 
-    private fun createPatientRecord(ncrRecords: List<NcrRecord>): PatientRecord {
-        return PatientRecord(
+    private fun createReferencePatient(ncrRecords: List<NcrRecord>): ReferencePatient {
+        return ReferencePatient(
             ncrId = extractNcrId(ncrRecords),
             sex = extractSex(ncrRecords),
             isAlive = determineIsAlive(ncrRecords),
@@ -58,8 +58,8 @@ class PatientRecordFactory(private val tumorEntryExtractor: NcrTumorEntryExtract
     }
 
     companion object {
-        fun default(): PatientRecordFactory {
-            return PatientRecordFactory(NcrTumorEntryExtractor(NcrEpisodeExtractor(NcrSystemicTreatmentPlanExtractor())))
+        fun default(): ReferencePatientFactory {
+            return ReferencePatientFactory(NcrTumorEntryExtractor(NcrEpisodeExtractor(NcrSystemicTreatmentPlanExtractor())))
         }
     }
 }

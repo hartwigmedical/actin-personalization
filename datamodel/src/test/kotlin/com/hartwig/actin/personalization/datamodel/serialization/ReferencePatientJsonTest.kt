@@ -4,7 +4,7 @@ import com.hartwig.actin.personalization.datamodel.Diagnosis
 import com.hartwig.actin.personalization.datamodel.DistantMetastasesStatus
 import com.hartwig.actin.personalization.datamodel.Episode
 import com.hartwig.actin.personalization.datamodel.Location
-import com.hartwig.actin.personalization.datamodel.PatientRecord
+import com.hartwig.actin.personalization.datamodel.ReferencePatient
 import com.hartwig.actin.personalization.datamodel.Sex
 import com.hartwig.actin.personalization.datamodel.TumorBasisOfDiagnosis
 import com.hartwig.actin.personalization.datamodel.TumorEntry
@@ -44,7 +44,7 @@ private val EPISODE = Episode(
     pfsMeasures = emptyList()
 )
 private val PATIENT_RECORDS = listOf(
-    PatientRecord(
+    ReferencePatient(
         ncrId = 123,
         sex = Sex.MALE,
         isAlive = true,
@@ -52,12 +52,12 @@ private val PATIENT_RECORDS = listOf(
     )
 )
 
-class PatientRecordJsonTest {
+class ReferencePatientJsonTest {
 
     @Test
     fun `Should serialize and deserialize patient records in memory without changing their contents`() {
-        val serialized = PatientRecordJson.toJson(PATIENT_RECORDS)
-        val deserialized = PatientRecordJson.fromJson(serialized)
+        val serialized = ReferencePatientJson.toJson(PATIENT_RECORDS)
+        val deserialized = ReferencePatientJson.fromJson(serialized)
         assertThat(deserialized).isEqualTo(PATIENT_RECORDS)
     }
 
@@ -65,8 +65,8 @@ class PatientRecordJsonTest {
     fun `Should serialize and deserialize patient records on disk without changing their contents`() {
         val tempFile = createTempFile()
         val path = tempFile.toString()
-        PatientRecordJson.write(PATIENT_RECORDS, path)
-        assertThat(PatientRecordJson.read(path)).isEqualTo(PATIENT_RECORDS)
+        ReferencePatientJson.write(PATIENT_RECORDS, path)
+        assertThat(ReferencePatientJson.read(path)).isEqualTo(PATIENT_RECORDS)
         tempFile.deleteIfExists()
     }
 }

@@ -3,7 +3,7 @@ package com.hartwig.actin.personalization.datamodel
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class PatientRecord(
+data class ReferencePatient(
     val ncrId: Int,
     val sex: Sex,
     val isAlive: Boolean,

@@ -26,7 +26,7 @@ class PersonalizedDataInterpreterTest {
             recordWithEpisode(capoxEpisode),
         )
 
-        val interpreter = PersonalizedDataInterpreter.createFromPatientRecords(patients)
+        val interpreter = PersonalizedDataInterpreter.createFromReferencePatients(patients)
         assertThat(interpreter.patientsByTreatment).containsExactly(
             TreatmentGroup.CAPECITABINE_OR_FLUOROURACIL to listOf(DIAGNOSIS to fluourouracilEpisode, DIAGNOSIS to capecitabineEpisode),
             TreatmentGroup.CAPOX_OR_FOLFOX to listOf(DIAGNOSIS to capoxEpisode)

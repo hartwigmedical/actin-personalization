@@ -1,8 +1,7 @@
 package com.hartwig.actin.personalization.recruitment.algo
 
-import com.hartwig.actin.personalization.recruitment.datamodel.PatientRecord
-import org.apache.logging.log4j.LogManager
-import org.apache.logging.log4j.Logger
+import com.hartwig.actin.personalization.recruitment.datamodel.ReferencePatient
+import io.github.oshai.kotlinlogging.KotlinLogging
 import weka.classifiers.lazy.IBk
 import weka.core.Attribute
 import weka.core.DenseInstance
@@ -10,9 +9,9 @@ import weka.core.Instances
 
 object NearestNeighborModel {
 
-    private val LOGGER: Logger = LogManager.getLogger(NearestNeighborModel::class)
+    private val LOGGER = KotlinLogging.logger {}
 
-    fun run(patients: List<PatientRecord>) {
+    fun run(patients: List<ReferencePatient>) {
         val ageAttr = Attribute("age")
         val ecogAttr = Attribute("ecog")
         val pfsAttr = Attribute("pfs")
@@ -22,7 +21,7 @@ object NearestNeighborModel {
         val patientDb = Instances("patients", attributes, patients.size)
         patientDb.setClassIndex(pfsAttr.index())
 
-        LOGGER.info(" Creating WEKA instances object for ${patients.size} patients")
+        LOGGER.info { " Creating WEKA instances object for ${patients.size} patients" }
         for (patient in patients) {
             val patientInstance = DenseInstance(attributes.size)
             patientInstance.setDataset(patientDb)
@@ -34,7 +33,7 @@ object NearestNeighborModel {
         }
 
         val k = 1
-        LOGGER.info(" Building K-nearest neighbour model with K=$k")
+        LOGGER.info { " Building K-nearest neighbour model with K=$k" }
         val classifier = IBk(k)
         classifier.buildClassifier(patientDb)
 
@@ -43,8 +42,8 @@ object NearestNeighborModel {
         newPatient.setValue(ageAttr, 50.0)
         newPatient.setValue(ecogAttr, 1.0)
 
-        LOGGER.info(" Classifying new patient with age 50 and ECOG 1")
+        LOGGER.info { " Classifying new patient with age 50 and ECOG 1" }
         val expectedPfs = classifier.classifyInstance(newPatient)
-        LOGGER.info(" PFS estimated to be $expectedPfs")
+        LOGGER.info { " PFS estimated to be $expectedPfs" }
     }
 }
