@@ -150,16 +150,6 @@
                 <groupId>io.github.oshai</groupId>
                 <artifactId>kotlin-logging-jvm</artifactId>
                 <version>${kotlin-logging-jvm.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>org.jetbrains.kotlin</groupId>
-                        <artifactId>kotlin-stdlib-common</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>org.jetbrains.kotlin</groupId>
-                        <artifactId>kotlin-stdlib-jdk8</artifactId>
-                    </exclusion>
-                </exclusions>
             </dependency>
             <dependency>
                 <groupId>nz.ac.waikato.cms.weka</groupId>
