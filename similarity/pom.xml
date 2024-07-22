@@ -18,10 +18,7 @@
             <groupId>com.hartwig.actin.personalization</groupId>
             <artifactId>datamodel</artifactId>
         </dependency>
-        <dependency>
-            <groupId>com.hartwig.actin.personalization</groupId>
-            <artifactId>ncr</artifactId>
-        </dependency>
+
         <dependency>
             <groupId>nz.ac.waikato.cms.weka</groupId>
             <artifactId>weka-stable</artifactId>
@@ -29,6 +26,18 @@
         <dependency>
             <groupId>org.jetbrains.kotlin</groupId>
             <artifactId>kotlin-stdlib</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-slf4j2-impl</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.github.oshai</groupId>
+            <artifactId>kotlin-logging-jvm</artifactId>
         </dependency>
         <dependency>
             <groupId>com.itextpdf</groupId>
@@ -45,12 +54,6 @@
         <dependency>
             <groupId>info.picocli</groupId>
             <artifactId>picocli</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-reload4j</artifactId>
-            <scope>runtime</scope>
         </dependency>
 
         <dependency>

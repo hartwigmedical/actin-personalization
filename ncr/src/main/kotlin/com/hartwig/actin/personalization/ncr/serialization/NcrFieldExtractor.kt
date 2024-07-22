@@ -1,7 +1,6 @@
 package com.hartwig.actin.personalization.ncr.serialization
 
-import org.apache.logging.log4j.LogManager
-import org.apache.logging.log4j.Logger
+import io.github.oshai.kotlinlogging.KotlinLogging
 
 class NcrFieldExtractor(private val fields: Map<String, Int>, private val parts: Array<String>) {
 
@@ -45,11 +44,11 @@ class NcrFieldExtractor(private val fields: Map<String, Int>, private val parts:
     }
 
     private fun logEpisodeID(property: String) {
-        LOGGER.warn("Could not parse property '{}' with value '{}' for episode {}", property, value(property), value(EPISODE_ID))
+        LOGGER.warn { "Could not parse property '$property' with value '${value(property)}' for episode ${value(EPISODE_ID)}" }
     }
 
     companion object {
         private const val EPISODE_ID: String = "key_eid"
-        private val LOGGER: Logger = LogManager.getLogger(NcrFieldExtractor::class)
+        private val LOGGER = KotlinLogging.logger {}
     }
 }

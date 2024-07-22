@@ -4,7 +4,7 @@ import com.hartwig.actin.personalization.datamodel.Diagnosis
 import com.hartwig.actin.personalization.datamodel.DistantMetastasesStatus
 import com.hartwig.actin.personalization.datamodel.Episode
 import com.hartwig.actin.personalization.datamodel.Location
-import com.hartwig.actin.personalization.datamodel.PatientRecord
+import com.hartwig.actin.personalization.datamodel.ReferencePatient
 import com.hartwig.actin.personalization.datamodel.Sex
 import com.hartwig.actin.personalization.datamodel.SystemicTreatmentPlan
 import com.hartwig.actin.personalization.datamodel.Treatment
@@ -44,14 +44,14 @@ val EPISODE = Episode(
 
 val DIAGNOSIS_AND_EPISODE = DIAGNOSIS to EPISODE
 
-val PATIENT_RECORD = PatientRecord(
+val PATIENT_RECORD = ReferencePatient(
     ncrId = 123,
     sex = Sex.MALE,
     isAlive = true,
     tumorEntries = listOf(TumorEntry(DIAGNOSIS, listOf(EPISODE))),
 )
 
-fun recordWithEpisode(episode: Episode): PatientRecord {
+fun recordWithEpisode(episode: Episode): ReferencePatient {
     return PATIENT_RECORD.copy(tumorEntries = PATIENT_RECORD.tumorEntries.map { it.copy(episodes = listOf(episode)) })
 }
 

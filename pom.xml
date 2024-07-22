@@ -29,8 +29,9 @@
         <maven.assembly.plugin.version>3.3.0</maven.assembly.plugin.version>
         <maven.surefire.plugin.version>3.1.2</maven.surefire.plugin.version>
 
-        <apache.log4j.version>2.18.0</apache.log4j.version>
-        <slf4j-reload4j.version>1.7.36</slf4j-reload4j.version>
+        <slf4j-api.version>2.0.13</slf4j-api.version>
+        <apache.log4j.version>2.23.1</apache.log4j.version>
+        <kotlin-logging-jvm.version>5.1.4</kotlin-logging-jvm.version>
         <weka.version>3.8.6</weka.version>
         <kotlinx-serialization-json.version>1.6.3</kotlinx-serialization-json.version>
         <jackson.version>2.16.1</jackson.version>
@@ -136,9 +137,19 @@
                 <version>${kotlin.version}</version>
             </dependency>
             <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-api</artifactId>
+                <version>${slf4j-api.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>org.apache.logging.log4j</groupId>
-                <artifactId>log4j-core</artifactId>
+                <artifactId>log4j-slf4j2-impl</artifactId>
                 <version>${apache.log4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.github.oshai</groupId>
+                <artifactId>kotlin-logging-jvm</artifactId>
+                <version>${kotlin-logging-jvm.version}</version>
             </dependency>
             <dependency>
                 <groupId>nz.ac.waikato.cms.weka</groupId>
@@ -194,13 +205,6 @@
                 <groupId>com.itextpdf</groupId>
                 <artifactId>io</artifactId>
                 <version>${itext.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.slf4j</groupId>
-                <artifactId>slf4j-reload4j</artifactId>
-                <version>${slf4j-reload4j.version}</version>
-                <scope>runtime</scope>
             </dependency>
 
             <dependency>

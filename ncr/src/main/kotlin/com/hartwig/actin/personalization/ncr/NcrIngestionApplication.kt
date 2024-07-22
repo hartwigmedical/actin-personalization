@@ -1,10 +1,9 @@
 package com.hartwig.actin.personalization.ncr
 
-import com.hartwig.actin.personalization.datamodel.serialization.PatientRecordJson
-import com.hartwig.actin.personalization.ncr.interpretation.PatientRecordFactory
+import com.hartwig.actin.personalization.datamodel.serialization.ReferencePatientJson
+import com.hartwig.actin.personalization.ncr.interpretation.ReferencePatientFactory
 import com.hartwig.actin.personalization.ncr.serialization.NcrDataReader
-import org.apache.logging.log4j.LogManager
-import org.apache.logging.log4j.Logger
+import io.github.oshai.kotlinlogging.KotlinLogging
 import picocli.CommandLine
 import java.util.concurrent.Callable
 
@@ -18,26 +17,26 @@ class NcrIngestionApplication : Callable<Int> {
 
     override fun call(): Int {
         try {
-            LOGGER.info("Running {} v{}", APPLICATION, VERSION)
+            LOGGER.info { "Running $APPLICATION v$VERSION" }
 
-            LOGGER.info("Reading NCR dataset from {}", ncrFile)
+            LOGGER.info { "Reading NCR dataset from $ncrFile" }
             val ncrRecords = NcrDataReader.read(ncrFile)
-            val patientRecords = PatientRecordFactory.default().create(ncrRecords)
-            LOGGER.info(" Created {} patient records from {} NCR records", patientRecords.size, ncrRecords.size)
+            val patientRecords = ReferencePatientFactory.default().create(ncrRecords)
+            LOGGER.info { " Created ${patientRecords.size} patient records from ${ncrRecords.size} NCR records" }
 
-            LOGGER.info("Writing serialized records to {}", outputFile)
-            PatientRecordJson.write(patientRecords, outputFile)
+            LOGGER.info { "Writing serialized records to $outputFile" }
+            ReferencePatientJson.write(patientRecords, outputFile)
 
-            LOGGER.info("Done!")
+            LOGGER.info { "Done!" }
             return 0
         } catch (e: Exception) {
-            LOGGER.error("Failed to ingest NCR dataset", e)
+            LOGGER.error(e) { "Failed to ingest NCR dataset" }
             return 1
         }
     }
 
     companion object {
-        val LOGGER: Logger = LogManager.getLogger(NcrIngestionApplication::class.java)
+        val LOGGER = KotlinLogging.logger {}
         const val APPLICATION = "NCR inspection application"
         val VERSION = NcrIngestionApplication::class.java.getPackage().implementationVersion
     }

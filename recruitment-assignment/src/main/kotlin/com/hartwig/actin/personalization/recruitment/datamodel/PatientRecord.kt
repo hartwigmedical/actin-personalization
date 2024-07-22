@@ -1,6 +1,6 @@
 package com.hartwig.actin.personalization.recruitment.datamodel
 
-data class PatientRecord(
+data class ReferencePatient(
     val id : Int,
     val age : Int,
     val ecog : Int,

@@ -1,9 +1,8 @@
 package com.hartwig.actin.personalization.database
 
-import com.hartwig.actin.personalization.ncr.interpretation.PatientRecordFactory
+import com.hartwig.actin.personalization.ncr.interpretation.ReferencePatientFactory
 import com.hartwig.actin.personalization.ncr.serialization.NcrDataReader
-import org.apache.logging.log4j.LogManager
-import org.apache.logging.log4j.Logger
+import io.github.oshai.kotlinlogging.KotlinLogging
 import picocli.CommandLine
 import java.util.concurrent.Callable
 
@@ -22,27 +21,27 @@ class PersonalizationLoaderApplication : Callable<Int> {
     lateinit var dbUrl: String
 
     override fun call(): Int {
-        LOGGER.info("Running {} v{}", APPLICATION, VERSION)
+        LOGGER.info { "Running $APPLICATION v$VERSION" }
 
-        LOGGER.info("Loading NCR records from file $ncrFile")
+        LOGGER.info { "Loading NCR records from file $ncrFile" }
         val records = NcrDataReader.read(ncrFile)
-        LOGGER.info(" Loaded {} NCR records", records.size)
+        LOGGER.info { " Loaded ${records.size} NCR records" }
 
-        LOGGER.info("Creating patient records")
-        val patients = PatientRecordFactory.default().create(records)
-        LOGGER.info(" Created {} patient records", patients.size)
+        LOGGER.info { "Creating patient records" }
+        val patients = ReferencePatientFactory.default().create(records)
+        LOGGER.info { " Created ${patients.size} patient records" }
 
         val writer = DatabaseWriter.fromCredentials(dbUser, dbPass, dbUrl)
 
-        LOGGER.info("Writing {} patient records to database", patients.size)
+        LOGGER.info { "Writing ${patients.size} patient records to database" }
         writer.writeAllToDb(patients)
 
-        LOGGER.info("Done!")
+        LOGGER.info { "Done!" }
         return 0
     }
 
     companion object {
-        val LOGGER: Logger = LogManager.getLogger(PersonalizationLoaderApplication::class.java)
+        val LOGGER = KotlinLogging.logger {}
         const val APPLICATION = "ACTIN-Personalization Loader"
         private val VERSION = PersonalizationLoaderApplication::class.java.getPackage().implementationVersion
     }
