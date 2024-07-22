@@ -10,8 +10,8 @@ import com.hartwig.actin.personalization.datamodel.serialization.ReferencePatien
 import com.hartwig.actin.personalization.similarity.population.DiagnosisAndEpisode
 import com.hartwig.actin.personalization.similarity.population.PatientPopulationBreakdown
 import com.hartwig.actin.personalization.similarity.population.PersonalizedDataAnalysis
-import com.hartwig.actin.personalization.similarity.population.SubPopulationDefinition
 import io.github.oshai.kotlinlogging.KotlinLogging
+import com.hartwig.actin.personalization.similarity.population.PopulationDefinition
 
 private fun Episode.doesNotIncludeAdjuvantOrNeoadjuvantTreatment(): Boolean {
     return !hasHadPreSurgerySystemicChemotherapy &&
@@ -25,10 +25,10 @@ class PersonalizedDataInterpreter(val patientsByTreatment: List<Pair<TreatmentGr
     fun analyzePatient(
         age: Int, whoStatus: Int, hasRasMutation: Boolean, metastasisLocationGroups: Set<LocationGroup>
     ): PersonalizedDataAnalysis {
-        val subPopulationDefinitions =
-            SubPopulationDefinition.createAllForPatientProfile(age, whoStatus, hasRasMutation, metastasisLocationGroups)
+        val populationDefinitions =
+            PopulationDefinition.createAllForPatientProfile(age, whoStatus, hasRasMutation, metastasisLocationGroups)
 
-        return PatientPopulationBreakdown(patientsByTreatment, subPopulationDefinitions).analyze()
+        return PatientPopulationBreakdown(patientsByTreatment, populationDefinitions).analyze()
     }
 
     companion object {

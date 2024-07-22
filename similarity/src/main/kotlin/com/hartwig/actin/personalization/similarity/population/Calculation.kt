@@ -6,7 +6,7 @@ interface Calculation {
 
     fun isEligible(patient: DiagnosisAndEpisode): Boolean
 
-    fun calculate(patients: List<DiagnosisAndEpisode>, eligibleSubPopulationSize: Int): Measurement
+    fun calculate(patients: List<DiagnosisAndEpisode>, eligiblePopulationSize: Int): Measurement
 
     fun createTableElement(measurement: Measurement): TableElement
 

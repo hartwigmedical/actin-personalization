@@ -46,12 +46,14 @@ enum class LocationGroup(private val displayOverride: String? = null) {
     PARANASAL_SINUSES,
     PENIS,
     PERIPHERAL_NERVES_AND_AUTONOMIC_NERVOUS_SYSTEM,
+    PERITONEUM("Peritoneal"),
     PRIMARY_LOCATION_UNKNOWN,
     PROSTATE,
     RECTOSIGMOID,
     RECTUM,
     RENAL_PELVIS,
-    RETROPERITONEUM_AND_PERITONEUM("Peritoneal"),
+    RETROPERITONEUM_AND_PERITONEUM,
+    RETROPERITONEUM,
     SINUS_PYRIFORM,
     SKIN,
     SMALL_INTESTINE,
@@ -68,18 +70,17 @@ enum class LocationGroup(private val displayOverride: String? = null) {
     VAGINA,
     VULVA;
 
-    fun topLevelGroup() = if (this in TOP_LEVEL_GROUPS) this else OTHER
+    fun topLevelGroup() = TOP_LEVEL_GROUP_MAPPING[this] ?: OTHER
 
     fun display() = displayOverride ?: name.replace("_", " ").lowercase().replaceFirstChar { it.uppercase() }
 
     companion object {
-        private val TOP_LEVEL_GROUPS = setOf(
+        private val TOP_LEVEL_GROUP_MAPPING = listOf(
             BRAIN,
             BRONCHUS_AND_LUNG,
-            COLON,
             LIVER_AND_INTRAHEPATIC_BILE_DUCTS,
             LYMPH_NODES,
-            RETROPERITONEUM_AND_PERITONEUM
-        )
+            PERITONEUM
+        ).associateWith { it } + mapOf(RETROPERITONEUM_AND_PERITONEUM to PERITONEUM)
     }
 }
