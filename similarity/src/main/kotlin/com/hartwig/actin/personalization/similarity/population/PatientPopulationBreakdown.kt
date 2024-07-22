@@ -8,39 +8,39 @@ typealias DiagnosisAndEpisode = Pair<Diagnosis, Episode>
 
 class PatientPopulationBreakdown(
     private val patientsByTreatment: List<Pair<TreatmentGroup, List<DiagnosisAndEpisode>>>,
-    private val subPopulationDefinitions: List<SubPopulationDefinition>
+    private val populationDefinitions: List<PopulationDefinition>
 ) {
     fun analyze(): PersonalizedDataAnalysis {
         val allPatients = patientsByTreatment.flatMap { it.second }
-        val subPopulations = subPopulationDefinitions.map { subPopulationFromDefinition(it, allPatients) }
-        val subPopulationsByName = subPopulations.associateBy(SubPopulation::name)
+        val populations = populationDefinitions.map { populationFromDefinition(it, allPatients) }
+        val populationsByName = populations.associateBy(Population::name)
 
         val treatmentAnalyses = patientsByTreatment.map { (treatment, patientsWithTreatment) ->
-            treatmentAnalysisForPatients(treatment, patientsWithTreatment, subPopulationsByName)
+            treatmentAnalysisForPatients(treatment, patientsWithTreatment, populationsByName)
         }
 
-        return PersonalizedDataAnalysis(treatmentAnalyses, subPopulations)
+        return PersonalizedDataAnalysis(treatmentAnalyses, populations)
     }
 
-    private fun subPopulationFromDefinition(
-        subPopulationDefinition: SubPopulationDefinition, allPatients: List<DiagnosisAndEpisode>
-    ): SubPopulation {
-        val matchingPatients = allPatients.filter(subPopulationDefinition.criteria)
+    private fun populationFromDefinition(
+        populationDefinition: PopulationDefinition, allPatients: List<DiagnosisAndEpisode>
+    ): Population {
+        val matchingPatients = allPatients.filter(populationDefinition.criteria)
         val patientsByMeasurementType = MeasurementType.entries.associateWith { measurementType ->
             matchingPatients.filter(measurementType.calculation::isEligible)
         }
-        return SubPopulation(subPopulationDefinition.name, patientsByMeasurementType)
+        return Population(populationDefinition.name, patientsByMeasurementType)
     }
 
     private fun treatmentAnalysisForPatients(
-        treatment: TreatmentGroup, patients: List<DiagnosisAndEpisode>, subPopulationsByName: Map<String, SubPopulation>
+        treatment: TreatmentGroup, patients: List<DiagnosisAndEpisode>, populationsByName: Map<String, Population>
     ): TreatmentAnalysis {
         val treatmentMeasurements = MeasurementType.entries.associateWith { measurementType ->
             val patientsWithTreatmentAndMeasurement = patients.filter(measurementType.calculation::isEligible)
-            subPopulationDefinitions.map { (title, criteria) ->
+            populationDefinitions.map { (title, criteria) ->
                 val matchingPatients = patientsWithTreatmentAndMeasurement.filter(criteria)
-                val eligibleSubPopulationSize = subPopulationsByName[title]!!.patientsByMeasurementType[measurementType]!!.size
-                title to measurementType.calculation.calculate(matchingPatients, eligibleSubPopulationSize)
+                val eligiblePopulationSize = populationsByName[title]!!.patientsByMeasurementType[measurementType]!!.size
+                title to measurementType.calculation.calculate(matchingPatients, eligiblePopulationSize)
             }.toMap()
         }
         return TreatmentAnalysis(treatment, treatmentMeasurements)

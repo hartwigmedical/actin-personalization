@@ -19,20 +19,20 @@ class PatientPopulationBreakdownTest {
             TreatmentGroup.CAPOX_OR_FOLFOX to listOf(capoxPatient)
         )
         val ageSubPopulation = "Age 45-55"
-        val subPopulationDefinitions = listOf(
-            SubPopulationDefinition(ALL_PATIENTS_SUB_POPULATION_NAME) { true },
-            SubPopulationDefinition(ageSubPopulation) { it.first.ageAtDiagnosis in 45..55 }
+        val populationDefinitions = listOf(
+            PopulationDefinition(ALL_PATIENTS_POPULATION_NAME) { true },
+            PopulationDefinition(ageSubPopulation) { it.first.ageAtDiagnosis in 45..55 }
         )
 
-        val analysis = PatientPopulationBreakdown(patientsByTreatment, subPopulationDefinitions).analyze()
-        assertThat(analysis.subPopulations).containsExactly(
-            SubPopulation(
-                ALL_PATIENTS_SUB_POPULATION_NAME, mapOf(
+        val analysis = PatientPopulationBreakdown(patientsByTreatment, populationDefinitions).analyze()
+        assertThat(analysis.populations).containsExactly(
+            Population(
+                ALL_PATIENTS_POPULATION_NAME, mapOf(
                     MeasurementType.TREATMENT_DECISION to listOf(fluourouracilPatient, capecitabinePatient, capoxPatient),
                     MeasurementType.PROGRESSION_FREE_SURVIVAL to listOf(fluourouracilPatient, capoxPatient)
                 )
             ),
-            SubPopulation(
+            Population(
                 ageSubPopulation, mapOf(
                     MeasurementType.TREATMENT_DECISION to listOf(fluourouracilPatient, capecitabinePatient),
                     MeasurementType.PROGRESSION_FREE_SURVIVAL to listOf(fluourouracilPatient)
@@ -44,11 +44,11 @@ class PatientPopulationBreakdownTest {
             TreatmentAnalysis(
                 TreatmentGroup.CAPECITABINE_OR_FLUOROURACIL, mapOf(
                     MeasurementType.TREATMENT_DECISION to mapOf(
-                        ALL_PATIENTS_SUB_POPULATION_NAME to Measurement(2.0 / 3, 2),
+                        ALL_PATIENTS_POPULATION_NAME to Measurement(2.0 / 3, 2),
                         ageSubPopulation to Measurement(1.0, 2)
                     ),
                     MeasurementType.PROGRESSION_FREE_SURVIVAL to mapOf(
-                        ALL_PATIENTS_SUB_POPULATION_NAME to Measurement(70.0, 1, 70, 70, Double.NaN),
+                        ALL_PATIENTS_POPULATION_NAME to Measurement(70.0, 1, 70, 70, Double.NaN),
                         ageSubPopulation to Measurement(70.0, 1, 70, 70, Double.NaN)
                     )
                 )
@@ -56,11 +56,11 @@ class PatientPopulationBreakdownTest {
             TreatmentAnalysis(
                 TreatmentGroup.CAPOX_OR_FOLFOX, mapOf(
                     MeasurementType.TREATMENT_DECISION to mapOf(
-                        ALL_PATIENTS_SUB_POPULATION_NAME to Measurement(1.0 / 3, 1),
+                        ALL_PATIENTS_POPULATION_NAME to Measurement(1.0 / 3, 1),
                         ageSubPopulation to Measurement(0.0, 0)
                     ),
                     MeasurementType.PROGRESSION_FREE_SURVIVAL to mapOf(
-                        ALL_PATIENTS_SUB_POPULATION_NAME to Measurement(100.0, 1, 100, 100, Double.NaN),
+                        ALL_PATIENTS_POPULATION_NAME to Measurement(100.0, 1, 100, 100, Double.NaN),
                         ageSubPopulation to Measurement(Double.NaN, 0, null, null, Double.NaN)
                     )
                 )
