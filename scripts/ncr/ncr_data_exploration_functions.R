@@ -1,11 +1,23 @@
-load_ncr_data <- function() {  
-  ncr <- read.csv(paste0(Sys.getenv("HOME"), "/hmf/tmp/ncr_crc_dataset.csv"), sep = ";")
+load_ncr_data_latest <- function() {
+  ncr <- read.csv(paste0(Sys.getenv("HOME"), "/hmf/tmp/ncr_crc_dataset_2.csv"), sep = ";")
 
   return(ncr)
 }
 
-load_ncr_data_notebook <- function() { 
-  ncr <- read.csv(paste0("/data/patient_like_me/ncr/K23244.csv"), sep = ";")
+load_ncr_data_1 <- function() {
+  ncr <- read.csv(paste0(Sys.getenv("HOME"), "/hmf/tmp/ncr_crc_dataset_1.csv"), sep = ";")
+
+  return(ncr)
+}
+
+load_ncr_data_notebook_latest <- function() {
+  ncr <- read.csv(paste0("/data/patient_like_me/ncr/latest/K2400223.csv"), sep = ";")
+
+  return(ncr)
+}
+
+load_ncr_data_notebook_1 <- function() {
+  ncr <- read.csv(paste0("/data/patient_like_me/ncr/1/K23244.csv"), sep = ";")
 
   return(ncr)
 }
