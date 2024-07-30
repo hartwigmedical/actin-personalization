@@ -32,6 +32,7 @@ SELECT
 	metastasisLocationGroupsPriorToSystemicTreatment,
     systemicTreatmentPlan,
     intervalTumorIncidenceTreatmentPlanStart,
+    intervalTumorIncidenceTreatmentPlanStop,
     pfs AS systemicTreatmentPlanPfs,
     response,
     intervalTreatmentPlanStartResponseDate
