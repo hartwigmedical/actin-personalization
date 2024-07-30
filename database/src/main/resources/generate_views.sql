@@ -33,6 +33,7 @@ SELECT
     systemicTreatmentPlan,
     intervalTumorIncidenceTreatmentPlanStart,
     intervalTumorIncidenceTreatmentPlanStop,
+    intervalTumorIncidenceTreatmentPlanStop-intervalTumorIncidenceTreatmentPlanStart AS systemicTreatmentPlanDuration,
     pfs AS systemicTreatmentPlanPfs,
     response,
     intervalTreatmentPlanStartResponseDate
