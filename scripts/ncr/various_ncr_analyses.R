@@ -28,7 +28,13 @@ ggplot(data, aes(x=as.factor(type), y = intervalVariable, fill=as.factor(type)))
 t.test(intervalVariable~type, data=data)
 wilcox.test(intervalVariable~type, data=data)
 
+systemicTreatmentPlanPercentages <- prop.table(table(data$systemicTreatmentPlan))*100
+systemicTreatmentPlanCensorPercentages <- data %>% filter(type=='CENSOR') %>% select(systemicTreatmentPlan) %>% table() %>% prop.table()*100
+systemicTreatmentPlanProgOrDeathPercentages <- data %>% filter(type=='PROGRESSION_OR_DEATH') %>% select(systemicTreatmentPlan) %>% table() %>% prop.table()*100
 
+barplot(systemicTreatmentPlanPercentages, las=2, cex.names=0.7, main="All")
+barplot(systemicTreatmentPlanCensorPercentages, las=2, cex.names=0.7, main="Censor only")
+barplot(systemicTreatmentPlanProgOrDeathPercentages, las=2, cex.names=0.7, main="Progression/death only")
 
 ### 240729 NCR data update analysis---------------------------------------------
 # Retrieve data ------------------------------------------------------------------
