@@ -1,9 +1,38 @@
 library(dplyr)
 library(tibble)
 
+source(paste0(Sys.getenv("HOME"), "/hmf/repos/actin-personalization/scripts/ncr/ncr_data_exploration_functions.R"))
+
+### 240801 CENSOR data analysis---------------------------------------------
+# Retrieve data ------------------------------------------------------------------
 rm(list=ls())
 
-source(paste0(Sys.getenv("HOME"), "/hmf/repos/actin-personalization/scripts/ncr/ncr_data_exploration_functions.R"))
+dbActin <- dbConnect(MySQL(), dbname='actin_personalization', groups="RAnalysis")
+query <-"select ncrId, 'CENSOR' as type, systemicTreatmentPlan, if(intervalTumorIncidencePfsMeasureDate-intervalTumorIncidenceTreatmentPlanStart<0,null, intervalTumorIncidencePfsMeasureDate-intervalTumorIncidenceTreatmentPlanStart) as intervalVariable from diagnosisTreatments d 
+inner join pfsMeasure p on p.episodeId=d.episodeId
+where d.episodeId in (select episodeId from pfsMeasure where pfsMeasureType='CENSOR') and systemicTreatmentPlan is not null
+union
+select ncrId, 'PROGRESSION_OR_DEATH' as type, systemicTreatmentPlan, systemicTreatmentPlanPfs as intervalVariable from diagnosisTreatments 
+where systemicTreatmentPlan is not null and systemicTreatmentPlanPfs is not null;"
+
+data <- dbGetQuery(dbActin, query)
+dbDisconnect(dbActin)
+
+# Plot and analyze data
+medianIntervalPerType <- data %>% group_by(type) %>% summarize(median=median(intervalVariable, na.rm=T))
+
+ggplot(data, aes(x=intervalVariable, fill=as.factor(type))) + geom_density(alpha=0.5) + theme_minimal() + labs(title="Density plot of interval by type")
+ggplot(data, aes(x=as.factor(type), y = intervalVariable, fill=as.factor(type))) + geom_boxplot() + theme_minimal() + labs(title="Boxplot of interval by type")
+ggplot(data, aes(x=as.factor(type), y = intervalVariable, fill=as.factor(type))) + geom_violin() + theme_minimal() + labs(title="Violin plot of interval by type")
+
+t.test(intervalVariable~type, data=data)
+wilcox.test(intervalVariable~type, data=data)
+
+
+
+### 240729 NCR data update analysis---------------------------------------------
+# Retrieve data ------------------------------------------------------------------
+rm(list=ls())
 
 ncr_latest <- load_ncr_data_latest()
 ncr_orig <- load_ncr_data_1()
