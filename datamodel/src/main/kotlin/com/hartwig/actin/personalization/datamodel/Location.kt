@@ -78,6 +78,7 @@ enum class Location(val locationGroup: LocationGroup) {
     GASTRIC_FUNDUS(LocationGroup.STOMACH),
     GASTRIC_GREATER_CURVATURE_NOS(LocationGroup.STOMACH),
     GASTRIC_SMALL_CURVATURE_NOS(LocationGroup.STOMACH),
+    GASTROESOPHAGEAL_JUNCTION(LocationGroup.STOMACH),
     GLANDULA_PAROTID(LocationGroup.GLANDULA_PAROTID),
     GLANDULA_SUBMANDIBULARIS(LocationGroup.MAJOR_SALIVARY_GLANDS),
     GLOTTIS(LocationGroup.LARYNX),

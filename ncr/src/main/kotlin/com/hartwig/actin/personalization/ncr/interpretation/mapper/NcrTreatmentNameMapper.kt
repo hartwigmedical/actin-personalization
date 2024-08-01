@@ -21,6 +21,7 @@ object NcrTreatmentNameMapper : NcrStringCodeMapper<Drug> {
             "L01BA03" -> Drug.RALTITREXED
             "L01BA04" -> Drug.PEMETREXED
             "L01BB04" -> Drug.CLADRIBINE
+            "L01BB05" -> Drug.CLADRIBINE  // TODO - Fludarabine
             "L01BC01" -> Drug.CYTARABINE
             "L01BC02" -> Drug.FLUOROURACIL
             "L01BC03" -> Drug.TEGAFUR
@@ -36,6 +37,7 @@ object NcrTreatmentNameMapper : NcrStringCodeMapper<Drug> {
             "L01DB01" -> Drug.DOXORUBICIN_ADRIAMYCIN
             "L01DB02" -> Drug.DAUNORUBICIN
             "L01DB03" -> Drug.EPIRUBICIN_SYSTEMIC
+            "L01DB06" -> Drug.EPIRUBICIN_SYSTEMIC  // TODO - Idarubicine
             "L01DC03" -> Drug.MITOMYCIN_SYSTEMIC
             "L01XA01" -> Drug.CISPLATIN
             "L01XA02" -> Drug.CARBOPLATIN
@@ -58,17 +60,19 @@ object NcrTreatmentNameMapper : NcrStringCodeMapper<Drug> {
             "L02BG03" -> Drug.ANASTROZOLE
             "L02BG04" -> Drug.LETROZOLE_FEMARA
             "L02BX" -> Drug.GONADORELIN_ANTAGONISTS_LHRH
-            "L02BX03" -> Drug.ABIRATERONE_ZYTIGA_AND_PREDNISONE
+            "L02BX03", "L02BX53" -> Drug.ABIRATERONE_ZYTIGA_AND_PREDNISONE  // TODO
             "H02AB02" -> Drug.DEXAMETHASONE
             "H02AB07" -> Drug.PREDNISONE
             "L03AB04" -> Drug.INTERFERON_ALPHA_2A
             "430000" -> Drug.TARGETED_THERAPY
             "433000" -> Drug.ANGIOGENESIS_INHIBITOR
+            "445000" -> Drug.BEVACIZUMAB  // TODO - Bevacizumab/interferon alfa-2a
             "690430" -> Drug.TARGETED_THERAPY_ABROAD
             "699005" -> Drug.STUDY_MEDICATION_IMMUNOTHERAPY
             "L01E" -> Drug.PROTEIN_KINASE_INHIBITORS
             "L01EA01" -> Drug.IMATINIB
             "L01EB02" -> Drug.ERLOTINIB
+            "L01EB04" -> Drug.ERLOTINIB  // TODO - OSIMERTINIB
             "L01EC01" -> Drug.VEMURAFENIB
             "L01EC02" -> Drug.DABRAFENIB
             "L01EC03" -> Drug.ENCORAFENIB
@@ -79,8 +83,10 @@ object NcrTreatmentNameMapper : NcrStringCodeMapper<Drug> {
             "L01EL01" -> Drug.IBRUTINIB
             "L01EX03" -> Drug.PAZOPANIB
             "L01EX07" -> Drug.CABOZANTINIB
+            "L01EX17" -> Drug.CABOZANTINIB  // TODO - Capmatinib
             "L01F" -> Drug.MONOCLONAL_ANTIBODIES
             "L01FA01" -> Drug.RITUXIMAB
+            "L01FC01" -> Drug.TARGETED_THERAPY  // TODO - DARATUMUMAB
             "L01FD01" -> Drug.TRASTUZUMAB_HERCEPTIN
             "L01FD02" -> Drug.PERTUZUMAB
             "L01FE01" -> Drug.CETUXIMAB

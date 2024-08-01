@@ -3,7 +3,6 @@ package com.hartwig.actin.personalization.ncr.interpretation.mapper
 import com.hartwig.actin.personalization.datamodel.TumorType
 
 object NcrTumorTypeMapper : NcrIntCodeMapper<TumorType> {
-
     override fun resolve(code: Int): TumorType {
         return when (code) {
             1 -> TumorType.CRC_ADENOCARCINOMA
@@ -53,10 +52,12 @@ object NcrTumorTypeMapper : NcrIntCodeMapper<TumorType> {
             8260 -> TumorType.PAPILLARY_ADENOCARCINOMA_NOS
             8261 -> TumorType.ADENOCARCINOMA_IN_VILLOUS_ADENOMA
             8263 -> TumorType.ADENOCARCINOMA_IN_TUBULOVILLIAN_ADENOMA
+            8290 -> TumorType.ADENOCARCINOMA_IN_TUBULOVILLIAN_ADENOMA // TODO - Oxyfiel adenoom/carcinoom - Hurthle-cel carcinoom
             8310 -> TumorType.CLEAR_CELL_ADENOCARCINOMA_NOS
             8312 -> TumorType.RENAL_CELL_CARCINOMA_NOS
             8317 -> TumorType.CHROMOPHOBIC_RENAL_CELL_CARCINOMA
             8318 -> TumorType.SARCOMATOID_RENAL_CELL_CARCINOMA
+            8341 -> TumorType.PAPILLARY_ADENOCARCINOMA_NOS // TODO - new
             8380 -> TumorType.ENDOMETRIOID_CARCINOMA_NOS
             8401 -> TumorType.APOCRINE_ADENOCARCINOMA
             8402 -> TumorType.HIDRADENOCARCINOMA
@@ -69,6 +70,7 @@ object NcrTumorTypeMapper : NcrIntCodeMapper<TumorType> {
             8500 -> TumorType.DUCTAL_CARCINOMA_NOS
             8503 -> TumorType.INTRADUCTAL_PAPILLARY_ADENOCARCINOMA
             8504 -> TumorType.ENCAPSULATED_INTRACYSTIC_PAPILLARY_CARCINOMA
+            8510 -> TumorType.MEDULLARY_CARCINOMA_WITH_LYMPHOID_STROMA // TODO - new
             8512 -> TumorType.MEDULLARY_CARCINOMA_WITH_LYMPHOID_STROMA
             8520 -> TumorType.LOBULAR_CARCINOMA_NOS
             8522 -> TumorType.DUCTAL_AND_LOBULAR_CARCINOMA
@@ -118,6 +120,7 @@ object NcrTumorTypeMapper : NcrIntCodeMapper<TumorType> {
             9705 -> TumorType.NODAL_TFH_CELL_LYMPHOMA_ANGIOIMMUNOBLASTIC_TYPE
             9709 -> TumorType.CUTANEOUS_T_CELL_LYMPHOMA_NOS
             9718 -> TumorType.PRIMARY_CUTANEOUS_ANAPLASTIC_CD30_T_CELL_LYMPHOMA
+            9731 -> TumorType.EXTRAMEDULLARY_PLASMACYTOMA // TODO - new
             9732 -> TumorType.MULTIPLE_MYELOMA_OR_PLASMA_CELL_MYELOMA_KAHLERS_DISEASE
             9734 -> TumorType.EXTRAMEDULLARY_PLASMACYTOMA
             9761 -> TumorType.WALDENSTROMS_MACROGLOBULINEMIA
@@ -128,12 +131,14 @@ object NcrTumorTypeMapper : NcrIntCodeMapper<TumorType> {
             9872 -> TumorType.AML_WITH_MINIMAL_DIFFERENTIATION
             9875 -> TumorType.CHRONIC_MYELOGENOUS_LEUKEMIA_BCR_ABL1_POS
             9876 -> TumorType.ATYPICAL_CHRONIC_MYELOGENOUS_LEUKEMIA_BCR_ABL1_NEG
+            9877 -> TumorType.AML_WITH_MINIMAL_DIFFERENTIATION  // TODO - AML met NPM1-mutatie
             9940 -> TumorType.HAIRY_CELL_LEUKEMIA
             9945 -> TumorType.CHRONIC_MYELOMONOCYTIC_LEUKEMIA
             9950 -> TumorType.POLYCYTHEMIA_VERA
             9960 -> TumorType.MYELOPROLIFERATIVE_DISORDER_NOS
             9961 -> TumorType.PRIMARY_MYELOFIBROSIS
             9962 -> TumorType.ESSENTIAL_THROMBOCYTHEMIA
+            9975 -> TumorType.MDS_WITH_DYSPLASIA_IN_AT_LEAST_ONE_CELL_LINE // TODO - Myelodysplastische/myeloproliferatieve aand., NNO
             9980 -> TumorType.MDS_WITH_DYSPLASIA_IN_ONE_CELL_LINE
             9982 -> TumorType.MDS_WITH_RING_SIDEROBLASTS_OR_MDS_WITH_SF3B1_MUTATION
             9983 -> TumorType.MDS_WITH_ELEVATED_BLASTS_ONE
