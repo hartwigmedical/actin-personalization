@@ -30,7 +30,7 @@ object NcrLocationMapper {
             "C119" -> Location.NASOPHARYNX_NOS
             "C129" -> Location.SINUS_PYRIFORM
             "C130" -> Location.POSTCRICOID_REGION
-            "C131" -> Location.OTHER_POORLY_DEFINED_LOCALIZATIONS  // TODO - new
+            "C131" -> Location.ARYEPIGLOTTIC_FOLD
             "C139" -> Location.HYPOPHARYNX_NOS
             "C148" -> Location.LIP_ORAL_CAVITY_PHARYNX_OVERLAPPING
             "C153" -> Location.ESOPHAGUS_UPPER_THIRD
@@ -43,8 +43,8 @@ object NcrLocationMapper {
             "C163" -> Location.GASTRIC_ANTRUM_PYLORI
             "C165" -> Location.GASTRIC_SMALL_CURVATURE_NOS
             "C166" -> Location.GASTRIC_GREATER_CURVATURE_NOS
-            "C167" -> Location.OTHER_POORLY_DEFINED_LOCALIZATIONS  // TODO - new
-            "C168" -> Location.OTHER_POORLY_DEFINED_LOCALIZATIONS  // TODO - new
+            "C167" -> Location.GASTROESOPHAGEAL_JUNCTION
+            "C168" -> Location.STOMACH_OVERHANG
             "C169" -> Location.STOMACH_NOS
             "C170" -> Location.DUODENUM
             "C171" -> Location.JEJUNUM
