@@ -75,6 +75,7 @@ object NcrLocationMapper {
             "C242" -> Location.COMMON_BILE_DUCT_DISTAL_EXTRAHEPATIC_BILE_DUCT
             "C244" -> Location.HEPATIC_DUCT_PROXIMAL_EXTRAHEPATIC_BILE_DUCTS
             "C248" -> Location.GALLBLADDER_BILE_DUCTS_OVERLAPPING
+            "C249" -> Location.BILE_DUCTS_NOS
             "C250" -> Location.PANCREATIC_HEAD
             "C251" -> Location.PANCREATIC_CORPUS
             "C252" -> Location.PANCREAS_CAUDA
@@ -147,6 +148,7 @@ object NcrLocationMapper {
             "C508" -> Location.BREAST_OVERLAPPING
             "C509" -> Location.BREAST_NNO
             "C510" -> Location.LABIA_MAJORA
+            "C511" -> Location.LABIA_MINORA
             "C519" -> Location.VULVA_NOS
             "C529" -> Location.VAGINA_NOS
             "C530" -> Location.ENDOCERVIX
@@ -164,6 +166,7 @@ object NcrLocationMapper {
             "C574" -> Location.UTERINE_ADNEXA_NOS
             "C600" -> Location.PREPUTIUM
             "C601" -> Location.GLANS_PENIS
+            "C602" -> Location.PENIS_BODY
             "C619" -> Location.PROSTATE
             "C621" -> Location.TESTIS_DESCENDED
             "C629" -> Location.TESTIS_NOS
@@ -205,6 +208,7 @@ object NcrLocationMapper {
             "C740" -> Location.ADRENAL_CORTEX
             "C741" -> Location.ADRENAL_MEDULLA
             "C749" -> Location.ADRENAL_GLAND_NOS
+            "C751" -> Location.PITUITARY_GLAND
             "C761" -> Location.THORAX_NOS
             "C762" -> Location.ABDOMEN_NOS
             "C763" -> Location.PELVIS_NNE
