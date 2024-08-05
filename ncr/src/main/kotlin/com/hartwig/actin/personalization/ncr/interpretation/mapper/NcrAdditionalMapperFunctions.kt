@@ -15,7 +15,7 @@ fun resolvePreAndPostSurgery(code: Int?): Pair<Boolean, Boolean> {
 
 fun resolveCyclesAndDetails(code: Int?): Pair<Int?, TreatmentCyclesDetails?> {
     return when (code) {
-        in 0..48 -> Pair(code, null)
+        in 0..48, 60 -> Pair(code, null)
         66 -> Pair(null, TreatmentCyclesDetails.SENSITIZER)
         77 -> Pair(null, TreatmentCyclesDetails.MAINTENANCE)
         98 -> Pair(null, TreatmentCyclesDetails.ONGOING_TREATMENT)

@@ -30,7 +30,7 @@ class NcrIngestionApplication : Callable<Int> {
             LOGGER.info { "Done!" }
             return 0
         } catch (e: Exception) {
-            LOGGER.error(e) { "Failed to ingest NCR dataset" }
+            LOGGER.error(e) { "Failed to ingest NCR dataset: $e" }
             return 1
         }
     }
