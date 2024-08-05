@@ -4,7 +4,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class PfsMeasure(
-    val pfsMeasureType: PfsMeasureType,
-    val pfsMeasureFollowupEvent: PfsMeasureFollowUpEvent?,
-    val intervalTumorIncidencePfsMeasureDate: Int?
+    val type: PfsMeasureType,
+    val followUpEvent: PfsMeasureFollowUpEvent?,
+    val intervalTumorIncidencePfsMeasure: Int?
 )

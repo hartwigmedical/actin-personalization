@@ -141,7 +141,7 @@ CREATE TABLE `metastasis` (
     `location` varchar(255) NOT NULL,
     `locationGroup` varchar(50) NOT NULL,
     `intervalTumorIncidenceMetastasisDetection` int,
-    `progression` tinyint(1),
+    `isPartOfProgression` tinyint(1),
     FOREIGN KEY (`episodeId`) REFERENCES `episode`(`id`),
     PRIMARY KEY (`id`)
 );
@@ -150,10 +150,10 @@ DROP TABLE IF EXISTS `labMeasurement`;
 CREATE TABLE `labMeasurement` (
     `id` int NOT NULL AUTO_INCREMENT,
     `episodeId` int NOT NULL,
-    `labMeasure` varchar(50) NOT NULL,
-    `labMeasureValue` double NOT NULL,
-    `labMeasureUnit` varchar(50) NOT NULL,
-    `intervalTumorIncidenceLabMeasureValue` int,
+    `name` varchar(50) NOT NULL,
+    `value` double NOT NULL,
+    `unit` varchar(50) NOT NULL,
+    `intervalTumorIncidenceLabMeasure` int,
     `isPreSurgical` tinyint(1),
     `isPostSurgical` tinyint(1),
     FOREIGN KEY (`episodeId`) REFERENCES `episode`(`id`),
@@ -164,14 +164,14 @@ DROP TABLE IF EXISTS `surgery`;
 CREATE TABLE `surgery` (
     `id` int NOT NULL AUTO_INCREMENT,
     `episodeId` int NOT NULL,
-    `surgeryType` varchar(50) NOT NULL,
-    `surgeryTechnique` varchar(50),
-    `surgeryUrgency` varchar(255),
-    `surgeryRadicality` varchar(50),
+    `type` varchar(50) NOT NULL,
+    `technique` varchar(50),
+    `urgency` varchar(255),
+    `radicality` varchar(50),
     `circumferentialResectionMargin` varchar(50),
     `anastomoticLeakageAfterSurgery` varchar(50),
     `intervalTumorIncidenceSurgery` int,
-    `durationOfHospitalization` int,
+    `hospitalizationDuration` int,
     FOREIGN KEY (`episodeId`) REFERENCES `episode`(`id`),
     PRIMARY KEY (`id`)
 );
@@ -184,15 +184,12 @@ CREATE TABLE `systemicTreatmentScheme` (
     `intervalTumorIncidenceTreatmentLineStartMax` int,
     `intervalTumorIncidenceTreatmentLineStopMin` int,
     `intervalTumorIncidenceTreatmentLineStopMax` int,
-
-    `intervalTreatmentStartMinResponseDate` int,
-    `intervalTreatmentStartMaxResponseDate` int,
     FOREIGN KEY (`episodeId`) REFERENCES `episode`(`id`),
     PRIMARY KEY (`id`)
 );
 
-DROP TABLE IF EXISTS `systemicTreatmentComponent`;
-CREATE TABLE `systemicTreatmentComponent` (
+DROP TABLE IF EXISTS `systemicTreatmentSchemeDrug`;
+CREATE TABLE `systemicTreatmentSchemeDrug` (
     `id` int NOT NULL AUTO_INCREMENT,
     `systemicTreatmentSchemeId` int NOT NULL,
     `drug` varchar(50) NOT NULL,
@@ -211,9 +208,9 @@ DROP TABLE IF EXISTS `pfsMeasure`;
 CREATE TABLE `pfsMeasure` (
     `id` int NOT NULL AUTO_INCREMENT,
     `episodeId` int NOT NULL,
-    `pfsMeasureType` varchar(50) NOT NULL,
-    `pfsMeasureFollowupEvent` varchar(50),
-    `intervalTumorIncidencePfsMeasureDate` int,
+    `type` varchar(50) NOT NULL,
+    `followUpEvent` varchar(50),
+    `intervalTumorIncidencePfsMeasure` int,
     FOREIGN KEY (`episodeId`) REFERENCES `episode`(`id`),
     PRIMARY KEY (`id`)
 );
