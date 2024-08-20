@@ -37,6 +37,7 @@ class PersonalizationReportWriterApplication : Callable<Int> {
         val tables = listOf(
             MeasurementType.TREATMENT_DECISION,
             MeasurementType.PROGRESSION_FREE_SURVIVAL,
+            MeasurementType.PERCENT_WITH_PFS_ONE_HUNDRED_DAYS,
             MeasurementType.PERCENT_WITH_PFS_ONE_YEAR
         ).map { measure ->
             TableContent.fromPersonalizedDataAnalysis(analysis, measure)
