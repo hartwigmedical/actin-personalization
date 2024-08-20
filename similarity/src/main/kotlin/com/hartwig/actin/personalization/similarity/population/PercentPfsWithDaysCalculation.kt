@@ -26,7 +26,8 @@ class PercentPfsWithDaysCalculation(val minPfsDays: Int) : Calculation {
     }
 
     override fun createTableElement(measurement: Measurement): TableElement {
-        return TableElement.regular(String.format("%.1f%%", 100.0 * measurement.value))
+        val valueString = if (measurement.value.isNaN()) "" else String.format("%.1f%% ", 100.0 * measurement.value)
+        return TableElement.regular("$valueString(n=${measurement.numPatients})")
     }
 
     override fun title(): String {
