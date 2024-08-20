@@ -8,7 +8,8 @@ typealias DiagnosisAndEpisode = Pair<Diagnosis, Episode>
 
 class PatientPopulationBreakdown(
     private val patientsByTreatment: List<Pair<TreatmentGroup, List<DiagnosisAndEpisode>>>,
-    private val populationDefinitions: List<PopulationDefinition>
+    private val populationDefinitions: List<PopulationDefinition>,
+    private val measurementTypes: List<MeasurementType> = MeasurementType.entries
 ) {
     fun analyze(): PersonalizedDataAnalysis {
         val allPatients = patientsByTreatment.flatMap { it.second }
@@ -26,7 +27,7 @@ class PatientPopulationBreakdown(
         populationDefinition: PopulationDefinition, allPatients: List<DiagnosisAndEpisode>
     ): Population {
         val matchingPatients = allPatients.filter(populationDefinition.criteria)
-        val patientsByMeasurementType = MeasurementType.entries.associateWith { measurementType ->
+        val patientsByMeasurementType = measurementTypes.associateWith { measurementType ->
             matchingPatients.filter(measurementType.calculation::isEligible)
         }
         return Population(populationDefinition.name, patientsByMeasurementType)
@@ -35,13 +36,13 @@ class PatientPopulationBreakdown(
     private fun treatmentAnalysisForPatients(
         treatment: TreatmentGroup, patients: List<DiagnosisAndEpisode>, populationsByName: Map<String, Population>
     ): TreatmentAnalysis {
-        val treatmentMeasurements = MeasurementType.entries.associateWith { measurementType ->
+        val treatmentMeasurements = measurementTypes.associateWith { measurementType ->
             val patientsWithTreatmentAndMeasurement = patients.filter(measurementType.calculation::isEligible)
-            populationDefinitions.map { (title, criteria) ->
+            populationDefinitions.associate { (title, criteria) ->
                 val matchingPatients = patientsWithTreatmentAndMeasurement.filter(criteria)
                 val eligiblePopulationSize = populationsByName[title]!!.patientsByMeasurementType[measurementType]!!.size
                 title to measurementType.calculation.calculate(matchingPatients, eligiblePopulationSize)
-            }.toMap()
+            }
         }
         return TreatmentAnalysis(treatment, treatmentMeasurements)
     }

@@ -33,8 +33,12 @@ class PersonalizationReportWriterApplication : Callable<Int> {
 
         val analysis = PersonalizedDataInterpreter.createFromFile(patientFile)
             .analyzePatient(age, whoStatus, hasRasMutation, extractTopLevelLocationGroups(metastasisLocationString))
-        
-        val tables = listOf(MeasurementType.TREATMENT_DECISION, MeasurementType.PROGRESSION_FREE_SURVIVAL).map { measure ->
+
+        val tables = listOf(
+            MeasurementType.TREATMENT_DECISION,
+            MeasurementType.PROGRESSION_FREE_SURVIVAL,
+            MeasurementType.PERCENT_WITH_PFS_ONE_YEAR
+        ).map { measure ->
             TableContent.fromPersonalizedDataAnalysis(analysis, measure)
         }
 

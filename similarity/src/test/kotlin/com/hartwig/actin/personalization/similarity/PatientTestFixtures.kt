@@ -55,8 +55,10 @@ fun recordWithEpisode(episode: Episode): ReferencePatient {
     return PATIENT_RECORD.copy(tumorEntries = PATIENT_RECORD.tumorEntries.map { it.copy(episodes = listOf(episode)) })
 }
 
-fun episodeWithTreatment(treatment: Treatment, pfs: Int? = null): Episode {
+fun episodeWithTreatment(treatment: Treatment, pfs: Int? = null, planStart: Int? = null): Episode {
     return EPISODE.copy(
-        systemicTreatmentPlan = SystemicTreatmentPlan(treatment = treatment, systemicTreatmentSchemes = emptyList(), pfs = pfs)
+        systemicTreatmentPlan = SystemicTreatmentPlan(
+            treatment = treatment, systemicTreatmentSchemes = emptyList(), pfs = pfs, intervalTumorIncidenceTreatmentPlanStart = planStart
+        )
     )
 }
