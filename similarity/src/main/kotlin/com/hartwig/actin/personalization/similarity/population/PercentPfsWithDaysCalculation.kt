@@ -4,6 +4,8 @@ import com.hartwig.actin.personalization.datamodel.PfsMeasure
 import com.hartwig.actin.personalization.datamodel.PfsMeasureType
 import com.hartwig.actin.personalization.similarity.report.TableElement
 
+private const val MIN_PATIENT_COUNT = 20
+
 class PercentPfsWithDaysCalculation(val minPfsDays: Int) : Calculation {
 
     override fun isEligible(patient: DiagnosisAndEpisode): Boolean {
@@ -26,8 +28,12 @@ class PercentPfsWithDaysCalculation(val minPfsDays: Int) : Calculation {
     }
 
     override fun createTableElement(measurement: Measurement): TableElement {
-        val valueString = if (measurement.value.isNaN()) "" else String.format("%.1f%% ", 100.0 * measurement.value)
-        return TableElement.regular("$valueString(n=${measurement.numPatients})")
+        val text = if (measurement.numPatients < MIN_PATIENT_COUNT) {
+            "(n≤$MIN_PATIENT_COUNT)"
+        } else {
+            String.format("%.1f%% (n=${measurement.numPatients})", 100.0 * measurement.value)
+        }
+        return TableElement.regular(text)
     }
 
     override fun title(): String {

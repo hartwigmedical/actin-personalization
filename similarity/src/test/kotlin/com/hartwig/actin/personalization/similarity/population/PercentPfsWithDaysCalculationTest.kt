@@ -67,9 +67,16 @@ class PercentPfsWithDaysCalculationTest {
     }
 
     @Test
-    fun `Should create table element with percentage of population`() {
-        val measurement = Measurement(0.03, 3)
+    fun `Should create table element without value when patient count below minimum`() {
+        val measurement = Measurement(0.03, 19)
         val tableElement = calculation.createTableElement(measurement)
-        assertThat(tableElement).isEqualTo(TableElement.regular("3.0% (n=3)"))
+        assertThat(tableElement).isEqualTo(TableElement.regular("(n≤20)"))
+    }
+
+    @Test
+    fun `Should create table element with percentage of population`() {
+        val measurement = Measurement(0.03, 30)
+        val tableElement = calculation.createTableElement(measurement)
+        assertThat(tableElement).isEqualTo(TableElement.regular("3.0% (n=30)"))
     }
 }
