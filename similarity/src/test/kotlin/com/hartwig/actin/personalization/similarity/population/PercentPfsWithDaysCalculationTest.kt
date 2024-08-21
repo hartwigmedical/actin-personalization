@@ -77,6 +77,6 @@ class PercentPfsWithDaysCalculationTest {
     fun `Should create table element with percentage of population`() {
         val measurement = Measurement(0.03, 30)
         val tableElement = calculation.createTableElement(measurement)
-        assertThat(tableElement).isEqualTo(TableElement.regular("3.0% (n=30)"))
+        assertThat(tableElement).isEqualTo(TableElement("3.0% ", "(n=30)", 0.03))
     }
 }

@@ -5,7 +5,7 @@ import com.hartwig.actin.personalization.similarity.population.PersonalizedDataA
 import com.hartwig.actin.personalization.similarity.population.Population
 import java.lang.IllegalArgumentException
 
-data class TableElement(val boldContent: String? = null, val content: String? = null) {
+data class TableElement(val boldContent: String? = null, val content: String? = null, val shading: Double? = null) {
     companion object {
         fun regular(content: String) = TableElement(content = content)
     }

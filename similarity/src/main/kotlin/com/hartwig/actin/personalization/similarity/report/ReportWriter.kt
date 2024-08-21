@@ -59,10 +59,16 @@ class ReportWriter(private val fontRegular: PdfFont, private val fontBold: PdfFo
         val contentWidth = contentWidth()
         val table = Table(UnitValue.createPercentArray(floatArrayOf(1f))).setWidth(contentWidth)
 
-        tables.forEach { tableContent ->
-            table.addCell(titleCellWithText(tableContent.title))
-            table.addCell(borderlessCellWithElement(renderTable(tableContent)))
+        tables.flatMap { tableContent ->
+            sequenceOf(
+                titleCellWithText(tableContent.title),
+                borderlessCellWithElement(renderTable(tableContent)),
+                emptyCell()
+            )
         }
+            .dropLast(1)
+            .forEach(table::addCell)
+        
         document.add(table)
     }
 
@@ -132,10 +138,19 @@ class ReportWriter(private val fontRegular: PdfFont, private val fontBold: PdfFo
         return borderlessCellWithElement(Paragraph(text))
     }
 
-    private fun borderlessCellWithElement(element: IBlockElement): Cell {
+    private fun borderlessCellWithElement(element: IBlockElement, shading: Double? = null): Cell {
+        val cell = emptyCell()
+        cell.add(element)
+        if (shading != null) {
+            val rgb = 1 - (shading / 2).toFloat()
+            cell.setBackgroundColor(DeviceRgb(rgb, rgb, rgb))
+        }
+        return cell
+    }
+
+    private fun emptyCell(): Cell {
         val cell = Cell(1, 1)
         cell.setBorder(Border.NO_BORDER)
-        cell.add(element)
         return cell
     }
 

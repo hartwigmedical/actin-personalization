@@ -28,12 +28,11 @@ class PercentPfsWithDaysCalculation(val minPfsDays: Int) : Calculation {
     }
 
     override fun createTableElement(measurement: Measurement): TableElement {
-        val text = if (measurement.numPatients < MIN_PATIENT_COUNT) {
-            "(n≤$MIN_PATIENT_COUNT)"
+        return if (measurement.numPatients < MIN_PATIENT_COUNT) {
+            TableElement.regular("(n≤$MIN_PATIENT_COUNT)")
         } else {
-            String.format("%.1f%% (n=${measurement.numPatients})", 100.0 * measurement.value)
+            TableElement(String.format("%.1f%% ", 100.0 * measurement.value), "(n=${measurement.numPatients})", measurement.value)
         }
-        return TableElement.regular(text)
     }
 
     override fun title(): String {
