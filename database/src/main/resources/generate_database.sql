@@ -114,6 +114,8 @@ CREATE TABLE `episode` (
     `intervalTreatmentPlanStartLatestAliveStatus` int,
     `pfs` int,
     `intervalTreatmentPlanStartResponseDate` int,
+    `observedPfsDays` int,
+    `censored` tinyint(1),
     FOREIGN KEY (`diagnosisId`) REFERENCES `diagnosis`(`id`),
     PRIMARY KEY (`id`)
 );

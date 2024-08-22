@@ -29,11 +29,18 @@ class NcrSystemicTreatmentPlanExtractor {
         val firstScheme = treatmentSchemes.firstOrNull() ?: return null
         val treatment = extractTreatmentFromSchemes(treatmentSchemes)
         val planStart = firstScheme.intervalTumorIncidenceTreatmentLineStartMin
-        val intervalTumorFirstPfsMeasure = pfsMeasures.asSequence().filter { it.pfsMeasureType != PfsMeasureType.CENSOR }
-            .map(PfsMeasure::intervalTumorIncidencePfsMeasureDate)
-            .filterNotNull()
-            .filter { planStart == null || it >= planStart }
-            .minOrNull()
+
+        val sortedPfsMeasuresAfterPlanStart = pfsMeasures.asSequence()
+            .filterNot { it.intervalTumorIncidencePfsMeasureDate == null }
+            .sortedBy(PfsMeasure::intervalTumorIncidencePfsMeasureDate)
+            .dropWhile { planStart != null && it.intervalTumorIncidencePfsMeasureDate!! < planStart }
+
+        val intervalTumorFirstPfsMeasure = sortedPfsMeasuresAfterPlanStart.firstOrNull { it.pfsMeasureType != PfsMeasureType.CENSOR }
+            ?.intervalTumorIncidencePfsMeasureDate
+
+        val (observedPfsDays, censored) = intervalTumorFirstPfsMeasure?.let { it to false }
+            ?: sortedPfsMeasuresAfterPlanStart.firstOrNull()?.let { it.intervalTumorIncidencePfsMeasureDate!! to true }
+                ?.takeIf { hasNoProgressionOrDeathWithUnknownInterval(pfsMeasures) } ?: Pair(null, null)
 
         return SystemicTreatmentPlan(
             treatment = treatment,
@@ -45,8 +52,14 @@ class NcrSystemicTreatmentPlanExtractor {
             pfs = intervalTumorFirstPfsMeasure?.let { firstPfsInt -> planStart?.let { firstPfsInt - it } },
             intervalTreatmentPlanStartResponseDate = responseMeasure?.intervalTumorIncidenceResponseMeasureDate?.let { responseInterval ->
                 planStart?.let { responseInterval - planStart }
-            }
+            },
+            observedPfsDays = observedPfsDays,
+            censored = censored
         )
+    }
+
+    private fun hasNoProgressionOrDeathWithUnknownInterval(pfsMeasures: List<PfsMeasure>) = pfsMeasures.none {
+        it.pfsMeasureType != PfsMeasureType.CENSOR && it.intervalTumorIncidencePfsMeasureDate == null
     }
 
     private fun drugsFromScheme(systemicTreatmentScheme: SystemicTreatmentScheme): List<Drug> {
