@@ -115,7 +115,7 @@ class ReportWriter(private val fontRegular: PdfFont, private val fontBold: PdfFo
         )
         val paragraph = Paragraph()
         paragraph.addAll(textElements)
-        return borderlessCellWithElement(paragraph)
+        return borderlessCellWithElement(paragraph, element.shading)
     }
 
     private fun titleCellWithText(text: String): Cell {
