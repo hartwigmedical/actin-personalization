@@ -4,7 +4,7 @@ import com.hartwig.actin.personalization.datamodel.Drug
 import com.hartwig.actin.personalization.datamodel.PfsMeasure
 import com.hartwig.actin.personalization.datamodel.PfsMeasureType
 import com.hartwig.actin.personalization.datamodel.ResponseMeasure
-import com.hartwig.actin.personalization.datamodel.SystemicTreatmentComponent
+import com.hartwig.actin.personalization.datamodel.SystemicTreatmentSchemeDrug
 import com.hartwig.actin.personalization.datamodel.SystemicTreatmentPlan
 import com.hartwig.actin.personalization.datamodel.SystemicTreatmentScheme
 import com.hartwig.actin.personalization.datamodel.Treatment
@@ -29,8 +29,8 @@ class NcrSystemicTreatmentPlanExtractor {
         val firstScheme = treatmentSchemes.firstOrNull() ?: return null
         val treatment = extractTreatmentFromSchemes(treatmentSchemes)
         val planStart = firstScheme.intervalTumorIncidenceTreatmentLineStartMin
-        val intervalTumorFirstPfsMeasure = pfsMeasures.asSequence().filter { it.pfsMeasureType != PfsMeasureType.CENSOR }
-            .map(PfsMeasure::intervalTumorIncidencePfsMeasureDate)
+        val intervalTumorFirstPfsMeasure = pfsMeasures.asSequence().filter { it.type != PfsMeasureType.CENSOR }
+            .map(PfsMeasure::intervalTumorIncidencePfsMeasure)
             .filterNotNull()
             .filter { planStart == null || it >= planStart }
             .minOrNull()
@@ -50,7 +50,7 @@ class NcrSystemicTreatmentPlanExtractor {
     }
 
     private fun drugsFromScheme(systemicTreatmentScheme: SystemicTreatmentScheme): List<Drug> {
-        return systemicTreatmentScheme.treatmentComponents.map(SystemicTreatmentComponent::drug)
+        return systemicTreatmentScheme.treatmentComponents.map(SystemicTreatmentSchemeDrug::drug)
     }
 
     private fun extractTreatmentFromSchemes(treatmentSchemes: Iterable<SystemicTreatmentScheme>): Treatment {
@@ -117,7 +117,7 @@ class NcrSystemicTreatmentPlanExtractor {
                 },
                 systCode14?.let { extractSystemicComponent(it, systSchemanum14, systKuren14, systStartInt14, systStopInt14, systPrepost14) }
             )
-                .groupBy(SystemicTreatmentComponent::treatmentSchemeNumber)
+                .groupBy(SystemicTreatmentSchemeDrug::schemeNumber)
                 .map { (schemeNumber, treatments) ->
                     val (startMin, startMax, stopMin, stopMax) = treatments.map {
                         with(it) {
@@ -138,10 +138,10 @@ class NcrSystemicTreatmentPlanExtractor {
 
     private fun extractSystemicComponent(
         code: String, schemaNum: Int?, cycleCode: Int?, startInterval: Int?, stopInterval: Int?, prePostCode: Int?
-    ): SystemicTreatmentComponent {
+    ): SystemicTreatmentSchemeDrug {
         val (preSurgery, postSurgery) = resolvePreAndPostSurgery(prePostCode)
         val (cycles, cycleDetails) = resolveCyclesAndDetails(cycleCode)
-        return SystemicTreatmentComponent(
+        return SystemicTreatmentSchemeDrug(
             resolve(code),
             schemaNum,
             cycles,

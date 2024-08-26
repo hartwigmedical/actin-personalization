@@ -1,6 +1,6 @@
 package com.hartwig.actin.personalization.datamodel
 
-enum class LabMeasureUnit {
+enum class Unit {
     BILLIONS_PER_LITER,
     GRAM_PER_LITER,
     MICROGRAM_PER_LITER,

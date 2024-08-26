@@ -5,7 +5,7 @@ import com.hartwig.actin.personalization.datamodel.PfsMeasure
 import com.hartwig.actin.personalization.datamodel.PfsMeasureType
 import com.hartwig.actin.personalization.datamodel.ResponseMeasure
 import com.hartwig.actin.personalization.datamodel.ResponseMeasureType
-import com.hartwig.actin.personalization.datamodel.SystemicTreatmentComponent
+import com.hartwig.actin.personalization.datamodel.SystemicTreatmentSchemeDrug
 import com.hartwig.actin.personalization.datamodel.Treatment
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -29,7 +29,7 @@ class NcrSystemicTreatmentPlanExtractorTest {
             3 to listOf(Drug.TEGAFUR_OR_GIMERACIL_OR_OTERACIL)
         )
         val drugsByScheme =
-            plan.systemicTreatmentSchemes.associate { it.schemeNumber to it.treatmentComponents.map(SystemicTreatmentComponent::drug) }
+            plan.systemicTreatmentSchemes.associate { it.schemeNumber to it.treatmentComponents.map(SystemicTreatmentSchemeDrug::drug) }
         assertThat(drugsByScheme).isEqualTo(expectedDrugs)
 
         assertThat(plan.intervalTumorIncidenceTreatmentPlanStart).isEqualTo(1)
