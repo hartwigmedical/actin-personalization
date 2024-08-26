@@ -4,15 +4,13 @@ import com.hartwig.actin.personalization.datamodel.Drug
 import com.hartwig.actin.personalization.datamodel.Episode
 import com.hartwig.actin.personalization.datamodel.GastroenterologyResection
 import com.hartwig.actin.personalization.datamodel.Location
-import com.hartwig.actin.personalization.datamodel.LocationGroup
 import com.hartwig.actin.personalization.datamodel.MetastasesRadiotherapy
 import com.hartwig.actin.personalization.datamodel.MetastasesSurgery
-import com.hartwig.actin.personalization.datamodel.ReferencePatient
 import com.hartwig.actin.personalization.datamodel.Radiotherapy
+import com.hartwig.actin.personalization.datamodel.ReferencePatient
 import com.hartwig.actin.personalization.datamodel.SystemicTreatmentScheme
 import com.hartwig.actin.personalization.datamodel.TumorEntry
 import io.github.oshai.kotlinlogging.KotlinLogging
-
 import org.jooq.DSLContext
 import org.jooq.JSON
 import org.jooq.SQLDialect
@@ -187,7 +185,14 @@ class DatabaseWriter(private val context: DSLContext, private val connection: ja
         episode.pfsMeasures.map { extractSimpleRecord(Tables.PFSMEASURE, it, "episodeId", episodeId) }
 
     private fun systemicTreatmentComponentRecordsFromScheme(schemeId: Int, scheme: SystemicTreatmentScheme) =
-        scheme.treatmentComponents.map { extractSimpleRecord(Tables.SYSTEMICTREATMENTCOMPONENT, it, "systemicTreatmentSchemeId", schemeId) }
+        scheme.treatmentComponents.map {
+            extractSimpleRecord(
+                Tables.SYSTEMICTREATMENTSCHEMEDRUG,
+                it,
+                "systemicTreatmentSchemeId",
+                schemeId
+            )
+        }
     
     private fun writeDrugs() {
         LOGGER.info { " Writing drug records" }
