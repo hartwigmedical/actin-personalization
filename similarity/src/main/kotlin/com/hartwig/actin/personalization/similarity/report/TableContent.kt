@@ -4,6 +4,9 @@ import com.hartwig.actin.personalization.similarity.population.MeasurementType
 import com.hartwig.actin.personalization.similarity.population.PersonalizedDataAnalysis
 import com.hartwig.actin.personalization.similarity.population.Population
 import java.lang.IllegalArgumentException
+import java.util.Locale
+
+fun percentage(value: Double) = String.format(Locale.ENGLISH, "%.1f%%", 100.0 * value)
 
 data class TableElement(val boldContent: String? = null, val content: String? = null, val shading: Double? = null) {
     companion object {
