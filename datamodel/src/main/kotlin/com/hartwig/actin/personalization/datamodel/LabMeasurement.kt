@@ -4,10 +4,10 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class LabMeasurement(
-    val labMeasure: LabMeasure,
-    val labMeasureValue: Double,
-    val labMeasureUnit: LabMeasureUnit,
-    val intervalTumorIncidenceLabMeasureValue: Int?,
+    val name: LabMeasure,
+    val value: Double,
+    val unit: Unit,
+    val intervalTumorIncidenceLabMeasure: Int?,
     val isPreSurgical: Boolean?,
     val isPostSurgical: Boolean?,
 )

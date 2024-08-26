@@ -4,7 +4,7 @@ import com.hartwig.actin.personalization.datamodel.Drug
 import com.hartwig.actin.personalization.datamodel.PfsMeasure
 import com.hartwig.actin.personalization.datamodel.PfsMeasureType
 import com.hartwig.actin.personalization.datamodel.ResponseMeasure
-import com.hartwig.actin.personalization.datamodel.SystemicTreatmentComponent
+import com.hartwig.actin.personalization.datamodel.SystemicTreatmentSchemeDrug
 import com.hartwig.actin.personalization.datamodel.SystemicTreatmentPlan
 import com.hartwig.actin.personalization.datamodel.SystemicTreatmentScheme
 import com.hartwig.actin.personalization.datamodel.Treatment
@@ -31,15 +31,15 @@ class NcrSystemicTreatmentPlanExtractor {
         val planStart = firstScheme.intervalTumorIncidenceTreatmentLineStartMin
 
         val sortedPfsMeasuresAfterPlanStart = pfsMeasures.asSequence()
-            .filterNot { it.intervalTumorIncidencePfsMeasureDate == null }
-            .sortedBy(PfsMeasure::intervalTumorIncidencePfsMeasureDate)
-            .dropWhile { planStart != null && it.intervalTumorIncidencePfsMeasureDate!! < planStart }
+            .filterNot { it.intervalTumorIncidencePfsMeasure == null }
+            .sortedBy(PfsMeasure::intervalTumorIncidencePfsMeasure)
+            .dropWhile { planStart != null && it.intervalTumorIncidencePfsMeasure!! < planStart }
 
-        val intervalTumorFirstPfsMeasure = sortedPfsMeasuresAfterPlanStart.firstOrNull { it.pfsMeasureType != PfsMeasureType.CENSOR }
-            ?.intervalTumorIncidencePfsMeasureDate
+        val intervalTumorFirstPfsMeasure = sortedPfsMeasuresAfterPlanStart.firstOrNull { it.type != PfsMeasureType.CENSOR }
+            ?.intervalTumorIncidencePfsMeasure
 
         val (observedPfsDays, censored) = intervalTumorFirstPfsMeasure?.let { it to false }
-            ?: sortedPfsMeasuresAfterPlanStart.firstOrNull()?.let { it.intervalTumorIncidencePfsMeasureDate!! to true }
+            ?: sortedPfsMeasuresAfterPlanStart.firstOrNull()?.let { it.intervalTumorIncidencePfsMeasure!! to true }
                 ?.takeIf { hasNoProgressionOrDeathWithUnknownInterval(pfsMeasures) } ?: Pair(null, null)
 
         return SystemicTreatmentPlan(
@@ -59,11 +59,11 @@ class NcrSystemicTreatmentPlanExtractor {
     }
 
     private fun hasNoProgressionOrDeathWithUnknownInterval(pfsMeasures: List<PfsMeasure>) = pfsMeasures.none {
-        it.pfsMeasureType != PfsMeasureType.CENSOR && it.intervalTumorIncidencePfsMeasureDate == null
+        it.type != PfsMeasureType.CENSOR && it.intervalTumorIncidencePfsMeasure == null
     }
 
     private fun drugsFromScheme(systemicTreatmentScheme: SystemicTreatmentScheme): List<Drug> {
-        return systemicTreatmentScheme.treatmentComponents.map(SystemicTreatmentComponent::drug)
+        return systemicTreatmentScheme.treatmentComponents.map(SystemicTreatmentSchemeDrug::drug)
     }
 
     private fun extractTreatmentFromSchemes(treatmentSchemes: Iterable<SystemicTreatmentScheme>): Treatment {
@@ -130,7 +130,7 @@ class NcrSystemicTreatmentPlanExtractor {
                 },
                 systCode14?.let { extractSystemicComponent(it, systSchemanum14, systKuren14, systStartInt14, systStopInt14, systPrepost14) }
             )
-                .groupBy(SystemicTreatmentComponent::treatmentSchemeNumber)
+                .groupBy(SystemicTreatmentSchemeDrug::schemeNumber)
                 .map { (schemeNumber, treatments) ->
                     val (startMin, startMax, stopMin, stopMax) = treatments.map {
                         with(it) {
@@ -151,10 +151,10 @@ class NcrSystemicTreatmentPlanExtractor {
 
     private fun extractSystemicComponent(
         code: String, schemaNum: Int?, cycleCode: Int?, startInterval: Int?, stopInterval: Int?, prePostCode: Int?
-    ): SystemicTreatmentComponent {
+    ): SystemicTreatmentSchemeDrug {
         val (preSurgery, postSurgery) = resolvePreAndPostSurgery(prePostCode)
         val (cycles, cycleDetails) = resolveCyclesAndDetails(cycleCode)
-        return SystemicTreatmentComponent(
+        return SystemicTreatmentSchemeDrug(
             resolve(code),
             schemaNum,
             cycles,

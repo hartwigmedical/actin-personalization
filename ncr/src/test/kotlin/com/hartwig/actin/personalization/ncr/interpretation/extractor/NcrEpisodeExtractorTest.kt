@@ -5,7 +5,7 @@ import com.hartwig.actin.personalization.datamodel.DistantMetastasesStatus
 import com.hartwig.actin.personalization.datamodel.Episode
 import com.hartwig.actin.personalization.datamodel.ExtraMuralInvasionCategory
 import com.hartwig.actin.personalization.datamodel.LabMeasure
-import com.hartwig.actin.personalization.datamodel.LabMeasureUnit
+import com.hartwig.actin.personalization.datamodel.Unit
 import com.hartwig.actin.personalization.datamodel.LabMeasurement
 import com.hartwig.actin.personalization.datamodel.Location
 import com.hartwig.actin.personalization.datamodel.LymphaticInvasionCategory
@@ -65,13 +65,13 @@ class NcrEpisodeExtractorTest {
             extraMuralInvasionCategory = ExtraMuralInvasionCategory.ABOVE_FIVE_MM,
             tumorRegression = TumorRegression.MINIMAL_REGRESSION,
             labMeasurements = listOf(
-                LabMeasurement(LabMeasure.LACTATE_DEHYDROGENASE, 10.0, LabMeasureUnit.UNIT_PER_LITER, 1, null, null),
-                LabMeasurement(LabMeasure.ALKALINE_PHOSPHATASE, 20.0, LabMeasureUnit.UNIT_PER_LITER, 2, null, null),
-                LabMeasurement(LabMeasure.NEUTROPHILS_ABSOLUTE, 30.5, LabMeasureUnit.BILLIONS_PER_LITER, 3, null, null),
-                LabMeasurement(LabMeasure.ALBUMINE, 40.5, LabMeasureUnit.GRAM_PER_LITER, 4, null, null),
-                LabMeasurement(LabMeasure.LEUKOCYTES_ABSOLUTE, 50.5, LabMeasureUnit.BILLIONS_PER_LITER, 5, null, null),
-                LabMeasurement(LabMeasure.CARCINOEMBRYONIC_ANTIGEN, 0.1, LabMeasureUnit.MICROGRAM_PER_LITER, null, true, false),
-                LabMeasurement(LabMeasure.CARCINOEMBRYONIC_ANTIGEN, 0.2, LabMeasureUnit.MICROGRAM_PER_LITER, null, false, true)
+                LabMeasurement(LabMeasure.LACTATE_DEHYDROGENASE, 10.0, Unit.UNIT_PER_LITER, 1, null, null),
+                LabMeasurement(LabMeasure.ALKALINE_PHOSPHATASE, 20.0, Unit.UNIT_PER_LITER, 2, null, null),
+                LabMeasurement(LabMeasure.NEUTROPHILS_ABSOLUTE, 30.5, Unit.BILLIONS_PER_LITER, 3, null, null),
+                LabMeasurement(LabMeasure.ALBUMINE, 40.5, Unit.GRAM_PER_LITER, 4, null, null),
+                LabMeasurement(LabMeasure.LEUKOCYTES_ABSOLUTE, 50.5, Unit.BILLIONS_PER_LITER, 5, null, null),
+                LabMeasurement(LabMeasure.CARCINOEMBRYONIC_ANTIGEN, 0.1, Unit.MICROGRAM_PER_LITER, null, true, false),
+                LabMeasurement(LabMeasure.CARCINOEMBRYONIC_ANTIGEN, 0.2, Unit.MICROGRAM_PER_LITER, null, false, true)
             ),
             hasReceivedTumorDirectedTreatment = false,
             reasonRefrainmentFromTumorDirectedTreatment =
