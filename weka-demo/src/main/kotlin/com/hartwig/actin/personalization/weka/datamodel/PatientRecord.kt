@@ -1,4 +1,4 @@
-package com.hartwig.actin.personalization.recruitment.datamodel
+package com.hartwig.actin.personalization.weka.datamodel
 
 data class ReferencePatient(
     val id : Int,

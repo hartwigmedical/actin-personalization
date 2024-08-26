@@ -3,6 +3,7 @@ package com.hartwig.actin.personalization.similarity.population
 import com.hartwig.actin.personalization.datamodel.PfsMeasure
 import com.hartwig.actin.personalization.datamodel.PfsMeasureType
 import com.hartwig.actin.personalization.similarity.report.TableElement
+import com.hartwig.actin.personalization.similarity.report.percentage
 
 private const val MIN_PATIENT_COUNT = 20
 
@@ -31,7 +32,7 @@ class PercentPfsWithDaysCalculation(val minPfsDays: Int) : Calculation {
         return if (measurement.numPatients < MIN_PATIENT_COUNT) {
             TableElement.regular("(n≤$MIN_PATIENT_COUNT)")
         } else {
-            TableElement(String.format("%.1f%% ", 100.0 * measurement.value), "(n=${measurement.numPatients})", measurement.value)
+            TableElement(percentage(measurement.value), " (n=${measurement.numPatients})", measurement.value)
         }
     }
 
@@ -40,17 +41,17 @@ class PercentPfsWithDaysCalculation(val minPfsDays: Int) : Calculation {
     }
 
     private fun hasProgressionOrDeathBeforeMinDays(pfsMeasures: List<PfsMeasure>, minDaysSinceIncidence: Int) = pfsMeasures.any {
-        it.pfsMeasureType != PfsMeasureType.CENSOR && it.intervalTumorIncidencePfsMeasureDate?.let { measureInterval ->
+        it.type != PfsMeasureType.CENSOR && it.intervalTumorIncidencePfsMeasure?.let { measureInterval ->
             measureInterval < minDaysSinceIncidence
         } == true
     }
 
     private fun hasNoProgressionOrDeathWithUnknownInterval(pfsMeasures: List<PfsMeasure>) = pfsMeasures.none {
-        it.pfsMeasureType != PfsMeasureType.CENSOR && it.intervalTumorIncidencePfsMeasureDate == null
+        it.type != PfsMeasureType.CENSOR && it.intervalTumorIncidencePfsMeasure == null
     }
 
     private fun hasAnyPfsMeasureWithMinDays(pfsMeasures: List<PfsMeasure>, minDaysSinceIncidence: Int) = pfsMeasures.any { measure ->
-        measure.intervalTumorIncidencePfsMeasureDate?.let { it >= minDaysSinceIncidence } == true
+        measure.intervalTumorIncidencePfsMeasure?.let { it >= minDaysSinceIncidence } == true
     }
 
     private fun hasMeasureWithMinDaysAndNoUnknownMeasures(pfsMeasures: List<PfsMeasure>, minDaysSinceIncidence: Int) =
