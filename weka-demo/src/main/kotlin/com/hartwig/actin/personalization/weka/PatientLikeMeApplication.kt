@@ -1,13 +1,13 @@
-package com.hartwig.actin.personalization.recruitment
+package com.hartwig.actin.personalization.weka
 
-import com.hartwig.actin.personalization.recruitment.algo.NearestNeighborModel
-import com.hartwig.actin.personalization.recruitment.serialization.ReferencePatientReader
+import com.hartwig.actin.personalization.weka.algo.NearestNeighborModel
+import com.hartwig.actin.personalization.weka.serialization.ReferencePatientReader
 import io.github.oshai.kotlinlogging.KotlinLogging
 
 class PatientLikeMeApplication {
 
     fun run() {
-        LOGGER.info { "Running patient-like-me application for recruitment assignment" }
+        LOGGER.info { "Running patient-like-me application for WEKA demo" }
 
         val patientDatabasePath = this::class.java.classLoader.getResource("database/patients.tsv")!!.path
         LOGGER.info { "Reading database from $patientDatabasePath" }

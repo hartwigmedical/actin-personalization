@@ -11,7 +11,7 @@
     <artifactId>system</artifactId>
     <packaging>jar</packaging>
     <version>local-SNAPSHOT</version>
-    <name>HMF ACTIN Personalization - System</name>
+    <name>Hartwig ACTIN Personalization - System</name>
 
     <dependencies>
         <dependency>

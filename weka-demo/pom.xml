@@ -8,10 +8,10 @@
         <version>local-SNAPSHOT</version>
     </parent>
 
-    <artifactId>recruitment-assignment</artifactId>
+    <artifactId>weka-demo</artifactId>
     <packaging>jar</packaging>
     <version>local-SNAPSHOT</version>
-    <name>HMF ACTIN Personalization - Recruitment Assignment</name>
+    <name>Hartwig ACTIN Personalization - WEKA Demo</name>
 
     <dependencies>
         <dependency>
@@ -55,7 +55,7 @@
                     <archive>
                         <manifest>
                             <addClasspath>true</addClasspath>
-                            <mainClass>com.hartwig.actin.personalization.recruitment.PatientLikeMeApplication</mainClass>
+                            <mainClass>com.hartwig.actin.personalization.weka.PatientLikeMeApplication</mainClass>
                             <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
                         </manifest>
                     </archive>

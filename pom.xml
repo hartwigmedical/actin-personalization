@@ -6,10 +6,10 @@
     <artifactId>actin-personalization</artifactId>
     <packaging>pom</packaging>
     <version>local-SNAPSHOT</version>
-    <name>HMF ACTIN Personalization</name>
+    <name>Hartwig ACTIN Personalization</name>
 
     <modules>
-        <module>recruitment-assignment</module>
+        <module>weka-demo</module>
         <module>datamodel</module>
         <module>ncr</module>
         <module>database</module>

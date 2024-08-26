@@ -1,6 +1,6 @@
-package com.hartwig.actin.personalization.recruitment.serialization
+package com.hartwig.actin.personalization.weka.serialization
 
-import com.hartwig.actin.personalization.recruitment.datamodel.ReferencePatient
+import com.hartwig.actin.personalization.weka.datamodel.ReferencePatient
 import java.io.File
 import java.nio.file.Files
 
