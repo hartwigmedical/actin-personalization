@@ -24,7 +24,8 @@ class PatientPopulationBreakdownTest {
             PopulationDefinition(ageSubPopulation) { it.first.ageAtDiagnosis in 45..55 }
         )
 
-        val analysis = PatientPopulationBreakdown(patientsByTreatment, populationDefinitions).analyze()
+        val measurementTypes = listOf(MeasurementType.TREATMENT_DECISION, MeasurementType.PROGRESSION_FREE_SURVIVAL)
+        val analysis = PatientPopulationBreakdown(patientsByTreatment, populationDefinitions, measurementTypes).analyze()
         assertThat(analysis.populations).containsExactly(
             Population(
                 ALL_PATIENTS_POPULATION_NAME, mapOf(

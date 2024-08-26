@@ -1,7 +1,7 @@
 package com.hartwig.actin.personalization.similarity.population
 
 import com.hartwig.actin.personalization.similarity.report.TableElement
-import java.util.Locale
+import com.hartwig.actin.personalization.similarity.report.percentage
 
 object TreatmentDecisionCalculation : Calculation {
 
@@ -12,7 +12,7 @@ object TreatmentDecisionCalculation : Calculation {
     }
 
     override fun createTableElement(measurement: Measurement): TableElement {
-        return TableElement.regular(String.format(Locale.ENGLISH, "%.1f%%", 100.0 * measurement.value))
+        return TableElement.regular(percentage(measurement.value))
     }
 
     override fun title(): String {

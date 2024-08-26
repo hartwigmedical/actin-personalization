@@ -22,6 +22,7 @@
 
         <kotlin.version>2.0.0</kotlin.version>
         <kotlin.jvm.target>11</kotlin.jvm.target>
+        <kotlin.compiler.apiVersion>2.0</kotlin.compiler.apiVersion>
         <kotlin.code.style>official</kotlin.code.style>
 
         <!-- KD: Even though all code is in kotlin, the jooq code generator generates java code that needs to be compiled -->
