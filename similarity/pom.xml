@@ -11,7 +11,7 @@
     <artifactId>similarity</artifactId>
     <packaging>jar</packaging>
     <version>local-SNAPSHOT</version>
-    <name>HMF ACTIN Personalization - Similarity</name>
+    <name>Hartwig ACTIN Personalization - Similarity</name>
 
     <dependencies>
         <dependency>

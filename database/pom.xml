@@ -13,7 +13,7 @@
     <artifactId>database</artifactId>
     <packaging>jar</packaging>
     <version>local-SNAPSHOT</version>
-    <name>HMF ACTIN Personalization - Database</name>
+    <name>Hartwig ACTIN Personalization - Database</name>
 
     <dependencies>
         <dependency>
