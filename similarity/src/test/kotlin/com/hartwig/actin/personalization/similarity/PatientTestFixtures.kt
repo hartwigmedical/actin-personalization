@@ -63,7 +63,7 @@ fun episodeWithTreatment(treatment: Treatment, pfs: Int? = null, planStart: Int?
             pfs = pfs,
             intervalTumorIncidenceTreatmentPlanStart = planStart,
             observedPfsDays = pfs,
-            censored = false
+            hadEvent = true
         )
     )
 }
