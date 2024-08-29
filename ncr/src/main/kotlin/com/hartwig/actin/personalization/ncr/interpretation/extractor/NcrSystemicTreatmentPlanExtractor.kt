@@ -1,6 +1,13 @@
 package com.hartwig.actin.personalization.ncr.interpretation.extractor
 
-import com.hartwig.actin.personalization.datamodel.*
+import com.hartwig.actin.personalization.datamodel.Drug
+import com.hartwig.actin.personalization.datamodel.PfsMeasure
+import com.hartwig.actin.personalization.datamodel.PfsMeasureType
+import com.hartwig.actin.personalization.datamodel.ResponseMeasure
+import com.hartwig.actin.personalization.datamodel.SystemicTreatmentPlan
+import com.hartwig.actin.personalization.datamodel.SystemicTreatmentScheme
+import com.hartwig.actin.personalization.datamodel.SystemicTreatmentSchemeDrug
+import com.hartwig.actin.personalization.datamodel.Treatment
 import com.hartwig.actin.personalization.ncr.datamodel.NcrSystemicTreatment
 import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrTreatmentNameMapper.resolve
 import com.hartwig.actin.personalization.ncr.interpretation.mapper.resolveCyclesAndDetails
