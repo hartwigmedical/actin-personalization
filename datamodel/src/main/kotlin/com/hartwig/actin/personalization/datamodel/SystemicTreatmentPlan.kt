@@ -11,5 +11,7 @@ data class SystemicTreatmentPlan(
     val intervalTreatmentPlanStartLatestAliveStatus: Int? = null,
 
     val pfs: Int? = null,
-    val intervalTreatmentPlanStartResponseDate: Int? = null
+    val intervalTreatmentPlanStartResponseDate: Int? = null,
+    val observedPfsDays: Int? = null,
+    val hadProgressionEvent: Boolean? = null
 )

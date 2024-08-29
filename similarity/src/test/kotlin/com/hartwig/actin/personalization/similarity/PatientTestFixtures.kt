@@ -58,7 +58,12 @@ fun recordWithEpisode(episode: Episode): ReferencePatient {
 fun episodeWithTreatment(treatment: Treatment, pfs: Int? = null, planStart: Int? = null): Episode {
     return EPISODE.copy(
         systemicTreatmentPlan = SystemicTreatmentPlan(
-            treatment = treatment, systemicTreatmentSchemes = emptyList(), pfs = pfs, intervalTumorIncidenceTreatmentPlanStart = planStart
+            treatment = treatment,
+            systemicTreatmentSchemes = emptyList(),
+            pfs = pfs,
+            intervalTumorIncidenceTreatmentPlanStart = planStart,
+            observedPfsDays = pfs,
+            hadProgressionEvent = true
         )
     )
 }
