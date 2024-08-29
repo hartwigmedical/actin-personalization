@@ -195,13 +195,13 @@ CREATE TABLE `systemicTreatmentSchemeDrug` (
     `id` int NOT NULL AUTO_INCREMENT,
     `systemicTreatmentSchemeId` int NOT NULL,
     `drug` varchar(50) NOT NULL,
-    `treatmentSchemeNumber` int,
-    `treatmentNumberOfCycles` int,
-    `treatmentCyclesDetails` varchar(50),
+    `schemeNumber` int,
+    `numberOfCycles` int,
+    `numberOfCyclesDetails` varchar(50),
     `intervalTumorIncidenceTreatmentStart` int,
     `intervalTumorIncidenceTreatmentStop` int,
-    `preSurgery` bool,
-    `postSurgery` bool,
+    `isAdministeredPreSurgery` bool,
+    `isAdministeredPostSurgery` bool,
     FOREIGN KEY (`systemicTreatmentSchemeId`) REFERENCES `systemicTreatmentScheme`(`id`),
     PRIMARY KEY (`id`)
 );

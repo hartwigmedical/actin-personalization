@@ -55,7 +55,7 @@
                     <archive>
                         <manifest>
                             <addClasspath>true</addClasspath>
-                            <mainClass>com.hartwig.actin.personalization.weka.PatientLikeMeApplication</mainClass>
+                            <mainClass>com.hartwig.actin.personalization.demo.PatientLikeMeApplication</mainClass>
                             <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
                         </manifest>
                     </archive>

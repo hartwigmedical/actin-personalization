@@ -1,6 +1,6 @@
-package com.hartwig.actin.personalization.weka.algo
+package com.hartwig.actin.personalization.demo.algo
 
-import com.hartwig.actin.personalization.weka.datamodel.ReferencePatient
+import com.hartwig.actin.personalization.demo.datamodel.ReferencePatient
 import io.github.oshai.kotlinlogging.KotlinLogging
 import weka.classifiers.functions.LinearRegression
 import weka.core.Attribute

@@ -43,6 +43,14 @@ rm(list=ls())
 ncr_latest <- load_ncr_data_latest()
 ncr_orig <- load_ncr_data_1()
 
+# general impression of data
+ncr_latest %>% summarise(count_key_nkr=n(), distinct_count_key_nkr=n_distinct(key_nkr), distinct_count_key_dia=n_distinct(key_zid))
+ncr_latest %>% dplyr::filter(epis=='DIA') %>% summarise(count=n())
+ncr_latest %>% dplyr::filter(epis=='VERB') %>% summarise(count=n())
+
+ncr_latest %>% dplyr::filter(vit_stat==0) %>% summarise(count=n_distinct(key_nkr))
+ncr_orig %>% dplyr::filter(vit_stat==0) %>% summarise(count=n())
+
 # general impression of data sets by incjr 
 ncr_latest %>% group_by(incjr) %>% summarise(count_key_nkr=n(), distinct_count_key_nkr=n_distinct(key_nkr))
 ncr_orig %>% group_by(incjr) %>% summarise(count_key_nkr=n(), distinct_count_key_nkr=n_distinct(key_nkr))

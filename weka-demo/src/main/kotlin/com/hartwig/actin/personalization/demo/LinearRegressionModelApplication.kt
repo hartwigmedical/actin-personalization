@@ -1,13 +1,13 @@
-package com.hartwig.actin.personalization.weka
+package com.hartwig.actin.personalization.demo
 
-import com.hartwig.actin.personalization.weka.algo.NearestNeighborModel
-import com.hartwig.actin.personalization.weka.serialization.ReferencePatientReader
+import com.hartwig.actin.personalization.demo.algo.LinearRegressionModel
+import com.hartwig.actin.personalization.demo.serialization.ReferencePatientReader
 import io.github.oshai.kotlinlogging.KotlinLogging
 
-class PatientLikeMeApplication {
+class LinearRegressionModelApplication {
 
     fun run() {
-        LOGGER.info { "Running patient-like-me application for WEKA demo" }
+        LOGGER.info { "Running linear model application for WEKA demo" }
 
         val patientDatabasePath = this::class.java.classLoader.getResource("database/patients.tsv")!!.path
         LOGGER.info { "Reading database from $patientDatabasePath" }
@@ -18,8 +18,8 @@ class PatientLikeMeApplication {
             LOGGER.info { " $patient" }
         }
 
-        LOGGER.info { "Running nearest-neighbour model" }
-        NearestNeighborModel.run(patients)
+        LOGGER.info { "Running linear regression" }
+        LinearRegressionModel.run(patients)
     }
 
     companion object {
@@ -28,5 +28,5 @@ class PatientLikeMeApplication {
 }
 
 fun main() {
-    PatientLikeMeApplication().run()
+    LinearRegressionModelApplication().run()
 }
