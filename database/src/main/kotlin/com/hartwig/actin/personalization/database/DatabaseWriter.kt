@@ -1,21 +1,8 @@
 package com.hartwig.actin.personalization.database
 
-import com.hartwig.actin.personalization.datamodel.Drug
-import com.hartwig.actin.personalization.datamodel.Episode
-import com.hartwig.actin.personalization.datamodel.GastroenterologyResection
-import com.hartwig.actin.personalization.datamodel.Location
-import com.hartwig.actin.personalization.datamodel.MetastasesRadiotherapy
-import com.hartwig.actin.personalization.datamodel.MetastasesSurgery
-import com.hartwig.actin.personalization.datamodel.Radiotherapy
-import com.hartwig.actin.personalization.datamodel.ReferencePatient
-import com.hartwig.actin.personalization.datamodel.SystemicTreatmentScheme
-import com.hartwig.actin.personalization.datamodel.TumorEntry
+import com.hartwig.actin.personalization.datamodel.*
 import io.github.oshai.kotlinlogging.KotlinLogging
-import org.jooq.DSLContext
-import org.jooq.JSON
-import org.jooq.SQLDialect
-import org.jooq.Table
-import org.jooq.TableRecord
+import org.jooq.*
 import org.jooq.impl.DSL
 import java.sql.DriverManager
 
@@ -137,7 +124,7 @@ class DatabaseWriter(private val context: DSLContext, private val connection: ja
                 dbRecord.set(table.PFS, plan.pfs)
                 dbRecord.set(table.INTERVALTREATMENTPLANSTARTRESPONSEDATE, plan.intervalTreatmentPlanStartResponseDate)
                 dbRecord.set(table.OBSERVEDPFSDAYS, plan.observedPfsDays)
-                dbRecord.set(table.HADEVENT, plan.hadEvent)
+                dbRecord.set(table.HADPROGRESSIONEVENT, plan.hadProgressionEvent)
             }
             episode to dbRecord
         }

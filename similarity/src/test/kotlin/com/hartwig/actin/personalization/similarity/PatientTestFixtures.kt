@@ -1,16 +1,6 @@
 package com.hartwig.actin.personalization.similarity
 
-import com.hartwig.actin.personalization.datamodel.Diagnosis
-import com.hartwig.actin.personalization.datamodel.DistantMetastasesStatus
-import com.hartwig.actin.personalization.datamodel.Episode
-import com.hartwig.actin.personalization.datamodel.Location
-import com.hartwig.actin.personalization.datamodel.ReferencePatient
-import com.hartwig.actin.personalization.datamodel.Sex
-import com.hartwig.actin.personalization.datamodel.SystemicTreatmentPlan
-import com.hartwig.actin.personalization.datamodel.Treatment
-import com.hartwig.actin.personalization.datamodel.TumorBasisOfDiagnosis
-import com.hartwig.actin.personalization.datamodel.TumorEntry
-import com.hartwig.actin.personalization.datamodel.TumorType
+import com.hartwig.actin.personalization.datamodel.*
 
 val DIAGNOSIS = Diagnosis(
     consolidatedTumorType = TumorType.CRC_OTHER,
@@ -63,7 +53,7 @@ fun episodeWithTreatment(treatment: Treatment, pfs: Int? = null, planStart: Int?
             pfs = pfs,
             intervalTumorIncidenceTreatmentPlanStart = planStart,
             observedPfsDays = pfs,
-            hadEvent = true
+            hadProgressionEvent = true
         )
     )
 }
