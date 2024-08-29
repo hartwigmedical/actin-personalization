@@ -44,7 +44,7 @@ FROM
         INNER JOIN
     episode e ON d.id = e.diagnosisId
         LEFT JOIN
-    (SELECT episodeId, GROUP_CONCAT(surgeryType) AS surgeries FROM surgery GROUP BY 1) AS s ON e.id = s.episodeId
+    (SELECT episodeId, GROUP_CONCAT(type) AS surgeries FROM surgery GROUP BY 1) AS s ON e.id = s.episodeId
 		LEFT JOIN
 	(SELECT episodeId, GROUP_CONCAT(locationGroup ORDER BY locationGroup) AS metastasisLocationGroupsPriorToSystemicTreatment FROM metastasis mm INNER JOIN episode ee ON mm.episodeId=ee.id WHERE intervalTumorIncidenceMetastasisDetection < intervalTumorIncidenceTreatmentPlanStart GROUP BY 1) AS m ON e.id=m.episodeId
 WHERE e.order=1
