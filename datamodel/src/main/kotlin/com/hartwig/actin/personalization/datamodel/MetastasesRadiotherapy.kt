@@ -5,6 +5,6 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class MetastasesRadiotherapy(
     val metastasesRadiotherapyType: MetastasesRadiotherapyType,
-    val intervalTumorIncidenceRadiotherapyMetastasesStart: Int?,
-    val intervalTumorIncidenceRadiotherapyMetastasesStop: Int?,
+    val intervalTumorIncidenceRadiotherapyMetastasesStartDays: Int?,
+    val intervalTumorIncidenceRadiotherapyMetastasesStopDays: Int?,
 )

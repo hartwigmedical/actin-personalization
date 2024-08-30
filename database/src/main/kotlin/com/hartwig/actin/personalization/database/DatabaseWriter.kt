@@ -127,15 +127,15 @@ class DatabaseWriter(private val context: DSLContext, private val connection: ja
                 jsonList(episode.metastasesRadiotherapies.map(MetastasesRadiotherapy::metastasesRadiotherapyType))
             )
             dbRecord.set(table.RESPONSE, episode.responseMeasure?.responseMeasureType?.name)
-            dbRecord.set(table.INTERVALTUMORINCIDENCERESPONSEDATE, episode.responseMeasure?.intervalTumorIncidenceResponseMeasureDate)
+            dbRecord.set(table.INTERVALTUMORINCIDENCERESPONSEDAYS, episode.responseMeasure?.intervalTumorIncidenceResponseMeasureDays)
             
             episode.systemicTreatmentPlan?.let { plan ->
                 dbRecord.set(table.SYSTEMICTREATMENTPLAN, plan.treatment.name)
-                dbRecord.set(table.INTERVALTUMORINCIDENCETREATMENTPLANSTART, plan.intervalTumorIncidenceTreatmentPlanStart)
-                dbRecord.set(table.INTERVALTUMORINCIDENCETREATMENTPLANSTOP, plan.intervalTumorIncidenceTreatmentPlanStop)
-                dbRecord.set(table.INTERVALTREATMENTPLANSTARTLATESTALIVESTATUS, plan.intervalTreatmentPlanStartLatestAliveStatus)
-                dbRecord.set(table.PFS, plan.pfs)
-                dbRecord.set(table.INTERVALTREATMENTPLANSTARTRESPONSEDATE, plan.intervalTreatmentPlanStartResponseDate)
+                dbRecord.set(table.INTERVALTUMORINCIDENCETREATMENTPLANSTARTDAYS, plan.intervalTumorIncidenceTreatmentPlanStartDays)
+                dbRecord.set(table.INTERVALTUMORINCIDENCETREATMENTPLANSTOPDAYS, plan.intervalTumorIncidenceTreatmentPlanStopDays)
+                dbRecord.set(table.INTERVALTREATMENTPLANSTARTLATESTALIVESTATUSDAYS, plan.intervalTreatmentPlanStartLatestAliveStatusDays)
+                dbRecord.set(table.PFSDAYS, plan.pfsDays)
+                dbRecord.set(table.INTERVALTREATMENTPLANSTARTRESPONSEDAYS, plan.intervalTreatmentPlanStartResponseDays)
                 dbRecord.set(table.OBSERVEDPFSDAYS, plan.observedPfsDays)
                 dbRecord.set(table.HADPROGRESSIONEVENT, plan.hadProgressionEvent)
             }

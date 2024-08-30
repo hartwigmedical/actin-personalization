@@ -32,11 +32,11 @@ class NcrSystemicTreatmentPlanExtractorTest {
             plan.systemicTreatmentSchemes.associate { it.schemeNumber to it.treatmentComponents.map(SystemicTreatmentSchemeDrug::drug) }
         assertThat(drugsByScheme).isEqualTo(expectedDrugs)
 
-        assertThat(plan.intervalTumorIncidenceTreatmentPlanStart).isEqualTo(1)
-        assertThat(plan.intervalTumorIncidenceTreatmentPlanStop).isEqualTo(7)
-        assertThat(plan.intervalTreatmentPlanStartLatestAliveStatus).isEqualTo(79)
-        assertThat(plan.pfs).isEqualTo(3)
-        assertThat(plan.intervalTreatmentPlanStartResponseDate).isEqualTo(2)
+        assertThat(plan.intervalTumorIncidenceTreatmentPlanStartDays).isEqualTo(1)
+        assertThat(plan.intervalTumorIncidenceTreatmentPlanStopDays).isEqualTo(7)
+        assertThat(plan.intervalTreatmentPlanStartLatestAliveStatusDays).isEqualTo(79)
+        assertThat(plan.pfsDays).isEqualTo(3)
+        assertThat(plan.intervalTreatmentPlanStartResponseDays).isEqualTo(2)
     }
 
     @Test

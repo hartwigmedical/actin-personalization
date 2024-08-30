@@ -6,12 +6,12 @@ import kotlinx.serialization.Serializable
 data class SystemicTreatmentPlan(
     val treatment: Treatment,
     val systemicTreatmentSchemes: List<SystemicTreatmentScheme>,
-    val intervalTumorIncidenceTreatmentPlanStart: Int? = null,
-    val intervalTumorIncidenceTreatmentPlanStop: Int? = null,
-    val intervalTreatmentPlanStartLatestAliveStatus: Int? = null,
+    val intervalTumorIncidenceTreatmentPlanStartDays: Int? = null,
+    val intervalTumorIncidenceTreatmentPlanStopDays: Int? = null,
+    val intervalTreatmentPlanStartLatestAliveStatusDays: Int? = null,
 
-    val pfs: Int? = null,
-    val intervalTreatmentPlanStartResponseDate: Int? = null,
+    val pfsDays: Int? = null,
+    val intervalTreatmentPlanStartResponseDays: Int? = null,
     val observedPfsDays: Int? = null,
     val hadProgressionEvent: Boolean? = null
 )

@@ -8,7 +8,7 @@ data class PriorTumor(
     override val tumorLocations: Set<Location>,
     override val hasHadTumorDirectedSystemicTherapy: Boolean,
 
-    val incidenceIntervalPrimaryTumor: Int?,
+    val intervalTumorIncidencePriorTumorDays: Int?,
     val tumorPriorId: Int,
     val tumorLocationCategory: TumorLocationCategory,
     val stageTNM: StageTnm?,

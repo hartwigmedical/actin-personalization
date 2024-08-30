@@ -11,7 +11,7 @@ class PercentPfsWithDaysCalculation(val minPfsDays: Int) : Calculation {
 
     override fun isEligible(patient: DiagnosisAndEpisode): Boolean {
         return with(patient.second) {
-            systemicTreatmentPlan?.intervalTumorIncidenceTreatmentPlanStart?.let { planStart ->
+            systemicTreatmentPlan?.intervalTumorIncidenceTreatmentPlanStartDays?.let { planStart ->
                 val minDaysSinceIncidence = planStart + minPfsDays
                 hasProgressionOrDeathBeforeMinDays(pfsMeasures, minDaysSinceIncidence)
                         || hasMeasureWithMinDaysAndNoUnknownMeasures(pfsMeasures, minDaysSinceIncidence)
@@ -22,7 +22,7 @@ class PercentPfsWithDaysCalculation(val minPfsDays: Int) : Calculation {
     override fun calculate(patients: List<DiagnosisAndEpisode>, eligiblePopulationSize: Int): Measurement {
         val pfsCount = patients.count { (_, episode) ->
             !hasProgressionOrDeathBeforeMinDays(
-                episode.pfsMeasures, episode.systemicTreatmentPlan?.intervalTumorIncidenceTreatmentPlanStart!! + minPfsDays
+                episode.pfsMeasures, episode.systemicTreatmentPlan?.intervalTumorIncidenceTreatmentPlanStartDays!! + minPfsDays
             )
         }
         return Measurement(pfsCount.toDouble() / patients.size, patients.size)
@@ -41,17 +41,17 @@ class PercentPfsWithDaysCalculation(val minPfsDays: Int) : Calculation {
     }
 
     private fun hasProgressionOrDeathBeforeMinDays(pfsMeasures: List<PfsMeasure>, minDaysSinceIncidence: Int) = pfsMeasures.any {
-        it.type != PfsMeasureType.CENSOR && it.intervalTumorIncidencePfsMeasure?.let { measureInterval ->
+        it.type != PfsMeasureType.CENSOR && it.intervalTumorIncidencePfsMeasureDays?.let { measureInterval ->
             measureInterval < minDaysSinceIncidence
         } == true
     }
 
     private fun hasNoProgressionOrDeathWithUnknownInterval(pfsMeasures: List<PfsMeasure>) = pfsMeasures.none {
-        it.type != PfsMeasureType.CENSOR && it.intervalTumorIncidencePfsMeasure == null
+        it.type != PfsMeasureType.CENSOR && it.intervalTumorIncidencePfsMeasureDays == null
     }
 
     private fun hasAnyPfsMeasureWithMinDays(pfsMeasures: List<PfsMeasure>, minDaysSinceIncidence: Int) = pfsMeasures.any { measure ->
-        measure.intervalTumorIncidencePfsMeasure?.let { it >= minDaysSinceIncidence } == true
+        measure.intervalTumorIncidencePfsMeasureDays?.let { it >= minDaysSinceIncidence } == true
     }
 
     private fun hasMeasureWithMinDaysAndNoUnknownMeasures(pfsMeasures: List<PfsMeasure>, minDaysSinceIncidence: Int) =

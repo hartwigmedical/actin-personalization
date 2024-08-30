@@ -93,7 +93,7 @@ class PfsCalculationTest {
                 systemicTreatmentPlan = SystemicTreatmentPlan(
                     treatment = Treatment.CAPECITABINE,
                     systemicTreatmentSchemes = emptyList(),
-                    pfs = pfs
+                    pfsDays = pfs
                 )
             )
         )

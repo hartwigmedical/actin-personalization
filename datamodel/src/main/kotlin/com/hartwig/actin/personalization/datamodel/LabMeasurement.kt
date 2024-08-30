@@ -7,7 +7,7 @@ data class LabMeasurement(
     val name: LabMeasure,
     val value: Double,
     val unit: Unit,
-    val intervalTumorIncidenceLabMeasure: Int?,
+    val intervalTumorIncidenceLabMeasureDays: Int?,
     val isPreSurgical: Boolean?,
     val isPostSurgical: Boolean?,
 )

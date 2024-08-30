@@ -10,6 +10,6 @@ data class Surgery(
     val radicality: SurgeryRadicality? = null,
     val circumferentialResectionMargin: SurgeryCircumferentialResectionMargin? = null,
     val anastomoticLeakageAfterSurgery: AnastomoticLeakageAfterSurgery? = null,
-    val intervalTumorIncidenceSurgery: Int? = null,
-    val hospitalizationDuration: Int? = null
+    val intervalTumorIncidenceSurgeryDays: Int? = null,
+    val hospitalizationDurationDays: Int? = null
 )

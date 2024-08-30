@@ -17,7 +17,7 @@ val DIAGNOSIS = Diagnosis(
     tumorLocations = emptySet(),
     hasHadTumorDirectedSystemicTherapy = false,
     ageAtDiagnosis = 50,
-    intervalTumorIncidenceLatestAliveStatus = 100,
+    intervalTumorIncidenceLatestAliveStatusDays = 100,
     hasHadPriorTumor = false,
     priorTumors = emptyList()
 )
@@ -60,8 +60,8 @@ fun episodeWithTreatment(treatment: Treatment, pfs: Int? = null, planStart: Int?
         systemicTreatmentPlan = SystemicTreatmentPlan(
             treatment = treatment,
             systemicTreatmentSchemes = emptyList(),
-            pfs = pfs,
-            intervalTumorIncidenceTreatmentPlanStart = planStart,
+            pfsDays = pfs,
+            intervalTumorIncidenceTreatmentPlanStartDays = planStart,
             observedPfsDays = pfs,
             hadProgressionEvent = true
         )

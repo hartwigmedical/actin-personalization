@@ -6,5 +6,5 @@ import kotlinx.serialization.Serializable
 data class MetastasesSurgery(
     val metastasesSurgeryType: MetastasesSurgeryType,
     val surgeryMetastasesRadicality: SurgeryRadicality?,
-    val intervalTumorIncidenceMetastasesSurgery: Int?
+    val intervalTumorIncidenceMetastasesSurgeryDays: Int?
 )

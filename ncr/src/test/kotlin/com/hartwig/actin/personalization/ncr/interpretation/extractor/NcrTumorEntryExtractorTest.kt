@@ -27,14 +27,14 @@ class NcrTumorEntryExtractorTest {
                 tumorLocations = setOf(Location.ASCENDING_COLON),
                 hasHadTumorDirectedSystemicTherapy = false,
                 ageAtDiagnosis = 50,
-                intervalTumorIncidenceLatestAliveStatus = 80,
+                intervalTumorIncidenceLatestAliveStatusDays = 80,
                 hasHadPriorTumor = true,
                 priorTumors = listOf(
                     PriorTumor(
                         consolidatedTumorType = TumorType.MELANOMA,
                         tumorLocations = setOf(Location.SKIN_SHOULDER_ARM_HAND),
                         hasHadTumorDirectedSystemicTherapy = true,
-                        incidenceIntervalPrimaryTumor = 20,
+                        intervalTumorIncidencePriorTumorDays = 20,
                         tumorPriorId = 1,
                         tumorLocationCategory = TumorLocationCategory.SKIN,
                         stageTNM = StageTnm.IIC,
