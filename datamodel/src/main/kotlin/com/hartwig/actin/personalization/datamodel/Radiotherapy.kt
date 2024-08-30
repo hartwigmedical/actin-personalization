@@ -6,6 +6,6 @@ import kotlinx.serialization.Serializable
 data class Radiotherapy(
     val radiotherapyType: RadiotherapyType,
     val radiotherapyTotalDosage: Double?,
-    val intervalTumorIncidenceRadiotherapyStart: Int?,
-    val intervalTumorIncidenceRadiotherapyStop: Int?,
+    val intervalTumorIncidenceRadiotherapyStartDays: Int?,
+    val intervalTumorIncidenceRadiotherapyStopDays: Int?,
 )

@@ -117,7 +117,7 @@ class NcrEpisodeExtractor(private val systemicTreatmentPlanExtractor: NcrSystemi
                 radiotherapies = extractRadiotherapies(treatment.primaryRadiotherapy),
                 metastasesRadiotherapies = extractMetastasesRadiotherapies(treatment.metastaticRadiotherapy),
                 hasHadHipecTreatment = NcrBooleanMapper.resolve(treatment.hipec.hipec) == true,
-                intervalTumorIncidenceHipecTreatment = treatment.hipec.hipecInt1,
+                intervalTumorIncidenceHipecTreatmentDays = treatment.hipec.hipecInt1,
                 hasHadPreSurgeryRadiotherapy = hasHadPreSurgeryRadiotherapy,
                 hasHadPostSurgeryRadiotherapy = hasHadPostSurgeryRadiotherapy,
                 hasHadPreSurgeryChemoRadiotherapy = hasHadPreSurgeryChemoRadiotherapy,

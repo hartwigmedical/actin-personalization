@@ -37,9 +37,9 @@ data class PopulationDefinition(val name: String, val criteria: (DiagnosisAndEpi
         }
 
         private fun episodeMatchesMetastasisLocationGroups(episode: Episode, metastasisLocationGroups: Set<LocationGroup>): Boolean =
-            episode.systemicTreatmentPlan?.intervalTumorIncidenceTreatmentPlanStart?.let { planStart ->
+            episode.systemicTreatmentPlan?.intervalTumorIncidenceTreatmentPlanStartDays?.let { planStart ->
                 val groups = episode.metastases.filter { metastasis ->
-                    metastasis.intervalTumorIncidenceMetastasisDetection?.let { it < planStart } == true
+                    metastasis.intervalTumorIncidenceMetastasisDetectionDays?.let { it < planStart } == true
                 }
                     .map { it.location.locationGroup.topLevelGroup() }
                     .toSet()

@@ -50,7 +50,7 @@ data class Episode(
     val radiotherapies: List<Radiotherapy> = emptyList(),
     val metastasesRadiotherapies: List<MetastasesRadiotherapy> = emptyList(),
     val hasHadHipecTreatment: Boolean,
-    val intervalTumorIncidenceHipecTreatment: Int? = null,
+    val intervalTumorIncidenceHipecTreatmentDays: Int? = null,
     val hasHadPreSurgeryRadiotherapy: Boolean,
     val hasHadPostSurgeryRadiotherapy: Boolean,
     val hasHadPreSurgeryChemoRadiotherapy: Boolean,

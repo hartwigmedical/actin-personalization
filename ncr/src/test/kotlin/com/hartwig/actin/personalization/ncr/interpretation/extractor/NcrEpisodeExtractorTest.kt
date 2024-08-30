@@ -83,7 +83,7 @@ class NcrEpisodeExtractorTest {
             radiotherapies = emptyList(),
             metastasesRadiotherapies = emptyList(),
             hasHadHipecTreatment = false,
-            intervalTumorIncidenceHipecTreatment = null,
+            intervalTumorIncidenceHipecTreatmentDays = null,
             hasHadPreSurgeryRadiotherapy = false,
             hasHadPostSurgeryRadiotherapy = false,
             hasHadPreSurgeryChemoRadiotherapy = false,

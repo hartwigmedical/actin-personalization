@@ -8,8 +8,8 @@ data class SystemicTreatmentSchemeDrug(
     val schemeNumber: Int?, //Nullable because absent for prior tumors
     val numberOfCycles: Int?,
     val numberOfCyclesDetails: TreatmentCyclesDetails?,
-    val intervalTumorIncidenceTreatmentStart: Int?,
-    val intervalTumorIncidenceTreatmentStop: Int?,
+    val intervalTumorIncidenceTreatmentStartDays: Int?,
+    val intervalTumorIncidenceTreatmentStopDays: Int?,
     val isAdministeredPreSurgery: Boolean?,
     val isAdministeredPostSurgery: Boolean?
 )

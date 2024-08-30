@@ -28,15 +28,15 @@ class NcrSystemicTreatmentPlanExtractor {
         val treatmentSchemes = extractSystemicTreatmentSchemes(systemicTreatment)
         val firstScheme = treatmentSchemes.firstOrNull() ?: return null
         val treatment = extractTreatmentFromSchemes(treatmentSchemes)
-        val daysUntilPlanStart = firstScheme.intervalTumorIncidenceTreatmentLineStartMin
+        val daysUntilPlanStart = firstScheme.intervalTumorIncidenceTreatmentLineStartMinDays
 
         val sortedPfsMeasuresAfterPlanStart = pfsMeasures.asSequence()
-            .filterNot { it.intervalTumorIncidencePfsMeasure == null }
-            .sortedBy(PfsMeasure::intervalTumorIncidencePfsMeasure)
-            .dropWhile { daysUntilPlanStart != null && it.intervalTumorIncidencePfsMeasure!! < daysUntilPlanStart }
+            .filterNot { it.intervalTumorIncidencePfsMeasureDays == null }
+            .sortedBy(PfsMeasure::intervalTumorIncidencePfsMeasureDays)
+            .dropWhile { daysUntilPlanStart != null && it.intervalTumorIncidencePfsMeasureDays!! < daysUntilPlanStart }
 
         val intervalTumorFirstPfsMeasure = sortedPfsMeasuresAfterPlanStart.firstOrNull { it.type != PfsMeasureType.CENSOR }
-            ?.intervalTumorIncidencePfsMeasure
+            ?.intervalTumorIncidencePfsMeasureDays
 
         val (observedPfsDays, hadProgressionEvent) =
             if (daysUntilPlanStart == null || hasProgressionOrDeathWithUnknownInterval(pfsMeasures)) {
@@ -53,13 +53,13 @@ class NcrSystemicTreatmentPlanExtractor {
         return SystemicTreatmentPlan(
             treatment = treatment,
             systemicTreatmentSchemes = treatmentSchemes,
-            intervalTumorIncidenceTreatmentPlanStart = daysUntilPlanStart,
-            intervalTumorIncidenceTreatmentPlanStop = treatmentSchemes.last().intervalTumorIncidenceTreatmentLineStopMax,
-            intervalTreatmentPlanStartLatestAliveStatus = daysUntilPlanStart
+            intervalTumorIncidenceTreatmentPlanStartDays = daysUntilPlanStart,
+            intervalTumorIncidenceTreatmentPlanStopDays = treatmentSchemes.last().intervalTumorIncidenceTreatmentLineStopMaxDays,
+            intervalTreatmentPlanStartLatestAliveStatusDays = daysUntilPlanStart
                 ?.let {intervalTumorIncidenceLatestAliveStatus - daysUntilPlanStart }
                 ?.takeIf { it >= 0 },
-            pfs = intervalTumorFirstPfsMeasure?.let { firstPfsInt -> daysUntilPlanStart?.let { firstPfsInt - it } },
-            intervalTreatmentPlanStartResponseDate = responseMeasure?.intervalTumorIncidenceResponseMeasureDate
+            pfsDays = intervalTumorFirstPfsMeasure?.let { firstPfsInt -> daysUntilPlanStart?.let { firstPfsInt - it } },
+            intervalTreatmentPlanStartResponseDays = responseMeasure?.intervalTumorIncidenceResponseMeasureDays
                 ?.let { responseInterval -> daysUntilPlanStart?.let { responseInterval - daysUntilPlanStart } },
             observedPfsDays = observedPfsDays,
             hadProgressionEvent = hadProgressionEvent
@@ -70,11 +70,11 @@ class NcrSystemicTreatmentPlanExtractor {
         intervalTumorFirstPfsMeasure: Int?, sortedPfsMeasuresAfterPlanStart: Sequence<PfsMeasure>
     ): Pair<Int, Boolean>? {
         return intervalTumorFirstPfsMeasure?.let { it to true }
-            ?: sortedPfsMeasuresAfterPlanStart.lastOrNull()?.let { it.intervalTumorIncidencePfsMeasure!! to false }
+            ?: sortedPfsMeasuresAfterPlanStart.lastOrNull()?.let { it.intervalTumorIncidencePfsMeasureDays!! to false }
     }
 
     private fun hasProgressionOrDeathWithUnknownInterval(pfsMeasures: List<PfsMeasure>) = pfsMeasures.any {
-        it.type != PfsMeasureType.CENSOR && it.intervalTumorIncidencePfsMeasure == null
+        it.type != PfsMeasureType.CENSOR && it.intervalTumorIncidencePfsMeasureDays == null
     }
 
     private fun drugsFromScheme(systemicTreatmentScheme: SystemicTreatmentScheme): List<Drug> {
@@ -154,10 +154,10 @@ class NcrSystemicTreatmentPlanExtractor {
                     val (startMin, startMax, stopMin, stopMax) = treatments.map {
                         with(it) {
                             StartAndStopMinAndMax(
-                                intervalTumorIncidenceTreatmentStart,
-                                intervalTumorIncidenceTreatmentStart,
-                                intervalTumorIncidenceTreatmentStop,
-                                intervalTumorIncidenceTreatmentStop
+                                intervalTumorIncidenceTreatmentStartDays,
+                                intervalTumorIncidenceTreatmentStartDays,
+                                intervalTumorIncidenceTreatmentStopDays,
+                                intervalTumorIncidenceTreatmentStopDays
                             )
                         }
                     }.reduce(StartAndStopMinAndMax::plus)
