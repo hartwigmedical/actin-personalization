@@ -24,7 +24,7 @@ import com.hartwig.actin.personalization.datamodel.TnmT
 import com.hartwig.actin.personalization.datamodel.TumorBasisOfDiagnosis
 import com.hartwig.actin.personalization.datamodel.TumorDifferentiationGrade
 import com.hartwig.actin.personalization.datamodel.TumorRegression
-import com.hartwig.actin.personalization.datamodel.VenousInvasionCategory
+import com.hartwig.actin.personalization.datamodel.VenousInvasionDescription
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
@@ -60,7 +60,8 @@ class NcrEpisodeExtractorTest {
             hasDoublePrimaryTumor = false,
             mesorectalFasciaIsClear = true,
             distanceToMesorectalFasciaMm = null,
-            venousInvasionCategory = VenousInvasionCategory.SUSPECT,
+            hasVenousInvasion = true,
+            venousInvasionDescription = VenousInvasionDescription.SUSPECT,
             lymphaticInvasionCategory = LymphaticInvasionCategory.NA,
             extraMuralInvasionCategory = ExtraMuralInvasionCategory.ABOVE_FIVE_MM,
             tumorRegression = TumorRegression.MINIMAL_REGRESSION,
