@@ -25,7 +25,7 @@ data class Episode(
     val investigatedLymphNodesNumber: Int? = null,
     val positiveLymphNodesNumber: Int? = null,
 
-    val distantMetastasesStatus: DistantMetastasesStatus,
+    val distantMetastasesDetectionStatus: MetastasesDetectionStatus,
     val metastases: List<Metastasis>,
     val numberOfLiverMetastases: NumberOfLiverMetastases? = null,
     val maximumSizeOfLiverMetastasisMm: Int? = null,

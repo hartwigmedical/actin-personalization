@@ -126,7 +126,7 @@ class DatabaseWriter(private val context: DSLContext, private val connection: ja
                 table.METASTASESRADIOTHERAPIES,
                 jsonList(episode.metastasesRadiotherapies.map(MetastasesRadiotherapy::metastasesRadiotherapyType))
             )
-            dbRecord.set(table.RESPONSE, episode.responseMeasure?.responseMeasureType?.name)
+            dbRecord.set(table.RESPONSE, episode.responseMeasure?.measure?.name)
             dbRecord.set(table.INTERVALTUMORINCIDENCERESPONSEDAYS, episode.responseMeasure?.intervalTumorIncidenceResponseMeasureDays)
             
             episode.systemicTreatmentPlan?.let { plan ->

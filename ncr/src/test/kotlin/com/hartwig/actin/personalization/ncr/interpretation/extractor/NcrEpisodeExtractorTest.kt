@@ -1,7 +1,7 @@
 package com.hartwig.actin.personalization.ncr.interpretation.extractor
 
 import com.hartwig.actin.personalization.datamodel.AsaClassificationPreSurgeryOrEndoscopy
-import com.hartwig.actin.personalization.datamodel.DistantMetastasesStatus
+import com.hartwig.actin.personalization.datamodel.MetastasesDetectionStatus
 import com.hartwig.actin.personalization.datamodel.Episode
 import com.hartwig.actin.personalization.datamodel.ExtraMuralInvasionCategory
 import com.hartwig.actin.personalization.datamodel.LabMeasure
@@ -16,7 +16,7 @@ import com.hartwig.actin.personalization.datamodel.PfsMeasureFollowUpEvent
 import com.hartwig.actin.personalization.datamodel.PfsMeasureType
 import com.hartwig.actin.personalization.datamodel.ReasonRefrainmentFromTumorDirectedTreatment
 import com.hartwig.actin.personalization.datamodel.ResponseMeasure
-import com.hartwig.actin.personalization.datamodel.ResponseMeasureType
+import com.hartwig.actin.personalization.datamodel.ResponseMeasureCategory
 import com.hartwig.actin.personalization.datamodel.StageTnm
 import com.hartwig.actin.personalization.datamodel.TnmM
 import com.hartwig.actin.personalization.datamodel.TnmN
@@ -53,7 +53,7 @@ class NcrEpisodeExtractorTest {
             stageTNM = StageTnm.IIC,
             investigatedLymphNodesNumber = INVESTIGATED_LYMPH_NODES,
             positiveLymphNodesNumber = POSITIVE_LYMPH_NODES,
-            distantMetastasesStatus = DistantMetastasesStatus.AT_START,
+            distantMetastasesDetectionStatus = MetastasesDetectionStatus.AT_START,
             metastases = listOf(Metastasis(Location.ADRENAL_CORTEX, 20, true)),
             numberOfLiverMetastases = NumberOfLiverMetastases.FIVE_OR_MORE,
             maximumSizeOfLiverMetastasisMm = 15,
@@ -93,7 +93,7 @@ class NcrEpisodeExtractorTest {
             hasHadPostSurgerySystemicChemotherapy = false,
             hasHadPreSurgerySystemicTargetedTherapy = false,
             hasHadPostSurgerySystemicTargetedTherapy = true,
-            responseMeasure = ResponseMeasure(ResponseMeasureType.PD, 5),
+            responseMeasure = ResponseMeasure(ResponseMeasureCategory.PD, 5),
             systemicTreatmentPlan = null,
             pfsMeasures = listOf(
                 PfsMeasure(PfsMeasureType.PROGRESSION, PfsMeasureFollowUpEvent.LOCAL_ONLY, 4),

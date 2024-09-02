@@ -10,7 +10,7 @@ import com.hartwig.actin.personalization.datamodel.Metastasis
 import com.hartwig.actin.personalization.datamodel.PfsMeasure
 import com.hartwig.actin.personalization.datamodel.Radiotherapy
 import com.hartwig.actin.personalization.datamodel.ResponseMeasure
-import com.hartwig.actin.personalization.datamodel.ResponseMeasureType
+import com.hartwig.actin.personalization.datamodel.ResponseMeasureCategory
 import com.hartwig.actin.personalization.datamodel.Surgery
 import com.hartwig.actin.personalization.datamodel.VenousInvasionDescription
 import com.hartwig.actin.personalization.ncr.datamodel.NcrGastroenterologyResection
@@ -57,7 +57,7 @@ class NcrEpisodeExtractor(private val systemicTreatmentPlanExtractor: NcrSystemi
     fun extractEpisode(record: NcrRecord, intervalTumorIncidenceLatestAliveStatus: Int): Episode {
         return with(record) {
             val responseMeasure = treatmentResponse.responsUitslag?.let {
-                if (it == "99" || it == "0") null else enumValueOf<ResponseMeasureType>(it)
+                if (it == "99" || it == "0") null else enumValueOf<ResponseMeasureCategory>(it)
             }
                 ?.let { ResponseMeasure(it, treatmentResponse.responsInt ?: 0) }
 
@@ -96,7 +96,7 @@ class NcrEpisodeExtractor(private val systemicTreatmentPlanExtractor: NcrSystemi
                 stageTNM = NcrStageTnmMapper.resolveNullable(primaryDiagnosis.stadium),
                 investigatedLymphNodesNumber = primaryDiagnosis.ondLymf,
                 positiveLymphNodesNumber = primaryDiagnosis.posLymf,
-                distantMetastasesStatus = NcrDistantMetastasesStatusMapper.resolve(identification.metaEpis),
+                distantMetastasesDetectionStatus = NcrDistantMetastasesStatusMapper.resolve(identification.metaEpis),
                 metastases = extractMetastases(metastaticDiagnosis),
                 numberOfLiverMetastases = NcrNumberOfLiverMetastasesMapper.resolve(metastaticDiagnosis.metaLeverAantal),
                 maximumSizeOfLiverMetastasisMm = metastaticDiagnosis.metaLeverAfm,

@@ -75,7 +75,7 @@ CREATE TABLE `episode` (
     `investigatedLymphNodesNumber` int,
     `positiveLymphNodesNumber` int,
 
-    `distantMetastasesStatus` varchar(50) NOT NULL,
+    `distantMetastasesDetectionStatusInEpisode` varchar(50) NOT NULL,
     `numberOfLiverMetastases` varchar(50),
     `maximumSizeOfLiverMetastasisMm` int,
 
@@ -144,7 +144,7 @@ CREATE TABLE `metastasis` (
     `location` varchar(255) NOT NULL,
     `locationGroup` varchar(50) NOT NULL,
     `intervalTumorIncidenceMetastasisDetectionDays` int,
-    `isPartOfProgression` bool,
+    `isLinkedToProgression` bool,
     FOREIGN KEY (`episodeId`) REFERENCES `episode`(`id`),
     PRIMARY KEY (`id`)
 );
