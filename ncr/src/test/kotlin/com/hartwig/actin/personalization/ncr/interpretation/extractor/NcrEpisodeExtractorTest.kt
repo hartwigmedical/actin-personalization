@@ -1,6 +1,6 @@
 package com.hartwig.actin.personalization.ncr.interpretation.extractor
 
-import com.hartwig.actin.personalization.datamodel.AsaClassificationPreSurgeryOrEndoscopy
+import com.hartwig.actin.personalization.datamodel.AsaClassification
 import com.hartwig.actin.personalization.datamodel.MetastasesDetectionStatus
 import com.hartwig.actin.personalization.datamodel.Episode
 import com.hartwig.actin.personalization.datamodel.ExtraMuralInvasionCategory
@@ -37,7 +37,7 @@ class NcrEpisodeExtractorTest {
             id = EPISODE_ID,
             order = EPISODE_ORDER,
             whoStatusPreTreatmentStart = WHO_STATUS,
-            asaClassificationPreSurgeryOrEndoscopy = AsaClassificationPreSurgeryOrEndoscopy.V,
+            asaClassificationPreSurgeryOrEndoscopy = AsaClassification.V,
             tumorIncidenceYear = INCIDENCE_YEAR,
             tumorLocation = Location.ASCENDING_COLON,
             tumorBasisOfDiagnosis = TumorBasisOfDiagnosis.SPEC_BIOCHEMICAL_IMMUNOLOGICAL_LAB_INVESTIGATION,

@@ -7,7 +7,7 @@ data class Episode(
     val id: Int,
     val order: Int,
     val whoStatusPreTreatmentStart: Int? = null,
-    val asaClassificationPreSurgeryOrEndoscopy: AsaClassificationPreSurgeryOrEndoscopy? = null,
+    val asaClassificationPreSurgeryOrEndoscopy: AsaClassification? = null,
 
     val tumorIncidenceYear: Int,
     val tumorBasisOfDiagnosis: TumorBasisOfDiagnosis,

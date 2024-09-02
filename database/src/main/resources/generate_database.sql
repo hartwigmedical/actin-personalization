@@ -198,7 +198,7 @@ CREATE TABLE `systemicTreatmentSchemeDrug` (
     `drug` varchar(50) NOT NULL,
     `schemeNumber` int,
     `numberOfCycles` int,
-    `numberOfCyclesDetails` varchar(50),
+    `cyclesDetails` varchar(50),
     `intervalTumorIncidenceTreatmentStartDays` int,
     `intervalTumorIncidenceTreatmentStopDays` int,
     `isAdministeredPreSurgery` bool,
