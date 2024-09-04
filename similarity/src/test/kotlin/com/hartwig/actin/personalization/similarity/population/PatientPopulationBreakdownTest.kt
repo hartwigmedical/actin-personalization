@@ -49,8 +49,8 @@ class PatientPopulationBreakdownTest {
                         ageSubPopulation to Measurement(1.0, 2)
                     ),
                     MeasurementType.PROGRESSION_FREE_SURVIVAL to mapOf(
-                        ALL_PATIENTS_POPULATION_NAME to Measurement(70.0, 1, 70, 70, Double.NaN),
-                        ageSubPopulation to Measurement(70.0, 1, 70, 70, Double.NaN)
+                        ALL_PATIENTS_POPULATION_NAME to Measurement(70.0, 1, 70, 70, 0.0),
+                        ageSubPopulation to Measurement(70.0, 1, 70, 70, 0.0)
                     )
                 )
             ),
@@ -61,7 +61,7 @@ class PatientPopulationBreakdownTest {
                         ageSubPopulation to Measurement(0.0, 0)
                     ),
                     MeasurementType.PROGRESSION_FREE_SURVIVAL to mapOf(
-                        ALL_PATIENTS_POPULATION_NAME to Measurement(100.0, 1, 100, 100, Double.NaN),
+                        ALL_PATIENTS_POPULATION_NAME to Measurement(100.0, 1, 100, 100, 0.0),
                         ageSubPopulation to Measurement(Double.NaN, 0, null, null, Double.NaN)
                     )
                 )
