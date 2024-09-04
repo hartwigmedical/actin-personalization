@@ -75,7 +75,7 @@ CREATE TABLE `episode` (
     `investigatedLymphNodesNumber` int,
     `positiveLymphNodesNumber` int,
 
-    `distantMetastasesDetectionStatusInEpisode` varchar(50) NOT NULL,
+    `distantMetastasesDetectionStatus` varchar(50) NOT NULL,
     `numberOfLiverMetastases` varchar(50),
     `maximumSizeOfLiverMetastasisMm` int,
 

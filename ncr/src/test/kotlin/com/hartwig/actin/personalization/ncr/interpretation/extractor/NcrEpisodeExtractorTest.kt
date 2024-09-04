@@ -16,7 +16,7 @@ import com.hartwig.actin.personalization.datamodel.PfsMeasureFollowUpEvent
 import com.hartwig.actin.personalization.datamodel.PfsMeasureType
 import com.hartwig.actin.personalization.datamodel.ReasonRefrainmentFromTumorDirectedTreatment
 import com.hartwig.actin.personalization.datamodel.ResponseMeasure
-import com.hartwig.actin.personalization.datamodel.ResponseMeasureCategory
+import com.hartwig.actin.personalization.datamodel.ResponseType
 import com.hartwig.actin.personalization.datamodel.StageTnm
 import com.hartwig.actin.personalization.datamodel.TnmM
 import com.hartwig.actin.personalization.datamodel.TnmN
@@ -93,7 +93,7 @@ class NcrEpisodeExtractorTest {
             hasHadPostSurgerySystemicChemotherapy = false,
             hasHadPreSurgerySystemicTargetedTherapy = false,
             hasHadPostSurgerySystemicTargetedTherapy = true,
-            responseMeasure = ResponseMeasure(ResponseMeasureCategory.PD, 5),
+            responseMeasure = ResponseMeasure(ResponseType.PD, 5),
             systemicTreatmentPlan = null,
             pfsMeasures = listOf(
                 PfsMeasure(PfsMeasureType.PROGRESSION, PfsMeasureFollowUpEvent.LOCAL_ONLY, 4),

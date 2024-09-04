@@ -1,6 +1,6 @@
 package com.hartwig.actin.personalization.datamodel
 
-enum class ResponseMeasureCategory {
+enum class ResponseType {
     CR,
     MR,
     PD,
