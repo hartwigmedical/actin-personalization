@@ -303,7 +303,7 @@ class NcrEpisodeExtractor(private val systemicTreatmentPlanExtractor: NcrSystemi
             1 -> true to VenousInvasionDescription.EXTRAMURAL
             2 -> true to VenousInvasionDescription.INTRAMURAL
             5 -> true to VenousInvasionDescription.SUSPECT
-            8 -> false to null
+            8 -> null to null
             null, 9 -> null to null
             else -> throw IllegalArgumentException("Unexpected value for venous invasion: $veneusInvas")
         }
