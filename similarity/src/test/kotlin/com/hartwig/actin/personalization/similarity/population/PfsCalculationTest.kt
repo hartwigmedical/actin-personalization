@@ -8,69 +8,43 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
 private const val ELIGIBLE_SUB_POPULATION_SIZE = 50
+private val pfsList = listOf(400, 50, 800, 100, 25, 1600, 200)
 
 class PfsCalculationTest {
 
     @Test
-    fun `Should evaluate patients as eligible when pfs is not null`() {
+    fun `Should evaluate patients as eligible when observed PFS is not null`() {
         assertThat(PfsCalculation.isEligible(DIAGNOSIS_AND_EPISODE)).isFalse
         assertThat(PfsCalculation.isEligible(patientWithPfs(null))).isFalse
         assertThat(PfsCalculation.isEligible(patientWithPfs(100))).isTrue
     }
 
     @Test
-    fun `Should evaluate PFS as null for patient list with no non-null PFS`() {
-        assertEmptyMeasurement(PfsCalculation.calculate(emptyList(), ELIGIBLE_SUB_POPULATION_SIZE))
-        assertEmptyMeasurement(PfsCalculation.calculate(listOf(DIAGNOSIS_AND_EPISODE, patientWithPfs(null)), ELIGIBLE_SUB_POPULATION_SIZE))
-    }
-
-    @Test
-    fun `Should evaluate PFS as only value for patient list with one non-null PFS`() {
-        val pfs = 100
-        val measurement = PfsCalculation.calculate(listOf(patientWithPfs(pfs), DIAGNOSIS_AND_EPISODE), ELIGIBLE_SUB_POPULATION_SIZE)
-        assertThat(measurement.value).isEqualTo(pfs.toDouble())
-        assertThat(measurement.numPatients).isEqualTo(1)
-        assertThat(measurement.min).isEqualTo(pfs)
-        assertThat(measurement.max).isEqualTo(pfs)
-        assertThat(measurement.iqr).isNaN
-    }
-
-    @Test
-    fun `Should evaluate PFS as median for patient list with 2 non-null PFS values`() {
-        val pfsList = listOf(100, 200, null)
+    fun `Should evaluate median PFS for patient list`() {
         val measurement = PfsCalculation.calculate(pfsList.map(::patientWithPfs), ELIGIBLE_SUB_POPULATION_SIZE)
-        assertThat(measurement.value).isEqualTo(150.0)
-        assertThat(measurement.numPatients).isEqualTo(2)
-        assertThat(measurement.min).isEqualTo(100)
-        assertThat(measurement.max).isEqualTo(200)
-        assertThat(measurement.iqr).isEqualTo(100.0)
+        assertThat(measurement.value).isEqualTo(200.0)
+        assertThat(measurement.numPatients).isEqualTo(7)
+        assertThat(measurement.min).isEqualTo(25)
+        assertThat(measurement.max).isEqualTo(1600)
+        assertThat(measurement.iqr).isEqualTo(750.0)
     }
 
     @Test
-    fun `Should evaluate PFS as median for patient list with multiple non-null PFS values`() {
-        val pfsList = listOf(100, 200, 300, 400, 500, null)
-        val measurement = PfsCalculation.calculate(pfsList.map(::patientWithPfs), ELIGIBLE_SUB_POPULATION_SIZE)
-        assertThat(measurement.value).isEqualTo(300.0)
-        assertThat(measurement.numPatients).isEqualTo(5)
-        assertThat(measurement.min).isEqualTo(100)
-        assertThat(measurement.max).isEqualTo(500)
-        assertThat(measurement.iqr).isEqualTo(300.0)
-    }
-
-    @Test
-    fun `Should evaluate PFS as median for patient list with even number of non-null PFS values`() {
-        val pfsList = listOf(100, 200, 300, 400, null)
-        val measurement = PfsCalculation.calculate(pfsList.map(::patientWithPfs), ELIGIBLE_SUB_POPULATION_SIZE)
-        assertThat(measurement.value).isEqualTo(250.0)
-        assertThat(measurement.numPatients).isEqualTo(4)
-        assertThat(measurement.min).isEqualTo(100)
-        assertThat(measurement.max).isEqualTo(400)
-        assertThat(measurement.iqr).isEqualTo(200.0)
+    fun `Should incorporate censored values in PFS calculation`() {
+        // 25, 50, 100, 200, 365, 400, 730, 800, 1095, 1460, 1600, 1825
+        val censoredPatients = listOf(1, 2, 3, 4, 5).map { patientWithPfs(it * 365, false) }
+        val patients = pfsList.map(::patientWithPfs) + censoredPatients
+        val measurement = PfsCalculation.calculate(patients, ELIGIBLE_SUB_POPULATION_SIZE)
+        assertThat(measurement.value).isEqualTo(800.0)
+        assertThat(measurement.numPatients).isEqualTo(12)
+        assertThat(measurement.min).isEqualTo(25)
+        assertThat(measurement.max).isEqualTo(1600)
+        assertThat(measurement.iqr).isEqualTo(1500.0)
     }
 
     @Test
     fun `Should create table elements with all available information`() {
-        assertThat(PfsCalculation.createTableElement(Measurement(Double.NaN, 0))).isEqualTo(TableElement.regular("-"))
+        assertThat(PfsCalculation.createTableElement(Measurement(Double.NaN, 0))).isEqualTo(TableElement.regular("n≤20"))
         assertThat(PfsCalculation.createTableElement(Measurement(100.0, 10))).isEqualTo(TableElement.regular("n≤20"))
         assertThat(PfsCalculation.createTableElement(Measurement(100.0, 50))).isEqualTo(TableElement("100.0", "\n(n=50)"))
         assertThat(PfsCalculation.createTableElement(Measurement(100.0, 50, 50, 150, Double.NaN)))
@@ -79,7 +53,9 @@ class PfsCalculationTest {
             .isEqualTo(TableElement("100.0", ", IQR: 100.0\n(n=50)"))
     }
 
-    private fun assertEmptyMeasurement(measurement: Measurement) {
+    @Test
+    fun `Should return empty measurement for empty population`() {
+        val measurement = PfsCalculation.calculate(emptyList(), ELIGIBLE_SUB_POPULATION_SIZE)
         assertThat(measurement.value).isNaN
         assertThat(measurement.numPatients).isEqualTo(0)
         assertThat(measurement.min).isNull()
@@ -87,13 +63,14 @@ class PfsCalculationTest {
         assertThat(measurement.iqr).isNaN
     }
 
-    private fun patientWithPfs(pfs: Int?): DiagnosisAndEpisode {
+    private fun patientWithPfs(pfs: Int?, hadProgressionEvent: Boolean = true): DiagnosisAndEpisode {
         return DIAGNOSIS_AND_EPISODE.copy(
             second = DIAGNOSIS_AND_EPISODE.second.copy(
                 systemicTreatmentPlan = SystemicTreatmentPlan(
                     treatment = Treatment.CAPECITABINE,
                     systemicTreatmentSchemes = emptyList(),
-                    pfsDays = pfs
+                    observedPfsDays = pfs,
+                    hadProgressionEvent = hadProgressionEvent
                 )
             )
         )
