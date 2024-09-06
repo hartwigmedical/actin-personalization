@@ -1,11 +1,17 @@
 load_ncr_data_latest <- function() {
-  ncr <- read.csv(paste0(Sys.getenv("HOME"), "/hmf/tmp/ncr_crc_dataset_2.csv"), sep = ";")
+  ncr <- read.csv(paste0(Sys.getenv("HOME"), "/hmf/tmp/ncr_crc_latest.csv"), sep = ";")
 
   return(ncr)
 }
 
 load_ncr_data_1 <- function() {
   ncr <- read.csv(paste0(Sys.getenv("HOME"), "/hmf/tmp/ncr_crc_dataset_1.csv"), sep = ";")
+
+  return(ncr)
+}
+
+load_ncr_data_2 <- function() {
+  ncr <- read.csv(paste0(Sys.getenv("HOME"), "/hmf/tmp/ncr_crc_dataset_2.csv"), sep = ";")
 
   return(ncr)
 }
