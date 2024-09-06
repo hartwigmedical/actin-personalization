@@ -60,7 +60,6 @@ class NcrEpisodeExtractorTest {
             hasDoublePrimaryTumor = false,
             mesorectalFasciaIsClear = true,
             distanceToMesorectalFasciaMm = null,
-            hasVenousInvasion = true,
             venousInvasionDescription = VenousInvasionDescription.SUSPECT,
             lymphaticInvasionCategory = LymphaticInvasionCategory.NA,
             extraMuralInvasionCategory = ExtraMuralInvasionCategory.ABOVE_FIVE_MM,
