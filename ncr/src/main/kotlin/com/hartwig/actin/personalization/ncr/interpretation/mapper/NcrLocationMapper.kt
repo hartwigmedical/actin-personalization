@@ -187,7 +187,7 @@ object NcrLocationMapper {
             "C675" -> Location.BLADDER_NECK
             "C676" -> Location.URETHRAL_ORIFICE
             "C678" -> Location.OVERLAPPING_BLADDER_LOCATION
-            "C679" -> Location.BLOW_NNO
+            "C679" -> Location.BLADDER_NOS
             "C680" -> Location.URETHRA
             "C693" -> Location.CHOROIDEA
             "C700" -> Location.CEREBRAL_MENINGES
