@@ -49,6 +49,7 @@ import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrTnmTMapper
 import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrTumorBasisOfDiagnosisMapper
 import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrTumorDifferentiationGradeMapper
 import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrTumorRegressionMapper
+import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrVenousInvasionDescriptionMapper
 import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrWhoStatusMapper
 import com.hartwig.actin.personalization.ncr.interpretation.mapper.resolvePreAndPostSurgery
 
@@ -66,7 +67,6 @@ class NcrEpisodeExtractor(private val systemicTreatmentPlanExtractor: NcrSystemi
                 treatment.systemicTreatment, pfsMeasures, responseMeasure, intervalTumorIncidenceLatestAliveStatus
             )
             val (distanceToMesorectalFascia, mesorectalFasciaIsClear) = extractDistanceToMesorectalFascia(clinicalCharacteristics.mrfAfst)
-            val (hasVenousInvasion, venousInvasionDescription) = extractVenousInvasionDetails(clinicalCharacteristics.veneusInvas)
             val (hasHadPreSurgeryRadiotherapy, hasHadPostSurgeryRadiotherapy) = resolvePreAndPostSurgery(treatment.primaryRadiotherapy.rt)
             val (hasHadPreSurgeryChemoRadiotherapy, hasHadPostSurgeryChemoRadiotherapy) =
                 resolvePreAndPostSurgery(treatment.primaryRadiotherapy.chemort)
@@ -103,8 +103,7 @@ class NcrEpisodeExtractor(private val systemicTreatmentPlanExtractor: NcrSystemi
                 hasDoublePrimaryTumor = NcrBooleanMapper.resolve(clinicalCharacteristics.dubbeltum),
                 mesorectalFasciaIsClear = mesorectalFasciaIsClear,
                 distanceToMesorectalFasciaMm = distanceToMesorectalFascia,
-                hasVenousInvasion = hasVenousInvasion,
-                venousInvasionDescription =  venousInvasionDescription,
+                venousInvasionDescription =  NcrVenousInvasionDescriptionMapper.resolve(clinicalCharacteristics.veneusInvas),
                 lymphaticInvasionCategory = NcrLymphaticInvasionCategoryMapper.resolve(clinicalCharacteristics.lymfInvas),
                 extraMuralInvasionCategory = NcrExtraMuralInvasionCategoryMapper.resolve(clinicalCharacteristics.emi),
                 tumorRegression = NcrTumorRegressionMapper.resolve(clinicalCharacteristics.tumregres),
@@ -294,18 +293,6 @@ class NcrEpisodeExtractor(private val systemicTreatmentPlanExtractor: NcrSystemi
             222 -> null to false
             in 0..20 -> mrfAfst to null
             else -> throw IllegalStateException("Unexpected value for distance to mesorectal fascia: $mrfAfst")
-        }
-    }
-
-    private fun extractVenousInvasionDetails(veneusInvas: Int?): Pair<Boolean?, VenousInvasionDescription?> {
-        return when (veneusInvas) {
-            0 -> false to null
-            1 -> true to VenousInvasionDescription.EXTRAMURAL
-            2 -> true to VenousInvasionDescription.INTRAMURAL
-            5 -> true to VenousInvasionDescription.SUSPECT
-            8 -> null to null
-            null, 9 -> null to null
-            else -> throw IllegalArgumentException("Unexpected value for venous invasion: $veneusInvas")
         }
     }
 

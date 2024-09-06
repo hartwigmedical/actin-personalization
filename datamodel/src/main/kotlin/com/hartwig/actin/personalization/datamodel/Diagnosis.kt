@@ -14,7 +14,7 @@ data class Diagnosis(
     val priorTumors: List<PriorTumor>,
 
     val cci: Int? = null,
-    val cciNumberOfCategories: NumberOfCategories? = null,
+    val cciNumberOfCategories: NumberOfCciCategories? = null,
     val cciHasAids: Boolean? = null,
     val cciHasCongestiveHeartFailure: Boolean? = null,
     val cciHasCollagenosis: Boolean? = null,

@@ -82,7 +82,6 @@ CREATE TABLE `episode` (
     `hasDoublePrimaryTumor` bool,
     `mesorectalFasciaIsClear` bool,
     `distanceToMesorectalFasciaMm` int,
-    `hasVenousInvasion` bool,
     `venousInvasionDescription` varchar(50),
     `lymphaticInvasionCategory` varchar(50),
     `extraMuralInvasionCategory` varchar(50),

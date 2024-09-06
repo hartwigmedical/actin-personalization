@@ -33,7 +33,6 @@ data class Episode(
     val hasDoublePrimaryTumor: Boolean? = null,
     val mesorectalFasciaIsClear: Boolean? = null,
     val distanceToMesorectalFasciaMm: Int? = null,
-    val hasVenousInvasion: Boolean? = null,
     val venousInvasionDescription: VenousInvasionDescription? = null,
     val lymphaticInvasionCategory: LymphaticInvasionCategory? = null,
     val extraMuralInvasionCategory: ExtraMuralInvasionCategory? = null,

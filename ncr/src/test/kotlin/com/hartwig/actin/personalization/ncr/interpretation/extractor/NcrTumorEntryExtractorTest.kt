@@ -1,7 +1,7 @@
 package com.hartwig.actin.personalization.ncr.interpretation.extractor
 
 import com.hartwig.actin.personalization.datamodel.AnorectalVergeDistanceCategory
-import com.hartwig.actin.personalization.datamodel.NumberOfCategories
+import com.hartwig.actin.personalization.datamodel.NumberOfCciCategories
 import com.hartwig.actin.personalization.datamodel.Diagnosis
 import com.hartwig.actin.personalization.datamodel.Drug
 import com.hartwig.actin.personalization.datamodel.Location
@@ -42,7 +42,7 @@ class NcrTumorEntryExtractorTest {
                     )
                 ),
                 cci = 1,
-                cciNumberOfCategories = NumberOfCategories.ONE_CATEGORY,
+                cciNumberOfCategories = NumberOfCciCategories.ONE_CATEGORY,
                 cciHasAids = null,
                 cciHasCongestiveHeartFailure = true,
                 cciHasCollagenosis = null,
