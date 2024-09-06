@@ -22,7 +22,7 @@ This allows some drugs to be dropped after the initial cycle while still using t
 ### Progression-Free Survival (PFS)
 
 A patient's PFS is the time between the start of their treatment and disease progression or death.
-Some reference patients may not experience an event during the length of the study, in which case they are marked
+Some reference patients may not experience an event before the time of the last follow-up, in which case they are marked
 "censored" and we do not know their true PFS.
 Each `Episode` has a list of PFS measures with dates, each of which can represent progression, death, or censorship.
 The episode's PFS measures are summarized in two fields of the systemic treatment plan:
