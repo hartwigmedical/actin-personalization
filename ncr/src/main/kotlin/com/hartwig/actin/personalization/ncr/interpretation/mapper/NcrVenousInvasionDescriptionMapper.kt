@@ -11,8 +11,8 @@ object NcrVenousInvasionDescriptionMapper:  NcrIntCodeMapper<VenousInvasionDescr
             2 -> VenousInvasionDescription.INTRAMURAL
             5 -> VenousInvasionDescription.SUSPECT
             8 -> VenousInvasionDescription.NA
-            null, 9 -> null
-            else -> throw IllegalArgumentException("Unexpected value for venous invasion: $code")
+            9 -> null
+            else -> throw IllegalArgumentException("Unexpected value for VenousInvasionDescription: $code")
         }
     }
 }
