@@ -4,6 +4,6 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class ResponseMeasure(
-    val responseMeasureType: ResponseMeasureType,
-    val intervalTumorIncidenceResponseMeasureDays: Int?
+    val responseType: ResponseType,
+    val intervalTumorIncidenceResponseDays: Int?
 )

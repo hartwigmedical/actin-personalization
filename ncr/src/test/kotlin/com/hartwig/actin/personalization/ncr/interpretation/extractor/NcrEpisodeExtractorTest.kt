@@ -1,7 +1,7 @@
 package com.hartwig.actin.personalization.ncr.interpretation.extractor
 
-import com.hartwig.actin.personalization.datamodel.AsaClassificationPreSurgeryOrEndoscopy
-import com.hartwig.actin.personalization.datamodel.DistantMetastasesStatus
+import com.hartwig.actin.personalization.datamodel.AsaClassification
+import com.hartwig.actin.personalization.datamodel.MetastasesDetectionStatus
 import com.hartwig.actin.personalization.datamodel.Episode
 import com.hartwig.actin.personalization.datamodel.ExtraMuralInvasionCategory
 import com.hartwig.actin.personalization.datamodel.LabMeasure
@@ -16,7 +16,7 @@ import com.hartwig.actin.personalization.datamodel.PfsMeasureFollowUpEvent
 import com.hartwig.actin.personalization.datamodel.PfsMeasureType
 import com.hartwig.actin.personalization.datamodel.ReasonRefrainmentFromTumorDirectedTreatment
 import com.hartwig.actin.personalization.datamodel.ResponseMeasure
-import com.hartwig.actin.personalization.datamodel.ResponseMeasureType
+import com.hartwig.actin.personalization.datamodel.ResponseType
 import com.hartwig.actin.personalization.datamodel.StageTnm
 import com.hartwig.actin.personalization.datamodel.TnmM
 import com.hartwig.actin.personalization.datamodel.TnmN
@@ -24,7 +24,7 @@ import com.hartwig.actin.personalization.datamodel.TnmT
 import com.hartwig.actin.personalization.datamodel.TumorBasisOfDiagnosis
 import com.hartwig.actin.personalization.datamodel.TumorDifferentiationGrade
 import com.hartwig.actin.personalization.datamodel.TumorRegression
-import com.hartwig.actin.personalization.datamodel.VenousInvasionCategory
+import com.hartwig.actin.personalization.datamodel.VenousInvasionDescription
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
@@ -37,7 +37,7 @@ class NcrEpisodeExtractorTest {
             id = EPISODE_ID,
             order = EPISODE_ORDER,
             whoStatusPreTreatmentStart = WHO_STATUS,
-            asaClassificationPreSurgeryOrEndoscopy = AsaClassificationPreSurgeryOrEndoscopy.V,
+            asaClassificationPreSurgeryOrEndoscopy = AsaClassification.V,
             tumorIncidenceYear = INCIDENCE_YEAR,
             tumorLocation = Location.ASCENDING_COLON,
             tumorBasisOfDiagnosis = TumorBasisOfDiagnosis.SPEC_BIOCHEMICAL_IMMUNOLOGICAL_LAB_INVESTIGATION,
@@ -53,14 +53,14 @@ class NcrEpisodeExtractorTest {
             stageTNM = StageTnm.IIC,
             investigatedLymphNodesNumber = INVESTIGATED_LYMPH_NODES,
             positiveLymphNodesNumber = POSITIVE_LYMPH_NODES,
-            distantMetastasesStatus = DistantMetastasesStatus.AT_START,
+            distantMetastasesDetectionStatus = MetastasesDetectionStatus.AT_START,
             metastases = listOf(Metastasis(Location.ADRENAL_CORTEX, 20, true)),
             numberOfLiverMetastases = NumberOfLiverMetastases.FIVE_OR_MORE,
             maximumSizeOfLiverMetastasisMm = 15,
             hasDoublePrimaryTumor = false,
             mesorectalFasciaIsClear = true,
             distanceToMesorectalFasciaMm = null,
-            venousInvasionCategory = VenousInvasionCategory.SUSPECT,
+            venousInvasionDescription = VenousInvasionDescription.SUSPECT,
             lymphaticInvasionCategory = LymphaticInvasionCategory.NA,
             extraMuralInvasionCategory = ExtraMuralInvasionCategory.ABOVE_FIVE_MM,
             tumorRegression = TumorRegression.MINIMAL_REGRESSION,
@@ -92,7 +92,7 @@ class NcrEpisodeExtractorTest {
             hasHadPostSurgerySystemicChemotherapy = false,
             hasHadPreSurgerySystemicTargetedTherapy = false,
             hasHadPostSurgerySystemicTargetedTherapy = true,
-            responseMeasure = ResponseMeasure(ResponseMeasureType.PD, 5),
+            responseMeasure = ResponseMeasure(ResponseType.PD, 5),
             systemicTreatmentPlan = null,
             pfsMeasures = listOf(
                 PfsMeasure(PfsMeasureType.PROGRESSION, PfsMeasureFollowUpEvent.LOCAL_ONLY, 4),

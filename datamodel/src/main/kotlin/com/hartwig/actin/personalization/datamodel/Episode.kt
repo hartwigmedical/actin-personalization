@@ -7,7 +7,7 @@ data class Episode(
     val id: Int,
     val order: Int,
     val whoStatusPreTreatmentStart: Int? = null,
-    val asaClassificationPreSurgeryOrEndoscopy: AsaClassificationPreSurgeryOrEndoscopy? = null,
+    val asaClassificationPreSurgeryOrEndoscopy: AsaClassification? = null,
 
     val tumorIncidenceYear: Int,
     val tumorBasisOfDiagnosis: TumorBasisOfDiagnosis,
@@ -25,7 +25,7 @@ data class Episode(
     val investigatedLymphNodesNumber: Int? = null,
     val positiveLymphNodesNumber: Int? = null,
 
-    val distantMetastasesStatus: DistantMetastasesStatus,
+    val distantMetastasesDetectionStatus: MetastasesDetectionStatus,
     val metastases: List<Metastasis>,
     val numberOfLiverMetastases: NumberOfLiverMetastases? = null,
     val maximumSizeOfLiverMetastasisMm: Int? = null,
@@ -33,7 +33,7 @@ data class Episode(
     val hasDoublePrimaryTumor: Boolean? = null,
     val mesorectalFasciaIsClear: Boolean? = null,
     val distanceToMesorectalFasciaMm: Int? = null,
-    val venousInvasionCategory: VenousInvasionCategory? = null,
+    val venousInvasionDescription: VenousInvasionDescription? = null,
     val lymphaticInvasionCategory: LymphaticInvasionCategory? = null,
     val extraMuralInvasionCategory: ExtraMuralInvasionCategory? = null,
     val tumorRegression: TumorRegression? = null,

@@ -75,14 +75,14 @@ CREATE TABLE `episode` (
     `investigatedLymphNodesNumber` int,
     `positiveLymphNodesNumber` int,
 
-    `distantMetastasesStatus` varchar(50) NOT NULL,
+    `distantMetastasesDetectionStatus` varchar(50) NOT NULL,
     `numberOfLiverMetastases` varchar(50),
     `maximumSizeOfLiverMetastasisMm` int,
 
     `hasDoublePrimaryTumor` bool,
     `mesorectalFasciaIsClear` bool,
     `distanceToMesorectalFasciaMm` int,
-    `venousInvasionCategory` varchar(50),
+    `venousInvasionDescription` varchar(50),
     `lymphaticInvasionCategory` varchar(50),
     `extraMuralInvasionCategory` varchar(50),
     `tumorRegression` varchar(50),
@@ -143,7 +143,7 @@ CREATE TABLE `metastasis` (
     `location` varchar(255) NOT NULL,
     `locationGroup` varchar(50) NOT NULL,
     `intervalTumorIncidenceMetastasisDetectionDays` int,
-    `isPartOfProgression` bool,
+    `isLinkedToProgression` bool,
     FOREIGN KEY (`episodeId`) REFERENCES `episode`(`id`),
     PRIMARY KEY (`id`)
 );
@@ -197,7 +197,8 @@ CREATE TABLE `systemicTreatmentSchemeDrug` (
     `drug` varchar(50) NOT NULL,
     `schemeNumber` int,
     `numberOfCycles` int,
-    `numberOfCyclesDetails` varchar(50),
+    `intent` varchar(50),
+    `drugTreatmentIsOngoing` bool,
     `intervalTumorIncidenceTreatmentStartDays` int,
     `intervalTumorIncidenceTreatmentStopDays` int,
     `isAdministeredPreSurgery` bool,

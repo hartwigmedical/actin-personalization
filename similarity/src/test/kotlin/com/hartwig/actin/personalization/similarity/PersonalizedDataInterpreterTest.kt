@@ -1,6 +1,6 @@
 package com.hartwig.actin.personalization.similarity
 
-import com.hartwig.actin.personalization.datamodel.DistantMetastasesStatus
+import com.hartwig.actin.personalization.datamodel.MetastasesDetectionStatus
 import com.hartwig.actin.personalization.datamodel.Surgery
 import com.hartwig.actin.personalization.datamodel.SurgeryType
 import com.hartwig.actin.personalization.datamodel.Treatment
@@ -17,7 +17,7 @@ class PersonalizedDataInterpreterTest {
         val capoxEpisode = episodeWithTreatment(Treatment.CAPOX)
         val patients = listOf(
             recordWithEpisode(fluourouracilEpisode),
-            recordWithEpisode(fluourouracilEpisode.copy(distantMetastasesStatus = DistantMetastasesStatus.AT_PROGRESSION)),
+            recordWithEpisode(fluourouracilEpisode.copy(distantMetastasesDetectionStatus = MetastasesDetectionStatus.AT_PROGRESSION)),
             recordWithEpisode(episodeWithTreatment(Treatment.OTHER)),
             recordWithEpisode(fluourouracilEpisode.copy(systemicTreatmentPlan = null)),
             recordWithEpisode(fluourouracilEpisode.copy(surgeries = listOf(Surgery(SurgeryType.NOS_OR_OTHER)))),

@@ -1,7 +1,6 @@
 package com.hartwig.actin.personalization.datamodel
 
-enum class TreatmentCyclesDetails {
+enum class TreatmentIntent {
     SENSITIZER,
     MAINTENANCE,
-    ONGOING_TREATMENT
 }
