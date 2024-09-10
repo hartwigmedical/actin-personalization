@@ -1,7 +1,7 @@
 package com.hartwig.actin.personalization.similarity
 
 import com.hartwig.actin.personalization.datamodel.Diagnosis
-import com.hartwig.actin.personalization.datamodel.DistantMetastasesStatus
+import com.hartwig.actin.personalization.datamodel.MetastasesDetectionStatus
 import com.hartwig.actin.personalization.datamodel.Episode
 import com.hartwig.actin.personalization.datamodel.Location
 import com.hartwig.actin.personalization.datamodel.ReferencePatient
@@ -27,7 +27,7 @@ val EPISODE = Episode(
     tumorIncidenceYear = 2020,
     tumorBasisOfDiagnosis = TumorBasisOfDiagnosis.CLINICAL_AND_DIAGNOSTIC_INVESTIGATION,
     tumorLocation = Location.COLON_NOS,
-    distantMetastasesStatus = DistantMetastasesStatus.AT_START,
+    distantMetastasesDetectionStatus = MetastasesDetectionStatus.AT_START,
     metastases = emptyList(),
     hasReceivedTumorDirectedTreatment = false,
     hasHadHipecTreatment = false,

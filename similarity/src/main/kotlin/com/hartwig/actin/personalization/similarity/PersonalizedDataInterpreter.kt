@@ -1,6 +1,6 @@
 package com.hartwig.actin.personalization.similarity
 
-import com.hartwig.actin.personalization.datamodel.DistantMetastasesStatus
+import com.hartwig.actin.personalization.datamodel.MetastasesDetectionStatus
 import com.hartwig.actin.personalization.datamodel.Episode
 import com.hartwig.actin.personalization.datamodel.LocationGroup
 import com.hartwig.actin.personalization.datamodel.ReferencePatient
@@ -46,7 +46,7 @@ class PersonalizedDataInterpreter(val patientsByTreatment: List<Pair<TreatmentGr
                 diagnosis to episodes.single { it.order == 1 }
             }
                 .filter { (_, episode) ->
-                    episode.distantMetastasesStatus == DistantMetastasesStatus.AT_START &&
+                    episode.distantMetastasesDetectionStatus == MetastasesDetectionStatus.AT_START &&
                             episode.systemicTreatmentPlan?.treatment?.let { it != Treatment.OTHER } == true &&
                             episode.surgeries.isEmpty() &&
                             episode.doesNotIncludeAdjuvantOrNeoadjuvantTreatment()

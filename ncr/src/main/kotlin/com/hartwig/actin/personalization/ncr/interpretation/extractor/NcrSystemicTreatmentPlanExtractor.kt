@@ -59,7 +59,7 @@ class NcrSystemicTreatmentPlanExtractor {
                 ?.let {intervalTumorIncidenceLatestAliveStatus - daysUntilPlanStart }
                 ?.takeIf { it >= 0 },
             pfsDays = intervalTumorFirstPfsMeasure?.let { firstPfsInt -> daysUntilPlanStart?.let { firstPfsInt - it } },
-            intervalTreatmentPlanStartResponseDays = responseMeasure?.intervalTumorIncidenceResponseMeasureDays
+            intervalTreatmentPlanStartResponseDays = responseMeasure?.intervalTumorIncidenceResponseDays
                 ?.let { responseInterval -> daysUntilPlanStart?.let { responseInterval - daysUntilPlanStart } },
             observedPfsDays = observedPfsDays,
             hadProgressionEvent = hadProgressionEvent
@@ -172,12 +172,13 @@ class NcrSystemicTreatmentPlanExtractor {
         code: String, schemaNum: Int?, cycleCode: Int?, startInterval: Int?, stopInterval: Int?, prePostCode: Int?
     ): SystemicTreatmentSchemeDrug {
         val (preSurgery, postSurgery) = resolvePreAndPostSurgery(prePostCode)
-        val (cycles, cycleDetails) = resolveCyclesAndDetails(cycleCode)
+        val (cycles, intent, isOngoing) = resolveCyclesAndDetails(cycleCode)
         return SystemicTreatmentSchemeDrug(
             resolve(code),
             schemaNum,
             cycles,
-            cycleDetails,
+            intent,
+            isOngoing,
             startInterval,
             stopInterval,
             preSurgery,

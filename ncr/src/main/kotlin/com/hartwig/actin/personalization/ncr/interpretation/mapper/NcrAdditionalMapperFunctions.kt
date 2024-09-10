@@ -1,6 +1,6 @@
 package com.hartwig.actin.personalization.ncr.interpretation.mapper
 
-import com.hartwig.actin.personalization.datamodel.TreatmentCyclesDetails
+import com.hartwig.actin.personalization.datamodel.TreatmentIntent
 
 fun resolvePreAndPostSurgery(code: Int?): Pair<Boolean, Boolean> {
     return when (code) {
@@ -13,13 +13,13 @@ fun resolvePreAndPostSurgery(code: Int?): Pair<Boolean, Boolean> {
     }
 }
 
-fun resolveCyclesAndDetails(code: Int?): Pair<Int?, TreatmentCyclesDetails?> {
+fun resolveCyclesAndDetails(code: Int?): Triple<Int?, TreatmentIntent?, Boolean?> {
     return when (code) {
-        in 0..48, 60 -> Pair(code, null)
-        66 -> Pair(null, TreatmentCyclesDetails.SENSITIZER)
-        77 -> Pair(null, TreatmentCyclesDetails.MAINTENANCE)
-        98 -> Pair(null, TreatmentCyclesDetails.ONGOING_TREATMENT)
-        99, null -> Pair(null, null)
+        in 0..48, 60 -> Triple(code, null, false)
+        66 -> Triple(null, TreatmentIntent.SENSITIZER, null)
+        77 -> Triple(null, TreatmentIntent.MAINTENANCE, null)
+        98 -> Triple(null, null, true)
+        99, null -> Triple(null, null, null)
         else -> throw IllegalArgumentException("Unknown CyclesAndDetails code: $code")
     }
 }
