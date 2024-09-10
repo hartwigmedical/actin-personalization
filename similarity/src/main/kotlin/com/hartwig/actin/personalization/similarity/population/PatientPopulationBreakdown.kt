@@ -3,6 +3,7 @@ package com.hartwig.actin.personalization.similarity.population
 import com.hartwig.actin.personalization.datamodel.Diagnosis
 import com.hartwig.actin.personalization.datamodel.Episode
 import com.hartwig.actin.personalization.datamodel.TreatmentGroup
+import org.jetbrains.kotlinx.kandy.ir.Plot
 
 typealias DiagnosisAndEpisode = Pair<Diagnosis, Episode>
 
@@ -14,13 +15,13 @@ class PatientPopulationBreakdown(
     fun analyze(): PersonalizedDataAnalysis {
         val allPatients = patientsByTreatment.flatMap { it.second }
         val populations = populationDefinitions.map { populationFromDefinition(it, allPatients) }
-        val populationsByName = populations.associateBy(Population::name)
+        val populationsByNameAndMeasurement = populations.associateBy(Population::name)
 
         val treatmentAnalyses = patientsByTreatment.map { (treatment, patientsWithTreatment) ->
-            treatmentAnalysisForPatients(treatment, patientsWithTreatment, populationsByName)
+            treatmentAnalysisForPatients(treatment, patientsWithTreatment, populationsByNameAndMeasurement)
         }
 
-        return PersonalizedDataAnalysis(treatmentAnalyses, populations)
+        return PersonalizedDataAnalysis(treatmentAnalyses, populations, plotsForPatients(allPatients))
     }
 
     private fun populationFromDefinition(
@@ -45,5 +46,30 @@ class PatientPopulationBreakdown(
             }
         }
         return TreatmentAnalysis(treatment, treatmentMeasurements)
+    }
+
+    private fun patientHasPfsMetrics(patient: DiagnosisAndEpisode): Boolean {
+        val plan = patient.second.systemicTreatmentPlan
+        return plan?.observedPfsDays != null && plan.hadProgressionEvent != null
+    }
+
+    private fun patientObservedPfsDays(patient: DiagnosisAndEpisode) =
+        patient.second.systemicTreatmentPlan?.observedPfsDays
+
+    private fun plotsForPatients(allPatients: List<DiagnosisAndEpisode>): Map<String, Plot> {
+        val sortedPopulationsByName = populationDefinitions.associate { definition ->
+            val patients = allPatients.filter(definition.criteria)
+                .filter(::patientHasPfsMetrics)
+                .sortedBy(::patientObservedPfsDays)
+            definition.name to patients
+        }
+        val sortedPopulationsByTreatment = patientsByTreatment.associate { (treatment, patients) ->
+            treatment.display to patients.filter(::patientHasPfsMetrics).sortedBy(::patientObservedPfsDays)
+        }
+        return listOfNotNull(
+            PfsPlot.createPfsPlot(sortedPopulationsByName)?.let { "populations" to it },
+            PfsPlot.createPfsPlot(sortedPopulationsByTreatment)?.let { "treatments" to it }
+        )
+            .toMap()
     }
 }

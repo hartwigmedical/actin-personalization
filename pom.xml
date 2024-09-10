@@ -40,6 +40,7 @@
         <picocli.version>4.7.6</picocli.version>
         <mysqlconnector.version>8.0.31</mysqlconnector.version>
         <itext.version>7.2.4</itext.version>
+        <kandy-lets-plot.version>0.7.0</kandy-lets-plot.version>
         <google.artifactregistry.version>2.1.0</google.artifactregistry.version>
 
         <junit-jupiter.version>5.10.3</junit-jupiter.version>
@@ -206,6 +207,11 @@
                 <groupId>com.itextpdf</groupId>
                 <artifactId>io</artifactId>
                 <version>${itext.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jetbrains.kotlinx</groupId>
+                <artifactId>kandy-lets-plot</artifactId>
+                <version>${kandy-lets-plot.version}</version>
             </dependency>
 
             <dependency>
