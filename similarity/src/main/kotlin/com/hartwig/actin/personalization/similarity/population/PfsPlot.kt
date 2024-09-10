@@ -17,7 +17,7 @@ object PfsPlot {
             plot {
                 step {
                     x(historiesByName.flatMap { (_, histories) -> histories.map(EventCountAndSurvivalAtTime::daysSincePlanStart) }) {
-                        axis.breaks((0..longestInterval step 100).toList())
+                        axis.breaksLabeled(*(0..longestInterval step 100).toList().map { it to "$it" }.toTypedArray())
                         axis.name = "Days since treatment start"
                     }
                     y(
