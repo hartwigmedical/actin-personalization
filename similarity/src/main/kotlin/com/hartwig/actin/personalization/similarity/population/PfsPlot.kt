@@ -28,7 +28,7 @@ object PfsPlot {
                     }
                     color(historiesByName.flatMap { (name, histories) -> histories.map { name } }, "Group")
                 }
-                layout.size = 525 to 300
+                layout.size = 1000 to 600
             }
         }
     }

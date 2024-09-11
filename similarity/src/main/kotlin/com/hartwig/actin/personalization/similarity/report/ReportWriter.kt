@@ -101,6 +101,7 @@ class ReportWriter(
             plot.save("$outputDir/$name$IMAGE_FILE_EXTENSION")
 
             val image = Image(ImageDataFactory.create("$outputDir/lets-plot-images/$name$IMAGE_FILE_EXTENSION"))
+            image.setWidth(contentWidth())
             document.add(image)
         }
     }
