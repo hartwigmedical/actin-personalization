@@ -5,6 +5,7 @@ import com.itextpdf.io.exceptions.IOException
 import com.itextpdf.io.font.FontProgram
 import com.itextpdf.io.font.FontProgramFactory
 import com.itextpdf.io.font.PdfEncodings
+import com.itextpdf.io.image.ImageDataFactory
 import com.itextpdf.kernel.colors.DeviceRgb
 import com.itextpdf.kernel.font.PdfFont
 import com.itextpdf.kernel.font.PdfFontFactory
@@ -19,10 +20,15 @@ import com.itextpdf.layout.borders.Border
 import com.itextpdf.layout.borders.SolidBorder
 import com.itextpdf.layout.element.Cell
 import com.itextpdf.layout.element.IBlockElement
+import com.itextpdf.layout.element.Image
 import com.itextpdf.layout.element.Paragraph
 import com.itextpdf.layout.element.Table
 import com.itextpdf.layout.element.Text
 import com.itextpdf.layout.properties.UnitValue
+import org.jetbrains.kotlinx.kandy.ir.Plot
+import org.jetbrains.kotlinx.kandy.letsplot.export.save
+import kotlin.io.path.Path
+
 
 private const val FONT_REGULAR_PATH = "fonts/nimbus-sans/NimbusSansL-Regular.ttf"
 private const val FONT_BOLD_PATH = "fonts/nimbus-sans/NimbusSansL-Bold.ttf"
@@ -39,8 +45,11 @@ private const val PAGE_MARGIN_TOP = 100f // Top margin also excludes the chapter
 private const val PAGE_MARGIN_LEFT = 30f
 private const val PAGE_MARGIN_RIGHT = 30f
 private const val PAGE_MARGIN_BOTTOM = 40f
+private const val IMAGE_FILE_EXTENSION = ".png"
 
-class ReportWriter(private val fontRegular: PdfFont, private val fontBold: PdfFont, private val writer: PdfWriter) {
+class ReportWriter(
+    private val writer: PdfWriter, private val outputPath: String, fontRegular: PdfFont, fontBold: PdfFont
+) {
 
     private val chapterTitleStyle = Style().setFont(fontBold).setFontSize(11f).setFontColor(PALETTE_BLACK)
     private val tableTitleStyle = Style().setFont(fontBold).setFontSize(9f).setFontColor(PALETTE_BLUE)
@@ -48,10 +57,11 @@ class ReportWriter(private val fontRegular: PdfFont, private val fontBold: PdfFo
     private val tableBoldContentStyle = Style().setFont(fontBold).setFontSize(8f).setFontColor(PALETTE_BLACK)
     private val tableContentStyle = Style().setFont(fontRegular).setFontSize(8f).setFontColor(PALETTE_BLACK)
 
-    fun writeReport(title: String, tables: List<TableContent>) {
+    fun writeReport(title: String, tables: List<TableContent>, plots: Map<String, Plot>) {
         val document = document()
         addChapterTitle(document, title)
         writeTables(document, tables)
+        addPlots(document, plots)
         document.close()
     }
 
@@ -83,6 +93,16 @@ class ReportWriter(private val fontRegular: PdfFont, private val fontBold: PdfFo
             rowElements.map(::cellWithTableElement).let { listOf(it.first().setBorderRight(BORDER)) + it.drop(1) }
         }.forEach(table::addCell)
         return table
+    }
+
+    private fun addPlots(document: Document, plots: Map<String, Plot>) {
+        val outputDir = Path(outputPath).parent
+        plots.forEach { (name, plot) ->
+            plot.save("$outputDir/$name$IMAGE_FILE_EXTENSION")
+
+            val image = Image(ImageDataFactory.create("$outputDir/lets-plot-images/$name$IMAGE_FILE_EXTENSION"))
+            document.add(image)
+        }
     }
 
     private fun contentWidth(): Float {
@@ -162,7 +182,7 @@ class ReportWriter(private val fontRegular: PdfFont, private val fontBold: PdfFo
 
             val writer = PdfWriter(outputPath, properties)
             writer.compressionLevel = 9
-            return ReportWriter(createFont(FONT_REGULAR_PATH), createFont(FONT_BOLD_PATH), writer)
+            return ReportWriter(writer, outputPath, createFont(FONT_REGULAR_PATH), createFont(FONT_BOLD_PATH))
         }
 
         private fun createFont(fontPath: String): PdfFont {

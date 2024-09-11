@@ -5,10 +5,8 @@ import com.hartwig.actin.personalization.similarity.population.MeasurementType
 import com.hartwig.actin.personalization.similarity.report.ReportWriter
 import com.hartwig.actin.personalization.similarity.report.TableContent
 import io.github.oshai.kotlinlogging.KotlinLogging
-import org.jetbrains.kotlinx.kandy.letsplot.export.save
 import picocli.CommandLine
 import java.util.concurrent.Callable
-import kotlin.io.path.Path
 
 class PersonalizationReportWriterApplication : Callable<Int> {
 
@@ -45,13 +43,11 @@ class PersonalizationReportWriterApplication : Callable<Int> {
 
         val populationTables = analysis.populations.map { TableContent.createForPopulation(analysis, it) }
 
-        val outputDir = Path(outputPath).parent
-        LOGGER.info { "Writing plot images to $outputDir" }
-        analysis.plots.map { (name, plot) -> plot.save("$outputDir/$name.png") }
-
         LOGGER.info { "Writing PDF report to $outputPath" }
         val writer = ReportWriter.create(outputPath)
-        writer.writeReport("SOC personalized real-world evidence annotation", measurementTables + populationTables)
+        writer.writeReport(
+            "SOC personalized real-world evidence annotation", measurementTables + populationTables, analysis.plots
+        )
 
         LOGGER.info { "Done!" }
         return 0
