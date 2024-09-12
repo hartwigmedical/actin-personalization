@@ -13,7 +13,7 @@ class TestPersonalizationReportWriterApplication {
     fun run(): Int {
         LOGGER.info { "Running $APPLICATION v$VERSION" }
 
-        val outputPath = "$WORK_DIRECTORY/out.pdf"
+        val outputPath = "./out.pdf"
         val analysis = PersonalizedDataInterpreter.createFromReferencePatients(
             (1..1000 step 10).map { recordWithEpisode(episodeWithTreatment(Treatment.FOLFOX, it)) }
         )
@@ -23,7 +23,7 @@ class TestPersonalizationReportWriterApplication {
             MeasurementType.TREATMENT_DECISION, MeasurementType.PROGRESSION_FREE_SURVIVAL
         ).map { TableContent.createForMeasurementType(analysis, it) }
 
-        LOGGER.info { "Writing PDF report to $outputPath" }
+        LOGGER.info { "Writing PDF report to $WORK_DIRECTORY" }
         val writer = ReportWriter.create(outputPath)
         writer.writeReport("SOC personalized real-world evidence annotation", measurementTables, analysis.plots)
 
