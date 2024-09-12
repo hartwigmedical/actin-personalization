@@ -12,7 +12,6 @@ import com.hartwig.actin.personalization.datamodel.Radiotherapy
 import com.hartwig.actin.personalization.datamodel.ResponseMeasure
 import com.hartwig.actin.personalization.datamodel.ResponseType
 import com.hartwig.actin.personalization.datamodel.Surgery
-import com.hartwig.actin.personalization.datamodel.VenousInvasionDescription
 import com.hartwig.actin.personalization.ncr.datamodel.NcrGastroenterologyResection
 import com.hartwig.actin.personalization.ncr.datamodel.NcrLabValues
 import com.hartwig.actin.personalization.ncr.datamodel.NcrMetastaticDiagnosis
@@ -85,9 +84,9 @@ class NcrEpisodeExtractor(private val systemicTreatmentPlanExtractor: NcrSystemi
                 tumorBasisOfDiagnosis = NcrTumorBasisOfDiagnosisMapper.resolve(primaryDiagnosis.diagBasis),
                 tumorLocation = NcrLocationMapper.resolveLocation(primaryDiagnosis.topoSublok),
                 tumorDifferentiationGrade = NcrTumorDifferentiationGradeMapper.resolve(primaryDiagnosis.diffgrad.toInt()),
-                tnmCT = NcrTnmTMapper.resolve(primaryDiagnosis.ct),
-                tnmCN = NcrTnmNMapper.resolve(primaryDiagnosis.cn),
-                tnmCM = NcrTnmMMapper.resolve(primaryDiagnosis.cm),
+                tnmCT = NcrTnmTMapper.resolveNullable(primaryDiagnosis.ct),
+                tnmCN = NcrTnmNMapper.resolveNullable(primaryDiagnosis.cn),
+                tnmCM = NcrTnmMMapper.resolveNullable(primaryDiagnosis.cm),
                 tnmPT = NcrTnmTMapper.resolveNullable(primaryDiagnosis.pt),
                 tnmPN = NcrTnmNMapper.resolveNullable(primaryDiagnosis.pn),
                 tnmPM = NcrTnmMMapper.resolveNullable(primaryDiagnosis.pm),
