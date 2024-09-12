@@ -6,12 +6,14 @@ import com.hartwig.actin.personalization.similarity.report.ReportWriter
 import com.hartwig.actin.personalization.similarity.report.TableContent
 import io.github.oshai.kotlinlogging.KotlinLogging
 
+private val WORK_DIRECTORY = System.getProperty("user.dir")
+
 class TestPersonalizationReportWriterApplication {
 
     fun run(): Int {
         LOGGER.info { "Running $APPLICATION v$VERSION" }
 
-        val outputPath = "./out.pdf"
+        val outputPath = "$WORK_DIRECTORY/out.pdf"
         val analysis = PersonalizedDataInterpreter.createFromReferencePatients(
             (1..1000 step 10).map { recordWithEpisode(episodeWithTreatment(Treatment.FOLFOX, it)) }
         )
