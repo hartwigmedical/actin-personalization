@@ -268,7 +268,7 @@ class NcrEpisodeExtractor(private val systemicTreatmentPlanExtractor: NcrSystemi
             )
                 .flatMap { (measure, values) ->
                     values.mapNotNull { (value, interval) ->
-                        value?.takeIf { it != 9999 }?.let { LabMeasurement(measure, it.toDouble(), measure.unit, interval, null, null) }
+                        value?.toDouble()?.takeIf { it != 9999.0 }?.let { LabMeasurement(measure, it, measure.unit, interval, null, null) }
                     }
                 }
 
