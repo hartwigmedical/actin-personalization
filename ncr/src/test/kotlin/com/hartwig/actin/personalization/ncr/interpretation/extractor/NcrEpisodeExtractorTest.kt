@@ -1,13 +1,13 @@
 package com.hartwig.actin.personalization.ncr.interpretation.extractor
 
 import com.hartwig.actin.personalization.datamodel.AsaClassification
-import com.hartwig.actin.personalization.datamodel.MetastasesDetectionStatus
 import com.hartwig.actin.personalization.datamodel.Episode
 import com.hartwig.actin.personalization.datamodel.ExtraMuralInvasionCategory
 import com.hartwig.actin.personalization.datamodel.LabMeasure
 import com.hartwig.actin.personalization.datamodel.LabMeasurement
 import com.hartwig.actin.personalization.datamodel.Location
 import com.hartwig.actin.personalization.datamodel.LymphaticInvasionCategory
+import com.hartwig.actin.personalization.datamodel.MetastasesDetectionStatus
 import com.hartwig.actin.personalization.datamodel.Metastasis
 import com.hartwig.actin.personalization.datamodel.NumberOfLiverMetastases
 import com.hartwig.actin.personalization.datamodel.PfsMeasure
@@ -24,7 +24,6 @@ import com.hartwig.actin.personalization.datamodel.TumorBasisOfDiagnosis
 import com.hartwig.actin.personalization.datamodel.TumorDifferentiationGrade
 import com.hartwig.actin.personalization.datamodel.TumorRegression
 import com.hartwig.actin.personalization.datamodel.Unit
-import com.hartwig.actin.personalization.datamodel.VenousInvasionCategory
 import com.hartwig.actin.personalization.datamodel.VenousInvasionDescription
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
