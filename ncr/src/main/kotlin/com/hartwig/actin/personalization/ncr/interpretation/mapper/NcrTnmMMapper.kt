@@ -3,7 +3,7 @@ package com.hartwig.actin.personalization.ncr.interpretation.mapper
 import com.hartwig.actin.personalization.datamodel.TnmM
 
 object NcrTnmMMapper : NcrStringCodeMapper<TnmM?> {
-    override fun resolve(code: String): TnmM? {
+    override fun resolve(code: String): TnmM {
         return when (code) {
             "0" -> TnmM.M0
             "1" -> TnmM.M1
@@ -12,7 +12,6 @@ object NcrTnmMMapper : NcrStringCodeMapper<TnmM?> {
             "1C" -> TnmM.M1C
             "-" -> TnmM.M_MINUS
             "X" -> TnmM.X
-            "" -> null
             else -> throw IllegalArgumentException("Unknown TnmM code: $code")
         }
     }
