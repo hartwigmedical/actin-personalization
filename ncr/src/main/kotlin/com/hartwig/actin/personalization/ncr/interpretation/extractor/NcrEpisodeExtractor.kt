@@ -10,7 +10,7 @@ import com.hartwig.actin.personalization.datamodel.Metastasis
 import com.hartwig.actin.personalization.datamodel.PfsMeasure
 import com.hartwig.actin.personalization.datamodel.Radiotherapy
 import com.hartwig.actin.personalization.datamodel.ResponseMeasure
-import com.hartwig.actin.personalization.datamodel.ResponseMeasureType
+import com.hartwig.actin.personalization.datamodel.ResponseType
 import com.hartwig.actin.personalization.datamodel.Surgery
 import com.hartwig.actin.personalization.ncr.datamodel.NcrGastroenterologyResection
 import com.hartwig.actin.personalization.ncr.datamodel.NcrLabValues
@@ -48,7 +48,7 @@ import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrTnmTMapper
 import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrTumorBasisOfDiagnosisMapper
 import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrTumorDifferentiationGradeMapper
 import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrTumorRegressionMapper
-import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrVenousInvasionCategoryMapper
+import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrVenousInvasionDescriptionMapper
 import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrWhoStatusMapper
 import com.hartwig.actin.personalization.ncr.interpretation.mapper.resolvePreAndPostSurgery
 
@@ -57,7 +57,7 @@ class NcrEpisodeExtractor(private val systemicTreatmentPlanExtractor: NcrSystemi
     fun extractEpisode(record: NcrRecord, intervalTumorIncidenceLatestAliveStatus: Int): Episode {
         return with(record) {
             val responseMeasure = treatmentResponse.responsUitslag?.let {
-                if (it == "99" || it == "0") null else enumValueOf<ResponseMeasureType>(it)
+                if (it == "99" || it == "0") null else enumValueOf<ResponseType>(it)
             }
                 ?.let { ResponseMeasure(it, treatmentResponse.responsInt ?: 0) }
 
@@ -84,9 +84,9 @@ class NcrEpisodeExtractor(private val systemicTreatmentPlanExtractor: NcrSystemi
                 tumorBasisOfDiagnosis = NcrTumorBasisOfDiagnosisMapper.resolve(primaryDiagnosis.diagBasis),
                 tumorLocation = NcrLocationMapper.resolveLocation(primaryDiagnosis.topoSublok),
                 tumorDifferentiationGrade = NcrTumorDifferentiationGradeMapper.resolve(primaryDiagnosis.diffgrad.toInt()),
-                tnmCT = NcrTnmTMapper.resolve(primaryDiagnosis.ct),
-                tnmCN = NcrTnmNMapper.resolve(primaryDiagnosis.cn),
-                tnmCM = NcrTnmMMapper.resolve(primaryDiagnosis.cm),
+                tnmCT = NcrTnmTMapper.resolveNullable(primaryDiagnosis.ct),
+                tnmCN = NcrTnmNMapper.resolveNullable(primaryDiagnosis.cn),
+                tnmCM = NcrTnmMMapper.resolveNullable(primaryDiagnosis.cm),
                 tnmPT = NcrTnmTMapper.resolveNullable(primaryDiagnosis.pt),
                 tnmPN = NcrTnmNMapper.resolveNullable(primaryDiagnosis.pn),
                 tnmPM = NcrTnmMMapper.resolveNullable(primaryDiagnosis.pm),
@@ -95,14 +95,14 @@ class NcrEpisodeExtractor(private val systemicTreatmentPlanExtractor: NcrSystemi
                 stageTNM = NcrStageTnmMapper.resolveNullable(primaryDiagnosis.stadium),
                 investigatedLymphNodesNumber = primaryDiagnosis.ondLymf,
                 positiveLymphNodesNumber = primaryDiagnosis.posLymf,
-                distantMetastasesStatus = NcrDistantMetastasesStatusMapper.resolve(identification.metaEpis),
+                distantMetastasesDetectionStatus = NcrDistantMetastasesStatusMapper.resolve(identification.metaEpis),
                 metastases = extractMetastases(metastaticDiagnosis),
                 numberOfLiverMetastases = NcrNumberOfLiverMetastasesMapper.resolve(metastaticDiagnosis.metaLeverAantal),
                 maximumSizeOfLiverMetastasisMm = metastaticDiagnosis.metaLeverAfm,
                 hasDoublePrimaryTumor = NcrBooleanMapper.resolve(clinicalCharacteristics.dubbeltum),
                 mesorectalFasciaIsClear = mesorectalFasciaIsClear,
                 distanceToMesorectalFasciaMm = distanceToMesorectalFascia,
-                venousInvasionCategory = NcrVenousInvasionCategoryMapper.resolve(clinicalCharacteristics.veneusInvas),
+                venousInvasionDescription =  NcrVenousInvasionDescriptionMapper.resolve(clinicalCharacteristics.veneusInvas),
                 lymphaticInvasionCategory = NcrLymphaticInvasionCategoryMapper.resolve(clinicalCharacteristics.lymfInvas),
                 extraMuralInvasionCategory = NcrExtraMuralInvasionCategoryMapper.resolve(clinicalCharacteristics.emi),
                 tumorRegression = NcrTumorRegressionMapper.resolve(clinicalCharacteristics.tumregres),

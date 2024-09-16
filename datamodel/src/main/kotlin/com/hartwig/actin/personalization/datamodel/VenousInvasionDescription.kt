@@ -1,9 +1,9 @@
 package com.hartwig.actin.personalization.datamodel
 
-enum class VenousInvasionCategory {
-    NONE,
+enum class VenousInvasionDescription {
     EXTRAMURAL,
     INTRAMURAL,
-    SUSPECT,
     NA,
+    NONE,
+    SUSPECT,
 }

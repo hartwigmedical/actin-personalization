@@ -1,6 +1,6 @@
 package com.hartwig.actin.personalization.datamodel
 
-enum class AsaClassificationPreSurgeryOrEndoscopy {
+enum class AsaClassification {
     I,
     II,
     III,

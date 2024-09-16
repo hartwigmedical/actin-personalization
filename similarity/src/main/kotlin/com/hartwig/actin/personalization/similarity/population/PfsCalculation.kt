@@ -4,32 +4,46 @@ import com.hartwig.actin.personalization.similarity.report.TableElement
 
 object PfsCalculation : Calculation {
 
+    private data class EventCountAndSurvivalAtTime(
+        val daysSincePlanStart: Int,
+        val numEvents: Int,
+        val survival: Double
+    )
+
     private const val MIN_PATIENT_COUNT = 20
     
-    override fun isEligible(patient: DiagnosisAndEpisode) = patient.second.systemicTreatmentPlan?.pfsDays != null
+    override fun isEligible(patient: DiagnosisAndEpisode) =
+        patient.second.systemicTreatmentPlan?.observedPfsDays != null
 
     override fun calculate(patients: List<DiagnosisAndEpisode>, eligiblePopulationSize: Int): Measurement {
-        val pfsList = patients.mapNotNull { (_, episode) -> episode.systemicTreatmentPlan?.pfsDays }.sorted()
-        val (q1, q3) = if (pfsList.size < 2) Pair(Double.NaN, Double.NaN) else {
-            val midPoint = pfsList.size / 2
-            Pair(
-                median(pfsList.subList(0, midPoint)),
-                median(pfsList.subList(pfsList.size - midPoint, pfsList.size))
-            )
-        }
+        val eventHistory = eventHistory(patients.sortedBy { it.second.systemicTreatmentPlan!!.observedPfsDays!! })
+
         return Measurement(
-            median(pfsList), pfsList.size, pfsList.minOrNull(), pfsList.maxOrNull(), q3 - q1
+            pfsForQuartile(eventHistory, 0.5),
+            patients.size,
+            eventHistory.firstOrNull()?.daysSincePlanStart,
+            eventHistory.lastOrNull()?.daysSincePlanStart,
+            pfsForQuartile(eventHistory, 0.75) - pfsForQuartile(eventHistory, 0.25)
         )
+    }
+
+    private fun pfsForQuartile(eventHistory: List<EventCountAndSurvivalAtTime>, quartileAsDecimal: Double): Double {
+        val expectedSurvivalFraction = 1 - quartileAsDecimal
+        // Negate target and evaluation function to search list in descending order:
+        val searchIndex = eventHistory.binarySearchBy(-expectedSurvivalFraction) { -it.survival }
+        val realIndex = if (searchIndex < 0) -(searchIndex + 1) else searchIndex
+
+        return if (realIndex == eventHistory.size) Double.NaN else eventHistory[realIndex].daysSincePlanStart.toDouble()
     }
 
     override fun createTableElement(measurement: Measurement): TableElement {
         return when {
-            measurement.value.isNaN() -> {
-                TableElement.regular("-")
-            }
-
             measurement.numPatients <= MIN_PATIENT_COUNT -> {
                 TableElement.regular("n≤$MIN_PATIENT_COUNT")
+            }
+
+            measurement.value.isNaN() -> {
+                TableElement.regular("-")
             }
 
             else -> {
@@ -50,19 +64,22 @@ object PfsCalculation : Calculation {
         return "Progression-free survival (median, IQR) in NCR real-world data set"
     }
 
-    private fun median(sortedList: List<Int>): Double {
-        return when (sortedList.size) {
-            0 -> Double.NaN
-            1 -> sortedList.first().toDouble()
-            else -> {
-                val midPoint = sortedList.size / 2
-                sortedList.let {
-                    if (it.size % 2 == 0)
-                        (it[midPoint] + it[midPoint - 1]) / 2.0
-                    else
-                        it[midPoint].toDouble()
-                }
+    private tailrec fun eventHistory(
+        populationToProcess: List<DiagnosisAndEpisode>,
+        eventHistory: List<EventCountAndSurvivalAtTime> = emptyList(),
+    ): List<EventCountAndSurvivalAtTime> {
+        return if (populationToProcess.isEmpty()) eventHistory else {
+            val treatmentDetails = populationToProcess.first().second.systemicTreatmentPlan!!
+            val previousEvent = eventHistory.lastOrNull() ?: EventCountAndSurvivalAtTime(0, 0, 1.0)
+            val newEventHistory = if (!treatmentDetails.hadProgressionEvent!!) eventHistory else {
+                val newEvent = EventCountAndSurvivalAtTime(
+                    treatmentDetails.observedPfsDays!!,
+                    previousEvent.numEvents + 1,
+                    previousEvent.survival * (1 - (1.0 / populationToProcess.size))
+                )
+                eventHistory + newEvent
             }
+            eventHistory(populationToProcess.drop(1), newEventHistory)
         }
     }
 }
