@@ -53,7 +53,6 @@ class NcrEpisodeExtractorTest {
                 it.name == LabMeasure.LACTATE_DEHYDROGENASE || it.name == LabMeasure.ALBUMINE
             }
         )
-
         val episode = NcrEpisodeExtractor(NcrSystemicTreatmentPlanExtractor()).extractEpisode(modifiedNcrRecord, 80)
         assertThat(episode.systemicTreatmentPlan).isNotNull
         assertThat(episode.copy(systemicTreatmentPlan = null)).isEqualTo(expectedModifiedEpisode)
