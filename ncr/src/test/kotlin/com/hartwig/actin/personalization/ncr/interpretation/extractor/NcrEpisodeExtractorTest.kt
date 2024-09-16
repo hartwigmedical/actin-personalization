@@ -5,7 +5,6 @@ import com.hartwig.actin.personalization.datamodel.MetastasesDetectionStatus
 import com.hartwig.actin.personalization.datamodel.Episode
 import com.hartwig.actin.personalization.datamodel.ExtraMuralInvasionCategory
 import com.hartwig.actin.personalization.datamodel.LabMeasure
-import com.hartwig.actin.personalization.datamodel.Unit
 import com.hartwig.actin.personalization.datamodel.LabMeasurement
 import com.hartwig.actin.personalization.datamodel.Location
 import com.hartwig.actin.personalization.datamodel.LymphaticInvasionCategory
@@ -24,6 +23,8 @@ import com.hartwig.actin.personalization.datamodel.TnmT
 import com.hartwig.actin.personalization.datamodel.TumorBasisOfDiagnosis
 import com.hartwig.actin.personalization.datamodel.TumorDifferentiationGrade
 import com.hartwig.actin.personalization.datamodel.TumorRegression
+import com.hartwig.actin.personalization.datamodel.Unit
+import com.hartwig.actin.personalization.datamodel.VenousInvasionCategory
 import com.hartwig.actin.personalization.datamodel.VenousInvasionDescription
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -33,7 +34,33 @@ class NcrEpisodeExtractorTest {
 
     @Test
     fun `Should extract episode from NCR record`() {
-        val expectedEpisode = Episode(
+        val episode = NcrEpisodeExtractor(NcrSystemicTreatmentPlanExtractor()).extractEpisode(NCR_RECORD, 80)
+        assertThat(episode.systemicTreatmentPlan).isNotNull
+        assertThat(episode.copy(systemicTreatmentPlan = null)).isEqualTo(expectedEpisode)
+    }
+
+    @Test
+    fun `Should filter out invalid lab measurements (9999 or null)`() {
+        val modifiedNcrRecord = NCR_RECORD.copy(
+            labValues = NCR_LAB_VALUES.copy(
+                ldh1 = null,
+                albumine1 = 9999.0,
+                ldh2 = 9999
+            )
+        )
+
+        val expectedModifiedEpisode = expectedEpisode.copy(
+            labMeasurements = expectedEpisode.labMeasurements.filterNot {
+                it.name == LabMeasure.LACTATE_DEHYDROGENASE || it.name == LabMeasure.ALBUMINE
+            }
+        )
+        val episode = NcrEpisodeExtractor(NcrSystemicTreatmentPlanExtractor()).extractEpisode(modifiedNcrRecord, 80)
+        assertThat(episode.systemicTreatmentPlan).isNotNull
+        assertThat(episode.copy(systemicTreatmentPlan = null)).isEqualTo(expectedModifiedEpisode)
+    }
+
+    companion object {
+        private val expectedEpisode = Episode(
             id = EPISODE_ID,
             order = EPISODE_ORDER,
             whoStatusPreTreatmentStart = WHO_STATUS,
@@ -99,9 +126,5 @@ class NcrEpisodeExtractorTest {
                 PfsMeasure(PfsMeasureType.DEATH, PfsMeasureFollowUpEvent.REGIONAL, 80),
             )
         )
-
-        val episode = NcrEpisodeExtractor(NcrSystemicTreatmentPlanExtractor()).extractEpisode(NCR_RECORD, 80)
-        assertThat(episode.systemicTreatmentPlan).isNotNull
-        assertThat(episode.copy(systemicTreatmentPlan = null)).isEqualTo(expectedEpisode)
     }
 }
