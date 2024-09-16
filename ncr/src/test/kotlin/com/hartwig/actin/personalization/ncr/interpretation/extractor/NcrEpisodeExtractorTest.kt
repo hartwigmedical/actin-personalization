@@ -30,8 +30,37 @@ import org.junit.jupiter.api.Test
 
 
 class NcrEpisodeExtractorTest {
+
+    @Test
+    fun `Should extract episode from NCR record`() {
+        val episode = NcrEpisodeExtractor(NcrSystemicTreatmentPlanExtractor()).extractEpisode(NCR_RECORD, 80)
+        assertThat(episode.systemicTreatmentPlan).isNotNull
+        assertThat(episode.copy(systemicTreatmentPlan = null)).isEqualTo(expectedEpisode)
+    }
+
+    @Test
+    fun `Should filter out invalid lab measurements (9999 or null)`() {
+        val modifiedNcrRecord = NCR_RECORD.copy(
+            labValues = NCR_LAB_VALUES.copy(
+                ldh1 = null,
+                albumine1 = 9999.0,
+                ldh2 = 9999
+            )
+        )
+
+        val expectedModifiedEpisode = expectedEpisode.copy(
+            labMeasurements = expectedEpisode.labMeasurements.filterNot {
+                it.name == LabMeasure.LACTATE_DEHYDROGENASE || it.name == LabMeasure.ALBUMINE
+            }
+        )
+
+        val episode = NcrEpisodeExtractor(NcrSystemicTreatmentPlanExtractor()).extractEpisode(modifiedNcrRecord, 80)
+        assertThat(episode.systemicTreatmentPlan).isNotNull
+        assertThat(episode.copy(systemicTreatmentPlan = null)).isEqualTo(expectedModifiedEpisode)
+    }
+
     companion object {
-        val expectedEpisode = Episode(
+        private val expectedEpisode = Episode(
             id = EPISODE_ID,
             order = EPISODE_ORDER,
             whoStatusPreTreatmentStart = WHO_STATUS,
@@ -97,33 +126,5 @@ class NcrEpisodeExtractorTest {
                 PfsMeasure(PfsMeasureType.DEATH, PfsMeasureFollowUpEvent.REGIONAL, 80),
             )
         )
-    }
-    @Test
-    fun `Should extract episode from NCR record`() {
-        val episode = NcrEpisodeExtractor(NcrSystemicTreatmentPlanExtractor()).extractEpisode(NCR_RECORD, 80)
-        assertThat(episode.systemicTreatmentPlan).isNotNull
-        assertThat(episode.copy(systemicTreatmentPlan = null)).isEqualTo(expectedEpisode)
-    }
-
-    @Test
-    fun `Should filter out invalid lab measurements (9999 or null)`() {
-        val modifiedNcrRecord = NCR_RECORD.copy(
-            labValues = NCR_LAB_VALUES.copy(
-                ldh1 = null,
-                ldhInt1 = null,
-                albumine1 = 9999.0,
-                albumineInt1 = 9999,
-            )
-        )
-
-        val expectedModifiedEpisode = expectedEpisode.copy(
-            labMeasurements = expectedEpisode.labMeasurements.filterNot {
-                it.name == LabMeasure.LACTATE_DEHYDROGENASE || it.name == LabMeasure.ALBUMINE
-            }
-        )
-
-        val episode = NcrEpisodeExtractor(NcrSystemicTreatmentPlanExtractor()).extractEpisode(modifiedNcrRecord, 80)
-        assertThat(episode.systemicTreatmentPlan).isNotNull
-        assertThat(episode.copy(systemicTreatmentPlan = null)).isEqualTo(expectedModifiedEpisode)
     }
 }
