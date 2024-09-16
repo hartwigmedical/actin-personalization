@@ -98,9 +98,11 @@ class ReportWriter(
     private fun addPlots(document: Document, plots: Map<String, Plot>) {
         val outputDir = Path(outputPath).parent
         plots.forEach { (name, plot) ->
-            plot.save("$outputDir/$name$IMAGE_FILE_EXTENSION")
+            val filename = "pfs_${name.replace(" ", "_")}$IMAGE_FILE_EXTENSION"
+            plot.save("$outputDir/$filename")
 
-            val image = Image(ImageDataFactory.create("$outputDir/lets-plot-images/$name$IMAGE_FILE_EXTENSION"))
+            document.add(titleCellWithText("Progression-free survival $name"))
+            val image = Image(ImageDataFactory.create("$outputDir/$filename"))
             image.setWidth(contentWidth())
             document.add(image)
         }
