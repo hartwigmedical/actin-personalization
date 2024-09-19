@@ -27,7 +27,9 @@ class NcrTumorEntryExtractorTest {
                 tumorLocations = setOf(Location.ASCENDING_COLON),
                 hasHadTumorDirectedSystemicTherapy = false,
                 ageAtDiagnosis = 50,
-                intervalTumorIncidenceLatestAliveStatusDays = 80,
+                overallSurvivalFromIncidenceDays = null,
+                observedOverallSurvivalFromIncidenceDays = 80,
+                hadSurvivalEvent = false,
                 hasHadPriorTumor = true,
                 priorTumors = listOf(
                     PriorTumor(

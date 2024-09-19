@@ -17,7 +17,9 @@ val DIAGNOSIS = Diagnosis(
     tumorLocations = emptySet(),
     hasHadTumorDirectedSystemicTherapy = false,
     ageAtDiagnosis = 50,
-    intervalTumorIncidenceLatestAliveStatusDays = 100,
+    overallSurvivalFromIncidenceDays = null,
+    observedOverallSurvivalFromIncidenceDays = 100,
+    hadSurvivalEvent = false,
     hasHadPriorTumor = false,
     priorTumors = emptyList()
 )
