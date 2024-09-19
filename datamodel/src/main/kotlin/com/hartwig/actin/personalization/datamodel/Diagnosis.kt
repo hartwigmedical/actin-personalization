@@ -9,7 +9,6 @@ data class Diagnosis(
     override val hasHadTumorDirectedSystemicTherapy: Boolean,
 
     val ageAtDiagnosis: Int,
-    val overallSurvivalFromIncidenceDays: Int? = null,
     val observedOverallSurvivalFromIncidenceDays: Int,
     val hadSurvivalEvent: Boolean,
     val hasHadPriorTumor: Boolean,

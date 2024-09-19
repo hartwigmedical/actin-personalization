@@ -17,7 +17,6 @@ val DIAGNOSIS = Diagnosis(
     tumorLocations = emptySet(),
     hasHadTumorDirectedSystemicTherapy = false,
     ageAtDiagnosis = 50,
-    overallSurvivalFromIncidenceDays = null,
     observedOverallSurvivalFromIncidenceDays = 100,
     hadSurvivalEvent = false,
     hasHadPriorTumor = false,
@@ -57,7 +56,7 @@ fun recordWithEpisode(episode: Episode): ReferencePatient {
     return PATIENT_RECORD.copy(tumorEntries = PATIENT_RECORD.tumorEntries.map { it.copy(episodes = listOf(episode)) })
 }
 
-fun episodeWithTreatment(treatment: Treatment, pfs: Int? = null, planStart: Int? = null): Episode {
+fun episodeWithTreatment(treatment: Treatment, pfs: Int? = null, planStart: Int? = null, os: Int? = null): Episode {
     return EPISODE.copy(
         systemicTreatmentPlan = SystemicTreatmentPlan(
             treatment = treatment,
@@ -65,7 +64,8 @@ fun episodeWithTreatment(treatment: Treatment, pfs: Int? = null, planStart: Int?
             pfsDays = pfs,
             intervalTumorIncidenceTreatmentPlanStartDays = planStart,
             observedPfsDays = pfs,
-            hadProgressionEvent = true
+            hadProgressionEvent = true,
+            observedOverallSurvivalFromTreatmentPlanStart = os
         )
     )
 }

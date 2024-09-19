@@ -47,7 +47,6 @@ class NcrTumorEntryExtractor(private val episodeExtractor: NcrEpisodeExtractor) 
                 tumorLocations = locations,
                 hasHadTumorDirectedSystemicTherapy = episodes.any(Episode::hasReceivedTumorDirectedTreatment),
                 ageAtDiagnosis = diagnosisRecord.patientCharacteristics.leeft,
-                overallSurvivalFromIncidenceDays = intervalTumorIncidenceLatestAliveStatus.takeIf { patientCharacteristics.vitStat!! == 1 } ,
                 observedOverallSurvivalFromIncidenceDays = intervalTumorIncidenceLatestAliveStatus,
                 hadSurvivalEvent = patientCharacteristics.vitStat!! == 1,
                 hasHadPriorTumor = priorTumors.isNotEmpty(),
