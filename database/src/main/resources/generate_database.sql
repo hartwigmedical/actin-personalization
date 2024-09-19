@@ -16,7 +16,8 @@ CREATE TABLE `diagnosis` (
     `consolidatedTumorType` varchar(255) NOT NULL,
     `tumorLocations` json NOT NULL,
     `ageAtDiagnosis` int NOT NULL,
-    `intervalTumorIncidenceLatestAliveStatus` int NOT NULL,
+    `observedOverallSurvivalFromIncidenceDays` int NOT NULL,
+    `hadSurvivalEvent` bool NOT NULL,
     `hasHadPriorTumor` bool NOT NULL,
     `cci` int,
     `cciNumberOfCategories` varchar(50),
@@ -111,11 +112,11 @@ CREATE TABLE `episode` (
     `systemicTreatmentPlan` varchar(50),
     `intervalTumorIncidenceTreatmentPlanStartDays` int,
     `intervalTumorIncidenceTreatmentPlanStopDays` int,
-    `intervalTreatmentPlanStartLatestAliveStatusDays` int,
     `pfsDays` int,
     `intervalTreatmentPlanStartResponseDays` int,
     `observedPfsDays` int,
     `hadProgressionEvent` bool,
+    `observedOverallSurvivalFromTreatmentPlanStart` int,
     FOREIGN KEY (`diagnosisId`) REFERENCES `diagnosis`(`id`),
     PRIMARY KEY (`id`)
 );
