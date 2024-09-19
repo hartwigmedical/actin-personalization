@@ -61,7 +61,6 @@ fun episodeWithTreatment(treatment: Treatment, pfs: Int? = null, planStart: Int?
         systemicTreatmentPlan = SystemicTreatmentPlan(
             treatment = treatment,
             systemicTreatmentSchemes = emptyList(),
-            pfsDays = pfs,
             intervalTumorIncidenceTreatmentPlanStartDays = planStart,
             observedPfsDays = pfs,
             hadProgressionEvent = true,

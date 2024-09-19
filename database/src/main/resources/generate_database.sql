@@ -112,7 +112,6 @@ CREATE TABLE `episode` (
     `systemicTreatmentPlan` varchar(50),
     `intervalTumorIncidenceTreatmentPlanStartDays` int,
     `intervalTumorIncidenceTreatmentPlanStopDays` int,
-    `pfsDays` int,
     `intervalTreatmentPlanStartResponseDays` int,
     `observedPfsDays` int,
     `hadProgressionEvent` bool,

@@ -55,7 +55,6 @@ class NcrSystemicTreatmentPlanExtractor {
             systemicTreatmentSchemes = treatmentSchemes,
             intervalTumorIncidenceTreatmentPlanStartDays = daysUntilPlanStart,
             intervalTumorIncidenceTreatmentPlanStopDays = treatmentSchemes.last().intervalTumorIncidenceTreatmentLineStopMaxDays,
-            pfsDays = intervalTumorFirstPfsMeasure?.let { firstPfsInt -> daysUntilPlanStart?.let { firstPfsInt - it } },
             intervalTreatmentPlanStartResponseDays = responseMeasure?.intervalTumorIncidenceResponseDays
                 ?.let { responseInterval -> daysUntilPlanStart?.let { responseInterval - daysUntilPlanStart } },
             observedPfsDays = observedPfsDays,
