@@ -16,7 +16,7 @@ CREATE TABLE `diagnosis` (
     `consolidatedTumorType` varchar(255) NOT NULL,
     `tumorLocations` json NOT NULL,
     `ageAtDiagnosis` int NOT NULL,
-    `observedOverallSurvivalFromIncidenceDays` int NOT NULL,
+    `observedOverallSurvivalFromTumorIncidenceDays` int NOT NULL,
     `hadSurvivalEvent` bool NOT NULL,
     `hasHadPriorTumor` bool NOT NULL,
     `cci` int,
