@@ -46,7 +46,7 @@ FROM patient p
 JOIN diagnosis d ON p.id = d.patientId
 JOIN episode e ON d.id = e.diagnosisId AND e.order=1
 LEFT JOIN (
-    SELECT episodeId, GROUP_CONCAT(type) AS surgeries FROM surgery GROUP BY id
+    SELECT episodeId, GROUP_CONCAT(type) AS surgeries FROM surgery GROUP BY episodeId
 ) s ON e.id = s.episodeId
 LEFT JOIN (
     SELECT episodeId, GROUP_CONCAT(locationGroup ORDER BY locationGroup) AS metastasisLocationGroupsPriorToSystemicTreatment
