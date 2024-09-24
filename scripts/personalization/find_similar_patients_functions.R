@@ -1,6 +1,6 @@
 find_similar_patients_general <- function(ref_data) {
   
-  out <- ref_data %>% dplyr::filter(distantMetastasesStatus == 'AT_START' &
+  out <- ref_data %>% dplyr::filter(distantMetastasesDetectionStatus == 'AT_START' &
                                       !is.na(systemicTreatmentPlan) &
                                       hasHadPreSurgerySystemicChemotherapy == 0 &
                                       hasHadPostSurgerySystemicChemotherapy == 0 &
