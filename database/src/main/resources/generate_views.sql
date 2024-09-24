@@ -38,10 +38,11 @@ SELECT
     d.hasBrafV600EMutation,
     d.hasRasMutation,
     d.hasKrasG12CMutation,
+    e.id as episodeId,
     e.*,
-    surgeries,
-    metastasisLocationGroupsPriorToSystemicTreatment,
-    intervalTumorIncidenceTreatmentPlanStopDays-intervalTumorIncidenceTreatmentPlanStartDays AS systemicTreatmentPlanDuration
+    s.surgeries,
+    m.metastasisLocationGroupsPriorToSystemicTreatment,
+    e.intervalTumorIncidenceTreatmentPlanStopDays-e.intervalTumorIncidenceTreatmentPlanStartDays AS systemicTreatmentPlanDuration
 FROM patient p
 JOIN diagnosis d ON p.id = d.patientId
 JOIN episode e ON d.id = e.diagnosisId AND e.order=1
