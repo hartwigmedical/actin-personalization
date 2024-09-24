@@ -133,11 +133,10 @@ class DatabaseWriter(private val context: DSLContext, private val connection: ja
                 dbRecord.set(table.SYSTEMICTREATMENTPLAN, plan.treatment.name)
                 dbRecord.set(table.INTERVALTUMORINCIDENCETREATMENTPLANSTARTDAYS, plan.intervalTumorIncidenceTreatmentPlanStartDays)
                 dbRecord.set(table.INTERVALTUMORINCIDENCETREATMENTPLANSTOPDAYS, plan.intervalTumorIncidenceTreatmentPlanStopDays)
-                dbRecord.set(table.INTERVALTREATMENTPLANSTARTLATESTALIVESTATUSDAYS, plan.intervalTreatmentPlanStartLatestAliveStatusDays)
-                dbRecord.set(table.PFSDAYS, plan.pfsDays)
                 dbRecord.set(table.INTERVALTREATMENTPLANSTARTRESPONSEDAYS, plan.intervalTreatmentPlanStartResponseDays)
                 dbRecord.set(table.OBSERVEDPFSDAYS, plan.observedPfsDays)
                 dbRecord.set(table.HADPROGRESSIONEVENT, plan.hadProgressionEvent)
+                dbRecord.set(table.OBSERVEDOVERALLSURVIVALFROMTREATMENTPLANSTART, plan.observedOverallSurvivalFromTreatmentPlanStart)
             }
             episode to dbRecord
         }

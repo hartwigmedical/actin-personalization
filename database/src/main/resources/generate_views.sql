@@ -6,7 +6,7 @@ SELECT
     e.diagnosisId,
     e.id AS episodeId,
     e.order,
-    distantMetastasesStatus,
+    distantMetastasesDetectionStatus,
     consolidatedTumorType,
     tumorLocations,
     ageAtDiagnosis,
@@ -31,12 +31,12 @@ SELECT
     hasHadPostSurgerySystemicTargetedTherapy,
 	metastasisLocationGroupsPriorToSystemicTreatment,
     systemicTreatmentPlan,
-    intervalTumorIncidenceTreatmentPlanStart,
-    intervalTumorIncidenceTreatmentPlanStop,
-    intervalTumorIncidenceTreatmentPlanStop-intervalTumorIncidenceTreatmentPlanStart AS systemicTreatmentPlanDuration,
-    pfs AS systemicTreatmentPlanPfs,
+    intervalTumorIncidenceTreatmentPlanStartDays,
+    intervalTumorIncidenceTreatmentPlanStopDays,
+    intervalTumorIncidenceTreatmentPlanStopDays-intervalTumorIncidenceTreatmentPlanStartDays AS systemicTreatmentPlanDuration,
+    observedPfsDays AS systemicTreatmentPlanPfs,
     response,
-    intervalTreatmentPlanStartResponseDate
+    intervalTreatmentPlanStartResponseDays
 FROM
     patient p
         INNER JOIN
@@ -46,6 +46,6 @@ FROM
         LEFT JOIN
     (SELECT episodeId, GROUP_CONCAT(type) AS surgeries FROM surgery GROUP BY 1) AS s ON e.id = s.episodeId
 		LEFT JOIN
-	(SELECT episodeId, GROUP_CONCAT(locationGroup ORDER BY locationGroup) AS metastasisLocationGroupsPriorToSystemicTreatment FROM metastasis mm INNER JOIN episode ee ON mm.episodeId=ee.id WHERE intervalTumorIncidenceMetastasisDetection < intervalTumorIncidenceTreatmentPlanStart GROUP BY 1) AS m ON e.id=m.episodeId
+	(SELECT episodeId, GROUP_CONCAT(locationGroup ORDER BY locationGroup) AS metastasisLocationGroupsPriorToSystemicTreatment FROM metastasis mm INNER JOIN episode ee ON mm.episodeId=ee.id WHERE intervalTumorIncidenceMetastasisDetectionDays < intervalTumorIncidenceTreatmentPlanStartDays GROUP BY 1) AS m ON e.id=m.episodeId
 WHERE e.order=1
 );
