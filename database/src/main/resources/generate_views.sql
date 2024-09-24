@@ -39,8 +39,8 @@ SELECT
     d.hasRasMutation,
     d.hasKrasG12CMutation,
     e.*,
-	surgeries,
-	metastasisLocationGroupsPriorToSystemicTreatment,
+    surgeries,
+    metastasisLocationGroupsPriorToSystemicTreatment,
     intervalTumorIncidenceTreatmentPlanStopDays-intervalTumorIncidenceTreatmentPlanStartDays AS systemicTreatmentPlanDuration
 FROM patient p
 JOIN diagnosis d ON p.id = d.patientId
