@@ -19,14 +19,16 @@ assumptions about the shape of the true underlying survival function.
 It makes use of all available information at every event time to predict survival, including reference patients who are
 censored at later times.
 
-The probability `p` of surviving any interval `i` is the fraction of patients that are at risk during that interval that
-do not experience a progression event during that interval.
+The probability `p` of not having a (progression) event during any interval `i` is the fraction of patients that are at risk during that interval that
+do not experience a (progression) event during that interval.
 
 `p = (numSurvivedUpToI - numEventsI) / numSurvivedUpToI`
 
+which can also be written as:
+
 `p = 1 - (numEventsI / numSurvivedUpToI)`
 
-If we handle each event independently, then only one patient does not survive each interval:
+or, if we handle each event independently, then only one patient does not survive each interval, as:
 
 `p = 1 - (1 / numSurvivedUpToI)`
 

@@ -35,17 +35,12 @@ class PersonalizationReportWriterApplication : Callable<Int> {
             .analyzePatient(age, whoStatus, hasRasMutation, extractTopLevelLocationGroups(metastasisLocationString))
 
         val measurementTables = listOf(
-            MeasurementType.TREATMENT_DECISION,
-            MeasurementType.PROGRESSION_FREE_SURVIVAL,
-            MeasurementType.PERCENT_WITH_PFS_THREE_MONTHS,
-            MeasurementType.PERCENT_WITH_PFS_ONE_YEAR
+            MeasurementType.TREATMENT_DECISION, MeasurementType.PROGRESSION_FREE_SURVIVAL,
         ).map { TableContent.createForMeasurementType(analysis, it) }
-
-        val populationTables = analysis.populations.map { TableContent.createForPopulation(analysis, it) }
 
         LOGGER.info { "Writing PDF report to $outputPath" }
         val writer = ReportWriter.create(outputPath)
-        writer.writeReport("SOC personalized real-world evidence annotation", measurementTables + populationTables)
+        writer.writeReport("SOC personalized real-world evidence annotation", measurementTables, analysis.plots)
 
         LOGGER.info { "Done!" }
         return 0

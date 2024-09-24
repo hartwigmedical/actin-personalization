@@ -40,6 +40,10 @@
             <artifactId>kotlin-logging-jvm</artifactId>
         </dependency>
         <dependency>
+            <groupId>info.picocli</groupId>
+            <artifactId>picocli</artifactId>
+        </dependency>
+        <dependency>
             <groupId>com.itextpdf</groupId>
             <artifactId>kernel</artifactId>
         </dependency>
@@ -52,8 +56,8 @@
             <artifactId>io</artifactId>
         </dependency>
         <dependency>
-            <groupId>info.picocli</groupId>
-            <artifactId>picocli</artifactId>
+            <groupId>org.jetbrains.kotlinx</groupId>
+            <artifactId>kandy-lets-plot</artifactId>
         </dependency>
 
         <dependency>

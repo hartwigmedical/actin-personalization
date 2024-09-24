@@ -2,13 +2,13 @@ package com.hartwig.actin.personalization.similarity.population
 
 import com.hartwig.actin.personalization.similarity.report.TableElement
 
-object PfsCalculation : Calculation {
+data class EventCountAndSurvivalAtTime(
+    val daysSincePlanStart: Int,
+    val numEvents: Int,
+    val survival: Double
+)
 
-    private data class EventCountAndSurvivalAtTime(
-        val daysSincePlanStart: Int,
-        val numEvents: Int,
-        val survival: Double
-    )
+object PfsCalculation : Calculation {
 
     private const val MIN_PATIENT_COUNT = 20
     
@@ -64,7 +64,7 @@ object PfsCalculation : Calculation {
         return "Progression-free survival (median, IQR) in NCR real-world data set"
     }
 
-    private tailrec fun eventHistory(
+    tailrec fun eventHistory(
         populationToProcess: List<DiagnosisAndEpisode>,
         eventHistory: List<EventCountAndSurvivalAtTime> = emptyList(),
     ): List<EventCountAndSurvivalAtTime> {
