@@ -58,7 +58,7 @@ LEFT JOIN (
 ) m ON e.id=m.episodeId
 );
 
-CREATE OR REPLACE VIEW filteredTreatments
+CREATE OR REPLACE VIEW nonCurativeTreatments
 AS (
 SELECT *
 FROM diagnosisTreatments
@@ -68,4 +68,13 @@ AND hasHadPostSurgerySystemicChemotherapy = 0
 AND hasHadPreSurgerySystemicTargetedTherapy = 0
 AND hasHadPostSurgerySystemicTargetedTherapy = 0
 AND surgeries IS NULL
+AND gastroenterologyResections = JSON_ARRAY()
+AND hasHadHipecTreatment = 0
+);
+
+CREATE OR REPLACE VIEW knownPalliativeTreatments
+AS (
+SELECT *
+FROM nonCurativeTreatments
+WHERE systemicTreatmentPlan IS NOT NULL AND systemicTreatmentPlan != 'OTHER'
 );
