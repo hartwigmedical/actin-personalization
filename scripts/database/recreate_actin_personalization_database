@@ -11,7 +11,7 @@ if [[ -z "${database_credentials}" || -z "${database_name}" ]]; then
 fi
 
 actin_personalization_database_sql="database/src/main/resources/generate_database.sql"
-actin_personalization_views_sql="views/src/main/resources/generate_views.sql"
+actin_personalization_views_sql="database/src/main/resources/generate_views.sql"
 
 db_host=$(extract_database_host "${database_credentials}")
 db_port=$(extract_database_port "${database_credentials}")
