@@ -50,7 +50,7 @@ LEFT JOIN (
     SELECT episodeId, GROUP_CONCAT(type) AS surgeries FROM surgery GROUP BY episodeId
 ) s ON e.id = s.episodeId
 LEFT JOIN (
-    SELECT episodeId, GROUP_CONCAT(locationGroup ORDER BY locationGroup) AS metastasisLocationGroupsPriorToSystemicTreatment
+    SELECT episodeId, GROUP_CONCAT(DISTINCT locationGroup ORDER BY locationGroup) AS metastasisLocationGroupsPriorToSystemicTreatment
     FROM metastasis mm
     JOIN episode ee ON mm.episodeId=ee.id
     WHERE intervalTumorIncidenceMetastasisDetectionDays < intervalTumorIncidenceTreatmentPlanStartDays
