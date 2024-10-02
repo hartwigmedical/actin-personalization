@@ -59,7 +59,7 @@ class NcrSystemicTreatmentPlanExtractor {
                 ?.let { responseInterval -> daysUntilPlanStart?.let { responseInterval - daysUntilPlanStart } },
             observedPfsDays = observedPfsDays,
             hadProgressionEvent = hadProgressionEvent,
-            observedOverallSurvivalFromTreatmentPlanStart = daysUntilPlanStart
+            observedOsFromTreatmentStartDays = daysUntilPlanStart
                 ?.let { intervalTumorIncidenceLatestAliveStatus - daysUntilPlanStart }
                 ?.takeIf { it >= 0 },
         )
