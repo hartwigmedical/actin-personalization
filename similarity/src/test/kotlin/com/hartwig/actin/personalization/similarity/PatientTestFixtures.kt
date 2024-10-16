@@ -1,9 +1,9 @@
 package com.hartwig.actin.personalization.similarity
 
 import com.hartwig.actin.personalization.datamodel.Diagnosis
-import com.hartwig.actin.personalization.datamodel.MetastasesDetectionStatus
 import com.hartwig.actin.personalization.datamodel.Episode
 import com.hartwig.actin.personalization.datamodel.Location
+import com.hartwig.actin.personalization.datamodel.MetastasesDetectionStatus
 import com.hartwig.actin.personalization.datamodel.ReferencePatient
 import com.hartwig.actin.personalization.datamodel.Sex
 import com.hartwig.actin.personalization.datamodel.SystemicTreatmentPlan
@@ -17,7 +17,7 @@ val DIAGNOSIS = Diagnosis(
     tumorLocations = emptySet(),
     hasHadTumorDirectedSystemicTherapy = false,
     ageAtDiagnosis = 50,
-    observedOverallSurvivalFromTumorIncidenceDays = 100,
+    observedOsFromTumorIncidenceDays = 100,
     hadSurvivalEvent = false,
     hasHadPriorTumor = false,
     priorTumors = emptyList()
@@ -64,7 +64,7 @@ fun episodeWithTreatment(treatment: Treatment, pfs: Int? = null, planStart: Int?
             intervalTumorIncidenceTreatmentPlanStartDays = planStart,
             observedPfsDays = pfs,
             hadProgressionEvent = true,
-            observedOverallSurvivalFromTreatmentPlanStart = os
+            observedOsFromTreatmentStartDays = os
         )
     )
 }

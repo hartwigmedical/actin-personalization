@@ -8,7 +8,7 @@ SELECT
     d.consolidatedTumorType,
     d.tumorLocations,
     d.ageAtDiagnosis,
-    d.observedOverallSurvivalFromTumorIncidenceDays,
+    d.observedOsFromTumorIncidenceDays,
     d.hadSurvivalEvent,
     d.hasHadPriorTumor,
     d.cci,

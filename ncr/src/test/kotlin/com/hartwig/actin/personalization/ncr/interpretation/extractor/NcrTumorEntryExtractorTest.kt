@@ -1,10 +1,10 @@
 package com.hartwig.actin.personalization.ncr.interpretation.extractor
 
 import com.hartwig.actin.personalization.datamodel.AnorectalVergeDistanceCategory
-import com.hartwig.actin.personalization.datamodel.NumberOfCciCategories
 import com.hartwig.actin.personalization.datamodel.Diagnosis
 import com.hartwig.actin.personalization.datamodel.Drug
 import com.hartwig.actin.personalization.datamodel.Location
+import com.hartwig.actin.personalization.datamodel.NumberOfCciCategories
 import com.hartwig.actin.personalization.datamodel.PriorTumor
 import com.hartwig.actin.personalization.datamodel.StageTnm
 import com.hartwig.actin.personalization.datamodel.TumorLocationCategory
@@ -27,7 +27,7 @@ class NcrTumorEntryExtractorTest {
                 tumorLocations = setOf(Location.ASCENDING_COLON),
                 hasHadTumorDirectedSystemicTherapy = false,
                 ageAtDiagnosis = 50,
-                observedOverallSurvivalFromTumorIncidenceDays = 80,
+                observedOsFromTumorIncidenceDays = 80,
                 hadSurvivalEvent = false,
                 hasHadPriorTumor = true,
                 priorTumors = listOf(

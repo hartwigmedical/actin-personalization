@@ -136,7 +136,7 @@ class DatabaseWriter(private val context: DSLContext, private val connection: ja
                 dbRecord.set(table.INTERVALTREATMENTPLANSTARTRESPONSEDAYS, plan.intervalTreatmentPlanStartResponseDays)
                 dbRecord.set(table.OBSERVEDPFSDAYS, plan.observedPfsDays)
                 dbRecord.set(table.HADPROGRESSIONEVENT, plan.hadProgressionEvent)
-                dbRecord.set(table.OBSERVEDOVERALLSURVIVALFROMTREATMENTPLANSTART, plan.observedOverallSurvivalFromTreatmentPlanStart)
+                dbRecord.set(table.OBSERVEDOSFROMTREATMENTSTARTDAYS, plan.observedOsFromTreatmentStartDays)
             }
             episode to dbRecord
         }

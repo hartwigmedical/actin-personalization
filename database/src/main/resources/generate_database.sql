@@ -16,7 +16,7 @@ CREATE TABLE `diagnosis` (
     `consolidatedTumorType` varchar(255) NOT NULL,
     `tumorLocations` json NOT NULL,
     `ageAtDiagnosis` int NOT NULL,
-    `observedOverallSurvivalFromTumorIncidenceDays` int NOT NULL,
+    `observedOsFromTumorIncidenceDays` int NOT NULL,
     `hadSurvivalEvent` bool NOT NULL,
     `hasHadPriorTumor` bool NOT NULL,
     `cci` int,
@@ -115,7 +115,7 @@ CREATE TABLE `episode` (
     `intervalTreatmentPlanStartResponseDays` int,
     `observedPfsDays` int,
     `hadProgressionEvent` bool,
-    `observedOverallSurvivalFromTreatmentPlanStart` int,
+    `observedOsFromTreatmentStartDays` int,
     FOREIGN KEY (`diagnosisId`) REFERENCES `diagnosis`(`id`),
     PRIMARY KEY (`id`)
 );
