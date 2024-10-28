@@ -2,28 +2,27 @@ package com.hartwig.actin.personalization.similarity.population
 
 import com.hartwig.actin.personalization.similarity.report.TableElement
 
-object PfsCalculation : Calculation {
+object OsCalculation : Calculation {
 
     private const val MIN_PATIENT_COUNT = 20
-    
+
     override fun isEligible(patient: DiagnosisAndEpisode) =
-        patient.second.systemicTreatmentPlan?.observedPfsDays != null
+        patient.second.systemicTreatmentPlan?.observedOsFromTreatmentStartDays != null
 
     override fun calculate(patients: List<DiagnosisAndEpisode>, eligiblePopulationSize: Int): Measurement {
-        val eventHistory = eventHistory(patients.sortedBy { it.second.systemicTreatmentPlan!!.observedPfsDays!! })
+        val eventHistory = eventHistory(patients.sortedBy { it.second.systemicTreatmentPlan!!.observedOsFromTreatmentStartDays!! })
 
         return Measurement(
-            pfsForQuartile(eventHistory, 0.5),
+            osForQuartile(eventHistory, 0.5),
             patients.size,
             eventHistory.firstOrNull()?.daysSincePlanStart,
             eventHistory.lastOrNull()?.daysSincePlanStart,
-            pfsForQuartile(eventHistory, 0.75) - pfsForQuartile(eventHistory, 0.25)
+            osForQuartile(eventHistory, 0.75) - osForQuartile(eventHistory, 0.25)
         )
     }
 
-    private fun pfsForQuartile(eventHistory: List<EventCountAndSurvivalAtTime>, quartileAsDecimal: Double): Double {
+    private fun osForQuartile(eventHistory: List<EventCountAndSurvivalAtTime>, quartileAsDecimal: Double): Double {
         val expectedSurvivalFraction = 1 - quartileAsDecimal
-        // Negate target and evaluation function to search list in descending order:
         val searchIndex = eventHistory.binarySearchBy(-expectedSurvivalFraction) { -it.survival }
         val realIndex = if (searchIndex < 0) -(searchIndex + 1) else searchIndex
 
@@ -55,7 +54,7 @@ object PfsCalculation : Calculation {
     }
 
     override fun title(): String {
-        return "Progression-free survival (median, IQR) in NCR real-world data set"
+        return "Overall survival (median, IQR) in NCR real-world data set"
     }
 
     tailrec fun eventHistory(
@@ -65,9 +64,9 @@ object PfsCalculation : Calculation {
         return if (populationToProcess.isEmpty()) eventHistory else {
             val treatmentDetails = populationToProcess.first().second.systemicTreatmentPlan!!
             val previousEvent = eventHistory.lastOrNull() ?: EventCountAndSurvivalAtTime(0, 0, 1.0)
-            val newEventHistory = if (!treatmentDetails.hadProgressionEvent!!) eventHistory else {
+            val newEventHistory = if (!treatmentDetails.hadSurvivalEvent!!) eventHistory else {
                 val newEvent = EventCountAndSurvivalAtTime(
-                    treatmentDetails.observedPfsDays!!,
+                    treatmentDetails.observedOsFromTreatmentStartDays!!,
                     previousEvent.numEvents + 1,
                     previousEvent.survival * (1 - (1.0 / populationToProcess.size))
                 )
