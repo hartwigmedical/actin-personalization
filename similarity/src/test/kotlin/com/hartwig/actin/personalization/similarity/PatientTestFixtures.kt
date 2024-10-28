@@ -69,3 +69,8 @@ fun episodeWithTreatment(treatment: Treatment, pfs: Int? = null, planStart: Int?
         )
     )
 }
+fun episodeWithoutTreatment(): Episode {
+    return EPISODE.copy(
+        systemicTreatmentPlan = null
+    )
+}

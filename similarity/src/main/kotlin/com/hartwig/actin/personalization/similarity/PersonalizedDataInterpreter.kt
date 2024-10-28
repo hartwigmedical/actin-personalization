@@ -52,7 +52,7 @@ class PersonalizedDataInterpreter(val patientsByTreatment: List<Pair<TreatmentGr
                 }
 
             val patientsByTreatment = referencePop.groupBy { (_, episode) ->
-                episode.systemicTreatmentPlan!!.treatment.treatmentGroup
+                episode.systemicTreatmentPlan?.treatment?.treatmentGroup ?: TreatmentGroup.NONE
             }
                 .toList()
                 .sortedByDescending { it.second.size }

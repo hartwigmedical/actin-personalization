@@ -6,4 +6,5 @@ enum class TreatmentCategory {
     HORMONAL_THERAPY,
     OTHER_TREATMENTS,
     TARGETED_THERAPY,
+    NONE
 }
