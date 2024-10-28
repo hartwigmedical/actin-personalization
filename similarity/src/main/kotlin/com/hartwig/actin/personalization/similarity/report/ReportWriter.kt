@@ -60,8 +60,13 @@ class ReportWriter(
     fun writeReport(title: String, tables: List<TableContent>, plots: Map<String, Plot>) {
         val document = document()
         addChapterTitle(document, title)
-        writeTables(document, tables)
-        addPlots(document, plots)
+
+        writeTables(document, tables.filter { it.title.contains("Progression-free survival", ignoreCase = true) })
+        writeTables(document, tables.filter { it.title.contains("Overall survival", ignoreCase = true) })
+
+        addPlots(document, plots.filterKeys { it.contains("pfs_", ignoreCase = true) })
+        addPlots(document, plots.filterKeys { it.contains("os_", ignoreCase = true) })
+
         document.close()
     }
 
@@ -98,15 +103,17 @@ class ReportWriter(
     private fun addPlots(document: Document, plots: Map<String, Plot>) {
         val outputDir = Path(outputPath).parent
         plots.forEach { (name, plot) ->
-            val filename = "pfs_${name.replace(" ", "_")}$IMAGE_FILE_EXTENSION"
+            val plotType = if (name.startsWith("os_", ignoreCase = true)) "Overall survival" else "Progression-free survival"
+            val filename = "${plotType.lowercase().replace(" ", "_")}_${name.replace(" ", "_")}$IMAGE_FILE_EXTENSION"
             plot.save("$outputDir/$filename")
 
-            document.add(titleCellWithText("Progression-free survival $name"))
+            document.add(titleCellWithText("$plotType $name"))
             val image = Image(ImageDataFactory.create("$outputDir/$filename"))
             image.setWidth(contentWidth())
             document.add(image)
         }
     }
+
 
     private fun contentWidth(): Float {
         return PAGE_SIZE.width - (5 + PAGE_MARGIN_LEFT + PAGE_MARGIN_RIGHT)
