@@ -98,7 +98,7 @@ class NcrEpisodeExtractor(private val systemicTreatmentPlanExtractor: NcrSystemi
                 distantMetastasesDetectionStatus = NcrDistantMetastasesStatusMapper.resolve(identification.metaEpis),
                 metastases = extractMetastases(metastaticDiagnosis),
                 numberOfLiverMetastases = NcrNumberOfLiverMetastasesMapper.resolve(metastaticDiagnosis.metaLeverAantal),
-                maximumSizeOfLiverMetastasisMm = metastaticDiagnosis.metaLeverAfm,
+                maximumSizeOfLiverMetastasisMm = metastaticDiagnosis.metaLeverAfm.takeIf { it != 999 },
                 hasDoublePrimaryTumor = NcrBooleanMapper.resolve(clinicalCharacteristics.dubbeltum),
                 mesorectalFasciaIsClear = mesorectalFasciaIsClear,
                 distanceToMesorectalFasciaMm = distanceToMesorectalFascia,
@@ -233,6 +233,13 @@ class NcrEpisodeExtractor(private val systemicTreatmentPlanExtractor: NcrSystemi
     }
 
     private fun extractLabMeasurements(labValues: NcrLabValues): List<LabMeasurement> {
+        val extremeRanges = mapOf(
+            LabMeasure.LACTATE_DEHYDROGENASE to 120.0..10000.0,
+            LabMeasure.ALKALINE_PHOSPHATASE to 30.0..2000.0,
+            LabMeasure.NEUTROPHILS_ABSOLUTE to 2.0..100.0,
+            LabMeasure.ALBUMINE to 20.0..70.0,
+            LabMeasure.LEUKOCYTES_ABSOLUTE to 4.0..500.0,
+        )
         with(labValues) {
             val measurements = listOf(
                 LabMeasure.LACTATE_DEHYDROGENASE to listOf(
@@ -265,21 +272,19 @@ class NcrEpisodeExtractor(private val systemicTreatmentPlanExtractor: NcrSystemi
                     leuko3 to leukoInt3,
                     leuko4 to leukoInt4
                 )
-            )
-                .flatMap { (measure, values) ->
-                    values.mapNotNull { (value, interval) ->
-                        value?.toDouble()?.takeIf { it != 9999.0 }?.let { LabMeasurement(measure, it, measure.unit, interval, null, null) }
-                    }
+            ).flatMap { (measure, values) ->
+                val extremeRange = extremeRanges[measure] ?: Double.MIN_VALUE..Double.MAX_VALUE
+                values.mapNotNull { (value, interval) ->
+                    value?.toDouble()?.takeIf { it != 9999.0 && it in extremeRange }?.let { LabMeasurement(measure, it, measure.unit, interval, null, null) }
                 }
-
+            }
             return measurements + listOfNotNull(
                 periSurgicalCeaMeasurement(prechirCea, true),
                 periSurgicalCeaMeasurement(postchirCea, false)
             )
         }
     }
-
-    private fun periSurgicalCeaMeasurement(measurement: Double?, isPreSurgical: Boolean) = measurement?.takeIf { it != 9999.0 }?.let {
+    private fun periSurgicalCeaMeasurement(measurement: Double?, isPreSurgical: Boolean) = measurement?.takeIf { it != 9999.0 && it in 0.0..10000.0 }?.let {
         LabMeasurement(
             LabMeasure.CARCINOEMBRYONIC_ANTIGEN, it, LabMeasure.CARCINOEMBRYONIC_ANTIGEN.unit, null, isPreSurgical, !isPreSurgical
         )

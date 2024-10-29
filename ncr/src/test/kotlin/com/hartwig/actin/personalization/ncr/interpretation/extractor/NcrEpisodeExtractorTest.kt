@@ -39,23 +39,54 @@ class NcrEpisodeExtractorTest {
     }
 
     @Test
-    fun `Should filter out invalid lab measurements (9999 or null)`() {
+    fun `Should filter out invalid lab measurements (9999, null, or out of extreme ranges)`() {
         val modifiedNcrRecord = NCR_RECORD.copy(
             labValues = NCR_LAB_VALUES.copy(
                 ldh1 = null,
+                ldh2 = 9999,
+                ldh3 = 50,
                 albumine1 = 9999.0,
-                ldh2 = 9999
+                albumine2 = 10.0,
+                albumine3 = 40.5,
+                neutro1 = 500.0,
+                neutro2 = 30.5,
+                leuko1 = 50.5,
+                prechirCea = 9999.0,
+                postchirCea = null
             )
         )
 
-        val expectedModifiedEpisode = expectedEpisode.copy(
-            labMeasurements = expectedEpisode.labMeasurements.filterNot {
-                it.name == LabMeasure.LACTATE_DEHYDROGENASE || it.name == LabMeasure.ALBUMINE
-            }
+        val expectedEpisodeInvalidLabMeasurements = expectedEpisode.copy(
+            labMeasurements = listOf(
+                LabMeasurement(LabMeasure.NEUTROPHILS_ABSOLUTE, 30.5, Unit.BILLIONS_PER_LITER, null, null, null),
+                LabMeasurement(LabMeasure.ALBUMINE, 40.5, Unit.GRAM_PER_LITER, null, null, null),
+                LabMeasurement(LabMeasure.LEUKOCYTES_ABSOLUTE, 50.5, Unit.BILLIONS_PER_LITER, 5, null, null),
         )
+        )
+
         val episode = NcrEpisodeExtractor(NcrSystemicTreatmentPlanExtractor()).extractEpisode(modifiedNcrRecord, 80)
+
         assertThat(episode.systemicTreatmentPlan).isNotNull
-        assertThat(episode.copy(systemicTreatmentPlan = null)).isEqualTo(expectedModifiedEpisode)
+        assertThat(episode.copy(systemicTreatmentPlan = null)).isEqualTo(expectedEpisodeInvalidLabMeasurements)
+    }
+
+
+    @Test
+    fun `Should set maximumSizeOfLiverMetastasisMm to null when value is 999`() {
+        val modifiedNcrRecord = NCR_RECORD.copy(
+            metastaticDiagnosis = NCR_METASTATIC_DIAGNOSIS.copy(
+                metaLeverAfm = 999
+            )
+        )
+
+        val expectedEpisodeWithNullMetastasisSize = expectedEpisode.copy(
+            maximumSizeOfLiverMetastasisMm = null
+        )
+
+        val episode = NcrEpisodeExtractor(NcrSystemicTreatmentPlanExtractor()).extractEpisode(modifiedNcrRecord, 80)
+
+        assertThat(episode.systemicTreatmentPlan).isNotNull
+        assertThat(episode.copy(systemicTreatmentPlan = null)).isEqualTo(expectedEpisodeWithNullMetastasisSize)
     }
 
     companion object {
@@ -91,13 +122,11 @@ class NcrEpisodeExtractorTest {
             extraMuralInvasionCategory = ExtraMuralInvasionCategory.ABOVE_FIVE_MM,
             tumorRegression = TumorRegression.MINIMAL_REGRESSION,
             labMeasurements = listOf(
-                LabMeasurement(LabMeasure.LACTATE_DEHYDROGENASE, 10.0, Unit.UNIT_PER_LITER, 1, null, null),
-                LabMeasurement(LabMeasure.ALKALINE_PHOSPHATASE, 20.0, Unit.UNIT_PER_LITER, 2, null, null),
                 LabMeasurement(LabMeasure.NEUTROPHILS_ABSOLUTE, 30.5, Unit.BILLIONS_PER_LITER, 3, null, null),
                 LabMeasurement(LabMeasure.ALBUMINE, 40.5, Unit.GRAM_PER_LITER, 4, null, null),
                 LabMeasurement(LabMeasure.LEUKOCYTES_ABSOLUTE, 50.5, Unit.BILLIONS_PER_LITER, 5, null, null),
                 LabMeasurement(LabMeasure.CARCINOEMBRYONIC_ANTIGEN, 0.1, Unit.MICROGRAM_PER_LITER, null, true, false),
-                LabMeasurement(LabMeasure.CARCINOEMBRYONIC_ANTIGEN, 0.2, Unit.MICROGRAM_PER_LITER, null, false, true)
+                        LabMeasurement(LabMeasure.CARCINOEMBRYONIC_ANTIGEN, 0.2, Unit.MICROGRAM_PER_LITER, null, false, true)
             ),
             hasReceivedTumorDirectedTreatment = false,
             reasonRefrainmentFromTumorDirectedTreatment =
@@ -126,4 +155,5 @@ class NcrEpisodeExtractorTest {
             )
         )
     }
+
 }
