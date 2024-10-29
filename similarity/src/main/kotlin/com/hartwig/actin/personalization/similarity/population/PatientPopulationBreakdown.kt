@@ -2,6 +2,7 @@ package com.hartwig.actin.personalization.similarity.population
 
 import com.hartwig.actin.personalization.datamodel.Diagnosis
 import com.hartwig.actin.personalization.datamodel.Episode
+import com.hartwig.actin.personalization.datamodel.SystemicTreatmentPlan
 import com.hartwig.actin.personalization.datamodel.Treatment
 import com.hartwig.actin.personalization.datamodel.TreatmentGroup
 import org.jetbrains.kotlinx.kandy.ir.Plot
@@ -49,94 +50,68 @@ class PatientPopulationBreakdown(
         return TreatmentAnalysis(treatment, treatmentMeasurements)
     }
 
-    private fun patientHasPfsMetrics(patient: DiagnosisAndEpisode): Boolean {
-        val plan = patient.second.systemicTreatmentPlan
-        return plan?.observedPfsDays != null && plan.hadProgressionEvent != null
+    private fun createPlotsForMeasurement(
+        allPatients: List<DiagnosisAndEpisode>, timeFunction: (SystemicTreatmentPlan) -> Int?, eventFunction: (SystemicTreatmentPlan) -> Boolean?, title: String, yAxisLabel: String
+    ): Map<String, Plot> {
+        val calculation = SurvivalCalculation(timeFunction, eventFunction, title)
+        val filteredPatients = allPatients.filter(calculation::isEligible).sortedBy {
+            timeFunction(it.second.systemicTreatmentPlan!!)
+        }
+        val groupedPatientsByPopulation = populationDefinitions.associate { definition ->
+            definition.name to filteredPatients.filter(definition.criteria)
+        }
+        val plots = mutableListOf<Pair<String, Plot>>()
+        SurvivalPlot.createSurvivalPlot(groupedPatientsByPopulation, calculation, yAxisLabel)?.let {
+            plots.add("$yAxisLabel by population" to it)
+        }
+
+        listOf(
+            "WHO" to { p: List<DiagnosisAndEpisode> -> groupByWho(p) },
+            "FOLFOXIRI-B" to { p: List<DiagnosisAndEpisode> -> groupByTreatment(p, TreatmentGroup.FOLFOXIRI_B) },
+            "FOLFOX-B" to { p: List<DiagnosisAndEpisode> -> groupByTreatment(p, Treatment.FOLFOX_B) },
+            "CAPOX-B or FOLFOX-B" to { p: List<DiagnosisAndEpisode> -> groupByTreatment(p, TreatmentGroup.CAPOX_B_OR_FOLFOX_B) }
+        ).forEach { (label, filterFunction) ->
+            filterFunction(filteredPatients)?.let { group ->
+                SurvivalPlot.createSurvivalPlot(group, calculation, yAxisLabel)?.let {
+                    plots.add("$yAxisLabel with $label by group" to it)
+                }
+            }
+        }
+
+        val populationPlotsByTreatment = populationDefinitions.mapNotNull { definition ->
+            val patientsByTreatment = filteredPatients.filter(definition.criteria).groupBy {
+                it.second.systemicTreatmentPlan!!.treatment.treatmentGroup.display
+            }
+            SurvivalPlot.createSurvivalPlot(patientsByTreatment, calculation, yAxisLabel)
+                ?.let { "$yAxisLabel for group ${definition.name} by treatment" to it }
+        }
+        plots.addAll(populationPlotsByTreatment)
+
+        return plots.toMap()
     }
-
-    private fun patientHasOsMetrics(patient: DiagnosisAndEpisode): Boolean {
-        val plan = patient.second.systemicTreatmentPlan
-        return plan?.observedOsFromTreatmentStartDays != null && plan.hadSurvivalEvent != null
-    }
-
-    private fun patientObservedPfsDays(patient: DiagnosisAndEpisode) =
-        patient.second.systemicTreatmentPlan?.observedPfsDays
-
-    private fun patientObservedOsDays(patient: DiagnosisAndEpisode) =
-        patient.second.systemicTreatmentPlan?.observedOsFromTreatmentStartDays
 
     private fun plotsForPatients(allPatients: List<DiagnosisAndEpisode>): Map<String, Plot> {
-        val filteredPatientsForPfs = allPatients.filter(::patientHasPfsMetrics).sortedBy(::patientObservedPfsDays)
-        val filteredPatientsForOs = allPatients.filter(::patientHasOsMetrics).sortedBy(::patientObservedOsDays)
+        val pfsPlots = createPlotsForMeasurement(allPatients, timeFunction = SystemicTreatmentPlan::observedPfsDays,  eventFunction = SystemicTreatmentPlan::hadProgressionEvent, title = "Progression-free survival (median, IQR) in NCR real-world data set", yAxisLabel = "PFS %")
 
-        val sortedPatientsByPopulationForPfs = populationDefinitions.associate { definition ->
-            definition.name to filteredPatientsForPfs.filter(definition.criteria)
-        }
-        val sortedPatientsByPopulationForOs = populationDefinitions.associate { definition ->
-            definition.name to filteredPatientsForOs.filter(definition.criteria)
-        }
+        val osPlots = createPlotsForMeasurement(allPatients, timeFunction = SystemicTreatmentPlan::observedOsFromTreatmentStartDays, eventFunction = SystemicTreatmentPlan::hadSurvivalEvent, title = "Overall survival (median, IQR) in NCR real-world data set", yAxisLabel = "OS %")
 
-        val folfoxiriBPatientsForPfs = filteredPatientsForPfs.filter {
-            it.second.systemicTreatmentPlan!!.treatment.treatmentGroup == TreatmentGroup.FOLFOXIRI_B
-        }
-        val folfoxiriBPatientsForOs = filteredPatientsForOs.filter {
-            it.second.systemicTreatmentPlan!!.treatment.treatmentGroup == TreatmentGroup.FOLFOXIRI_B
-        }
-
-        val folfoxBPatientsForPfs = filteredPatientsForPfs.filter {
-            it.second.systemicTreatmentPlan!!.treatment == Treatment.FOLFOX_B
-        }
-        val folfoxBPatientsForOs = filteredPatientsForOs.filter {
-            it.second.systemicTreatmentPlan!!.treatment == Treatment.FOLFOX_B
-        }
-
-        val folfoxBOrCapoxBPatientsForPfs = filteredPatientsForPfs.filter {
-            it.second.systemicTreatmentPlan!!.treatment.treatmentGroup == TreatmentGroup.CAPOX_B_OR_FOLFOX_B
-        }
-        val folfoxBOrCapoxBPatientsForOs = filteredPatientsForOs.filter {
-            it.second.systemicTreatmentPlan!!.treatment.treatmentGroup == TreatmentGroup.CAPOX_B_OR_FOLFOX_B
-        }
-
-        val pfsPlots = listOfNotNull(
-            PfsPlot.createPfsPlot(sortedPatientsByPopulationForPfs)?.let { "PFS by population" to it },
-            plotByWho(filteredPatientsForPfs)?.let { "PFS by WHO" to it },
-            plotByWho(folfoxiriBPatientsForPfs)?.let { "PFS with FOLFOXIRI-B by WHO" to it },
-            plotByWho(folfoxBPatientsForPfs)?.let { "PFS with FOLFOX-B by WHO" to it },
-            plotByWho(folfoxBOrCapoxBPatientsForPfs)?.let { "PFS with CAPOX-B or FOLFOX-B by WHO" to it },
-        )
-
-        val osPlots = listOfNotNull(
-            OsPlot.createOsPlot(sortedPatientsByPopulationForOs)?.let { "OS by population" to it },
-            plotByWho(filteredPatientsForOs)?.let { "OS by WHO" to it },
-            plotByWho(folfoxiriBPatientsForOs)?.let { "OS with FOLFOXIRI-B by WHO" to it },
-            plotByWho(folfoxBPatientsForOs)?.let { "OS with FOLFOX-B by WHO" to it },
-            plotByWho(folfoxBOrCapoxBPatientsForOs)?.let { "OS with CAPOX-B or FOLFOX-B by WHO" to it },
-        )
-
-        val populationPlotsByTreatmentForPfs = populationDefinitions.mapNotNull { definition ->
-            val filteredPatientsByTreatment = filteredPatientsForPfs.filter(definition.criteria).groupBy { (_, episode) ->
-                episode.systemicTreatmentPlan!!.treatment.treatmentGroup.display
-            }
-            PfsPlot.createPfsPlot(filteredPatientsByTreatment)
-            PfsPlot.createPfsPlot(filteredPatientsByTreatment)
-                ?.let { "PFS for group ${definition.name} by treatment" to it }
-        }
-
-        val populationPlotsByTreatmentForOs = populationDefinitions.mapNotNull { definition ->
-            val filteredPatientsByTreatment = filteredPatientsForOs.filter(definition.criteria).groupBy { (_, episode) ->
-                episode.systemicTreatmentPlan!!.treatment.treatmentGroup.display
-            }
-            OsPlot.createOsPlot(filteredPatientsByTreatment)
-                ?.let { "OS for group ${definition.name} by treatment" to it }
-        }
-
-        return (pfsPlots + populationPlotsByTreatmentForPfs + osPlots + populationPlotsByTreatmentForOs).toMap()
+        return pfsPlots + osPlots
     }
 
-    private fun plotByWho(sortedPatients: List<DiagnosisAndEpisode>): Plot? {
-        val patientsByWho = sortedPatients.groupBy { (_, episode) -> "WHO ${episode.whoStatusPreTreatmentStart}" }
-            .filter { (key, _) -> key != "WHO null" }
-            .toSortedMap()
-        return PfsPlot.createPfsPlot(patientsByWho)
+    private fun groupByWho(patients: List<DiagnosisAndEpisode>) =
+        patients.groupBy { "WHO ${it.second.whoStatusPreTreatmentStart}" }.filterKeys { it != "WHO null" }
+
+    private fun groupByTreatment(
+        patients: List<DiagnosisAndEpisode>, treatment: Any
+    ): Map<String, List<DiagnosisAndEpisode>>? {
+        val groupedPatients = patients.filter {
+            val plan = it.second.systemicTreatmentPlan
+            when (treatment) {
+                is TreatmentGroup -> plan?.treatment?.treatmentGroup == treatment
+                is Treatment -> plan?.treatment == treatment
+                else -> false
+            }
+        }
+        return if (groupedPatients.isNotEmpty()) mapOf(treatment.toString() to groupedPatients) else null
     }
-}
+   }

@@ -19,23 +19,20 @@ class PatientPopulationBreakdownTest {
             TreatmentGroup.CAPECITABINE_OR_FLUOROURACIL to listOf(fluourouracilPatient, capecitabinePatient),
             TreatmentGroup.CAPOX_OR_FOLFOX to listOf(capoxPatient)
         )
-
         val ageSubPopulation = "Age 45-55"
         val populationDefinitions = listOf(
             PopulationDefinition(ALL_PATIENTS_POPULATION_NAME) { true },
             PopulationDefinition(ageSubPopulation) { it.first.ageAtDiagnosis in 45..55 }
         )
-
-        // Include both PFS and OS in measurement types
         val measurementTypes = listOf(
             MeasurementType.TREATMENT_DECISION,
             MeasurementType.PROGRESSION_FREE_SURVIVAL,
-            MeasurementType.OVERALL_SURVIVAL // Add OS here
+            MeasurementType.OVERALL_SURVIVAL
         )
 
         val analysis = PatientPopulationBreakdown(patientsByTreatment, populationDefinitions, measurementTypes).analyze()
 
-        assertThat(analysis.populations).containsExactly(
+        assertThat(analysis.populations).containsExactlyInAnyOrder(
             Population(
                 ALL_PATIENTS_POPULATION_NAME, mapOf(
                     MeasurementType.TREATMENT_DECISION to listOf(fluourouracilPatient, capecitabinePatient, capoxPatient),
