@@ -11,7 +11,6 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
 class NcrSystemicTreatmentPlanExtractorTest {
-
     @Test
     fun `Should extract systemic treatment plan`() {
         val pfsMeasures = listOf(
