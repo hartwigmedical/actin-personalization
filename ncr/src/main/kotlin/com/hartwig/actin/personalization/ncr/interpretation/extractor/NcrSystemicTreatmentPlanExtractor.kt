@@ -102,7 +102,7 @@ class NcrSystemicTreatmentPlanExtractor {
                 sortedPfsMeasuresAfterPlanStart.last().intervalTumorIncidencePfsMeasureDays?.let { it to true }
             }
         }
-        return null //Maybe an error better?
+        return null
     }
 
     private fun hasProgressionOrDeathWithUnknownInterval(pfsMeasures: List<PfsMeasure>) = pfsMeasures.any {

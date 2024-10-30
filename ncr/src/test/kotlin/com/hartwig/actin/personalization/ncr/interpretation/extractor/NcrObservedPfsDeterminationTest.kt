@@ -16,6 +16,19 @@ class NcrObservedPfsDeterminationTest {
     }
 
     @Test
+    fun `Should not determine observedPfsDays or hadProgressionEvent in case at least one interval is null`() {
+        val pfsMeasures = listOf(
+            PfsMeasure(PfsMeasureType.PROGRESSION, null, 5),
+            PfsMeasure(PfsMeasureType.PROGRESSION, null, null),
+        )
+
+        val plan = NcrSystemicTreatmentPlanExtractor()
+            .extractSystemicTreatmentPlan(NCR_SYSTEMIC_TREATMENT, pfsMeasures, null, 300)
+        assertThat(plan!!.observedPfsDays).isNull()
+        assertThat(plan.hadProgressionEvent).isNull()
+    }
+
+    @Test
     fun `Should interpret censor pfs value if measure occurred after treatment plan start`() {
         val plan = NcrSystemicTreatmentPlanExtractor()
             .extractSystemicTreatmentPlan(NCR_SYSTEMIC_TREATMENT, listOf(PfsMeasure(PfsMeasureType.CENSOR, null, 50)), null, 300)
