@@ -126,7 +126,7 @@ class NcrEpisodeExtractorTest {
                 LabMeasurement(LabMeasure.ALBUMINE, 40.5, Unit.GRAM_PER_LITER, 4, null, null),
                 LabMeasurement(LabMeasure.LEUKOCYTES_ABSOLUTE, 50.5, Unit.BILLIONS_PER_LITER, 5, null, null),
                 LabMeasurement(LabMeasure.CARCINOEMBRYONIC_ANTIGEN, 0.1, Unit.MICROGRAM_PER_LITER, null, true, false),
-                        LabMeasurement(LabMeasure.CARCINOEMBRYONIC_ANTIGEN, 0.2, Unit.MICROGRAM_PER_LITER, null, false, true)
+                LabMeasurement(LabMeasure.CARCINOEMBRYONIC_ANTIGEN, 0.2, Unit.MICROGRAM_PER_LITER, null, false, true)
             ),
             hasReceivedTumorDirectedTreatment = false,
             reasonRefrainmentFromTumorDirectedTreatment =
