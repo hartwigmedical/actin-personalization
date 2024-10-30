@@ -43,7 +43,6 @@ class NcrSystemicTreatmentPlanExtractor {
                     ?.let { (progressionIntervalFromTumorIncidence, hadProgressionEvent) ->
                         progressionIntervalFromTumorIncidence - daysUntilPlanStart to hadProgressionEvent
                     }
-                    ?.takeIf { (days, _) -> days >= 0 }
                     ?: Pair(null, null)
             }
 
