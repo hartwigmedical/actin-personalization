@@ -81,22 +81,10 @@ class NcrSystemicTreatmentPlanExtractor {
 
             return intervalFirstProgressionOrDeathMeasureAfterPlanStart?.let { it to true }
                 ?: intervalLastCensorMeasureAfterPlanStart?.let { it to false }
-        } else if (sortedPfsMeasuresAfterPlanStart.toList().size == 2) {
-            val hasPfsMeasureBeforePlanEnd = sortedPfsMeasuresAfterPlanEnd.toList().size < sortedPfsMeasuresAfterPlanStart.toList().size
-
+        } else if (sortedPfsMeasuresAfterPlanStart.toList().size > 1) {
             return if (daysUntilPlanEnd == null) {
                 null
-            } else if (hasPfsMeasureBeforePlanEnd) {
-                sortedPfsMeasuresAfterPlanStart.last().intervalTumorIncidencePfsMeasureDays?.let { it to true }
-            } else {
-                sortedPfsMeasuresAfterPlanStart.first().intervalTumorIncidencePfsMeasureDays?.let { it to true }
-            }
-        } else if (sortedPfsMeasuresAfterPlanStart.toList().size > 2) {
-            val hasPfsMeasureAfterPlanEnd = sortedPfsMeasuresAfterPlanEnd.toList().isNotEmpty()
-
-            return if (daysUntilPlanEnd == null) {
-                null
-            } else if (hasPfsMeasureAfterPlanEnd) {
+            } else if (sortedPfsMeasuresAfterPlanEnd.toList().isNotEmpty()) {
                 sortedPfsMeasuresAfterPlanEnd.first().intervalTumorIncidencePfsMeasureDays?.let { it to true }
             } else {
                 sortedPfsMeasuresAfterPlanStart.last().intervalTumorIncidencePfsMeasureDays?.let { it to true }
