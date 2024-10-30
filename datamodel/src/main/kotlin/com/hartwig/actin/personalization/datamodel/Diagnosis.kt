@@ -6,6 +6,7 @@ import kotlinx.serialization.Serializable
 data class Diagnosis(
     override val consolidatedTumorType: TumorType,
     override val tumorLocations: Set<Location>,
+    val sidedness: Sidedness? = null,
     override val hasHadTumorDirectedSystemicTherapy: Boolean,
 
     val ageAtDiagnosis: Int,

@@ -6,6 +6,7 @@ import com.hartwig.actin.personalization.datamodel.Drug
 import com.hartwig.actin.personalization.datamodel.Location
 import com.hartwig.actin.personalization.datamodel.NumberOfCciCategories
 import com.hartwig.actin.personalization.datamodel.PriorTumor
+import com.hartwig.actin.personalization.datamodel.Sidedness
 import com.hartwig.actin.personalization.datamodel.StageTnm
 import com.hartwig.actin.personalization.datamodel.TumorLocationCategory
 import com.hartwig.actin.personalization.datamodel.TumorType
@@ -26,6 +27,7 @@ class NcrTumorEntryExtractorTest {
                 consolidatedTumorType = TumorType.CRC_ADENOCARCINOMA,
                 tumorLocations = setOf(Location.ASCENDING_COLON),
                 hasHadTumorDirectedSystemicTherapy = false,
+                sidedness = Sidedness.RIGHT,
                 ageAtDiagnosis = 50,
                 observedOsFromTumorIncidenceDays = 80,
                 hadSurvivalEvent = false,

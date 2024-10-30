@@ -2,7 +2,9 @@ package com.hartwig.actin.personalization.ncr.interpretation.extractor
 
 import com.hartwig.actin.personalization.datamodel.Diagnosis
 import com.hartwig.actin.personalization.datamodel.Episode
+import com.hartwig.actin.personalization.datamodel.Location
 import com.hartwig.actin.personalization.datamodel.PriorTumor
+import com.hartwig.actin.personalization.datamodel.Sidedness
 import com.hartwig.actin.personalization.datamodel.TumorEntry
 import com.hartwig.actin.personalization.ncr.datamodel.NcrRecord
 import com.hartwig.actin.personalization.ncr.interpretation.DIAGNOSIS_EPISODE
@@ -46,6 +48,7 @@ class NcrTumorEntryExtractor(private val episodeExtractor: NcrEpisodeExtractor) 
                 consolidatedTumorType = NcrTumorTypeMapper.resolve(diagnosisRecord.primaryDiagnosis.morfCat!!),
                 tumorLocations = locations,
                 hasHadTumorDirectedSystemicTherapy = episodes.any(Episode::hasReceivedTumorDirectedTreatment),
+                sidedness = determineSidedness(locations),
                 ageAtDiagnosis = diagnosisRecord.patientCharacteristics.leeft,
                 observedOsFromTumorIncidenceDays = intervalTumorIncidenceLatestAliveStatus,
                 hadSurvivalEvent = patientCharacteristics.vitStat!! == 1,
@@ -81,6 +84,22 @@ class NcrTumorEntryExtractor(private val episodeExtractor: NcrEpisodeExtractor) 
             )
         }
         return TumorEntry(diagnosis, episodes)
+    }
+
+    private fun determineSidedness(locations: Set<Location>): Sidedness? {
+        val LOCATIONS_INDICATING_LEFT_SIDEDNESS =
+            setOf(Location.FLEXURA_LIENALIS, Location.DESCENDING_COLON, Location.RECTOSIGMOID, Location.SIGMOID_COLON, Location.RECTUM)
+        val LOCATIONS_INDICATING_RIGHT_SIDEDNESS =
+            setOf(Location.APPENDIX, Location.COECUM, Location.ASCENDING_COLON, Location.FLEXURA_HEPATICA)
+
+        val containsLeft = locations.any { it in LOCATIONS_INDICATING_LEFT_SIDEDNESS }
+        val containsRight = locations.any { it in LOCATIONS_INDICATING_RIGHT_SIDEDNESS }
+
+        return when {
+            containsLeft && !containsRight -> Sidedness.LEFT
+            containsRight && !containsLeft -> Sidedness.RIGHT
+            else -> null
+        }
     }
 
     private fun extractPriorTumors(record: NcrRecord): List<PriorTumor> {
