@@ -1,4 +1,4 @@
-CREATE OR REPLACE VIEW treatments
+CREATE OR REPLACE VIEW patientOverview
 AS (
 SELECT
     p.ncrId,
@@ -58,12 +58,13 @@ LEFT JOIN (
 ) m ON e.id=m.episodeId
 );
 
-CREATE OR REPLACE VIEW palliativeTreatments
+CREATE OR REPLACE VIEW palliativeIntents
 AS (
-SELECT IF(treatments.order=1,"SYNCHRONOUS","METACHRONOUS") AS chronicity,
+SELECT IF(treatments.order=1, "SYNCHRONOUS", "METACHRONOUS") AS chronicity,
 treatments.*
 FROM treatments
-WHERE distantMetastasesDetectionStatus = 'AT_START' AND (tnmCM like 'M1%' OR tnmPM like 'M1%' OR stageTNM like 'IV%')
+WHERE distantMetastasesDetectionStatus = 'AT_START'
+AND (tnmCM LIKE 'M1%' OR tnmPM LIKE 'M1%' OR stageTNM LIKE 'IV%')
 AND hasHadPreSurgerySystemicChemotherapy = 0
 AND hasHadPostSurgerySystemicChemotherapy = 0
 AND hasHadPreSurgerySystemicTargetedTherapy = 0
