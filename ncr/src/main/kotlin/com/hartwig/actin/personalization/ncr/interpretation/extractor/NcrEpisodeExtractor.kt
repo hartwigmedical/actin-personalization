@@ -267,7 +267,7 @@ class NcrEpisodeExtractor(private val systemicTreatmentPlanExtractor: NcrSystemi
                 )
             ).flatMap { (measure, values) ->
                 values.mapNotNull { (value, interval) ->
-                    value?.toDouble()?.takeIf { it != 9999.0 && it in measure.allowedRange }?.let {
+                    value?.toDouble()?.takeIf { it != 9999.0 && it <= measure.upperBound }?.let {
                         LabMeasurement(measure, it, measure.unit, interval, null, null)
                     }
                 }
@@ -278,7 +278,7 @@ class NcrEpisodeExtractor(private val systemicTreatmentPlanExtractor: NcrSystemi
             )
         }
     }
-    private fun periSurgicalCeaMeasurement(measurement: Double?, isPreSurgical: Boolean) = measurement?.takeIf { it != 9999.0 && it in LabMeasure.CARCINOEMBRYONIC_ANTIGEN.allowedRange }?.let {
+    private fun periSurgicalCeaMeasurement(measurement: Double?, isPreSurgical: Boolean) = measurement?.takeIf { it != 9999.0 && it <= LabMeasure.CARCINOEMBRYONIC_ANTIGEN.upperBound }?.let {
         LabMeasurement(
             LabMeasure.CARCINOEMBRYONIC_ANTIGEN, it, LabMeasure.CARCINOEMBRYONIC_ANTIGEN.unit, null, isPreSurgical, !isPreSurgical
         )
