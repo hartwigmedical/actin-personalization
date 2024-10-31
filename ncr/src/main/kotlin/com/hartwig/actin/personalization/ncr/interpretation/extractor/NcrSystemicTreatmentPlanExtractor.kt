@@ -76,7 +76,7 @@ class NcrSystemicTreatmentPlanExtractor {
     }
 
     private fun hasProgressionAndCensorPfsMeasures(pfsMeasures: List<PfsMeasure>) =
-        pfsMeasures.any { (it.type == PfsMeasureType.PROGRESSION || it.type == PfsMeasureType.DEATH) } && pfsMeasures.any() { it.type == PfsMeasureType.CENSOR }
+        pfsMeasures.any { it.type == PfsMeasureType.PROGRESSION || it.type == PfsMeasureType.DEATH } && pfsMeasures.any() { it.type == PfsMeasureType.CENSOR }
 
     private fun determineRelevantProgressionIntervalAndEvent(
         sortedPfsMeasuresAfterPlanStart: Sequence<PfsMeasure>, sortedPfsMeasuresAfterPlanEnd: Sequence<PfsMeasure>, daysUntilPlanEnd: Int?
