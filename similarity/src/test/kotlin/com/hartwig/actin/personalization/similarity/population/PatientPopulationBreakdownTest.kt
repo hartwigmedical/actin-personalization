@@ -11,77 +11,96 @@ class PatientPopulationBreakdownTest {
 
     @Test
     fun `Should analyze treatments for each sub-population`() {
-        val fluourouracilPatient = DIAGNOSIS to episodeWithTreatment(Treatment.FLUOROURACIL, pfs = 70, os = 300)
-        val capecitabinePatient = DIAGNOSIS to episodeWithTreatment(Treatment.CAPECITABINE, os = 350)
-        val capoxPatient = DIAGNOSIS.copy(ageAtDiagnosis = 85) to episodeWithTreatment(Treatment.CAPOX, pfs = 100, os = 400)
-
-        val patientsByTreatment = listOf(
-            TreatmentGroup.CAPECITABINE_OR_FLUOROURACIL to listOf(fluourouracilPatient, capecitabinePatient),
-            TreatmentGroup.CAPOX_OR_FOLFOX to listOf(capoxPatient)
-        )
-        val ageSubPopulation = "Age 45-55"
-        val populationDefinitions = listOf(
-            PopulationDefinition(ALL_PATIENTS_POPULATION_NAME) { true },
-            PopulationDefinition(ageSubPopulation) { it.first.ageAtDiagnosis in 45..55 }
-        )
-        val measurementTypes = listOf(
-            MeasurementType.TREATMENT_DECISION,
-            MeasurementType.PROGRESSION_FREE_SURVIVAL,
-            MeasurementType.OVERALL_SURVIVAL
-        )
-
-        val analysis = PatientPopulationBreakdown(patientsByTreatment, populationDefinitions, measurementTypes).analyze()
-
-        assertThat(analysis.populations).containsExactlyInAnyOrder(
-            Population(
-                ALL_PATIENTS_POPULATION_NAME, mapOf(
-                    MeasurementType.TREATMENT_DECISION to listOf(fluourouracilPatient, capecitabinePatient, capoxPatient),
-                    MeasurementType.PROGRESSION_FREE_SURVIVAL to listOf(fluourouracilPatient, capoxPatient),
-                    MeasurementType.OVERALL_SURVIVAL to listOf(fluourouracilPatient, capecitabinePatient, capoxPatient)
-                )
-            ),
-            Population(
-                ageSubPopulation, mapOf(
-                    MeasurementType.TREATMENT_DECISION to listOf(fluourouracilPatient, capecitabinePatient),
-                    MeasurementType.PROGRESSION_FREE_SURVIVAL to listOf(fluourouracilPatient),
-                    MeasurementType.OVERALL_SURVIVAL to listOf(fluourouracilPatient, capecitabinePatient)
-                )
+        @Test
+        fun `Should analyze treatments for each sub-population`() {
+            val fluourouracilPatient = episodeWithTreatment(
+                treatment = Treatment.FLUOROURACIL,
+                pfs = 70,
+                os = 300,
+                hadSurvivalEvent = true
             )
-        )
+            val capecitabinePatient = episodeWithTreatment(
+                treatment = Treatment.CAPECITABINE,
+                os = 350,
+                hadSurvivalEvent = true
+            )
+            val capoxDiagnosis = DIAGNOSIS.copy(ageAtDiagnosis = 85)
+            val capoxPatient = episodeWithTreatment(
+                treatment = Treatment.CAPOX,
+                pfs = 100,
+                os = 400,
+                hadSurvivalEvent = true,
+                diagnosis = capoxDiagnosis
+            )
 
-        assertThat(analysis.treatmentAnalyses).containsExactly(
-            TreatmentAnalysis(
-                TreatmentGroup.CAPECITABINE_OR_FLUOROURACIL, mapOf(
-                    MeasurementType.TREATMENT_DECISION to mapOf(
-                        ALL_PATIENTS_POPULATION_NAME to Measurement(2.0 / 3, 2),
-                        ageSubPopulation to Measurement(1.0, 2)
-                    ),
-                    MeasurementType.PROGRESSION_FREE_SURVIVAL to mapOf(
-                        ALL_PATIENTS_POPULATION_NAME to Measurement(70.0, 1, 70, 70, 0.0),
-                        ageSubPopulation to Measurement(70.0, 1, 70, 70, 0.0)
-                    ),
-                    MeasurementType.OVERALL_SURVIVAL to mapOf(
-                        ALL_PATIENTS_POPULATION_NAME to Measurement(300.0, 2, 300, 350, 50.0),
-                        ageSubPopulation to Measurement(300.0, 2, 300, 350, 50.0)
+            val patientsByTreatment = listOf(
+                TreatmentGroup.CAPECITABINE_OR_FLUOROURACIL to listOf(fluourouracilPatient, capecitabinePatient),
+                TreatmentGroup.CAPOX_OR_FOLFOX to listOf(capoxPatient)
+            )
+            val ageSubPopulation = "Age 45-55"
+            val populationDefinitions = listOf(
+                PopulationDefinition(ALL_PATIENTS_POPULATION_NAME) { true },
+                PopulationDefinition(ageSubPopulation) { it.first.ageAtDiagnosis in 45..55 }
+            )
+            val measurementTypes = listOf(
+                MeasurementType.TREATMENT_DECISION,
+                MeasurementType.PROGRESSION_FREE_SURVIVAL,
+                MeasurementType.OVERALL_SURVIVAL
+            )
+
+            val analysis = PatientPopulationBreakdown(patientsByTreatment, populationDefinitions, measurementTypes).analyze()
+
+            assertThat(analysis.populations).containsExactlyInAnyOrder(
+                Population(
+                    ALL_PATIENTS_POPULATION_NAME, mapOf(
+                        MeasurementType.TREATMENT_DECISION to listOf(fluourouracilPatient, capecitabinePatient, capoxPatient),
+                        MeasurementType.PROGRESSION_FREE_SURVIVAL to listOf(fluourouracilPatient, capoxPatient),
+                        MeasurementType.OVERALL_SURVIVAL to listOf(fluourouracilPatient, capecitabinePatient, capoxPatient)
                     )
-                )
-            ),
-            TreatmentAnalysis(
-                TreatmentGroup.CAPOX_OR_FOLFOX, mapOf(
-                    MeasurementType.TREATMENT_DECISION to mapOf(
-                        ALL_PATIENTS_POPULATION_NAME to Measurement(1.0 / 3, 1),
-                        ageSubPopulation to Measurement(0.0, 0)
-                    ),
-                    MeasurementType.PROGRESSION_FREE_SURVIVAL to mapOf(
-                        ALL_PATIENTS_POPULATION_NAME to Measurement(100.0, 1, 100, 100, 0.0),
-                        ageSubPopulation to Measurement(Double.NaN, 0, null, null, Double.NaN)
-                    ),
-                    MeasurementType.OVERALL_SURVIVAL to mapOf(
-                        ALL_PATIENTS_POPULATION_NAME to Measurement(400.0, 1, 400, 400, 0.0),
-                        ageSubPopulation to Measurement(Double.NaN, 0, null, null, Double.NaN)
+                ),
+                Population(
+                    ageSubPopulation, mapOf(
+                        MeasurementType.TREATMENT_DECISION to listOf(fluourouracilPatient, capecitabinePatient),
+                        MeasurementType.PROGRESSION_FREE_SURVIVAL to listOf(fluourouracilPatient),
+                        MeasurementType.OVERALL_SURVIVAL to listOf(fluourouracilPatient, capecitabinePatient)
                     )
                 )
             )
-        )
+
+            assertThat(analysis.treatmentAnalyses).containsExactly(
+                TreatmentAnalysis(
+                    TreatmentGroup.CAPECITABINE_OR_FLUOROURACIL, mapOf(
+                        MeasurementType.TREATMENT_DECISION to mapOf(
+                            ALL_PATIENTS_POPULATION_NAME to Measurement(2.0 / 3, 2),
+                            ageSubPopulation to Measurement(1.0, 2)
+                        ),
+                        MeasurementType.PROGRESSION_FREE_SURVIVAL to mapOf(
+                            ALL_PATIENTS_POPULATION_NAME to Measurement(70.0, 1, 70, 70, 0.0),
+                            ageSubPopulation to Measurement(70.0, 1, 70, 70, 0.0)
+                        ),
+                        MeasurementType.OVERALL_SURVIVAL to mapOf(
+                            ALL_PATIENTS_POPULATION_NAME to Measurement(300.0, 2, 300, 350, 50.0),
+                            ageSubPopulation to Measurement(300.0, 2, 300, 350, 50.0)
+                        )
+                    )
+                ),
+                TreatmentAnalysis(
+                    TreatmentGroup.CAPOX_OR_FOLFOX, mapOf(
+                        MeasurementType.TREATMENT_DECISION to mapOf(
+                            ALL_PATIENTS_POPULATION_NAME to Measurement(1.0 / 3, 1),
+                            ageSubPopulation to Measurement(0.0, 0)
+                        ),
+                        MeasurementType.PROGRESSION_FREE_SURVIVAL to mapOf(
+                            ALL_PATIENTS_POPULATION_NAME to Measurement(100.0, 1, 100, 100, 0.0),
+                            ageSubPopulation to Measurement(Double.NaN, 0, null, null, Double.NaN)
+                        ),
+                        MeasurementType.OVERALL_SURVIVAL to mapOf(
+                            ALL_PATIENTS_POPULATION_NAME to Measurement(400.0, 1, 400, 400, 0.0),
+                            ageSubPopulation to Measurement(Double.NaN, 0, null, null, Double.NaN)
+                        )
+                    )
+                )
+            )
+        }
     }
 }

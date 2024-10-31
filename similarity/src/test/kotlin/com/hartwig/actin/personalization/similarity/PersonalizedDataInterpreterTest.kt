@@ -12,40 +12,46 @@ class PersonalizedDataInterpreterTest {
 
     @Test
     fun `Should create interpreter with filtered and grouped patient records`() {
-        val fluourouracilEpisode = episodeWithTreatment(Treatment.FLUOROURACIL)
-        val capecitabineEpisode = episodeWithTreatment(Treatment.CAPECITABINE)
-        val capoxEpisode = episodeWithTreatment(Treatment.CAPOX)
-        val episodeWithoutSystemicPlan = episodeWithoutTreatment()
-        val episodeWithOtherTreatment = episodeWithTreatment(Treatment.OTHER)
+        // Destructure DiagnosisAndEpisode into Diagnosis and Episode
+        val (fluourouracilDiagnosis, fluourouracilEpisode) = episodeWithTreatment(Treatment.FLUOROURACIL)
+        val (capecitabineDiagnosis, capecitabineEpisode) = episodeWithTreatment(Treatment.CAPECITABINE)
+        val (capoxDiagnosis, capoxEpisode) = episodeWithTreatment(Treatment.CAPOX)
+        val (otherDiagnosis, episodeWithOtherTreatment) = episodeWithTreatment(Treatment.OTHER)
+        val defaultDiagnosis = DIAGNOSIS  // Use default diagnosis for episodes without treatment
 
+        // For episodes without treatment, use the default diagnosis
+        val episodeWithoutSystemicPlan = episodeWithoutTreatment()
+
+        // Create patients by combining Diagnosis and Episode
         val patients = listOf(
-            recordWithEpisode(fluourouracilEpisode),
-            recordWithEpisode(fluourouracilEpisode.copy(distantMetastasesDetectionStatus = MetastasesDetectionStatus.AT_PROGRESSION)),
-            recordWithEpisode(episodeWithOtherTreatment),
-            recordWithEpisode(fluourouracilEpisode.copy(systemicTreatmentPlan = null)),
-            recordWithEpisode(fluourouracilEpisode.copy(surgeries = listOf(Surgery(SurgeryType.NOS_OR_OTHER)))),
-            recordWithEpisode(fluourouracilEpisode.copy(hasHadPostSurgerySystemicChemotherapy = true)),
-            recordWithEpisode(capecitabineEpisode),
-            recordWithEpisode(capoxEpisode),
-            recordWithEpisode(episodeWithoutSystemicPlan)
+            recordWithEpisode(fluourouracilDiagnosis, fluourouracilEpisode),
+            recordWithEpisode(fluourouracilDiagnosis, fluourouracilEpisode.copy(distantMetastasesDetectionStatus = MetastasesDetectionStatus.AT_PROGRESSION)),
+            recordWithEpisode(otherDiagnosis, episodeWithOtherTreatment),
+            recordWithEpisode(fluourouracilDiagnosis, fluourouracilEpisode.copy(systemicTreatmentPlan = null)),
+            recordWithEpisode(fluourouracilDiagnosis, fluourouracilEpisode.copy(surgeries = listOf(Surgery(SurgeryType.NOS_OR_OTHER)))),
+            recordWithEpisode(fluourouracilDiagnosis, fluourouracilEpisode.copy(hasHadPostSurgerySystemicChemotherapy = true)),
+            recordWithEpisode(capecitabineDiagnosis, capecitabineEpisode),
+            recordWithEpisode(capoxDiagnosis, capoxEpisode),
+            recordWithEpisode(defaultDiagnosis, episodeWithoutSystemicPlan)
         )
 
         val interpreter = PersonalizedDataInterpreter.createFromReferencePatients(patients)
         assertThat(interpreter.patientsByTreatment).containsExactlyInAnyOrder(
             TreatmentGroup.CAPECITABINE_OR_FLUOROURACIL to listOf(
-                DIAGNOSIS to fluourouracilEpisode,
-                DIAGNOSIS to capecitabineEpisode
+                fluourouracilDiagnosis to fluourouracilEpisode,
+                capecitabineDiagnosis to capecitabineEpisode
             ),
             TreatmentGroup.CAPOX_OR_FOLFOX to listOf(
-                DIAGNOSIS to capoxEpisode
+                capoxDiagnosis to capoxEpisode
             ),
             TreatmentGroup.NONE to listOf(
-                DIAGNOSIS to episodeWithoutSystemicPlan,
-                DIAGNOSIS to fluourouracilEpisode.copy(systemicTreatmentPlan = null)
+                defaultDiagnosis to episodeWithoutSystemicPlan,
+                fluourouracilDiagnosis to fluourouracilEpisode.copy(systemicTreatmentPlan = null)
             ),
             TreatmentGroup.OTHER to listOf(
-                DIAGNOSIS to episodeWithOtherTreatment
+                otherDiagnosis to episodeWithOtherTreatment
             )
         )
+
     }
 }

@@ -1,22 +1,23 @@
 package com.hartwig.actin.personalization.similarity.population
 
-import com.hartwig.actin.personalization.datamodel.SystemicTreatmentPlan
+import com.hartwig.actin.personalization.datamodel.Diagnosis
 import com.hartwig.actin.personalization.datamodel.Treatment
 import com.hartwig.actin.personalization.similarity.DIAGNOSIS_AND_EPISODE
 import com.hartwig.actin.personalization.similarity.report.TableElement
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 
 private const val ELIGIBLE_SUB_POPULATION_SIZE = 50
 private val survivalList = listOf(400, 50, 800, 100, 25, 1600, 200)
 
 class SurvivalCalculationTest {
 
-    private val survivalCalculation = SurvivalCalculation(
-        timeFunction = SystemicTreatmentPlan::observedOsFromTreatmentStartDays,
-        eventFunction = SystemicTreatmentPlan::hadSurvivalEvent,
-        title = "Overall survival"
+    private val survivalCalculation = SurvivalCalculation<Diagnosis>(
+        timeFunction = Diagnosis::observedOsFromTumorIncidenceDays,
+        eventFunction = Diagnosis::hadSurvivalEvent,
+        title = "Overall survival",
+        extractor = { it.first }
     )
 
     @Nested
@@ -33,7 +34,10 @@ class SurvivalCalculationTest {
     inner class CalculationTests {
         @Test
         fun `Should evaluate median survival for patient list`() {
-            val measurement = survivalCalculation.calculate(survivalList.map(::patientWithSurvivalDays), ELIGIBLE_SUB_POPULATION_SIZE)
+            val measurement = survivalCalculation.calculate(
+                survivalList.map(::patientWithSurvivalDays),
+                ELIGIBLE_SUB_POPULATION_SIZE
+            )
             assertThat(measurement.value).isEqualTo(200.0)
             assertThat(measurement.numPatients).isEqualTo(7)
             assertThat(measurement.min).isEqualTo(25)
@@ -58,35 +62,40 @@ class SurvivalCalculationTest {
     inner class TableElementTests {
         @Test
         fun `Should create table elements with all available information`() {
-            assertThat(survivalCalculation.createTableElement(Measurement(Double.NaN, 0))).isEqualTo(TableElement.regular("n≤20"))
-            assertThat(survivalCalculation.createTableElement(Measurement(100.0, 10))).isEqualTo(TableElement.regular("n≤20"))
-            assertThat(survivalCalculation.createTableElement(Measurement(100.0, 50))).isEqualTo(TableElement("100.0", "\n(n=50)"))
-            assertThat(survivalCalculation.createTableElement(Measurement(100.0, 50, 50, 150, Double.NaN)))
+            assertThat(survivalCalculation.createTableElement(Measurement(Double.NaN, 0)))
+                .isEqualTo(TableElement.regular("n≤20"))
+            assertThat(survivalCalculation.createTableElement(Measurement(100.0, 10)))
+                .isEqualTo(TableElement.regular("n≤20"))
+            assertThat(survivalCalculation.createTableElement(Measurement(100.0, 50)))
                 .isEqualTo(TableElement("100.0", "\n(n=50)"))
-            assertThat(survivalCalculation.createTableElement(Measurement(100.0, 50, 50, 150, 100.0)))
-                .isEqualTo(TableElement("100.0", ", IQR: 100.0\n(n=50)"))
+            assertThat(
+                survivalCalculation.createTableElement(
+                    Measurement(100.0, 50, 50, 150, Double.NaN)
+                )
+            ).isEqualTo(TableElement("100.0", "\n(n=50)"))
+            assertThat(
+                survivalCalculation.createTableElement(
+                    Measurement(100.0, 50, 50, 150, 100.0)
+                )
+            ).isEqualTo(TableElement("100.0", ", IQR: 100.0\n(n=50)"))
         }
     }
 
     @Test
     fun `Should return empty measurement for empty population`() {
         val measurement = survivalCalculation.calculate(emptyList(), ELIGIBLE_SUB_POPULATION_SIZE)
-        assertThat(measurement.value).isNaN
+        assertThat(measurement.value).isNaN()
         assertThat(measurement.numPatients).isEqualTo(0)
         assertThat(measurement.min).isNull()
         assertThat(measurement.max).isNull()
-        assertThat(measurement.iqr).isNaN
+        assertThat(measurement.iqr).isNaN()
     }
 
     private fun patientWithSurvivalDays(days: Int?, hadEvent: Boolean = true): DiagnosisAndEpisode {
         return DIAGNOSIS_AND_EPISODE.copy(
-            second = DIAGNOSIS_AND_EPISODE.second.copy(
-                systemicTreatmentPlan = SystemicTreatmentPlan(
-                    treatment = Treatment.CAPECITABINE,
-                    systemicTreatmentSchemes = emptyList(),
-                    observedOsFromTreatmentStartDays = days,
-                    hadSurvivalEvent = hadEvent
-                )
+            first = DIAGNOSIS_AND_EPISODE.first.copy(
+                observedOsFromTumorIncidenceDays = days,
+                hadSurvivalEvent = hadEvent
             )
         )
     }

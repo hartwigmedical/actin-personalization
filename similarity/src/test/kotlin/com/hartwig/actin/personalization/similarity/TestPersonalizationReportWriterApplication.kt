@@ -15,9 +15,12 @@ class TestPersonalizationReportWriterApplication {
 
         val outputPath = "$WORK_DIRECTORY/out.pdf"
         val analysis = PersonalizedDataInterpreter.createFromReferencePatients(
-            (1..1000 step 10).map { recordWithEpisode(episodeWithTreatment(Treatment.FOLFOX, it)) }
+            (1..1000 step 10)
+                .map { episodeWithTreatment(Treatment.FOLFOX, it) }
+                .map { (diagnosis, episode) -> recordWithEpisode(diagnosis, episode) }
         )
             .analyzePatient(50, 1, false, emptySet())
+
 
         val measurementTables = listOf(
             MeasurementType.TREATMENT_DECISION, MeasurementType.PROGRESSION_FREE_SURVIVAL

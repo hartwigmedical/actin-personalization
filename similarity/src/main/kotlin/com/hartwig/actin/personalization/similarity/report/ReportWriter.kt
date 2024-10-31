@@ -103,7 +103,7 @@ class ReportWriter(
             val filename = "${name.replace(" ", "_")}$IMAGE_FILE_EXTENSION"
             plot.save("$outputDir/$filename")
 
-            document.add(titleCellWithText(" $name"))
+            document.add(titleCellWithText("$name"))
             val image = Image(ImageDataFactory.create("$outputDir/$filename"))
             image.setWidth(contentWidth())
             document.add(image)

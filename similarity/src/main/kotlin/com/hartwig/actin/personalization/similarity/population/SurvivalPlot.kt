@@ -9,27 +9,35 @@ object SurvivalPlot {
     private const val MIN_PATIENT_COUNT = 20
     private val percentageArray = (0..100 step 10).map { it / 100.0 to "$it%" }.toTypedArray()
 
-    fun createSurvivalPlot(
+    fun <T> createSurvivalPlot(
         sortedPopulationsByName: Map<String, List<DiagnosisAndEpisode>>,
-        calculation: SurvivalCalculation,
+        calculation: SurvivalCalculation<T>,
         yAxisLabel: String
     ): Plot? {
-        // Compute event histories for each group using the provided calculation
         val historiesByName = sortedPopulationsByName.mapValues { (_, patients) ->
-            val eligiblePatients = patients.filter(calculation::isEligible)
-            calculation.eventHistory(eligiblePatients)
+            val eligiblePatients = patients.filter { calculation.isEligible(it) }
+            val items = eligiblePatients.mapNotNull { calculation.extractor(it) }
+            calculation.eventHistory(items)
         }.filter { (_, histories) ->
             histories.size >= MIN_PATIENT_COUNT
         }
-        val longestInterval = historiesByName.values.flatMap { it.map(EventCountAndSurvivalAtTime::daysSincePlanStart) }.maxOrNull()
-            ?: return null
+
+        val longestInterval = historiesByName.values
+            .flatMap { it.map(EventCountAndSurvivalAtTime::daysSincePlanStart) }
+            .maxOrNull() ?: return null
+
 
         return plot {
             step {
-                // Flatten the data for plotting
-                val xValues = historiesByName.flatMap { (_, histories) -> histories.map(EventCountAndSurvivalAtTime::daysSincePlanStart) }
-                val yValues = historiesByName.flatMap { (_, histories) -> histories.map(EventCountAndSurvivalAtTime::survival) }
-                val groups = historiesByName.flatMap { (name, histories) -> histories.map { name } }
+                val xValues = historiesByName.flatMap { (_, histories) ->
+                    histories.map(EventCountAndSurvivalAtTime::daysSincePlanStart)
+                }
+                val yValues = historiesByName.flatMap { (_, histories) ->
+                    histories.map(EventCountAndSurvivalAtTime::survival)
+                }
+                val groups = historiesByName.flatMap { (name, histories) ->
+                    histories.map { name }
+                }
 
                 x(xValues) {
                     axis.breaksLabeled(*(0..longestInterval step 100).map { it to "$it" }.toTypedArray())
@@ -43,4 +51,5 @@ object SurvivalPlot {
             layout.size = 1000 to 600
         }
     }
+
 }

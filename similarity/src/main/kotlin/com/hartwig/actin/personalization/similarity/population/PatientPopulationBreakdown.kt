@@ -7,7 +7,6 @@ import com.hartwig.actin.personalization.datamodel.Treatment
 import com.hartwig.actin.personalization.datamodel.TreatmentGroup
 import org.jetbrains.kotlinx.kandy.ir.Plot
 
-typealias DiagnosisAndEpisode = Pair<Diagnosis, Episode>
 
 class PatientPopulationBreakdown(
     private val patientsByTreatment: List<Pair<TreatmentGroup, List<DiagnosisAndEpisode>>>,
@@ -50,12 +49,11 @@ class PatientPopulationBreakdown(
         return TreatmentAnalysis(treatment, treatmentMeasurements)
     }
 
-    private fun createPlotsForMeasurement(
-        allPatients: List<DiagnosisAndEpisode>, timeFunction: (SystemicTreatmentPlan) -> Int?, eventFunction: (SystemicTreatmentPlan) -> Boolean?, title: String, yAxisLabel: String
+    private fun <T> createPlotsForMeasurement(
+        allPatients: List<DiagnosisAndEpisode>, calculation: SurvivalCalculation<T>, yAxisLabel: String
     ): Map<String, Plot> {
-        val calculation = SurvivalCalculation(timeFunction, eventFunction, title)
         val filteredPatients = allPatients.filter(calculation::isEligible).sortedBy {
-            timeFunction(it.second.systemicTreatmentPlan!!)
+            calculation.extractor(it)?.let { item -> calculation.timeFunction(item) } ?: Int.MAX_VALUE
         }
         val groupedPatientsByPopulation = populationDefinitions.associate { definition ->
             definition.name to filteredPatients.filter(definition.criteria)
@@ -91,9 +89,9 @@ class PatientPopulationBreakdown(
     }
 
     private fun plotsForPatients(allPatients: List<DiagnosisAndEpisode>): Map<String, Plot> {
-        val pfsPlots = createPlotsForMeasurement(allPatients, timeFunction = SystemicTreatmentPlan::observedPfsDays,  eventFunction = SystemicTreatmentPlan::hadProgressionEvent, title = "Progression-free survival (median, IQR) in NCR real-world data set", yAxisLabel = "PFS %")
+        val pfsPlots = createPlotsForMeasurement(allPatients, PFS_CALCULATION, yAxisLabel = "PFS %")
 
-        val osPlots = createPlotsForMeasurement(allPatients, timeFunction = SystemicTreatmentPlan::observedOsFromTreatmentStartDays, eventFunction = SystemicTreatmentPlan::hadSurvivalEvent, title = "Overall survival (median, IQR) in NCR real-world data set", yAxisLabel = "OS %")
+        val osPlots = createPlotsForMeasurement(allPatients, OS_CALCULATION, yAxisLabel = "OS %")
 
         return pfsPlots + osPlots
     }

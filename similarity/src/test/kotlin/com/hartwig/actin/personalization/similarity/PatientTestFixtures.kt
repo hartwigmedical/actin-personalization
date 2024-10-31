@@ -12,6 +12,8 @@ import com.hartwig.actin.personalization.datamodel.TumorBasisOfDiagnosis
 import com.hartwig.actin.personalization.datamodel.TumorEntry
 import com.hartwig.actin.personalization.datamodel.TumorType
 
+typealias DiagnosisAndEpisode = Pair<Diagnosis, Episode>
+
 val DIAGNOSIS = Diagnosis(
     consolidatedTumorType = TumorType.CRC_OTHER,
     tumorLocations = emptySet(),
@@ -52,23 +54,38 @@ val PATIENT_RECORD = ReferencePatient(
     tumorEntries = listOf(TumorEntry(DIAGNOSIS, listOf(EPISODE))),
 )
 
-fun recordWithEpisode(episode: Episode): ReferencePatient {
-    return PATIENT_RECORD.copy(tumorEntries = PATIENT_RECORD.tumorEntries.map { it.copy(episodes = listOf(episode)) })
+fun recordWithEpisode(diagnosis: Diagnosis, episode: Episode): ReferencePatient {
+    return PATIENT_RECORD.copy(
+        tumorEntries = listOf(TumorEntry(diagnosis, listOf(episode))),
+        isAlive = !diagnosis.hadSurvivalEvent
+    )
 }
 
-fun episodeWithTreatment(treatment: Treatment, pfs: Int? = null, planStart: Int? = null, os: Int? = null): Episode {
-    return EPISODE.copy(
+
+fun episodeWithTreatment(
+    treatment: Treatment,
+    pfs: Int? = null,
+    planStart: Int? = null,
+    os: Int? = null,
+    hadSurvivalEvent: Boolean? = null,
+    diagnosis: Diagnosis = DIAGNOSIS
+): DiagnosisAndEpisode {
+    val updatedDiagnosis = diagnosis.copy(
+        observedOsFromTumorIncidenceDays = os ?: diagnosis.observedOsFromTumorIncidenceDays,
+        hadSurvivalEvent = hadSurvivalEvent ?: diagnosis.hadSurvivalEvent
+    )
+    val updatedEpisode = EPISODE.copy(
         systemicTreatmentPlan = SystemicTreatmentPlan(
             treatment = treatment,
             systemicTreatmentSchemes = emptyList(),
             intervalTumorIncidenceTreatmentPlanStartDays = planStart,
             observedPfsDays = pfs,
-            hadProgressionEvent = true,
-            observedOsFromTreatmentStartDays = os,
-            hadSurvivalEvent = true
+            hadProgressionEvent = true
         )
     )
+    return updatedDiagnosis to updatedEpisode
 }
+
 fun episodeWithoutTreatment(): Episode {
     return EPISODE.copy(
         systemicTreatmentPlan = null
