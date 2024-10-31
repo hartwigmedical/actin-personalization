@@ -7,6 +7,7 @@ SELECT
     d.patientId,
     d.consolidatedTumorType,
     d.tumorLocations,
+    d.sidedness,
     d.ageAtDiagnosis,
     d.observedOsFromTumorIncidenceDays,
     d.hadSurvivalEvent,
