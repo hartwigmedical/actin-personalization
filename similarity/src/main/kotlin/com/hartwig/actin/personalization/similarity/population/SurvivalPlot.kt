@@ -15,41 +15,36 @@ object SurvivalPlot {
         yAxisLabel: String
     ): Plot? {
         val historiesByName = sortedPopulationsByName.mapValues { (_, patients) ->
-            val eligiblePatients = patients.filter { calculation.isEligible(it) }
-            val items = eligiblePatients.mapNotNull { calculation.extractor(it) }
+            val items = patients.mapNotNull { calculation.extractor(it) }
             calculation.eventHistory(items)
         }.filter { (_, histories) ->
             histories.size >= MIN_PATIENT_COUNT
         }
 
-        val longestInterval = historiesByName.values
-            .flatMap { it.map(EventCountAndSurvivalAtTime::daysSincePlanStart) }
-            .maxOrNull() ?: return null
+        return historiesByName.values.maxOfOrNull { it.last().daysSincePlanStart }?.let { longestInterval ->
+            plot {
+                step {
+                    val xValues = historiesByName.flatMap { (_, histories) ->
+                        histories.map(EventCountAndSurvivalAtTime::daysSincePlanStart)
+                    }
+                    val yValues = historiesByName.flatMap { (_, histories) ->
+                        histories.map(EventCountAndSurvivalAtTime::survival)
+                    }
+                    val groups = historiesByName.flatMap { (name, histories) ->
+                        histories.map { name }
+                    }
 
-
-        return plot {
-            step {
-                val xValues = historiesByName.flatMap { (_, histories) ->
-                    histories.map(EventCountAndSurvivalAtTime::daysSincePlanStart)
+                    x(xValues) {
+                        axis.breaksLabeled(*(0..longestInterval step 100).map { it to "$it" }.toTypedArray())
+                        axis.name = "Days since treatment start"
+                    }
+                    y(yValues, yAxisLabel) {
+                        axis.breaksLabeled(*percentageArray)
+                    }
+                    color(groups, "Group")
                 }
-                val yValues = historiesByName.flatMap { (_, histories) ->
-                    histories.map(EventCountAndSurvivalAtTime::survival)
-                }
-                val groups = historiesByName.flatMap { (name, histories) ->
-                    histories.map { name }
-                }
-
-                x(xValues) {
-                    axis.breaksLabeled(*(0..longestInterval step 100).map { it to "$it" }.toTypedArray())
-                    axis.name = "Days since treatment start"
-                }
-                y(yValues, yAxisLabel) {
-                    axis.breaksLabeled(*percentageArray)
-                }
-                color(groups, "Group")
+                layout.size = 1000 to 600
             }
-            layout.size = 1000 to 600
         }
     }
-
 }

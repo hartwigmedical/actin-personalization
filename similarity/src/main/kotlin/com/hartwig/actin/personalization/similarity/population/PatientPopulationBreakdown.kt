@@ -58,23 +58,18 @@ class PatientPopulationBreakdown(
         val groupedPatientsByPopulation = populationDefinitions.associate { definition ->
             definition.name to filteredPatients.filter(definition.criteria)
         }
-        val plots = mutableListOf<Pair<String, Plot>>()
-        SurvivalPlot.createSurvivalPlot(groupedPatientsByPopulation, calculation, yAxisLabel)?.let {
-            plots.add("$yAxisLabel by population" to it)
-        }
-
-        listOf(
-            "WHO" to { p: List<DiagnosisAndEpisode> -> groupByWho(p) },
-            "FOLFOXIRI-B" to { p: List<DiagnosisAndEpisode> -> groupByTreatment(p, TreatmentGroup.FOLFOXIRI_B) },
-            "FOLFOX-B" to { p: List<DiagnosisAndEpisode> -> groupByTreatment(p, Treatment.FOLFOX_B) },
-            "CAPOX-B or FOLFOX-B" to { p: List<DiagnosisAndEpisode> -> groupByTreatment(p, TreatmentGroup.CAPOX_B_OR_FOLFOX_B) }
-        ).forEach { (label, filterFunction) ->
-            filterFunction(filteredPatients)?.let { group ->
+        val plots = listOfNotNull(
+            SurvivalPlot.createSurvivalPlot(groupedPatientsByPopulation, calculation, yAxisLabel)?.let {
+                "$yAxisLabel by population" to it
+            },
+            ("WHO" to { p: List<DiagnosisAndEpisode> -> groupByWho(p) }).let { (label, filterFunction) ->
+            filterFunction(filteredPatients).let { group ->
                 SurvivalPlot.createSurvivalPlot(group, calculation, yAxisLabel)?.let {
-                    plots.add("$yAxisLabel with $label by group" to it)
+                    "$yAxisLabel with $label by group" to it
                 }
             }
         }
+        ).toMap()
 
         val populationPlotsByTreatment = populationDefinitions.mapNotNull { definition ->
             val patientsByTreatment = filteredPatients.filter(definition.criteria).groupBy {
@@ -83,7 +78,6 @@ class PatientPopulationBreakdown(
             SurvivalPlot.createSurvivalPlot(patientsByTreatment, calculation, yAxisLabel)
                 ?.let { "$yAxisLabel for group ${definition.name} by treatment" to it }
         }
-        plots.addAll(populationPlotsByTreatment)
 
         return plots.toMap()
     }

@@ -67,7 +67,8 @@ fun episodeWithTreatment(
     pfs: Int? = null,
     planStart: Int? = null,
     os: Int? = null,
-    hadSurvivalEvent: Boolean? = null,
+    hadSurvivalEvent: Boolean? = false,
+    hadProgressionEvent: Boolean? = false,
     diagnosis: Diagnosis = DIAGNOSIS
 ): DiagnosisAndEpisode {
     val updatedDiagnosis = diagnosis.copy(
@@ -80,7 +81,7 @@ fun episodeWithTreatment(
             systemicTreatmentSchemes = emptyList(),
             intervalTumorIncidenceTreatmentPlanStartDays = planStart,
             observedPfsDays = pfs,
-            hadProgressionEvent = true
+            hadProgressionEvent = hadProgressionEvent
         )
     )
     return updatedDiagnosis to updatedEpisode
