@@ -12,17 +12,14 @@ class PersonalizedDataInterpreterTest {
 
     @Test
     fun `Should create interpreter with filtered and grouped patient records`() {
-        // Destructure DiagnosisAndEpisode into Diagnosis and Episode
         val (fluourouracilDiagnosis, fluourouracilEpisode) = episodeWithTreatment(Treatment.FLUOROURACIL)
         val (capecitabineDiagnosis, capecitabineEpisode) = episodeWithTreatment(Treatment.CAPECITABINE)
         val (capoxDiagnosis, capoxEpisode) = episodeWithTreatment(Treatment.CAPOX)
         val (otherDiagnosis, episodeWithOtherTreatment) = episodeWithTreatment(Treatment.OTHER)
-        val defaultDiagnosis = DIAGNOSIS  // Use default diagnosis for episodes without treatment
+        val defaultDiagnosis = DIAGNOSIS
 
-        // For episodes without treatment, use the default diagnosis
         val episodeWithoutSystemicPlan = episodeWithoutTreatment()
 
-        // Create patients by combining Diagnosis and Episode
         val patients = listOf(
             recordWithEpisode(fluourouracilDiagnosis, fluourouracilEpisode),
             recordWithEpisode(fluourouracilDiagnosis, fluourouracilEpisode.copy(distantMetastasesDetectionStatus = MetastasesDetectionStatus.AT_PROGRESSION)),
