@@ -44,9 +44,9 @@ class NcrEpisodeExtractorTest {
             labValues = NCR_LAB_VALUES.copy(
                 ldh1 = null,
                 ldh2 = 9999,
-                ldh3 = 50,
+                ldh3 = 5000,
                 albumine1 = 9999.0,
-                albumine2 = 10.0,
+                albumine2 = 90.0,
                 albumine3 = 40.5,
                 neutro1 = 500.0,
                 neutro2 = 30.5,
@@ -58,10 +58,11 @@ class NcrEpisodeExtractorTest {
 
         val expectedEpisodeInvalidLabMeasurements = expectedEpisode.copy(
             labMeasurements = listOf(
+                LabMeasurement(LabMeasure.ALKALINE_PHOSPHATASE, 20.0, Unit.UNIT_PER_LITER, 2, null, null),
                 LabMeasurement(LabMeasure.NEUTROPHILS_ABSOLUTE, 30.5, Unit.BILLIONS_PER_LITER, null, null, null),
                 LabMeasurement(LabMeasure.ALBUMINE, 40.5, Unit.GRAM_PER_LITER, null, null, null),
-                LabMeasurement(LabMeasure.LEUKOCYTES_ABSOLUTE, 50.5, Unit.BILLIONS_PER_LITER, 5, null, null),
-        )
+                LabMeasurement(LabMeasure.LEUKOCYTES_ABSOLUTE, 50.5, Unit.BILLIONS_PER_LITER, 5, null, null)
+            )
         )
 
         val episode = NcrEpisodeExtractor(NcrSystemicTreatmentPlanExtractor()).extractEpisode(modifiedNcrRecord, 80)
@@ -122,6 +123,8 @@ class NcrEpisodeExtractorTest {
             extraMuralInvasionCategory = ExtraMuralInvasionCategory.ABOVE_FIVE_MM,
             tumorRegression = TumorRegression.MINIMAL_REGRESSION,
             labMeasurements = listOf(
+                LabMeasurement(LabMeasure.LACTATE_DEHYDROGENASE, 10.0, Unit.UNIT_PER_LITER, 1, null, null),
+                LabMeasurement(LabMeasure.ALKALINE_PHOSPHATASE, 20.0, Unit.UNIT_PER_LITER, 2, null, null),
                 LabMeasurement(LabMeasure.NEUTROPHILS_ABSOLUTE, 30.5, Unit.BILLIONS_PER_LITER, 3, null, null),
                 LabMeasurement(LabMeasure.ALBUMINE, 40.5, Unit.GRAM_PER_LITER, 4, null, null),
                 LabMeasurement(LabMeasure.LEUKOCYTES_ABSOLUTE, 50.5, Unit.BILLIONS_PER_LITER, 5, null, null),
