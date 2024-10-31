@@ -116,6 +116,25 @@ val NCR_PRIOR_MALIGNANCIES = NcrPriorMalignancies(
     mal1SystCode1 = "214000"
 )
 
+val NCR_PRIMARY_DIAGNOSIS = NcrPrimaryDiagnosis(
+    incjr = INCIDENCE_YEAR,
+    topoSublok = "C182",
+    morfCat = 1,
+    diagBasis = 4,
+    diffgrad = "2",
+    ct = "0",
+    cn = "1A",
+    cm = "-",
+    pt = "4A",
+    pn = "X",
+    pm = null,
+    cstadium = "NVT",
+    pstadium = "M",
+    stadium = "2C",
+    ondLymf = INVESTIGATED_LYMPH_NODES,
+    posLymf = POSITIVE_LYMPH_NODES
+)
+
 val NCR_CHARLSON_COMORBIDITIES = NcrCharlsonComorbidities(
     cci = 1,
     cciCat = 1,
@@ -150,24 +169,7 @@ val NCR_RECORD = NcrRecord(
         rasMut = 3
     ),
     priorMalignancies = NCR_PRIOR_MALIGNANCIES,
-    primaryDiagnosis = NcrPrimaryDiagnosis(
-        incjr = INCIDENCE_YEAR,
-        topoSublok = "C182",
-        morfCat = 1,
-        diagBasis = 4,
-        diffgrad = "2",
-        ct = "0",
-        cn = "1A",
-        cm = "-",
-        pt = "4A",
-        pn = "X",
-        pm = null,
-        cstadium = "NVT",
-        pstadium = "M",
-        stadium = "2C",
-        ondLymf = INVESTIGATED_LYMPH_NODES,
-        posLymf = POSITIVE_LYMPH_NODES
-    ),
+    primaryDiagnosis = NCR_PRIMARY_DIAGNOSIS,
     metastaticDiagnosis = NCR_METASTATIC_DIAGNOSIS,
     comorbidities = NCR_CHARLSON_COMORBIDITIES,
     labValues = NCR_LAB_VALUES,

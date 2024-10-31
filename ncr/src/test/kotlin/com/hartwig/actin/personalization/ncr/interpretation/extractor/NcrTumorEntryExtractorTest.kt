@@ -1,6 +1,7 @@
 package com.hartwig.actin.personalization.ncr.interpretation.extractor
 
 import com.hartwig.actin.personalization.datamodel.AnorectalVergeDistanceCategory
+import com.hartwig.actin.personalization.datamodel.ChronicityMetastases
 import com.hartwig.actin.personalization.datamodel.Diagnosis
 import com.hartwig.actin.personalization.datamodel.Drug
 import com.hartwig.actin.personalization.datamodel.Location
@@ -14,10 +15,12 @@ import org.junit.jupiter.api.Test
 
 class NcrTumorEntryExtractorTest {
 
+    private val diagnosisRecord = NCR_RECORD.copy(identification = NCR_IDENTIFICATION.copy(keyEid = 101, teller = 1, epis = "DIA"))
+    private val followupRecord = NCR_RECORD
+
     @Test
     fun `Should extract diagnosis and episodes from NCR records`() {
-        val diagnosisRecord = NCR_RECORD.copy(identification = NCR_IDENTIFICATION.copy(keyEid = 101, teller = 1, epis = "DIA"))
-        val records = listOf(diagnosisRecord, NCR_RECORD)
+        val records = listOf(diagnosisRecord, followupRecord)
         val (diagnosis, episodes) =
             NcrTumorEntryExtractor(NcrEpisodeExtractor(NcrSystemicTreatmentPlanExtractor())).extractTumorEntry(records)
         assertThat(episodes).hasSize(2)
@@ -61,6 +64,7 @@ class NcrTumorEntryExtractorTest {
                 cciHasRenalDisease = null,
                 cciHasLiverDisease = null,
                 cciHasUlcerDisease = null,
+                chronicityMetastases = ChronicityMetastases.METACHRONOUS,
                 presentedWithIleus = false,
                 presentedWithPerforation = true,
                 anorectalVergeDistanceCategory = AnorectalVergeDistanceCategory.FIVE_TO_TEN_CM,
@@ -71,5 +75,21 @@ class NcrTumorEntryExtractorTest {
                 hasKrasG12CMutation = true
             )
         )
+    }
+
+    @Test
+    fun `Should not determine chronicity in case of diagnosis episode only and unexpected stage`() {
+        val records = listOf(diagnosisRecord)
+        val (diagnosis) = NcrTumorEntryExtractor(NcrEpisodeExtractor(NcrSystemicTreatmentPlanExtractor())).extractTumorEntry(records)
+        assertThat(diagnosis.chronicityMetastases == null)
+    }
+
+    @Test
+    fun `Should resolve to synchronous chronicity in case diagnosis episode with expected stage`() {
+        val diagnosisRecord = diagnosisRecord.copy(primaryDiagnosis = NCR_PRIMARY_DIAGNOSIS.copy(stadium = "4"))
+        val records = listOf(diagnosisRecord)
+
+        val (diagnosis) = NcrTumorEntryExtractor(NcrEpisodeExtractor(NcrSystemicTreatmentPlanExtractor())).extractTumorEntry(records)
+        assertThat(diagnosis.chronicityMetastases == ChronicityMetastases.SYNCHRONOUS)
     }
 }

@@ -34,6 +34,7 @@ data class Diagnosis(
     val cciHasLiverDisease: Boolean? = null,
     val cciHasUlcerDisease: Boolean? = null,
 
+    val chronicityMetastases: ChronicityMetastases? = null,
     val presentedWithIleus: Boolean? = null,
     val presentedWithPerforation: Boolean? = null,
     val anorectalVergeDistanceCategory: AnorectalVergeDistanceCategory? = null,

@@ -1,8 +1,10 @@
 package com.hartwig.actin.personalization.ncr.interpretation.extractor
 
+import com.hartwig.actin.personalization.datamodel.ChronicityMetastases
 import com.hartwig.actin.personalization.datamodel.Diagnosis
 import com.hartwig.actin.personalization.datamodel.Episode
 import com.hartwig.actin.personalization.datamodel.PriorTumor
+import com.hartwig.actin.personalization.datamodel.StageTnm
 import com.hartwig.actin.personalization.datamodel.TumorEntry
 import com.hartwig.actin.personalization.ncr.datamodel.NcrRecord
 import com.hartwig.actin.personalization.ncr.interpretation.DIAGNOSIS_EPISODE
@@ -23,6 +25,8 @@ class NcrTumorEntryExtractor(private val episodeExtractor: NcrEpisodeExtractor) 
         val episodes = records.map { record -> episodeExtractor.extractEpisode(record, intervalTumorIncidenceLatestAliveStatus) }
         val locations = episodes.map(Episode::tumorLocation).toSet()
         val priorTumors = extractPriorTumors(diagnosisRecord)
+        val diagnosisStage = NcrStageTnmMapper.resolveNullable(diagnosisRecord.primaryDiagnosis.stadium)
+        val hasFollowupEpisodes = episodes.size > 1
 
         val diagnosis = with(diagnosisRecord) {
             val (hasBrafMutation, hasBrafV600EMutation) = when (molecularCharacteristics.brafMut) {
@@ -70,6 +74,7 @@ class NcrTumorEntryExtractor(private val episodeExtractor: NcrEpisodeExtractor) 
                 cciHasRenalDisease = NcrBooleanMapper.resolve(comorbidities.cciRenal),
                 cciHasLiverDisease = NcrBooleanMapper.resolve(comorbidities.cciSevereLiver),
                 cciHasUlcerDisease = NcrBooleanMapper.resolve(comorbidities.cciUlcer),
+                chronicityMetastases = extractChronicity(diagnosisStage, hasFollowupEpisodes),
                 presentedWithIleus = NcrBooleanMapper.resolve(clinicalCharacteristics.ileus),
                 presentedWithPerforation = NcrBooleanMapper.resolve(clinicalCharacteristics.perforatie),
                 anorectalVergeDistanceCategory = NcrAnorectalVergeDistanceCategoryMapper.resolve(clinicalCharacteristics.anusAfst),
@@ -81,6 +86,16 @@ class NcrTumorEntryExtractor(private val episodeExtractor: NcrEpisodeExtractor) 
             )
         }
         return TumorEntry(diagnosis, episodes)
+    }
+
+    private fun extractChronicity(diagnosisStage: StageTnm?, hasFollowupEpisodes: Boolean): ChronicityMetastases? {
+        return if (diagnosisStage in setOf(StageTnm.IV, StageTnm.IVA, StageTnm.IVB, StageTnm.IVC)) {
+            ChronicityMetastases.SYNCHRONOUS
+        } else if (hasFollowupEpisodes) {
+            ChronicityMetastases.METACHRONOUS
+        } else {
+            null
+        }
     }
 
     private fun extractPriorTumors(record: NcrRecord): List<PriorTumor> {
