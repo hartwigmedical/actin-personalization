@@ -39,7 +39,7 @@ CREATE TABLE `diagnosis` (
     `cciHasLiverDisease` bool,
     `cciHasUlcerDisease` bool,
 
-    `chronicityMetastases` varchar(50),
+    `chronicityMetastases` varchar(50) NOT NULL,
     `presentedWithIleus` bool,
     `presentedWithPerforation` bool,
     `anorectalVergeDistanceCategory` varchar(50),

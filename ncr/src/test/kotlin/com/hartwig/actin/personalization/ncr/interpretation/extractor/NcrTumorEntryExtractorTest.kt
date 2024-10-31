@@ -78,17 +78,8 @@ class NcrTumorEntryExtractorTest {
     }
 
     @Test
-    fun `Should not determine chronicity in case of diagnosis episode only and unexpected stage`() {
+    fun `Should resolve to synchronous chronicity metastases value in case there is only a diagnosis episode`() {
         val records = listOf(diagnosisRecord)
-        val (diagnosis) = NcrTumorEntryExtractor(NcrEpisodeExtractor(NcrSystemicTreatmentPlanExtractor())).extractTumorEntry(records)
-        assertThat(diagnosis.chronicityMetastases == null)
-    }
-
-    @Test
-    fun `Should resolve to synchronous chronicity in case diagnosis episode with expected stage`() {
-        val diagnosisRecord = diagnosisRecord.copy(primaryDiagnosis = NCR_PRIMARY_DIAGNOSIS.copy(stadium = "4"))
-        val records = listOf(diagnosisRecord)
-
         val (diagnosis) = NcrTumorEntryExtractor(NcrEpisodeExtractor(NcrSystemicTreatmentPlanExtractor())).extractTumorEntry(records)
         assertThat(diagnosis.chronicityMetastases == ChronicityMetastases.SYNCHRONOUS)
     }
