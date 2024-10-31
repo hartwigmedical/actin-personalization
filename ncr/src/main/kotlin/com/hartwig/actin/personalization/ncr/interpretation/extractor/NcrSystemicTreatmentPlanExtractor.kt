@@ -37,10 +37,12 @@ class NcrSystemicTreatmentPlanExtractor {
             .dropWhile { daysUntilPlanStart != null && it.intervalTumorIncidencePfsMeasureDays!! < daysUntilPlanStart }
 
         val sortedPfsMeasuresAfterPlanEnd = sortedPfsMeasuresAfterPlanStart
-            .filter { daysUntilPlanEnd != null && it.intervalTumorIncidencePfsMeasureDays!! > daysUntilPlanEnd }
+            .dropWhile { daysUntilPlanEnd != null && it.intervalTumorIncidencePfsMeasureDays!! < daysUntilPlanEnd }
 
         val (observedPfsDays, hadProgressionEvent) =
-            if (daysUntilPlanStart == null || hasProgressionOrDeathWithUnknownInterval(pfsMeasures)) {
+            if (daysUntilPlanStart == null ||
+                hasPfsMeasureWithUnknownInterval(pfsMeasures) ||
+                hasProgressionAndCensorPfsMeasures(pfsMeasures)) {
                 Pair(null, null)
             } else {
                 determineRelevantProgressionIntervalAndEvent(
@@ -69,18 +71,19 @@ class NcrSystemicTreatmentPlanExtractor {
         )
     }
 
+    private fun hasPfsMeasureWithUnknownInterval(pfsMeasures: List<PfsMeasure>) = pfsMeasures.any {
+        it.intervalTumorIncidencePfsMeasureDays == null
+    }
+
+    private fun hasProgressionAndCensorPfsMeasures(pfsMeasures: List<PfsMeasure>) =
+        pfsMeasures.any { (it.type == PfsMeasureType.PROGRESSION || it.type == PfsMeasureType.DEATH) } && pfsMeasures.any() { it.type == PfsMeasureType.CENSOR }
+
     private fun determineRelevantProgressionIntervalAndEvent(
         sortedPfsMeasuresAfterPlanStart: Sequence<PfsMeasure>, sortedPfsMeasuresAfterPlanEnd: Sequence<PfsMeasure>, daysUntilPlanEnd: Int?
     ): Pair<Int, Boolean>? {
         if (sortedPfsMeasuresAfterPlanStart.toList().size == 1) {
-            val intervalFirstProgressionOrDeathMeasureAfterPlanStart =
-                sortedPfsMeasuresAfterPlanStart.firstOrNull { it.type != PfsMeasureType.CENSOR }
-                    ?.intervalTumorIncidencePfsMeasureDays
-            val intervalLastCensorMeasureAfterPlanStart = sortedPfsMeasuresAfterPlanStart.lastOrNull() { it.type == PfsMeasureType.CENSOR }
-                ?.intervalTumorIncidencePfsMeasureDays
-
-            return intervalFirstProgressionOrDeathMeasureAfterPlanStart?.let { it to true }
-                ?: intervalLastCensorMeasureAfterPlanStart?.let { it to false }
+            return sortedPfsMeasuresAfterPlanStart.firstOrNull { it.type != PfsMeasureType.CENSOR }?.intervalTumorIncidencePfsMeasureDays?.let { it to true }
+                ?: sortedPfsMeasuresAfterPlanStart.lastOrNull()?.intervalTumorIncidencePfsMeasureDays?.let { it to false }
         } else if (sortedPfsMeasuresAfterPlanStart.toList().size > 1) {
             return if (daysUntilPlanEnd == null) {
                 null
@@ -91,10 +94,6 @@ class NcrSystemicTreatmentPlanExtractor {
             }
         }
         return null
-    }
-
-    private fun hasProgressionOrDeathWithUnknownInterval(pfsMeasures: List<PfsMeasure>) = pfsMeasures.any {
-        it.type != PfsMeasureType.CENSOR && it.intervalTumorIncidencePfsMeasureDays == null
     }
 
     private fun drugsFromScheme(systemicTreatmentScheme: SystemicTreatmentScheme): List<Drug> {
