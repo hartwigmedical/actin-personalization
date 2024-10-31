@@ -48,7 +48,7 @@ data class Diagnosis(
 
     companion object {
 
-        fun determineSidedness(locations: Set<Location>): Sidedness? {
+        private fun determineSidedness(locations: Set<Location>): Sidedness? {
             val LOCATIONS_INDICATING_LEFT_SIDEDNESS =
                 setOf(Location.FLEXURA_LIENALIS, Location.DESCENDING_COLON, Location.RECTOSIGMOID, Location.SIGMOID_COLON, Location.RECTUM)
             val LOCATIONS_INDICATING_RIGHT_SIDEDNESS =
