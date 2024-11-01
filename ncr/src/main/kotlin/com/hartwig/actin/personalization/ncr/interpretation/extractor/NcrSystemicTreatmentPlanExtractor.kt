@@ -30,20 +30,10 @@ class NcrSystemicTreatmentPlanExtractor {
         val daysUntilPlanStart = firstScheme.intervalTumorIncidenceTreatmentLineStartMinDays
         val daysUntilPlanEnd = treatmentSchemes.last().intervalTumorIncidenceTreatmentLineStopMaxDays
 
-        val sortedPfsMeasuresAfterPlanStart = pfsMeasures.asSequence()
-            .filterNot { it.intervalTumorIncidencePfsMeasureDays == null }
-            .sortedBy(PfsMeasure::intervalTumorIncidencePfsMeasureDays)
-            .dropWhile { daysUntilPlanStart != null && it.intervalTumorIncidencePfsMeasureDays!! < daysUntilPlanStart }
-
-        val sortedPfsMeasuresAfterPlanEnd = sortedPfsMeasuresAfterPlanStart
-            .dropWhile { daysUntilPlanEnd != null && it.intervalTumorIncidencePfsMeasureDays!! < daysUntilPlanEnd }
-
         val (observedPfsDays, hadProgressionEvent) = NcrPfsInterpreter().determineObservedPfsAndProgressionEvent(
             daysUntilPlanStart,
             daysUntilPlanEnd,
-            pfsMeasures,
-            sortedPfsMeasuresAfterPlanStart,
-            sortedPfsMeasuresAfterPlanEnd
+            pfsMeasures
         )
 
         return SystemicTreatmentPlan(

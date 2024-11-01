@@ -8,10 +8,15 @@ class NcrPfsInterpreter {
     fun determineObservedPfsAndProgressionEvent(
         daysUntilPlanStart: Int?,
         daysUntilPlanEnd: Int?,
-        pfsMeasures: List<PfsMeasure>,
-        sortedPfsMeasuresAfterPlanStart: Sequence<PfsMeasure>,
-        sortedPfsMeasuresAfterPlanEnd: Sequence<PfsMeasure>
+        pfsMeasures: List<PfsMeasure>
     ): Pair<Int?, Boolean?> {
+        val sortedPfsMeasuresAfterPlanStart = pfsMeasures.asSequence()
+            .filterNot { it.intervalTumorIncidencePfsMeasureDays == null }
+            .sortedBy(PfsMeasure::intervalTumorIncidencePfsMeasureDays)
+            .dropWhile { daysUntilPlanStart != null && it.intervalTumorIncidencePfsMeasureDays!! < daysUntilPlanStart }
+        val sortedPfsMeasuresAfterPlanEnd = sortedPfsMeasuresAfterPlanStart
+            .dropWhile { daysUntilPlanEnd != null && it.intervalTumorIncidencePfsMeasureDays!! < daysUntilPlanEnd }
+
         return if (daysUntilPlanStart == null ||
             hasPfsMeasureWithUnknownInterval(pfsMeasures) ||
             hasProgressionAndCensorPfsMeasures(pfsMeasures)
