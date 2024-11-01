@@ -14,6 +14,7 @@ class NcrPfsInterpreter {
             .filterNot { it.intervalTumorIncidencePfsMeasureDays == null }
             .sortedBy(PfsMeasure::intervalTumorIncidencePfsMeasureDays)
             .dropWhile { daysUntilPlanStart != null && it.intervalTumorIncidencePfsMeasureDays!! < daysUntilPlanStart }
+            .toList()
         val sortedPfsMeasuresAfterPlanEnd = sortedPfsMeasuresAfterPlanStart
             .dropWhile { daysUntilPlanEnd != null && it.intervalTumorIncidencePfsMeasureDays!! < daysUntilPlanEnd }
 
@@ -47,8 +48,8 @@ class NcrPfsInterpreter {
         pfsMeasures.filter { it.type == PfsMeasureType.CENSOR }.size > 1
 
     private fun determineRelevantProgressionIntervalAndEvent(
-        sortedPfsMeasuresAfterPlanStart: Sequence<PfsMeasure>,
-        sortedPfsMeasuresAfterPlanEnd: Sequence<PfsMeasure>,
+        sortedPfsMeasuresAfterPlanStart: List<PfsMeasure>,
+        sortedPfsMeasuresAfterPlanEnd: List<PfsMeasure>,
         daysUntilPlanEnd: Int?
     ): Pair<Int, Boolean>? {
         return when {
