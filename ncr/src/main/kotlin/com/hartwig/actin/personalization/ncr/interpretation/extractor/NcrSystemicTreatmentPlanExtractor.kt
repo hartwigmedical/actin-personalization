@@ -2,7 +2,6 @@ package com.hartwig.actin.personalization.ncr.interpretation.extractor
 
 import com.hartwig.actin.personalization.datamodel.Drug
 import com.hartwig.actin.personalization.datamodel.PfsMeasure
-import com.hartwig.actin.personalization.datamodel.PfsMeasureType
 import com.hartwig.actin.personalization.datamodel.ResponseMeasure
 import com.hartwig.actin.personalization.datamodel.SystemicTreatmentPlan
 import com.hartwig.actin.personalization.datamodel.SystemicTreatmentScheme
@@ -39,23 +38,13 @@ class NcrSystemicTreatmentPlanExtractor {
         val sortedPfsMeasuresAfterPlanEnd = sortedPfsMeasuresAfterPlanStart
             .dropWhile { daysUntilPlanEnd != null && it.intervalTumorIncidencePfsMeasureDays!! < daysUntilPlanEnd }
 
-        val (observedPfsDays, hadProgressionEvent) =
-            if (daysUntilPlanStart == null ||
-                hasPfsMeasureWithUnknownInterval(pfsMeasures) ||
-                hasProgressionAndCensorPfsMeasures(pfsMeasures)
-            ) {
-                Pair(null, null)
-            } else {
-                determineRelevantProgressionIntervalAndEvent(
-                    sortedPfsMeasuresAfterPlanStart,
-                    sortedPfsMeasuresAfterPlanEnd,
-                    daysUntilPlanEnd
-                )
-                    ?.let { (daysUntilProgression, hadProgressionEvent) ->
-                        daysUntilProgression - daysUntilPlanStart to hadProgressionEvent
-                    }
-                    ?: Pair(null, null)
-            }
+        val (observedPfsDays, hadProgressionEvent) = NcrPfsInterpreter().determineObservedPfsAndProgressionEvent(
+            daysUntilPlanStart,
+            daysUntilPlanEnd,
+            pfsMeasures,
+            sortedPfsMeasuresAfterPlanStart,
+            sortedPfsMeasuresAfterPlanEnd
+        )
 
         return SystemicTreatmentPlan(
             treatment = treatment,
@@ -70,38 +59,6 @@ class NcrSystemicTreatmentPlanExtractor {
                 ?.let { intervalTumorIncidenceLatestAliveStatus - daysUntilPlanStart }
                 ?.takeIf { it >= 0 },
         )
-    }
-
-    private fun hasPfsMeasureWithUnknownInterval(pfsMeasures: List<PfsMeasure>) = pfsMeasures.any {
-        it.intervalTumorIncidencePfsMeasureDays == null
-    }
-
-    private fun hasProgressionAndCensorPfsMeasures(pfsMeasures: List<PfsMeasure>) =
-        pfsMeasures.any { it.type == PfsMeasureType.PROGRESSION || it.type == PfsMeasureType.DEATH } && pfsMeasures.any() { it.type == PfsMeasureType.CENSOR }
-
-    private fun determineRelevantProgressionIntervalAndEvent(
-        sortedPfsMeasuresAfterPlanStart: Sequence<PfsMeasure>,
-        sortedPfsMeasuresAfterPlanEnd: Sequence<PfsMeasure>,
-        daysUntilPlanEnd: Int?
-    ): Pair<Int, Boolean>? {
-        return when {
-            sortedPfsMeasuresAfterPlanStart.toList().size == 1 -> {
-                sortedPfsMeasuresAfterPlanStart.firstOrNull { it.type != PfsMeasureType.CENSOR }?.intervalTumorIncidencePfsMeasureDays?.let { it to true }
-                    ?: sortedPfsMeasuresAfterPlanStart.lastOrNull()?.intervalTumorIncidencePfsMeasureDays?.let { it to false }
-            }
-
-            sortedPfsMeasuresAfterPlanStart.toList().size > 1 -> {
-                when {
-                    daysUntilPlanEnd == null -> null
-                    sortedPfsMeasuresAfterPlanEnd.toList()
-                        .isNotEmpty() -> sortedPfsMeasuresAfterPlanEnd.first().intervalTumorIncidencePfsMeasureDays?.let { it to true }
-
-                    else -> sortedPfsMeasuresAfterPlanStart.last().intervalTumorIncidencePfsMeasureDays?.let { it to true }
-                }
-            }
-
-            else -> null
-        }
     }
 
     private fun drugsFromScheme(systemicTreatmentScheme: SystemicTreatmentScheme): List<Drug> {

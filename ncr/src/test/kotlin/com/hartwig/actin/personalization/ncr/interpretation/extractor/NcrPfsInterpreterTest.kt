@@ -6,7 +6,7 @@ import com.hartwig.actin.personalization.ncr.datamodel.NcrSystemicTreatment
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
-class NcrObservedPfsDeterminationTest {
+class NcrPfsInterpreterTest {
     private val interval = 300
     private val response = null
     private val treatment = NcrSystemicTreatment(
