@@ -53,15 +53,15 @@ class NcrPfsInterpreter {
         daysUntilPlanEnd: Int?
     ): Pair<Int, Boolean>? {
         return when {
-            sortedPfsMeasuresAfterPlanStart.toList().size == 1 -> {
+            sortedPfsMeasuresAfterPlanStart.size == 1 -> {
                 sortedPfsMeasuresAfterPlanStart.firstOrNull { it.type != PfsMeasureType.CENSOR }?.intervalTumorIncidencePfsMeasureDays?.let { it to true }
                     ?: sortedPfsMeasuresAfterPlanStart.lastOrNull()?.intervalTumorIncidencePfsMeasureDays?.let { it to false }
             }
 
-            sortedPfsMeasuresAfterPlanStart.toList().size > 1 -> {
+            sortedPfsMeasuresAfterPlanStart.size > 1 -> {
                 when {
                     daysUntilPlanEnd == null -> null
-                    sortedPfsMeasuresAfterPlanEnd.toList().isNotEmpty() -> sortedPfsMeasuresAfterPlanEnd.first().intervalTumorIncidencePfsMeasureDays?.let { it to true }
+                    sortedPfsMeasuresAfterPlanEnd.isNotEmpty() -> sortedPfsMeasuresAfterPlanEnd.first().intervalTumorIncidencePfsMeasureDays?.let { it to true }
                     else -> sortedPfsMeasuresAfterPlanStart.last().intervalTumorIncidencePfsMeasureDays?.let { it to true }
                 }
             }
