@@ -64,7 +64,7 @@ class NcrTumorEntryExtractor(private val episodeExtractor: NcrEpisodeExtractor) 
                 hasHadPriorTumor = priorTumors.isNotEmpty(),
                 priorTumors = priorTumors,
                 orderOfFirstMetastaticEpisode = orderOfFirstMetastaticEpisode,
-                isMetachronous = orderOfFirstMetastaticEpisode?.let{ it > 1} ?: false,
+                isMetachronous = orderOfFirstMetastaticEpisode?.let{ it > 1 } ?: false,
                 cci = comorbidities.cci,
                 cciNumberOfCategories = NcrCciNumberOfCategoriesMapper.resolve(comorbidities.cciCat),
                 cciHasAids = NcrBooleanMapper.resolve(comorbidities.cciAids),

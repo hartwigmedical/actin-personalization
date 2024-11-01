@@ -21,7 +21,7 @@ CREATE TABLE `diagnosis` (
     `hadSurvivalEvent` bool NOT NULL,
     `hasHadPriorTumor` bool NOT NULL,
     `orderOfFirstMetastaticEpisode` int,
-    `isMetachronous = bool,
+    `isMetachronous` bool,
     `cci` int,
     `cciNumberOfCategories` varchar(50),
     `cciHasAids` bool,
