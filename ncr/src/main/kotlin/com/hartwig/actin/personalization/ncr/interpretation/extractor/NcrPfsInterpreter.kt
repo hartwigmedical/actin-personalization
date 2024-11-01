@@ -56,9 +56,7 @@ class NcrPfsInterpreter {
             sortedPfsMeasuresAfterPlanStart.toList().size > 1 -> {
                 when {
                     daysUntilPlanEnd == null -> null
-                    sortedPfsMeasuresAfterPlanEnd.toList()
-                        .isNotEmpty() -> sortedPfsMeasuresAfterPlanEnd.first().intervalTumorIncidencePfsMeasureDays?.let { it to true }
-
+                    sortedPfsMeasuresAfterPlanEnd.toList().isNotEmpty() -> sortedPfsMeasuresAfterPlanEnd.first().intervalTumorIncidencePfsMeasureDays?.let { it to true }
                     else -> sortedPfsMeasuresAfterPlanStart.last().intervalTumorIncidencePfsMeasureDays?.let { it to true }
                 }
             }
