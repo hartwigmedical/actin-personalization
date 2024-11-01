@@ -19,7 +19,8 @@ class NcrPfsInterpreter {
 
         return if (daysUntilPlanStart == null ||
             hasPfsMeasureWithUnknownInterval(pfsMeasures) ||
-            hasProgressionAndCensorPfsMeasures(pfsMeasures)
+            hasProgressionAndCensorPfsMeasures(pfsMeasures) ||
+            hasMultipleCensorPfsMeasures(pfsMeasures)
         ) {
             Pair(null, null)
         } else {
@@ -41,6 +42,9 @@ class NcrPfsInterpreter {
 
     private fun hasProgressionAndCensorPfsMeasures(pfsMeasures: List<PfsMeasure>) =
         pfsMeasures.any { it.type == PfsMeasureType.PROGRESSION || it.type == PfsMeasureType.DEATH } && pfsMeasures.any() { it.type == PfsMeasureType.CENSOR }
+
+    private fun hasMultipleCensorPfsMeasures(pfsMeasures: List<PfsMeasure>) =
+        pfsMeasures.filter { it.type == PfsMeasureType.CENSOR }.size > 1
 
     private fun determineRelevantProgressionIntervalAndEvent(
         sortedPfsMeasuresAfterPlanStart: Sequence<PfsMeasure>,

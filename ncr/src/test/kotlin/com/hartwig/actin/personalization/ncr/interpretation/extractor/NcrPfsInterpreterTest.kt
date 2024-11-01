@@ -101,4 +101,16 @@ class NcrPfsInterpreterTest {
         assertThat(pfs).isNull()
         assertThat(event).isNull()
     }
+
+    @Test
+    fun `Should not interpret any pfs measure if there are multiple censor measures`() {
+        val pfsMeasures = listOf(
+            PfsMeasure(PfsMeasureType.CENSOR, null, 2),
+            PfsMeasure(PfsMeasureType.CENSOR, null, 6),
+            PfsMeasure(PfsMeasureType.CENSOR, null, 14),
+        )
+        val (pfs, event) = NcrPfsInterpreter().determineObservedPfsAndProgressionEvent(daysUntilPlanStart, daysUntilPlanEnd, pfsMeasures)
+        assertThat(pfs).isNull()
+        assertThat(event).isNull()
+    }
 }
