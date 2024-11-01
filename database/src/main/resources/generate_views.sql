@@ -12,6 +12,7 @@ SELECT
     d.observedOsFromTumorIncidenceDays,
     d.hadSurvivalEvent,
     d.hasHadPriorTumor,
+    d.isMetachronous,
     d.cci,
     d.cciNumberOfCategories,
     d.cciHasAids,
@@ -46,7 +47,7 @@ SELECT
     e.intervalTumorIncidenceTreatmentPlanStopDays-e.intervalTumorIncidenceTreatmentPlanStartDays AS systemicTreatmentPlanDuration
 FROM patient p
 JOIN diagnosis d ON p.id = d.patientId
-JOIN episode e ON d.id = e.diagnosisId AND e.order=1
+JOIN episode e ON d.id = e.diagnosisId AND e.order=d.orderOfFirstMetastaticEpisode
 LEFT JOIN (
     SELECT episodeId, GROUP_CONCAT(type) AS surgeries FROM surgery GROUP BY episodeId
 ) s ON e.id = s.episodeId
@@ -63,8 +64,7 @@ CREATE OR REPLACE VIEW nonCurativeTreatments
 AS (
 SELECT *
 FROM diagnosisTreatments
-WHERE distantMetastasesDetectionStatus = 'AT_START'
-AND hasHadPreSurgerySystemicChemotherapy = 0
+WHERE hasHadPreSurgerySystemicChemotherapy = 0
 AND hasHadPostSurgerySystemicChemotherapy = 0
 AND hasHadPreSurgerySystemicTargetedTherapy = 0
 AND hasHadPostSurgerySystemicTargetedTherapy = 0
