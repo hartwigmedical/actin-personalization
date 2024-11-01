@@ -42,7 +42,7 @@ class NcrSystemicTreatmentPlanExtractor {
             if (daysUntilPlanStart == null || hasProgressionOrDeathWithUnknownInterval(pfsMeasures)) {
                 Pair(null, null)
             } else {
-                daysUntilProgressionOrCensorship(intervalTumorFirstPfsMeasure, sortedPfsMeasuresAfterPlanStart)
+                daysUntilProgressionOrCensorship(intervalTumorFirstPfsMeasure, sortedPfsMeasuresAfterPlanStart, intervalTumorIncidenceLatestAliveStatus, daysUntilPlanStart)
                     ?.let { (intervalTumorIncidenceProgressionOrCensor, hadProgressionEvent) ->
                         intervalTumorIncidenceProgressionOrCensor - daysUntilPlanStart to hadProgressionEvent
                     }
@@ -66,11 +66,26 @@ class NcrSystemicTreatmentPlanExtractor {
     }
 
     private fun daysUntilProgressionOrCensorship(
-        intervalTumorFirstPfsMeasure: Int?, sortedPfsMeasuresAfterPlanStart: Sequence<PfsMeasure>
+        intervalTumorFirstPfsMeasure: Int?,
+        sortedPfsMeasuresAfterPlanStart: Sequence<PfsMeasure>,
+        intervalTumorIncidenceLatestAliveStatus: Int,
+        daysUntilPlanStart: Int
     ): Pair<Int, Boolean>? {
         return intervalTumorFirstPfsMeasure?.let { it to true }
-            ?: sortedPfsMeasuresAfterPlanStart.lastOrNull()?.let { it.intervalTumorIncidencePfsMeasureDays!! to false }
+            ?: sortedPfsMeasuresAfterPlanStart.lastOrNull()?.let { lastPfsMeasure ->
+                if (lastPfsMeasure.type == PfsMeasureType.DEATH) {
+                    lastPfsMeasure.intervalTumorIncidencePfsMeasureDays!! to true
+                } else if (lastPfsMeasure.type == PfsMeasureType.CENSOR &&
+                    intervalTumorIncidenceLatestAliveStatus > lastPfsMeasure.intervalTumorIncidencePfsMeasureDays!!
+                ) {
+                    lastPfsMeasure.intervalTumorIncidencePfsMeasureDays!! to false
+                } else {
+                    null
+                }
+            }
     }
+
+
 
     private fun hasProgressionOrDeathWithUnknownInterval(pfsMeasures: List<PfsMeasure>) = pfsMeasures.any {
         it.type != PfsMeasureType.CENSOR && it.intervalTumorIncidencePfsMeasureDays == null
