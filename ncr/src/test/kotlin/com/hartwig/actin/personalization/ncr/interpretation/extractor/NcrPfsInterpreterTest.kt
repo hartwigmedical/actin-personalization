@@ -60,6 +60,14 @@ class NcrPfsInterpreterTest {
     }
 
     @Test
+    fun `Should interpret death pfs measure correctly if measure occurred after treatment plan start`() {
+        val pfsMeasures = listOf(PfsMeasure(PfsMeasureType.DEATH, null, 50))
+        val (pfs, event) = NcrPfsInterpreter.determineObservedPfsAndProgressionEvent(daysUntilPlanStart, daysUntilPlanEnd, pfsMeasures)
+        assertThat(pfs).isEqualTo(45)
+        assertThat(event).isTrue()
+    }
+
+    @Test
     fun `Should interpret pfs measure in case missing stop date if there is only one progression measure`() {
         val pfsMeasures = listOf(PfsMeasure(PfsMeasureType.PROGRESSION, null, 50))
         val (pfs, event) = NcrPfsInterpreter.determineObservedPfsAndProgressionEvent(daysUntilPlanStart, null, pfsMeasures)
