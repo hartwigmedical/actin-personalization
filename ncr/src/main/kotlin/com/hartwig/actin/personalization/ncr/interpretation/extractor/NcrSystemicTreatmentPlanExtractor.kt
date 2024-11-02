@@ -30,7 +30,7 @@ class NcrSystemicTreatmentPlanExtractor {
         val daysUntilPlanStart = firstScheme.intervalTumorIncidenceTreatmentLineStartMinDays
         val daysUntilPlanEnd = treatmentSchemes.last().intervalTumorIncidenceTreatmentLineStopMaxDays
 
-        val (observedPfsDays, hadProgressionEvent) = NcrPfsInterpreter().determineObservedPfsAndProgressionEvent(
+        val (observedPfsDays, hadProgressionEvent) = NcrPfsInterpreter.determineObservedPfsAndProgressionEvent(
             daysUntilPlanStart,
             daysUntilPlanEnd,
             pfsMeasures
