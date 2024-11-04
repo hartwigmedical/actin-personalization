@@ -18,8 +18,7 @@ object NcrPfsInterpreter {
         val sortedPfsMeasuresAfterPlanEnd = sortedPfsMeasuresAfterPlanStart
             .dropWhile { daysUntilPlanEnd != null && it.intervalTumorIncidencePfsMeasureDays!! < daysUntilPlanEnd }
 
-        return if (sortedPfsMeasuresAfterPlanStart.isEmpty() ||
-            daysUntilPlanStart == null ||
+        return if (daysUntilPlanStart == null ||
             hasPfsMeasureWithUnknownInterval(pfsMeasures) ||
             hasInvalidPfsMeasureCombination(pfsMeasures)
         ) {
@@ -50,15 +49,13 @@ object NcrPfsInterpreter {
         sortedPfsMeasuresAfterPlanEnd: List<PfsMeasure>,
         daysUntilPlanEnd: Int?
     ): Pair<Int, Boolean>? {
-        return when {
-            sortedPfsMeasuresAfterPlanStart.size == 1 -> {
-                sortedPfsMeasuresAfterPlanStart.firstOrNull { it.type != PfsMeasureType.CENSOR }?.intervalTumorIncidencePfsMeasureDays?.let { it to true }
-                    ?: sortedPfsMeasuresAfterPlanStart.last().intervalTumorIncidencePfsMeasureDays?.let { it to false }
-            }
-
-            else -> daysUntilPlanEnd?.let {
+        return if (sortedPfsMeasuresAfterPlanStart.size == 1) {
+            sortedPfsMeasuresAfterPlanStart.firstOrNull { it.type != PfsMeasureType.CENSOR }?.intervalTumorIncidencePfsMeasureDays?.let { it to true }
+                ?: sortedPfsMeasuresAfterPlanStart.last().intervalTumorIncidencePfsMeasureDays?.let { it to false }
+        } else {
+            daysUntilPlanEnd?.let {
                 sortedPfsMeasuresAfterPlanEnd.firstOrNull()?.intervalTumorIncidencePfsMeasureDays?.let { it to true }
-                    ?: sortedPfsMeasuresAfterPlanStart.last().intervalTumorIncidencePfsMeasureDays?.let { it to true }
+                    ?: sortedPfsMeasuresAfterPlanStart.lastOrNull()?.intervalTumorIncidencePfsMeasureDays?.let { it to true }
             }
         }
     }
