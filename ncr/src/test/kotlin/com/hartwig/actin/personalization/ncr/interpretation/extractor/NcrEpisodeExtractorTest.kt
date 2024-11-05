@@ -79,7 +79,7 @@ class NcrEpisodeExtractorTest {
             stageTNM = StageTnm.IIC,
             investigatedLymphNodesNumber = INVESTIGATED_LYMPH_NODES,
             positiveLymphNodesNumber = POSITIVE_LYMPH_NODES,
-            distantMetastasesDetectionStatus = MetastasesDetectionStatus.AT_START,
+            distantMetastasesDetectionStatus = MetastasesDetectionStatus.AT_PROGRESSION,
             metastases = listOf(Metastasis(Location.ADRENAL_CORTEX, 20, true)),
             numberOfLiverMetastases = NumberOfLiverMetastases.FIVE_OR_MORE,
             maximumSizeOfLiverMetastasisMm = 15,
