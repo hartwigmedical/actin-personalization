@@ -1,6 +1,7 @@
 package com.hartwig.actin.personalization.similarity
 
 import com.hartwig.actin.personalization.datamodel.Diagnosis
+import com.hartwig.actin.personalization.datamodel.DiagnosisEpisodeTreatment
 import com.hartwig.actin.personalization.datamodel.Episode
 import com.hartwig.actin.personalization.datamodel.Location
 import com.hartwig.actin.personalization.datamodel.MetastasesDetectionStatus
@@ -12,16 +13,14 @@ import com.hartwig.actin.personalization.datamodel.TumorBasisOfDiagnosis
 import com.hartwig.actin.personalization.datamodel.TumorEntry
 import com.hartwig.actin.personalization.datamodel.TumorType
 
-typealias DiagnosisAndEpisode = Pair<Diagnosis, Episode>
-
 val DIAGNOSIS = Diagnosis(
     consolidatedTumorType = TumorType.CRC_OTHER,
     tumorLocations = emptySet(),
     hasHadTumorDirectedSystemicTherapy = false,
     ageAtDiagnosis = 50,
     observedOsFromTumorIncidenceDays = 100,
-    hadSurvivalEvent = false,
-    hasHadPriorTumor = false,
+    hadSurvivalEvent = true,
+    hasHadPriorTumor = true,
     priorTumors = emptyList()
 )
 val EPISODE = Episode(
@@ -44,9 +43,11 @@ val EPISODE = Episode(
     hasHadPostSurgerySystemicTargetedTherapy = false,
     pfsMeasures = emptyList()
 )
-
-val DIAGNOSIS_AND_EPISODE = DIAGNOSIS to EPISODE
-
+val DIAGNOSIS_EPISODE_TREATMENT = DiagnosisEpisodeTreatment(
+    diagnosis = DIAGNOSIS,
+    episode = EPISODE,
+    systemicTreatmentPlan = EPISODE.systemicTreatmentPlan
+)
 val PATIENT_RECORD = ReferencePatient(
     ncrId = 123,
     sex = Sex.MALE,
@@ -61,16 +62,15 @@ fun recordWithEpisode(diagnosis: Diagnosis, episode: Episode): ReferencePatient 
     )
 }
 
-
-fun episodeWithTreatment(
+fun patientWithTreatment(
     treatment: Treatment,
     pfs: Int? = null,
     planStart: Int? = null,
     os: Int? = null,
-    hadSurvivalEvent: Boolean? = false,
-    hadProgressionEvent: Boolean? = false,
+    hadSurvivalEvent: Boolean? = true,
+    hadProgressionEvent: Boolean? = true,
     diagnosis: Diagnosis = DIAGNOSIS
-): DiagnosisAndEpisode {
+): DiagnosisEpisodeTreatment {
     val updatedDiagnosis = diagnosis.copy(
         observedOsFromTumorIncidenceDays = os ?: diagnosis.observedOsFromTumorIncidenceDays,
         hadSurvivalEvent = hadSurvivalEvent ?: diagnosis.hadSurvivalEvent
@@ -84,10 +84,10 @@ fun episodeWithTreatment(
             hadProgressionEvent = hadProgressionEvent
         )
     )
-    return updatedDiagnosis to updatedEpisode
+    return DiagnosisEpisodeTreatment(updatedDiagnosis, updatedEpisode, updatedEpisode.systemicTreatmentPlan)
 }
 
-fun episodeWithoutTreatment(): Episode {
+fun patientWithoutTreatment(): Episode {
     return EPISODE.copy(
         systemicTreatmentPlan = null
     )

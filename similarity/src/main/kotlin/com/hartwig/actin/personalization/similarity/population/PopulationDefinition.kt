@@ -1,11 +1,12 @@
 package com.hartwig.actin.personalization.similarity.population
 
+import com.hartwig.actin.personalization.datamodel.DiagnosisEpisodeTreatment
 import com.hartwig.actin.personalization.datamodel.Episode
 import com.hartwig.actin.personalization.datamodel.LocationGroup
 
 const val ALL_PATIENTS_POPULATION_NAME = "All"
 
-data class PopulationDefinition(val name: String, val criteria: (DiagnosisAndEpisode) -> Boolean) {
+data class PopulationDefinition(val name: String, val criteria: (DiagnosisEpisodeTreatment) -> Boolean) {
 
     companion object {
         fun createAllForPatientProfile(
@@ -16,8 +17,8 @@ data class PopulationDefinition(val name: String, val criteria: (DiagnosisAndEpi
 
             return listOf(
                 PopulationDefinition(ALL_PATIENTS_POPULATION_NAME) { true },
-                PopulationDefinition("Age $minAge-${maxAge}y") { it.first.ageAtDiagnosis in minAge..maxAge },
-                PopulationDefinition("WHO $whoStatus") { it.second.whoStatusPreTreatmentStart == whoStatus },
+                PopulationDefinition("Age $minAge-${maxAge}y") { it.diagnosis.ageAtDiagnosis in minAge..maxAge },
+                PopulationDefinition("WHO $whoStatus") { it.episode.whoStatusPreTreatmentStart == whoStatus },
                 PopulationDefinition(
                     "RAS ${if (hasRasMutation) "positive" else "negative"}"
                 ) { (diagnosis, _) -> diagnosis.hasRasMutation == hasRasMutation },

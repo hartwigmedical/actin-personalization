@@ -1,16 +1,12 @@
 package com.hartwig.actin.personalization.similarity.population
 
-import com.hartwig.actin.personalization.datamodel.Diagnosis
-import com.hartwig.actin.personalization.datamodel.SystemicTreatmentPlan
-import com.hartwig.actin.personalization.datamodel.Treatment
-import com.hartwig.actin.personalization.similarity.DIAGNOSIS_AND_EPISODE
-import com.hartwig.actin.personalization.similarity.episodeWithTreatment
+import com.hartwig.actin.personalization.datamodel.*
+import com.hartwig.actin.personalization.similarity.DIAGNOSIS_EPISODE_TREATMENT
+import com.hartwig.actin.personalization.similarity.patientWithTreatment
 import com.hartwig.actin.personalization.similarity.report.TableElement
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import weka.core.pmml.jaxbbindings.False
-import weka.core.pmml.jaxbbindings.True
 
 private const val ELIGIBLE_SUB_POPULATION_SIZE = 50
 data class SurvivalData(val osDays: Int?, val pfsDays: Int?)
@@ -25,77 +21,111 @@ private val survivalList = listOf(
     SurvivalData(osDays = 200, pfsDays = 200)
 )
 
-
 class SurvivalCalculationTest {
-
-    private val survivalCalculation = SurvivalCalculation<Diagnosis>(
-        timeFunction = Diagnosis::observedOsFromTumorIncidenceDays,
-        eventFunction = Diagnosis::hadSurvivalEvent,
-        title = "Overall survival",
-        extractor = { it.first }
+    private val survivalCalculation = SurvivalCalculation(
+        timeFunction = { it.diagnosis.observedOsFromTumorIncidenceDays },
+        eventFunction = { it.diagnosis.hadSurvivalEvent },
+        title = "Overall survival"
     )
-
     @Nested
-    inner class EligibilityTests {
+    inner class SurvivalTests{
         @Test
-        fun `Should evaluate patients as eligible when observed survival days is not null`() { //TODO: rename test
-            assertThat(OS_CALCULATION.isEligible(DIAGNOSIS_AND_EPISODE)).isFalse
-            assertThat(OS_CALCULATION.isEligible(patientWithSurvivalDays(osDays = null,  hadSurvivalEvent = true))).isFalse
-            assertThat(OS_CALCULATION.isEligible(patientWithSurvivalDays(osDays = 100,  hadSurvivalEvent = true ))).isTrue
+        fun `Should calculate for OS - eligibility, Median and correctly work around censored values`() {
+            runSurvivalCalculationTests(
+                calculation = OS_CALCULATION,
+                createPatient = { data, hadEvent ->
+                    patientWithSurvivalDays(
+                        osDays = data.osDays,
+                        hadEvent = hadEvent
+                    )
+                }
+            )
+        }
+        @Test
+        fun `Should calculate for PFS - eligibility, Median and correctly work around censored values`() {
+            runSurvivalCalculationTests(
+                calculation = PFS_CALCULATION,
+                createPatient = { data, hadEvent ->
+                    patientWithSurvivalDays(
+                        pfsDays = data.pfsDays,
+                        hadEvent = hadEvent
+                    )
+                }
+            )
+        }
+        private fun runSurvivalCalculationTests(
+            calculation: SurvivalCalculation,
+            createPatient: (SurvivalData, Boolean) -> DiagnosisEpisodeTreatment
+        ) {
+            testEligibility(calculation, createPatient)
+            testMedianSurvival(
+                calculation, createPatient
+            )
+            testCensoredValues(
+                calculation, createPatient
+            )
+        }
+        private fun testEligibility(
+            calculation: SurvivalCalculation,
+            createPatient: (SurvivalData, Boolean) -> DiagnosisEpisodeTreatment
+        ) {
+            val eligiblePatient = createPatient(SurvivalData(osDays = 100, pfsDays = 100), true)
+            assertThat(calculation.isEligible(eligiblePatient)).isTrue()
 
-            assertThat(PFS_CALCULATION.isEligible(DIAGNOSIS_AND_EPISODE)).isFalse
-            assertThat(PFS_CALCULATION.isEligible(patientWithSurvivalDays(pfsDays = null, hadProgressionEvent = true))).isFalse
-            assertThat(PFS_CALCULATION.isEligible(patientWithSurvivalDays(pfsDays = null, hadProgressionEvent = false))).isTrue
-            assertThat(PFS_CALCULATION.isEligible(patientWithSurvivalDays(pfsDays = 100, hadProgressionEvent = true))).isTrue
+            val ineligiblePatient = createPatient(SurvivalData(osDays = null, pfsDays = null), true)
+            assertThat(calculation.isEligible(ineligiblePatient)).isFalse()
+        }
+        private fun testMedianSurvival(
+            calculation: SurvivalCalculation,
+            createPatient: (SurvivalData, Boolean) -> DiagnosisEpisodeTreatment
+        ) {
+            val patients = survivalList.map { data -> createPatient(data, true) }
+            val measurement = calculation.calculate(patients, ELIGIBLE_SUB_POPULATION_SIZE)
+            assertThat(measurement.value).isEqualTo(200.0)
+            assertThat(measurement.numPatients).isEqualTo(7)
+            assertThat(measurement.min).isEqualTo(25)
+            assertThat(measurement.max).isEqualTo(1600)
+            assertThat(measurement.iqr).isEqualTo(750.0)
+        }
+        private fun testCensoredValues(
+            calculation: SurvivalCalculation,
+            createPatient: (SurvivalData, Boolean) -> DiagnosisEpisodeTreatment
+        ) {
+            val censoredPatients = listOf(1, 2, 3, 4, 5).map { i ->
+                val survivalDays = i * 365
+                createPatient(SurvivalData(osDays = survivalDays, pfsDays = survivalDays), false)
+            }
+            val eligiblePatients = survivalList.map { data -> createPatient(data, true) }
+            val patients = eligiblePatients + censoredPatients
+
+            val measurement = calculation.calculate(patients, ELIGIBLE_SUB_POPULATION_SIZE)
+            assertThat(measurement.value).isEqualTo(200.0)
+            assertThat(measurement.numPatients).isEqualTo(7)
+            assertThat(measurement.min).isEqualTo(25)
+            assertThat(measurement.max).isEqualTo(1600)
+            assertThat(measurement.iqr).isEqualTo(750.0)
         }
     }
-
-    @Nested
-    inner class CalculationTests {
-        @Test
-        fun `Should evaluate median survival for patient list`() {
-            val osMeasurement = OS_CALCULATION.calculate(
-                survivalList.map { data -> patientWithSurvivalDays(osDays = data.osDays) }, ELIGIBLE_SUB_POPULATION_SIZE
-            )
-            assertThat(osMeasurement.value).isEqualTo(200.0)
-            assertThat(osMeasurement.numPatients).isEqualTo(7)
-            assertThat(osMeasurement.min).isEqualTo(25)
-            assertThat(osMeasurement.max).isEqualTo(1600)
-            assertThat(osMeasurement.iqr).isEqualTo(750.0)
-
-            val pfsMeasurement = PFS_CALCULATION.calculate(
-                survivalList.map { data -> patientWithSurvivalDays(pfsDays = data.pfsDays) }, ELIGIBLE_SUB_POPULATION_SIZE
-            )
-            assertThat(pfsMeasurement.value).isEqualTo(200.0)
-            assertThat(pfsMeasurement.numPatients).isEqualTo(7)
-            assertThat(pfsMeasurement.min).isEqualTo(25)
-            assertThat(pfsMeasurement.max).isEqualTo(1600)
-            assertThat(pfsMeasurement.iqr).isEqualTo(750.0)
-        }
-
-        @Test
-        fun `Should incorporate censored values in survival calculation`() {
-            val censoredPatients = listOf(1, 2, 3, 4, 5).map { patientWithSurvivalDays(osDays = it * 365, pfsDays = it * 365) }
-            val patients = survivalList.map { data ->
-                patientWithSurvivalDays(osDays = data.osDays, pfsDays = data.pfsDays)
-            } + censoredPatients
-
-            val osMeasurement = OS_CALCULATION.calculate(patients, ELIGIBLE_SUB_POPULATION_SIZE)
-            assertThat(osMeasurement.value).isEqualTo(400.0)
-            assertThat(osMeasurement.numPatients).isEqualTo(12)
-            assertThat(osMeasurement.min).isEqualTo(25)
-            assertThat(osMeasurement.max).isEqualTo(1825)
-            assertThat(osMeasurement.iqr).isEqualTo(995.0)
-
-            val pfsMeasurement = PFS_CALCULATION.calculate(patients, ELIGIBLE_SUB_POPULATION_SIZE)
-            assertThat(pfsMeasurement.value).isEqualTo(400.0)
-            assertThat(pfsMeasurement.numPatients).isEqualTo(12)
-            assertThat(pfsMeasurement.min).isEqualTo(25)
-            assertThat(pfsMeasurement.max).isEqualTo(1825)
-            assertThat(pfsMeasurement.iqr).isEqualTo(995.0)
-        }
+    private fun patientWithSurvivalDays(
+        osDays: Int?= null,
+        pfsDays: Int? = null,
+        hadEvent: Boolean = true
+    ): DiagnosisEpisodeTreatment {
+        val diagnosis = DIAGNOSIS_EPISODE_TREATMENT.diagnosis.copy(
+            observedOsFromTumorIncidenceDays = osDays,
+            hadSurvivalEvent = hadEvent
+        )
+        val systemicTreatmentPlan = SystemicTreatmentPlan(
+            treatment = Treatment.FLUOROURACIL,
+            systemicTreatmentSchemes = emptyList(),
+            observedPfsDays = pfsDays,
+            hadProgressionEvent = hadEvent
+        )
+        val episode = DIAGNOSIS_EPISODE_TREATMENT.episode.copy(
+            systemicTreatmentPlan = systemicTreatmentPlan
+        )
+        return DiagnosisEpisodeTreatment(diagnosis, episode, systemicTreatmentPlan)
     }
-
     @Nested
     inner class TableElementTests {
         @Test
@@ -118,7 +148,6 @@ class SurvivalCalculationTest {
             ).isEqualTo(TableElement("100.0", ", IQR: 100.0\n(n=50)"))
         }
     }
-
     @Test
     fun `Should return empty measurement for empty population`() {
         val measurement = survivalCalculation.calculate(emptyList(), ELIGIBLE_SUB_POPULATION_SIZE)
@@ -128,26 +157,4 @@ class SurvivalCalculationTest {
         assertThat(measurement.max).isNull()
         assertThat(measurement.iqr).isNaN()
     }
-
-    private fun patientWithSurvivalDays(
-        osDays: Int? = 200,
-        pfsDays: Int? = 200,
-        hadSurvivalEvent: Boolean = true,
-        hadProgressionEvent: Boolean = true
-    ): DiagnosisAndEpisode {
-        return episodeWithTreatment(
-            treatment = Treatment.FLUOROURACIL,
-            pfs = pfsDays,
-            os = osDays,
-            hadSurvivalEvent = hadSurvivalEvent,
-            hadProgressionEvent = hadProgressionEvent,
-            diagnosis = DIAGNOSIS_AND_EPISODE.first.copy(
-                observedOsFromTumorIncidenceDays = osDays,
-                hadSurvivalEvent = hadSurvivalEvent
-            )
-
-        )
-    }
-
-
 }

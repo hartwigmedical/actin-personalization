@@ -1,70 +1,72 @@
 package com.hartwig.actin.personalization.similarity.population
-import com.hartwig.actin.personalization.datamodel.Diagnosis
-import com.hartwig.actin.personalization.datamodel.Episode
-import com.hartwig.actin.personalization.datamodel.SystemicTreatmentPlan
+
+import com.hartwig.actin.personalization.datamodel.DiagnosisEpisodeTreatment
 import com.hartwig.actin.personalization.similarity.report.TableElement
 
-
-typealias DiagnosisAndEpisode = Pair<Diagnosis, Episode>
-
-val PFS_CALCULATION = SurvivalCalculation<SystemicTreatmentPlan>(
-    timeFunction = SystemicTreatmentPlan::observedPfsDays,
-    eventFunction = SystemicTreatmentPlan::hadProgressionEvent,
-    title = "Progression-free survival (median, IQR) in NCR real-world data set",
-    extractor = { it.second.systemicTreatmentPlan },
-    eligibilityFunction = { plan ->
-        (plan.hadProgressionEvent == false) || (plan.hadProgressionEvent == true && plan.observedPfsDays != null)
-    }
+val PFS_CALCULATION = SurvivalCalculation(
+    timeFunction = { it.systemicTreatmentPlan?.observedPfsDays },
+    eventFunction = { it.systemicTreatmentPlan?.hadProgressionEvent },
+    title = "Progression-free survival (median, IQR) in NCR real-world data set"
 )
 
-val OS_CALCULATION = SurvivalCalculation<Diagnosis>(
-    timeFunction = Diagnosis::observedOsFromTumorIncidenceDays,
-    eventFunction = Diagnosis::hadSurvivalEvent,
-    title = "Overall survival (median, IQR) in NCR real-world data set",
-    extractor = { it.first }
+val OS_CALCULATION = SurvivalCalculation(
+    timeFunction = { it.diagnosis.observedOsFromTumorIncidenceDays },
+    eventFunction = { it.diagnosis.hadSurvivalEvent },
+    title = "Overall survival (median, IQR) in NCR real-world data set"
 )
 
-class SurvivalCalculation<T>(
-    val timeFunction: (T) -> Int?,
-    val eventFunction: (T) -> Boolean?,
-    val title: String,
-    val extractor: (DiagnosisAndEpisode) -> T?,
-    val eligibilityFunction: (T) -> Boolean = { timeFunction(it) != null && eventFunction(it) == true }
+class SurvivalCalculation(
+    internal val timeFunction: (DiagnosisEpisodeTreatment) -> Int?,
+    internal val eventFunction: (DiagnosisEpisodeTreatment) -> Boolean?,
+    internal val title: String
 ) : Calculation {
 
     private val MIN_PATIENT_COUNT = 20
 
-    override fun isEligible(patient: DiagnosisAndEpisode): Boolean {
-        val item = extractor(patient) ?: return false
-        println("Extracted Plan for Eligibility Check: observedPfsDays = ${timeFunction(item)}, hadProgressionEvent = ${eventFunction(item)}")
-        return eligibilityFunction(item)
+    override fun isEligible(patient: DiagnosisEpisodeTreatment): Boolean {
+        return eventFunction(patient) == true && timeFunction(patient) != null
     }
 
+    override fun calculate(patients: List<DiagnosisEpisodeTreatment>, eligiblePopulationSize: Int): Measurement {
+        val survivalValues = patients.filter { isEligible(it) }
+            .mapNotNull { timeFunction(it)?.toDouble() }
+            .sorted()
 
-    override fun calculate(patients: List<DiagnosisAndEpisode>, eligiblePopulationSize: Int): Measurement {
-        val items = patients.mapNotNull { extractor(it) }
-        val sortedItems = items.mapNotNull { item ->
-            timeFunction(item)?.let { item to it }
-        }.sortedBy { it.second }.map { it.first }
+        if (survivalValues.isEmpty()) {
+            return Measurement(Double.NaN, 0, null, null, Double.NaN)
+        }
 
-        val eventHistory = eventHistory(sortedItems)
+        val median = calculateMedian(survivalValues)
+        val iqr = calculateIQR(survivalValues)
 
-        return Measurement(
-            survivalForQuartile(eventHistory, 0.5),
-            items.size,
-            eventHistory.firstOrNull()?.daysSincePlanStart,
-            eventHistory.lastOrNull()?.daysSincePlanStart,
-            survivalForQuartile(eventHistory, 0.75) - survivalForQuartile(eventHistory, 0.25)
-        )
+        val min = survivalValues.firstOrNull()?.toInt()
+        val max = survivalValues.lastOrNull()?.toInt()
+
+        return Measurement(median, survivalValues.size, min,  max, iqr)
     }
 
-    private fun survivalForQuartile(eventHistory: List<EventCountAndSurvivalAtTime>, quartileAsDecimal: Double): Double {
-        val expectedSurvivalFraction = 1 - quartileAsDecimal
-        val searchIndex = eventHistory.binarySearchBy(-expectedSurvivalFraction) { -it.survival }
-        val realIndex = if (searchIndex < 0) -(searchIndex + 1) else searchIndex
-
-        return if (realIndex == eventHistory.size) Double.NaN else eventHistory[realIndex].daysSincePlanStart.toDouble()
+    private fun calculateMedian(sortedValues: List<Double>): Double {
+        val size = sortedValues.size
+        return if (size % 2 == 1) {
+            sortedValues[size / 2]
+        } else {
+            val mid1 = sortedValues[size / 2 - 1]
+            val mid2 = sortedValues[size / 2]
+            (mid1 + mid2) / 2.0
+        }
     }
+
+    private fun calculateIQR(sortedValues: List<Double>): Double {
+        val size = sortedValues.size
+        return if (size < 2) {
+            0.0
+        } else {
+            val q1 = calculateMedian(sortedValues.subList(0, size / 2))
+            val q3 = calculateMedian(sortedValues.subList((size + 1) / 2, size))
+            q3 - q1
+        }
+    }
+
 
     override fun createTableElement(measurement: Measurement): TableElement {
         return when {
@@ -82,13 +84,12 @@ class SurvivalCalculation<T>(
     }
 
     tailrec fun eventHistory(
-        populationToProcess: List<T>,
+        populationToProcess: List<DiagnosisEpisodeTreatment>,
         eventHistory: List<EventCountAndSurvivalAtTime> = emptyList()
     ): List<EventCountAndSurvivalAtTime> {
         return if (populationToProcess.isEmpty()) {
             eventHistory
         } else {
-
             val current = populationToProcess.first()
             val time = timeFunction(current)
             val eventOccurred = eventFunction(current)
@@ -99,7 +100,7 @@ class SurvivalCalculation<T>(
                 val previousEvent = eventHistory.lastOrNull() ?: EventCountAndSurvivalAtTime(0, 0, 1.0)
                 val newEvent = EventCountAndSurvivalAtTime(
                     time,
-                    previousEvent.numEvents + 1,
+                    previousEvent.numberOfEvents + 1,
                     previousEvent.survival * (1 - (1.0 / populationToProcess.size))
                 )
                 eventHistory(populationToProcess.drop(1), eventHistory + newEvent)

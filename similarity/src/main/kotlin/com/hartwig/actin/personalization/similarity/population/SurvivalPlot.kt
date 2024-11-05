@@ -1,5 +1,7 @@
 package com.hartwig.actin.personalization.similarity.population
 
+import com.hartwig.actin.personalization.datamodel.DiagnosisEpisodeTreatment
+
 import org.jetbrains.kotlinx.kandy.dsl.plot
 import org.jetbrains.kotlinx.kandy.ir.Plot
 import org.jetbrains.kotlinx.kandy.letsplot.feature.layout
@@ -9,23 +11,23 @@ object SurvivalPlot {
     private const val MIN_PATIENT_COUNT = 20
     private val percentageArray = (0..100 step 10).map { it / 100.0 to "$it%" }.toTypedArray()
 
-    fun <T> createSurvivalPlot(
-        sortedPopulationsByName: Map<String, List<DiagnosisAndEpisode>>,
-        calculation: SurvivalCalculation<T>,
+    fun createSurvivalPlot(
+        sortedPopulationsByName: Map<String, List<DiagnosisEpisodeTreatment>>,
+        calculation: SurvivalCalculation,
         yAxisLabel: String
     ): Plot? {
         val historiesByName = sortedPopulationsByName.mapValues { (_, patients) ->
-            val items = patients.mapNotNull { calculation.extractor(it) }
-            calculation.eventHistory(items)
+            val eligiblePatients = patients.filter(calculation::isEligible)
+            calculation.eventHistory(eligiblePatients)
         }.filter { (_, histories) ->
             histories.size >= MIN_PATIENT_COUNT
         }
 
-        return historiesByName.values.maxOfOrNull { it.last().daysSincePlanStart }?.let { longestInterval ->
+        return historiesByName.values.maxOfOrNull { it.last().daysSinceTreatmentPlanStart }?.let { longestInterval ->
             plot {
                 step {
                     val xValues = historiesByName.flatMap { (_, histories) ->
-                        histories.map(EventCountAndSurvivalAtTime::daysSincePlanStart)
+                        histories.map(EventCountAndSurvivalAtTime::daysSinceTreatmentPlanStart)
                     }
                     val yValues = historiesByName.flatMap { (_, histories) ->
                         histories.map(EventCountAndSurvivalAtTime::survival)
