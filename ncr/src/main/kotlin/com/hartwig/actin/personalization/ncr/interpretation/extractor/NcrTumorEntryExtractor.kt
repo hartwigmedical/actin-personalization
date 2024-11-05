@@ -29,7 +29,7 @@ class NcrTumorEntryExtractor(private val episodeExtractor: NcrEpisodeExtractor) 
                 MetastasesDetectionStatus.AT_START,
                 MetastasesDetectionStatus.AT_PROGRESSION
             )
-        }?.order ?: throw IllegalStateException("orderOfFirstMetastaticEpisode is not allowed to be null")
+        }?.order ?: throw IllegalStateException("orderOfFirstDistantMetastasesEpisode is not allowed to be null")
         val locations = episodes.map(Episode::tumorLocation).toSet()
         val priorTumors = extractPriorTumors(diagnosisRecord)
 
