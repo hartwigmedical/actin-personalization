@@ -14,12 +14,11 @@ import org.junit.jupiter.api.Test
 
 class NcrTumorEntryExtractorTest {
 
-    private val diagnosisRecord = NCR_RECORD.copy(identification = NCR_IDENTIFICATION.copy(keyEid = 101, teller = 1, epis = "DIA", metaEpis = 0))
-    private val followupRecord = NCR_RECORD
-
     @Test
     fun `Should extract diagnosis and episodes from NCR records`() {
-        val records = listOf(diagnosisRecord, followupRecord)
+        val diagnosisRecord = NCR_RECORD.copy(identification = NCR_IDENTIFICATION.copy(keyEid = 101, teller = 1, epis = "DIA", metaEpis = 0))
+        val records = listOf(diagnosisRecord, NCR_RECORD)
+
         val (diagnosis, episodes) =
             NcrTumorEntryExtractor(NcrEpisodeExtractor(NcrSystemicTreatmentPlanExtractor())).extractTumorEntry(records)
         assertThat(episodes).hasSize(2)
