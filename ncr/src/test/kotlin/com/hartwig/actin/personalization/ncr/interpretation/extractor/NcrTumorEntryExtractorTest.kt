@@ -1,7 +1,6 @@
 package com.hartwig.actin.personalization.ncr.interpretation.extractor
 
 import com.hartwig.actin.personalization.datamodel.AnorectalVergeDistanceCategory
-import com.hartwig.actin.personalization.datamodel.ChronicityMetastases
 import com.hartwig.actin.personalization.datamodel.Diagnosis
 import com.hartwig.actin.personalization.datamodel.Drug
 import com.hartwig.actin.personalization.datamodel.Location
@@ -15,7 +14,7 @@ import org.junit.jupiter.api.Test
 
 class NcrTumorEntryExtractorTest {
 
-    private val diagnosisRecord = NCR_RECORD.copy(identification = NCR_IDENTIFICATION.copy(keyEid = 101, teller = 1, epis = "DIA"))
+    private val diagnosisRecord = NCR_RECORD.copy(identification = NCR_IDENTIFICATION.copy(keyEid = 101, teller = 1, epis = "DIA", metaEpis = 0))
     private val followupRecord = NCR_RECORD
 
     @Test
@@ -45,6 +44,8 @@ class NcrTumorEntryExtractorTest {
                         systemicTreatments = listOf(Drug.EXTERNAL_RADIOTHERAPY_WITH_SENSITIZER)
                     )
                 ),
+                orderOfFirstDistantMetastasesEpisode = 2,
+                isMetachronous = true,
                 cci = 1,
                 cciNumberOfCategories = NumberOfCciCategories.ONE_CATEGORY,
                 cciHasAids = null,
@@ -64,7 +65,6 @@ class NcrTumorEntryExtractorTest {
                 cciHasRenalDisease = null,
                 cciHasLiverDisease = null,
                 cciHasUlcerDisease = null,
-                chronicityMetastases = ChronicityMetastases.METACHRONOUS,
                 presentedWithIleus = false,
                 presentedWithPerforation = true,
                 anorectalVergeDistanceCategory = AnorectalVergeDistanceCategory.FIVE_TO_TEN_CM,
@@ -75,12 +75,5 @@ class NcrTumorEntryExtractorTest {
                 hasKrasG12CMutation = true
             )
         )
-    }
-
-    @Test
-    fun `Should resolve to synchronous chronicity metastases value in case there is only a diagnosis episode`() {
-        val records = listOf(diagnosisRecord)
-        val (diagnosis) = NcrTumorEntryExtractor(NcrEpisodeExtractor(NcrSystemicTreatmentPlanExtractor())).extractTumorEntry(records)
-        assertThat(diagnosis.chronicityMetastases == ChronicityMetastases.SYNCHRONOUS)
     }
 }

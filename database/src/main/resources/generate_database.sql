@@ -19,6 +19,8 @@ CREATE TABLE `diagnosis` (
     `observedOsFromTumorIncidenceDays` int NOT NULL,
     `hadSurvivalEvent` bool NOT NULL,
     `hasHadPriorTumor` bool NOT NULL,
+    `orderOfFirstDistantMetastaticEpisode` int NOT NULL,
+    `isMetachronous` bool NOT NULL,
     `cci` int,
     `cciNumberOfCategories` varchar(50),
     `cciHasAids` bool,
@@ -39,7 +41,6 @@ CREATE TABLE `diagnosis` (
     `cciHasLiverDisease` bool,
     `cciHasUlcerDisease` bool,
 
-    `chronicityMetastases` varchar(50) NOT NULL,
     `presentedWithIleus` bool,
     `presentedWithPerforation` bool,
     `anorectalVergeDistanceCategory` varchar(50),

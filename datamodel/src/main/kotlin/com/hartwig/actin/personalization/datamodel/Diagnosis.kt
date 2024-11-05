@@ -13,6 +13,8 @@ data class Diagnosis(
     val hadSurvivalEvent: Boolean,
     val hasHadPriorTumor: Boolean,
     val priorTumors: List<PriorTumor>,
+    val orderOfFirstDistantMetastasesEpisode: Int,
+    val isMetachronous: Boolean,
 
     val cci: Int? = null,
     val cciNumberOfCategories: NumberOfCciCategories? = null,
@@ -34,7 +36,6 @@ data class Diagnosis(
     val cciHasLiverDisease: Boolean? = null,
     val cciHasUlcerDisease: Boolean? = null,
 
-    val chronicityMetastases: ChronicityMetastases,
     val presentedWithIleus: Boolean? = null,
     val presentedWithPerforation: Boolean? = null,
     val anorectalVergeDistanceCategory: AnorectalVergeDistanceCategory? = null,

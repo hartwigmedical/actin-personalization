@@ -33,7 +33,7 @@ val NCR_IDENTIFICATION = NcrIdentification(
     keyEid = EPISODE_ID,
     teller = EPISODE_ORDER,
     epis = "EPI",
-    metaEpis = 1
+    metaEpis = 2
 )
 
 val NCR_LAB_VALUES = NcrLabValues(

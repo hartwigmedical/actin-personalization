@@ -1,6 +1,5 @@
 package com.hartwig.actin.personalization.similarity
 
-import com.hartwig.actin.personalization.datamodel.ChronicityMetastases
 import com.hartwig.actin.personalization.datamodel.Diagnosis
 import com.hartwig.actin.personalization.datamodel.Episode
 import com.hartwig.actin.personalization.datamodel.Location
@@ -22,7 +21,8 @@ val DIAGNOSIS = Diagnosis(
     hadSurvivalEvent = false,
     hasHadPriorTumor = false,
     priorTumors = emptyList(),
-    chronicityMetastases = ChronicityMetastases.METACHRONOUS
+    orderOfFirstDistantMetastasesEpisode = 1,
+    isMetachronous = false
 )
 val EPISODE = Episode(
     id = 123,
