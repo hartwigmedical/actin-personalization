@@ -19,7 +19,7 @@ CREATE TABLE `diagnosis` (
     `observedOsFromTumorIncidenceDays` int NOT NULL,
     `hadSurvivalEvent` bool NOT NULL,
     `hasHadPriorTumor` bool NOT NULL,
-    `orderOfFirstDistantMetastaticEpisode` int NOT NULL,
+    `orderOfFirstDistantMetastasesEpisode` int NOT NULL,
     `isMetachronous` bool NOT NULL,
     `cci` int,
     `cciNumberOfCategories` varchar(50),

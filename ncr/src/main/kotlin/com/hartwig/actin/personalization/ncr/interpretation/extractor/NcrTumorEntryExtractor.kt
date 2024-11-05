@@ -24,7 +24,7 @@ class NcrTumorEntryExtractor(private val episodeExtractor: NcrEpisodeExtractor) 
         val episodes = records.map { record ->
             episodeExtractor.extractEpisode(record, intervalTumorIncidenceLatestAliveStatus)
         }.sortedBy(Episode::order)
-        val orderOfFirstDistantMetastaticEpisode = episodes.firstOrNull { episode ->
+        val orderOfFirstDistantMetastasesEpisode = episodes.firstOrNull { episode ->
             episode.distantMetastasesDetectionStatus in setOf(
                 MetastasesDetectionStatus.AT_START,
                 MetastasesDetectionStatus.AT_PROGRESSION
@@ -60,8 +60,8 @@ class NcrTumorEntryExtractor(private val episodeExtractor: NcrEpisodeExtractor) 
                 hadSurvivalEvent = patientCharacteristics.vitStat!! == 1,
                 hasHadPriorTumor = priorTumors.isNotEmpty(),
                 priorTumors = priorTumors,
-                orderOfFirstDistantMetastasesEpisode = orderOfFirstDistantMetastaticEpisode,
-                isMetachronous = orderOfFirstDistantMetastaticEpisode > 1,
+                orderOfFirstDistantMetastasesEpisode = orderOfFirstDistantMetastasesEpisode,
+                isMetachronous = orderOfFirstDistantMetastasesEpisode > 1,
                 cci = comorbidities.cci,
                 cciNumberOfCategories = NcrCciNumberOfCategoriesMapper.resolve(comorbidities.cciCat),
                 cciHasAids = NcrBooleanMapper.resolve(comorbidities.cciAids),
