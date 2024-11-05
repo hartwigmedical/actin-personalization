@@ -1,4 +1,4 @@
-CREATE OR REPLACE VIEW diagnosisTreatments
+CREATE OR REPLACE VIEW distantMetastasesOverview
 AS (
 SELECT
     p.ncrId,
@@ -11,6 +11,7 @@ SELECT
     d.observedOsFromTumorIncidenceDays,
     d.hadSurvivalEvent,
     d.hasHadPriorTumor,
+    d.isMetachronous,
     d.cci,
     d.cciNumberOfCategories,
     d.cciHasAids,
@@ -45,7 +46,7 @@ SELECT
     e.intervalTumorIncidenceTreatmentPlanStopDays-e.intervalTumorIncidenceTreatmentPlanStartDays AS systemicTreatmentPlanDuration
 FROM patient p
 JOIN diagnosis d ON p.id = d.patientId
-JOIN episode e ON d.id = e.diagnosisId AND e.order=1
+JOIN episode e ON d.id = e.diagnosisId AND e.order=d.orderOfFirstDistantMetastasesEpisode
 LEFT JOIN (
     SELECT episodeId, GROUP_CONCAT(type) AS surgeries FROM surgery GROUP BY episodeId
 ) s ON e.id = s.episodeId
@@ -58,23 +59,28 @@ LEFT JOIN (
 ) m ON e.id=m.episodeId
 );
 
-CREATE OR REPLACE VIEW nonCurativeTreatments
+CREATE OR REPLACE VIEW palliativeIntents
 AS (
 SELECT *
-FROM diagnosisTreatments
+FROM distantMetastasesOverview
 WHERE distantMetastasesDetectionStatus = 'AT_START'
+AND (tnmCM LIKE 'M1%' OR tnmPM LIKE 'M1%' OR stageTNM LIKE 'IV%')
 AND hasHadPreSurgerySystemicChemotherapy = 0
 AND hasHadPostSurgerySystemicChemotherapy = 0
 AND hasHadPreSurgerySystemicTargetedTherapy = 0
 AND hasHadPostSurgerySystemicTargetedTherapy = 0
 AND surgeries IS NULL
 AND gastroenterologyResections = JSON_ARRAY()
+AND metastasesSurgeries = JSON_ARRAY()
+AND radiotherapies = JSON_ARRAY()
+AND metastasesRadiotherapies = JSON_ARRAY()
 AND hasHadHipecTreatment = 0
+AND (hasReceivedTumorDirectedTreatment = 0 OR systemicTreatmentPlan IS NOT NULL)
 );
 
 CREATE OR REPLACE VIEW knownPalliativeTreatments
 AS (
 SELECT *
-FROM nonCurativeTreatments
+FROM palliativeIntents
 WHERE systemicTreatmentPlan IS NOT NULL AND systemicTreatmentPlan != 'OTHER'
 );
