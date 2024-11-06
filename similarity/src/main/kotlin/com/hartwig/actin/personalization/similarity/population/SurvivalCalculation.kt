@@ -1,11 +1,11 @@
 package com.hartwig.actin.personalization.similarity.population
 
-import com.hartwig.actin.personalization.datamodel.DiagnosisEpisodeTreatment
+import com.hartwig.actin.personalization.datamodel.DiagnosisEpisode
 import com.hartwig.actin.personalization.similarity.report.TableElement
 
 val PFS_CALCULATION = SurvivalCalculation(
-    timeFunction = { it.systemicTreatmentPlan?.observedPfsDays },
-    eventFunction = { it.systemicTreatmentPlan?.hadProgressionEvent },
+    timeFunction = { it.episode.systemicTreatmentPlan?.observedPfsDays },
+    eventFunction = { it.episode.systemicTreatmentPlan?.hadProgressionEvent },
     title = "Progression-free survival (median, IQR) in NCR real-world data set"
 )
 
@@ -16,20 +16,20 @@ val OS_CALCULATION = SurvivalCalculation(
 )
 
 class SurvivalCalculation(
-    internal val timeFunction: (DiagnosisEpisodeTreatment) -> Int?,
-    internal val eventFunction: (DiagnosisEpisodeTreatment) -> Boolean?,
+    internal val timeFunction: (DiagnosisEpisode) -> Int?,
+    internal val eventFunction: (DiagnosisEpisode) -> Boolean?,
     internal val title: String
 ) : Calculation {
 
     private val MIN_PATIENT_COUNT = 20
 
-    override fun isEligible(patient: DiagnosisEpisodeTreatment): Boolean {
+    override fun isEligible(patient: DiagnosisEpisode): Boolean {
         return eventFunction(patient) != null  && timeFunction(patient) != null
     }
 
-    override fun calculate(patients: List<DiagnosisEpisodeTreatment>, eligiblePopulationSize: Int): Measurement {
+    override fun calculate(patients: List<DiagnosisEpisode>, eligiblePopulationSize: Int): Measurement {
         val survivalValues = patients.filter { isEligible(it) }
-            .mapNotNull { timeFunction(it)?.toDouble() }
+            .map { timeFunction(it)!!.toDouble() }
             .sorted()
 
         if (survivalValues.isEmpty()) {
@@ -84,7 +84,7 @@ class SurvivalCalculation(
     }
 
     tailrec fun eventHistory(
-        populationToProcess: List<DiagnosisEpisodeTreatment>,
+        populationToProcess: List<DiagnosisEpisode>,
         eventHistory: List<EventCountAndSurvivalAtTime> = emptyList()
     ): List<EventCountAndSurvivalAtTime> {
         return if (populationToProcess.isEmpty()) {
@@ -94,12 +94,12 @@ class SurvivalCalculation(
             val time = timeFunction(current)
             val eventOccurred = eventFunction(current)
 
-            return if (time == null || eventOccurred != true) {
+            return if (eventOccurred != true) {
                 eventHistory(populationToProcess.drop(1), eventHistory)
             } else {
                 val previousEvent = eventHistory.lastOrNull() ?: EventCountAndSurvivalAtTime(0, 0, 1.0)
                 val newEvent = EventCountAndSurvivalAtTime(
-                    time,
+                    time!!,
                     previousEvent.numberOfEvents + 1,
                     previousEvent.survival * (1 - (1.0 / populationToProcess.size))
                 )

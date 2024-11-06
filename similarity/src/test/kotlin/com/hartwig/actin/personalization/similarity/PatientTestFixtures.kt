@@ -1,7 +1,7 @@
 package com.hartwig.actin.personalization.similarity
 
 import com.hartwig.actin.personalization.datamodel.Diagnosis
-import com.hartwig.actin.personalization.datamodel.DiagnosisEpisodeTreatment
+import com.hartwig.actin.personalization.datamodel.DiagnosisEpisode
 import com.hartwig.actin.personalization.datamodel.Episode
 import com.hartwig.actin.personalization.datamodel.Location
 import com.hartwig.actin.personalization.datamodel.MetastasesDetectionStatus
@@ -43,10 +43,9 @@ val EPISODE = Episode(
     hasHadPostSurgerySystemicTargetedTherapy = false,
     pfsMeasures = emptyList()
 )
-val DIAGNOSIS_EPISODE_TREATMENT = DiagnosisEpisodeTreatment(
+val DIAGNOSIS_EPISODE = DiagnosisEpisode(
     diagnosis = DIAGNOSIS,
-    episode = EPISODE,
-    systemicTreatmentPlan = EPISODE.systemicTreatmentPlan
+    episode = EPISODE
 )
 val PATIENT_RECORD = ReferencePatient(
     ncrId = 123,
@@ -70,7 +69,7 @@ fun patientWithTreatment(
     hadSurvivalEvent: Boolean? = null,
     hadProgressionEvent: Boolean? = null,
     diagnosis: Diagnosis = DIAGNOSIS
-): DiagnosisEpisodeTreatment {
+): DiagnosisEpisode {
     val updatedDiagnosis = diagnosis.copy(
         observedOsFromTumorIncidenceDays = os ?: diagnosis.observedOsFromTumorIncidenceDays,
         hadSurvivalEvent = hadSurvivalEvent ?: diagnosis.hadSurvivalEvent
@@ -84,7 +83,7 @@ fun patientWithTreatment(
             hadProgressionEvent = hadProgressionEvent
         )
     )
-    return DiagnosisEpisodeTreatment(updatedDiagnosis, updatedEpisode, updatedEpisode.systemicTreatmentPlan)
+    return DiagnosisEpisode(updatedDiagnosis, updatedEpisode)
 }
 
 fun patientWithoutTreatment(): Episode {

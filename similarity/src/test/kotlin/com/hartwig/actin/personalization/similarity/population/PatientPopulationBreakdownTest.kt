@@ -1,6 +1,7 @@
 package com.hartwig.actin.personalization.similarity.population
 
-import com.hartwig.actin.personalization.datamodel.*
+import com.hartwig.actin.personalization.datamodel.Treatment
+import com.hartwig.actin.personalization.datamodel.TreatmentGroup
 import com.hartwig.actin.personalization.similarity.DIAGNOSIS
 import com.hartwig.actin.personalization.similarity.patientWithTreatment
 import org.assertj.core.api.Assertions.assertThat

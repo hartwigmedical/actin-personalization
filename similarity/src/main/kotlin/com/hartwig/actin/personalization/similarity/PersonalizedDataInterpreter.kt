@@ -1,12 +1,12 @@
 package com.hartwig.actin.personalization.similarity
 
-import com.hartwig.actin.personalization.datamodel.DiagnosisEpisodeTreatment
-import com.hartwig.actin.personalization.datamodel.MetastasesDetectionStatus
 import com.hartwig.actin.personalization.datamodel.Episode
+import com.hartwig.actin.personalization.datamodel.TreatmentGroup
+import com.hartwig.actin.personalization.datamodel.DiagnosisEpisode
 import com.hartwig.actin.personalization.datamodel.LocationGroup
 import com.hartwig.actin.personalization.datamodel.ReferencePatient
-
-import com.hartwig.actin.personalization.datamodel.TreatmentGroup
+import com.hartwig.actin.personalization.datamodel.MetastasesDetectionStatus
+import com.hartwig.actin.personalization.datamodel.Treatment
 import com.hartwig.actin.personalization.datamodel.serialization.ReferencePatientJson
 
 import com.hartwig.actin.personalization.similarity.population.PatientPopulationBreakdown
@@ -21,7 +21,7 @@ private fun Episode.doesNotIncludeAdjuvantOrNeoadjuvantTreatment(): Boolean {
             !hasHadPostSurgerySystemicTargetedTherapy
 }
 
-class PersonalizedDataInterpreter(val patientsByTreatment: List<Pair<TreatmentGroup, List<DiagnosisEpisodeTreatment>>>) {
+class PersonalizedDataInterpreter(val patientsByTreatment: List<Pair<TreatmentGroup, List<DiagnosisEpisode>>>) {
 
     fun analyzePatient(
         age: Int, whoStatus: Int, hasRasMutation: Boolean, metastasisLocationGroups: Set<LocationGroup>
@@ -44,17 +44,16 @@ class PersonalizedDataInterpreter(val patientsByTreatment: List<Pair<TreatmentGr
 
         fun createFromReferencePatients(patients: List<ReferencePatient>): PersonalizedDataInterpreter {
             val referencePop = patients.flatMap(ReferencePatient::tumorEntries).mapNotNull { (diagnosis, episodes) ->
-                // Retrieve the single episode with order == 1 and create DiagnosisEpisodeTreatment
-                val episode = episodes.singleOrNull { it.order == 1 } ?: return@mapNotNull null
-                if (episode.distantMetastasesDetectionStatus == MetastasesDetectionStatus.AT_START &&
-                    episode.surgeries.isEmpty() &&
-                    episode.doesNotIncludeAdjuvantOrNeoadjuvantTreatment()
-                ) {
-                    DiagnosisEpisodeTreatment(diagnosis, episode, episode.systemicTreatmentPlan)
-                } else null
+                val episode = episodes.single { it.order == 1 }
+                DiagnosisEpisode(diagnosis, episode).takeIf {
+                    episode.distantMetastasesDetectionStatus == MetastasesDetectionStatus.AT_START &&
+                            episode.systemicTreatmentPlan?.treatment != Treatment.OTHER &&
+                            episode.surgeries.isEmpty() &&
+                            episode.doesNotIncludeAdjuvantOrNeoadjuvantTreatment()
+                }
             }
 
-            val patientsByTreatment = referencePop.groupBy { it.systemicTreatmentPlan?.treatment?.treatmentGroup ?: TreatmentGroup.NONE }
+            val patientsByTreatment = referencePop.groupBy { it.episode.systemicTreatmentPlan?.treatment?.treatmentGroup ?: TreatmentGroup.NONE }
                 .toList()
                 .sortedByDescending { it.second.size }
 

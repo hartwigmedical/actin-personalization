@@ -1,12 +1,12 @@
 package com.hartwig.actin.personalization.similarity.population
 
-import com.hartwig.actin.personalization.datamodel.DiagnosisEpisodeTreatment
+import com.hartwig.actin.personalization.datamodel.DiagnosisEpisode
 import com.hartwig.actin.personalization.datamodel.Episode
 import com.hartwig.actin.personalization.datamodel.LocationGroup
 
 const val ALL_PATIENTS_POPULATION_NAME = "All"
 
-data class PopulationDefinition(val name: String, val criteria: (DiagnosisEpisodeTreatment) -> Boolean) {
+data class PopulationDefinition(val name: String, val criteria: (DiagnosisEpisode) -> Boolean) {
 
     companion object {
         fun createAllForPatientProfile(

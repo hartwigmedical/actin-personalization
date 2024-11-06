@@ -1,7 +1,9 @@
 package com.hartwig.actin.personalization.similarity.population
 
-import com.hartwig.actin.personalization.datamodel.*
-import com.hartwig.actin.personalization.similarity.DIAGNOSIS_EPISODE_TREATMENT
+import com.hartwig.actin.personalization.datamodel.DiagnosisEpisode
+import com.hartwig.actin.personalization.datamodel.SystemicTreatmentPlan
+import com.hartwig.actin.personalization.datamodel.Treatment
+import com.hartwig.actin.personalization.similarity.DIAGNOSIS_EPISODE
 import com.hartwig.actin.personalization.similarity.report.TableElement
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
@@ -55,7 +57,7 @@ class SurvivalCalculationTest {
         }
 
         private fun testEligibility(calculation: SurvivalCalculation,name: String) {
-            val createPatient: (Int?, Boolean?) -> DiagnosisEpisodeTreatment = { days, hadEvent ->
+            val createPatient: (Int?, Boolean?) -> DiagnosisEpisode = { days, hadEvent ->
                 patientWithSurvivalDays(
                     osDays = if (name == "OS") days else null,
                     pfsDays = if (name == "PFS") days else null,
@@ -115,8 +117,8 @@ class SurvivalCalculationTest {
         osDays: Int?= null,
         pfsDays: Int? = null,
         hadEvent: Boolean? = true
-    ): DiagnosisEpisodeTreatment {
-        val diagnosis = DIAGNOSIS_EPISODE_TREATMENT.diagnosis.copy(
+    ): DiagnosisEpisode {
+        val diagnosis = DIAGNOSIS_EPISODE.diagnosis.copy(
             observedOsFromTumorIncidenceDays = osDays,
             hadSurvivalEvent = hadEvent
         )
@@ -126,10 +128,10 @@ class SurvivalCalculationTest {
             observedPfsDays = pfsDays,
             hadProgressionEvent = hadEvent
         )
-        val episode = DIAGNOSIS_EPISODE_TREATMENT.episode.copy(
+        val episode = DIAGNOSIS_EPISODE.episode.copy(
             systemicTreatmentPlan = systemicTreatmentPlan
         )
-        return DiagnosisEpisodeTreatment(diagnosis, episode, systemicTreatmentPlan)
+        return DiagnosisEpisode(diagnosis, episode)
     }
     @Nested
     inner class TableElementTests {

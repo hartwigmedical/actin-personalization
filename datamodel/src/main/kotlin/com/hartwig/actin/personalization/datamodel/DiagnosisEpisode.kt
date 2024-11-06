@@ -1,7 +1,6 @@
 package com.hartwig.actin.personalization.datamodel
 
-data class DiagnosisEpisodeTreatment(
+data class DiagnosisEpisode(
     val diagnosis: Diagnosis,
     val episode: Episode,
-    val systemicTreatmentPlan: SystemicTreatmentPlan? = null
 )

@@ -1,6 +1,6 @@
 package com.hartwig.actin.personalization.similarity.population
 
-import com.hartwig.actin.personalization.datamodel.DiagnosisEpisodeTreatment
+import com.hartwig.actin.personalization.datamodel.DiagnosisEpisode
 
 import org.jetbrains.kotlinx.kandy.dsl.plot
 import org.jetbrains.kotlinx.kandy.ir.Plot
@@ -12,7 +12,7 @@ object SurvivalPlot {
     private val percentageArray = (0..100 step 10).map { it / 100.0 to "$it%" }.toTypedArray()
 
     fun createSurvivalPlot(
-        sortedPopulationsByName: Map<String, List<DiagnosisEpisodeTreatment>>,
+        sortedPopulationsByName: Map<String, List<DiagnosisEpisode>>,
         calculation: SurvivalCalculation,
         yAxisLabel: String
     ): Plot? {
