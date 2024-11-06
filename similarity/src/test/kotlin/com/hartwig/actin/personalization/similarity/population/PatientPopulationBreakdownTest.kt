@@ -85,8 +85,8 @@ class PatientPopulationBreakdownTest {
                         ageSubPopulation to Measurement(70.0, 1, 70, 70, 0.0)
                     ),
                     MeasurementType.OVERALL_SURVIVAL to mapOf(
-                        ALL_PATIENTS_POPULATION_NAME to Measurement(325.0, 2, 300, 350, 50.0),
-                        ageSubPopulation to Measurement(325.0, 2, 300, 350, 50.0)
+                        ALL_PATIENTS_POPULATION_NAME to Measurement(300.0, 2, 300, 350, 50.0),
+                        ageSubPopulation to Measurement(300.0, 2, 300, 350, 50.0)
                     )
                 )
             ),

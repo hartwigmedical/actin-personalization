@@ -28,43 +28,27 @@ class SurvivalCalculation(
     }
 
     override fun calculate(patients: List<DiagnosisEpisode>, eligiblePopulationSize: Int): Measurement {
-        val survivalValues = patients.filter { isEligible(it) }
-            .map { timeFunction(it)!!.toDouble() }
-            .sorted()
 
-        if (survivalValues.isEmpty()) {
+        val eventHistory = eventHistory(patients.sortedBy { timeFunction(it)})
+
+        if (eventHistory.isEmpty()) {
             return Measurement(Double.NaN, 0, null, null, Double.NaN)
         }
 
-        val median = calculateMedian(survivalValues)
-        val iqr = calculateIQR(survivalValues)
-
-        val min = survivalValues.firstOrNull()?.toInt()
-        val max = survivalValues.lastOrNull()?.toInt()
-
-        return Measurement(median, survivalValues.size, min,  max, iqr)
+        return Measurement(
+            survivalForQuartile(eventHistory, 0.5),
+            eventHistory.size,
+            eventHistory.firstOrNull()?.daysSinceTreatmentPlanStart,
+            eventHistory.lastOrNull()?.daysSinceTreatmentPlanStart,
+            survivalForQuartile(eventHistory, 0.75) - survivalForQuartile(eventHistory, 0.25))
     }
 
-    private fun calculateMedian(sortedValues: List<Double>): Double {
-        val size = sortedValues.size
-        return if (size % 2 == 1) {
-            sortedValues[size / 2]
-        } else {
-            val mid1 = sortedValues[size / 2 - 1]
-            val mid2 = sortedValues[size / 2]
-            (mid1 + mid2) / 2.0
-        }
-    }
+    private fun survivalForQuartile(eventHistory: List<EventCountAndSurvivalAtTime>, quartileAsDecimal: Double): Double {
+        val expectedSurvivalFraction = 1 - quartileAsDecimal
+        val searchIndex = eventHistory.binarySearchBy(-expectedSurvivalFraction) { -it.survival }
+        val realIndex = if (searchIndex < 0) -(searchIndex + 1) else searchIndex
 
-    private fun calculateIQR(sortedValues: List<Double>): Double {
-        val size = sortedValues.size
-        return if (size < 2) {
-            0.0
-        } else {
-            val q1 = calculateMedian(sortedValues.subList(0, size / 2))
-            val q3 = calculateMedian(sortedValues.subList((size + 1) / 2, size))
-            q3 - q1
-        }
+        return if (realIndex == eventHistory.size) Double.NaN else eventHistory[realIndex].daysSinceTreatmentPlanStart.toDouble()
     }
 
 
@@ -82,29 +66,35 @@ class SurvivalCalculation(
     override fun title(): String {
         return title
     }
-
     tailrec fun eventHistory(
         populationToProcess: List<DiagnosisEpisode>,
-        eventHistory: List<EventCountAndSurvivalAtTime> = emptyList()
+        eventHistory: List<EventCountAndSurvivalAtTime> = emptyList(),
     ): List<EventCountAndSurvivalAtTime> {
-        return if (populationToProcess.isEmpty()) {
-            eventHistory
-        } else {
-            val current = populationToProcess.first()
-            val time = timeFunction(current)
-            val eventOccurred = eventFunction(current)
+        if (populationToProcess.isEmpty()) {
+            return eventHistory
+        }
 
-            return if (eventOccurred != true) {
-                eventHistory(populationToProcess.drop(1), eventHistory)
-            } else {
-                val previousEvent = eventHistory.lastOrNull() ?: EventCountAndSurvivalAtTime(0, 0, 1.0)
-                val newEvent = EventCountAndSurvivalAtTime(
-                    time!!,
-                    previousEvent.numberOfEvents + 1,
+        val current = populationToProcess.first()
+        val eventOccurred = eventFunction(current)
+        val time = timeFunction(current)
+
+        return if (eventOccurred == null || time == null) {
+            eventHistory(populationToProcess.drop(1), eventHistory)
+        } else {
+            val previousEvent = eventHistory.lastOrNull() ?: EventCountAndSurvivalAtTime(0, 0, 1.0)
+
+            val newEvent = EventCountAndSurvivalAtTime(
+                daysSinceTreatmentPlanStart = time,
+                numberOfEvents = if (eventOccurred) previousEvent.numberOfEvents + 1 else previousEvent.numberOfEvents,
+                survival = if (eventOccurred) {
                     previousEvent.survival * (1 - (1.0 / populationToProcess.size))
-                )
-                eventHistory(populationToProcess.drop(1), eventHistory + newEvent)
-            }
+                } else {
+                    previousEvent.survival
+                }
+            )
+
+            eventHistory(populationToProcess.drop(1), eventHistory + newEvent)
         }
     }
+
 }

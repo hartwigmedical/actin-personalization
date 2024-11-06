@@ -105,11 +105,11 @@ class SurvivalCalculationTest {
             val patients = eligiblePatients + censoredPatients
 
             val measurement = calculation.calculate(patients, ELIGIBLE_SUB_POPULATION_SIZE)
-            assertThat(measurement.value).describedAs("Censored values median for $name").isEqualTo(565.0)
-            assertThat(measurement.numPatients).describedAs("Total patients for $name").isEqualTo(12)
+            assertThat(measurement.value).describedAs("Censored values median for $name").isEqualTo(800.0)
+            assertThat(measurement.numPatients).describedAs("Total patients for  $name with censored values").isEqualTo(12)
             assertThat(measurement.min).describedAs("Minimum survival for $name with censored values").isEqualTo(25)
             assertThat(measurement.max).describedAs("Maximum survival for $name with censored values").isEqualTo(1825)
-            assertThat(measurement.iqr).describedAs("IQR for $name with censored values").isEqualTo(1127.5)
+            assertThat(measurement.iqr).describedAs("IQR for $name with censored values").isEqualTo(1500.0)
         }
     }
 
