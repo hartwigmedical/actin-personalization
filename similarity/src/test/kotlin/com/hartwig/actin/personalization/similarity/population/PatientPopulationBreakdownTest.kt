@@ -11,6 +11,7 @@ class PatientPopulationBreakdownTest {
 
     @Test
     fun `Should analyze treatments for each sub-population`() {
+
         val fluourouracilPatient = patientWithTreatment(
             treatment = Treatment.FLUOROURACIL,
             pfs = 70,
@@ -18,7 +19,6 @@ class PatientPopulationBreakdownTest {
             hadSurvivalEvent = true,
             hadProgressionEvent = true
         )
-
         val capecitabinePatient = patientWithTreatment(
             treatment = Treatment.CAPECITABINE,
             pfs = null,
@@ -26,7 +26,6 @@ class PatientPopulationBreakdownTest {
             hadSurvivalEvent = true,
             hadProgressionEvent = true
         )
-
         val capoxDiagnosis = DIAGNOSIS.copy(ageAtDiagnosis = 85)
         val capoxPatient = patientWithTreatment(
             treatment = Treatment.CAPOX,
@@ -36,13 +35,10 @@ class PatientPopulationBreakdownTest {
             hadProgressionEvent = true,
             diagnosis = capoxDiagnosis
         )
-
         val patientsByTreatment = listOf(
             TreatmentGroup.CAPECITABINE_OR_FLUOROURACIL to listOf(fluourouracilPatient, capecitabinePatient),
             TreatmentGroup.CAPOX_OR_FOLFOX to listOf(capoxPatient)
         )
-
-
         val ageSubPopulation = "Age 45-55"
         val populationDefinitions = listOf(
             PopulationDefinition(ALL_PATIENTS_POPULATION_NAME) { true },
@@ -53,7 +49,6 @@ class PatientPopulationBreakdownTest {
             MeasurementType.PROGRESSION_FREE_SURVIVAL,
             MeasurementType.OVERALL_SURVIVAL
         )
-
         val analysis = PatientPopulationBreakdown(patientsByTreatment, populationDefinitions, measurementTypes).analyze()
 
         assertThat(analysis.populations).containsExactlyInAnyOrder(

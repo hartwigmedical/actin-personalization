@@ -17,9 +17,10 @@ class TestPersonalizationReportWriterApplication {
         val analysis = PersonalizedDataInterpreter.createFromReferencePatients(
             (1..1000 step 10)
                 .map { patientWithTreatment(Treatment.FOLFOX, it) }
-                .map { (diagnosis, episode) -> recordWithEpisode(diagnosis, episode) }
+                .map { recordWithEpisode(it.episode) }
         )
             .analyzePatient(50, 1, false, emptySet())
+
 
 
         val measurementTables = listOf(

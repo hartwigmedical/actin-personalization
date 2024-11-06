@@ -54,40 +54,54 @@ val PATIENT_RECORD = ReferencePatient(
     tumorEntries = listOf(TumorEntry(DIAGNOSIS, listOf(EPISODE))),
 )
 
-fun recordWithEpisode(diagnosis: Diagnosis, episode: Episode): ReferencePatient {
-    return PATIENT_RECORD.copy(
-        tumorEntries = listOf(TumorEntry(diagnosis, listOf(episode))),
-        isAlive = !diagnosis.hadSurvivalEvent!!
+fun recordWithEpisode(
+    episode: Episode,
+    ageAtDiagnosis: Int? = null,
+    observedOsFromTumorIncidenceDays: Int? = null,
+    hadSurvivalEvent: Boolean? = null,
+    diagnosis: Diagnosis = DIAGNOSIS
+): ReferencePatient {
+    val updatedDiagnosis = diagnosis.copy(
+        ageAtDiagnosis = ageAtDiagnosis ?: diagnosis.ageAtDiagnosis,
+        observedOsFromTumorIncidenceDays = observedOsFromTumorIncidenceDays ?: diagnosis.observedOsFromTumorIncidenceDays,
+        hadSurvivalEvent = hadSurvivalEvent ?: diagnosis.hadSurvivalEvent
+    )
+    return ReferencePatient(
+        ncrId = PATIENT_RECORD.ncrId,
+        sex = PATIENT_RECORD.sex,
+        isAlive = !(updatedDiagnosis.hadSurvivalEvent ?: false),
+        tumorEntries = listOf(TumorEntry(updatedDiagnosis, listOf(episode)))
     )
 }
 
 fun patientWithTreatment(
-    treatment: Treatment,
+    treatment: Treatment? = null,
     pfs: Int? = null,
     planStart: Int? = null,
     os: Int? = null,
     hadSurvivalEvent: Boolean? = null,
     hadProgressionEvent: Boolean? = null,
+    ageAtDiagnosis: Int? = null,
+    episode: Episode = EPISODE,
     diagnosis: Diagnosis = DIAGNOSIS
 ): DiagnosisEpisode {
     val updatedDiagnosis = diagnosis.copy(
+        ageAtDiagnosis = ageAtDiagnosis ?: diagnosis.ageAtDiagnosis,
         observedOsFromTumorIncidenceDays = os ?: diagnosis.observedOsFromTumorIncidenceDays,
         hadSurvivalEvent = hadSurvivalEvent ?: diagnosis.hadSurvivalEvent
     )
-    val updatedEpisode = EPISODE.copy(
-        systemicTreatmentPlan = SystemicTreatmentPlan(
-            treatment = treatment,
+    val updatedSystemicTreatmentPlan = treatment?.let {
+        SystemicTreatmentPlan(
+            treatment = it,
             systemicTreatmentSchemes = emptyList(),
             intervalTumorIncidenceTreatmentPlanStartDays = planStart,
             observedPfsDays = pfs,
             hadProgressionEvent = hadProgressionEvent
         )
+    }
+    val updatedEpisode = episode.copy(
+        systemicTreatmentPlan = updatedSystemicTreatmentPlan
     )
     return DiagnosisEpisode(updatedDiagnosis, updatedEpisode)
 }
 
-fun patientWithoutTreatment(): Episode {
-    return EPISODE.copy(
-        systemicTreatmentPlan = null
-    )
-}
