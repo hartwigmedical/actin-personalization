@@ -20,7 +20,9 @@ val DIAGNOSIS = Diagnosis(
     observedOsFromTumorIncidenceDays = 100,
     hadSurvivalEvent = false,
     hasHadPriorTumor = false,
-    priorTumors = emptyList()
+    priorTumors = emptyList(),
+    orderOfFirstDistantMetastasesEpisode = 1,
+    isMetachronous = false
 )
 val EPISODE = Episode(
     id = 123,
