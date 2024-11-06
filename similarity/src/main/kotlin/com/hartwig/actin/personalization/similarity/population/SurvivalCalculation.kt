@@ -24,7 +24,7 @@ class SurvivalCalculation(
     private val MIN_PATIENT_COUNT = 20
 
     override fun isEligible(patient: DiagnosisEpisodeTreatment): Boolean {
-        return eventFunction(patient) == true && timeFunction(patient) != null
+        return eventFunction(patient) != null  && timeFunction(patient) != null
     }
 
     override fun calculate(patients: List<DiagnosisEpisodeTreatment>, eligiblePopulationSize: Int): Measurement {

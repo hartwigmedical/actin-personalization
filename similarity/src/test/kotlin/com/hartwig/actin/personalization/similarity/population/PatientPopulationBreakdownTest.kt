@@ -14,12 +14,16 @@ class PatientPopulationBreakdownTest {
             treatment = Treatment.FLUOROURACIL,
             pfs = 70,
             os = 300,
+            hadSurvivalEvent = true,
+            hadProgressionEvent = true
         )
 
         val capecitabinePatient = patientWithTreatment(
             treatment = Treatment.CAPECITABINE,
             pfs = null,
             os = 350,
+            hadSurvivalEvent = true,
+            hadProgressionEvent = true
         )
 
         val capoxDiagnosis = DIAGNOSIS.copy(ageAtDiagnosis = 85)
@@ -27,6 +31,8 @@ class PatientPopulationBreakdownTest {
             treatment = Treatment.CAPOX,
             pfs = 100,
             os = 400,
+            hadSurvivalEvent = true,
+            hadProgressionEvent = true,
             diagnosis = capoxDiagnosis
         )
 

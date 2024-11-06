@@ -58,7 +58,7 @@ val PATIENT_RECORD = ReferencePatient(
 fun recordWithEpisode(diagnosis: Diagnosis, episode: Episode): ReferencePatient {
     return PATIENT_RECORD.copy(
         tumorEntries = listOf(TumorEntry(diagnosis, listOf(episode))),
-        isAlive = !diagnosis.hadSurvivalEvent
+        isAlive = !diagnosis.hadSurvivalEvent!!
     )
 }
 
@@ -67,8 +67,8 @@ fun patientWithTreatment(
     pfs: Int? = null,
     planStart: Int? = null,
     os: Int? = null,
-    hadSurvivalEvent: Boolean? = true,
-    hadProgressionEvent: Boolean? = true,
+    hadSurvivalEvent: Boolean? = null,
+    hadProgressionEvent: Boolean? = null,
     diagnosis: Diagnosis = DIAGNOSIS
 ): DiagnosisEpisodeTreatment {
     val updatedDiagnosis = diagnosis.copy(
