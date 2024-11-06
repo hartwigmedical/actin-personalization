@@ -56,24 +56,27 @@ class SurvivalCalculationTest {
             }
         }
 
-        private fun testEligibility(calculation: SurvivalCalculation,name: String) {
+        private fun testEligibility(calculation:  SurvivalCalculation,name: String) {
             val createPatient: (Int?, Boolean?) -> DiagnosisEpisode = { days, hadEvent ->
                 patientWithSurvivalDays(
-                    osDays = if (name == "OS") days else null,
+                    osDays = if (name == "OS") days ?: 0 else 0,
                     pfsDays = if (name == "PFS") days else null,
                     hadEvent = hadEvent
                 )
             }
-            assertThat(calculation.isEligible(createPatient(100, true))).isTrue()
-            assertThat(calculation.isEligible(createPatient(null, true))).isFalse()
-            assertThat(calculation.isEligible(createPatient(100, null))).isFalse()
-        }
+            assertThat(calculation.isEligible(createPatient(100, true))).describedAs("Eligibility for  $name").isTrue()
+            assertThat(calculation.isEligible(createPatient(100, null))).describedAs("Eligibility for  $name").isFalse()
+
+            if (name == "PFS") {
+                assertThat(calculation.isEligible(createPatient(null, true))).describedAs("Eligibility for $name with null days").isFalse()
+            }
+         }
 
 
         private fun testMedianSurvival(calculation: SurvivalCalculation, name: String) {
             val patients = survivalList.map { data ->
                 patientWithSurvivalDays(
-                    osDays = if (name.contains("OS")) data.osDays else null,
+                    osDays = if (name.contains("OS")) data.osDays ?: 0 else 0,
                     pfsDays = if (name.contains("PFS")) data.pfsDays else null,
                     hadEvent = true
                 )
@@ -90,14 +93,14 @@ class SurvivalCalculationTest {
             val censoredPatients = listOf(1, 2, 3, 4, 5).map { i ->
                 val survivalDays = i * 365
                 patientWithSurvivalDays(
-                    osDays = if (name.contains("OS")) survivalDays else null,
+                    osDays = if (name.contains("OS")) survivalDays ?:0 else 0,
                     pfsDays = if (name.contains("PFS")) survivalDays else null,
                     hadEvent = false
                 )
             }
             val eligiblePatients = survivalList.map { data ->
                 patientWithSurvivalDays(
-                    osDays = if (name.contains("OS")) data.osDays else null,
+                    osDays = if (name.contains("OS")) data.osDays ?:0 else 0,
                     pfsDays = if (name.contains("PFS")) data.pfsDays else null,
                     hadEvent = true
                 )
@@ -114,7 +117,7 @@ class SurvivalCalculationTest {
     }
 
     private fun patientWithSurvivalDays(
-        osDays: Int?= null,
+        osDays: Int= 0,
         pfsDays: Int? = null,
         hadEvent: Boolean? = true
     ): DiagnosisEpisode {

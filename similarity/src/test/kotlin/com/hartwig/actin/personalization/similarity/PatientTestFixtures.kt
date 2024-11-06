@@ -76,9 +76,9 @@ fun recordWithEpisode(
 
 fun patientWithTreatment(
     treatment: Treatment? = null,
-    pfs: Int? = null,
+    pfsDays: Int? = null,
     planStart: Int? = null,
-    os: Int? = null,
+    osDays: Int = 0,
     hadSurvivalEvent: Boolean? = null,
     hadProgressionEvent: Boolean? = null,
     ageAtDiagnosis: Int? = null,
@@ -87,7 +87,7 @@ fun patientWithTreatment(
 ): DiagnosisEpisode {
     val updatedDiagnosis = diagnosis.copy(
         ageAtDiagnosis = ageAtDiagnosis ?: diagnosis.ageAtDiagnosis,
-        observedOsFromTumorIncidenceDays = os ?: diagnosis.observedOsFromTumorIncidenceDays,
+        observedOsFromTumorIncidenceDays = osDays ?: diagnosis.observedOsFromTumorIncidenceDays,
         hadSurvivalEvent = hadSurvivalEvent ?: diagnosis.hadSurvivalEvent
     )
     val updatedSystemicTreatmentPlan = treatment?.let {
@@ -95,7 +95,7 @@ fun patientWithTreatment(
             treatment = it,
             systemicTreatmentSchemes = emptyList(),
             intervalTumorIncidenceTreatmentPlanStartDays = planStart,
-            observedPfsDays = pfs,
+            observedPfsDays = pfsDays,
             hadProgressionEvent = hadProgressionEvent
         )
     }
