@@ -24,8 +24,12 @@ enum class Treatment(val drugs: Set<Drug>?, val display: String, val treatmentGr
     companion object {
         private val plansByDrugSet = Treatment.entries.filterNot { it.drugs == null }.associateBy(Treatment::drugs)
 
-        fun findForDrugs(drugs: Set<Drug>): Treatment {
-            return plansByDrugSet[drugs] ?: OTHER
+        fun findForDrugs(drugs: Set<Drug>?): Treatment {
+            return when {
+                drugs.isNullOrEmpty() -> NONE
+                else -> plansByDrugSet[drugs] ?: OTHER
+            }
         }
+
     }
 }

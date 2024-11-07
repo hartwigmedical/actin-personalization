@@ -38,8 +38,8 @@ class SurvivalCalculation(
         return Measurement(
             survivalForQuartile(eventHistory, 0.5),
             eventHistory.size,
-            eventHistory.firstOrNull()?.daysSinceTreatmentPlanStart,
-            eventHistory.lastOrNull()?.daysSinceTreatmentPlanStart,
+            eventHistory.firstOrNull()?.daysSinceStartMeasurement,
+            eventHistory.lastOrNull()?.daysSinceStartMeasurement,
             survivalForQuartile(eventHistory, 0.75) - survivalForQuartile(eventHistory, 0.25))
     }
 
@@ -48,7 +48,7 @@ class SurvivalCalculation(
         val searchIndex = eventHistory.binarySearchBy(-expectedSurvivalFraction) { -it.survival }
         val realIndex = if (searchIndex < 0) -(searchIndex + 1) else searchIndex
 
-        return if (realIndex == eventHistory.size) Double.NaN else eventHistory[realIndex].daysSinceTreatmentPlanStart.toDouble()
+        return if (realIndex == eventHistory.size) Double.NaN else eventHistory[realIndex].daysSinceStartMeasurement.toDouble()
     }
 
 
@@ -84,7 +84,7 @@ class SurvivalCalculation(
             val previousEvent = eventHistory.lastOrNull() ?: EventCountAndSurvivalAtTime(0, 0, 1.0)
 
             val newEvent = EventCountAndSurvivalAtTime(
-                daysSinceTreatmentPlanStart = time,
+                daysSinceStartMeasurement = time,
                 numberOfEvents = if (eventOccurred) previousEvent.numberOfEvents + 1 else previousEvent.numberOfEvents,
                 survival = if (eventOccurred) {
                     previousEvent.survival * (1 - (1.0 / populationToProcess.size))
