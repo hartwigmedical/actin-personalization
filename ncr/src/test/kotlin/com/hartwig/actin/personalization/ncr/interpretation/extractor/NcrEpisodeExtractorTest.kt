@@ -17,6 +17,7 @@ import com.hartwig.actin.personalization.datamodel.ReasonRefrainmentFromTumorDir
 import com.hartwig.actin.personalization.datamodel.ResponseMeasure
 import com.hartwig.actin.personalization.datamodel.ResponseType
 import com.hartwig.actin.personalization.datamodel.StageTnm
+import com.hartwig.actin.personalization.datamodel.SystemicTreatmentPlan
 import com.hartwig.actin.personalization.datamodel.TnmM
 import com.hartwig.actin.personalization.datamodel.TnmN
 import com.hartwig.actin.personalization.datamodel.TnmT
@@ -35,7 +36,7 @@ class NcrEpisodeExtractorTest {
     fun `Should extract episode from NCR record`() {
         val episode = NcrEpisodeExtractor(NcrSystemicTreatmentPlanExtractor()).extractEpisode(NCR_RECORD, 80)
         assertThat(episode.systemicTreatmentPlan).isNotNull
-        assertThat(episode.copy(systemicTreatmentPlan = null)).isEqualTo(expectedEpisode)
+        assertThat(episode.copy(systemicTreatmentPlan = SystemicTreatmentPlan.NONE)).isEqualTo(expectedEpisode)
     }
 
     @Test
@@ -55,7 +56,7 @@ class NcrEpisodeExtractorTest {
         )
         val episode = NcrEpisodeExtractor(NcrSystemicTreatmentPlanExtractor()).extractEpisode(modifiedNcrRecord, 80)
         assertThat(episode.systemicTreatmentPlan).isNotNull
-        assertThat(episode.copy(systemicTreatmentPlan = null)).isEqualTo(expectedModifiedEpisode)
+        assertThat(episode.copy(systemicTreatmentPlan = SystemicTreatmentPlan.NONE)).isEqualTo(expectedModifiedEpisode)
     }
 
     companion object {
@@ -119,7 +120,7 @@ class NcrEpisodeExtractorTest {
             hasHadPreSurgerySystemicTargetedTherapy = false,
             hasHadPostSurgerySystemicTargetedTherapy = true,
             responseMeasure = ResponseMeasure(ResponseType.PD, 5),
-            systemicTreatmentPlan = null,
+            systemicTreatmentPlan = SystemicTreatmentPlan.NONE,
             pfsMeasures = listOf(
                 PfsMeasure(PfsMeasureType.PROGRESSION, PfsMeasureFollowUpEvent.LOCAL_ONLY, 4),
                 PfsMeasure(PfsMeasureType.DEATH, PfsMeasureFollowUpEvent.REGIONAL, 80),

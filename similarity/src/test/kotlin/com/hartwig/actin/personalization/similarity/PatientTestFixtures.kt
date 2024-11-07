@@ -87,18 +87,16 @@ fun patientWithTreatment(
 ): DiagnosisEpisode {
     val updatedDiagnosis = diagnosis.copy(
         ageAtDiagnosis = ageAtDiagnosis ?: diagnosis.ageAtDiagnosis,
-        observedOsFromTumorIncidenceDays = osDays ?: diagnosis.observedOsFromTumorIncidenceDays,
+        observedOsFromTumorIncidenceDays = osDays,
         hadSurvivalEvent = hadSurvivalEvent ?: diagnosis.hadSurvivalEvent
     )
-    val updatedSystemicTreatmentPlan = treatment.let {
-        SystemicTreatmentPlan(
-            treatment = it,
-            systemicTreatmentSchemes = emptyList(),
-            intervalTumorIncidenceTreatmentPlanStartDays = planStart,
-            observedPfsDays = pfsDays,
-            hadProgressionEvent = hadProgressionEvent
-        )
-    }
+    val updatedSystemicTreatmentPlan = SystemicTreatmentPlan(
+        treatment = treatment,
+        systemicTreatmentSchemes = emptyList(),
+        intervalTumorIncidenceTreatmentPlanStartDays = planStart,
+        observedPfsDays = pfsDays,
+        hadProgressionEvent = hadProgressionEvent
+    )
     val updatedEpisode = episode.copy(
         systemicTreatmentPlan = updatedSystemicTreatmentPlan
     )

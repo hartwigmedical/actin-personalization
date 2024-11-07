@@ -13,4 +13,17 @@ data class SystemicTreatmentPlan(
     val observedPfsDays: Int? = null,
     val hadProgressionEvent: Boolean? = null,
     val observedOsFromTreatmentStartDays: Int? = null
-)
+){
+    companion object {
+        val NONE = SystemicTreatmentPlan(
+            treatment = Treatment.NONE,
+            systemicTreatmentSchemes = emptyList(),
+            intervalTumorIncidenceTreatmentPlanStartDays = null,
+            intervalTumorIncidenceTreatmentPlanStopDays = null,
+            intervalTreatmentPlanStartResponseDays = null,
+            observedPfsDays = null,
+            hadProgressionEvent = null,
+            observedOsFromTreatmentStartDays = null
+        )
+}
+}

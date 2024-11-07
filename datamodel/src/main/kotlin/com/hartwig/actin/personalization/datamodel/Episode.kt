@@ -62,13 +62,5 @@ data class Episode(
 
     val responseMeasure: ResponseMeasure? = null,
     val pfsMeasures: List<PfsMeasure>,
-    val systemicTreatmentPlan: SystemicTreatmentPlan = SystemicTreatmentPlan(
-        treatment = Treatment.NONE,
-        systemicTreatmentSchemes = emptyList(),
-        intervalTumorIncidenceTreatmentPlanStartDays = null,
-        intervalTumorIncidenceTreatmentPlanStopDays = null,
-        intervalTreatmentPlanStartResponseDays = null,
-        observedPfsDays = null,
-        hadProgressionEvent = null
-    )
+    val systemicTreatmentPlan: SystemicTreatmentPlan = SystemicTreatmentPlan.NONE
 )
