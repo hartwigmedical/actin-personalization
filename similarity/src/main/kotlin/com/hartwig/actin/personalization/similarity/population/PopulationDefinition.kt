@@ -3,6 +3,7 @@ package com.hartwig.actin.personalization.similarity.population
 import com.hartwig.actin.personalization.datamodel.DiagnosisEpisode
 import com.hartwig.actin.personalization.datamodel.Episode
 import com.hartwig.actin.personalization.datamodel.LocationGroup
+import com.hartwig.actin.personalization.datamodel.Treatment
 
 const val ALL_PATIENTS_POPULATION_NAME = "All"
 
@@ -37,14 +38,21 @@ data class PopulationDefinition(val name: String, val criteria: (DiagnosisEpisod
             }
         }
 
-        private fun episodeMatchesMetastasisLocationGroups(episode: Episode, metastasisLocationGroups: Set<LocationGroup>): Boolean =
-            episode.systemicTreatmentPlan?.intervalTumorIncidenceTreatmentPlanStartDays?.let { planStart ->
-                val groups = episode.metastases.filter { metastasis ->
-                    metastasis.intervalTumorIncidenceMetastasisDetectionDays?.let { it < planStart } == true
-                }
-                    .map { it.location.locationGroup.topLevelGroup() }
-                    .toSet()
-                groups == metastasisLocationGroups
-            } == true
+        private fun episodeMatchesMetastasisLocationGroups(
+            episode: Episode,
+            metastasisLocationGroups: Set<LocationGroup>
+        ): Boolean {
+            val planStart = episode.systemicTreatmentPlan.intervalTumorIncidenceTreatmentPlanStartDays
+            if (episode.systemicTreatmentPlan.treatment == Treatment.NONE || planStart == null) {
+                return episode.metastases.isNotEmpty() && metastasisLocationGroups.isNotEmpty()
+            }
+            val groups = episode.metastases.filter { metastasis ->
+                metastasis.intervalTumorIncidenceMetastasisDetectionDays?.let { it < planStart } == true
+            }
+                .map { it.location.locationGroup.topLevelGroup() }
+                .toSet()
+            return groups == metastasisLocationGroups
+        }
+
     }
 }
