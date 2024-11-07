@@ -23,7 +23,7 @@ class PersonalizedDataInterpreterTest {
             recordWithEpisode(fluourouracilEpisode),
             recordWithEpisode(fluourouracilEpisode.copy(distantMetastasesDetectionStatus = MetastasesDetectionStatus.AT_PROGRESSION)),
             recordWithEpisode(patientWithTreatment(treatment = Treatment.OTHER).episode),
-            recordWithEpisode(patientWithTreatment().episode),
+            recordWithEpisode(patientWithTreatment(treatment = Treatment.NONE).episode),
             recordWithEpisode(fluourouracilEpisode.copy(surgeries = listOf(Surgery(SurgeryType.NOS_OR_OTHER)))),
             recordWithEpisode(fluourouracilEpisode.copy(hasHadPostSurgerySystemicChemotherapy = true)),
             recordWithEpisode(capecitabineEpisode),

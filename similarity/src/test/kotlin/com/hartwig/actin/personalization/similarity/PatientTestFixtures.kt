@@ -75,7 +75,7 @@ fun recordWithEpisode(
 }
 
 fun patientWithTreatment(
-    treatment: Treatment? = null,
+    treatment: Treatment = Treatment.NONE,
     pfsDays: Int? = null,
     planStart: Int? = null,
     osDays: Int = 0,
@@ -90,7 +90,7 @@ fun patientWithTreatment(
         observedOsFromTumorIncidenceDays = osDays ?: diagnosis.observedOsFromTumorIncidenceDays,
         hadSurvivalEvent = hadSurvivalEvent ?: diagnosis.hadSurvivalEvent
     )
-    val updatedSystemicTreatmentPlan = treatment?.let {
+    val updatedSystemicTreatmentPlan = treatment.let {
         SystemicTreatmentPlan(
             treatment = it,
             systemicTreatmentSchemes = emptyList(),
