@@ -10,7 +10,7 @@ data class Diagnosis(
 
     val ageAtDiagnosis: Int,
     val observedOsFromTumorIncidenceDays: Int,
-    val hadSurvivalEvent: Boolean?,
+    val hadSurvivalEvent: Boolean,
     val hasHadPriorTumor: Boolean,
     val priorTumors: List<PriorTumor>,
 

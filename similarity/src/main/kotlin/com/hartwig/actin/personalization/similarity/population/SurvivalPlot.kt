@@ -23,11 +23,11 @@ object SurvivalPlot {
             histories.size >= MIN_PATIENT_COUNT
         }
 
-        return historiesByName.values.maxOfOrNull { it.last().daysSinceStartMeasurement }?.let { longestInterval ->
+        return historiesByName.values.maxOfOrNull { it.last().daysSinceStart }?.let { longestInterval ->
             plot {
                 step {
                     val xValues = historiesByName.flatMap { (_, histories) ->
-                        histories.map(EventCountAndSurvivalAtTime::daysSinceStartMeasurement)
+                        histories.map(EventCountAndSurvivalAtTime::daysSinceStart)
                     }
                     val yValues = historiesByName.flatMap { (_, histories) ->
                         histories.map(EventCountAndSurvivalAtTime::survival)

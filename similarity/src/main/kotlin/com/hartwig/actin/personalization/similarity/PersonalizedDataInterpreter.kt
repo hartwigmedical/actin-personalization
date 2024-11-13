@@ -43,17 +43,21 @@ class PersonalizedDataInterpreter(val patientsByTreatment: List<Pair<TreatmentGr
         }
 
         fun createFromReferencePatients(patients: List<ReferencePatient>): PersonalizedDataInterpreter {
-            val referencePop = patients.flatMap(ReferencePatient::tumorEntries).mapNotNull { (diagnosis, episodes) ->
-                val episode = episodes.single { it.order == 1 }
-                DiagnosisEpisode(diagnosis, episode).takeIf {
+            val referencePop = patients
+                .flatMap(ReferencePatient::tumorEntries)
+                .map { (diagnosis, episodes) ->
+                    val episode = episodes.single { it.order == 1 }
+                    DiagnosisEpisode(diagnosis, episode)
+                }
+                .filter { diagnosisEpisode ->
+                    val episode = diagnosisEpisode.episode
                     episode.distantMetastasesDetectionStatus == MetastasesDetectionStatus.AT_START &&
-                            episode.systemicTreatmentPlan?.treatment != Treatment.OTHER &&
+                            episode.systemicTreatmentPlan.treatment != Treatment.OTHER &&
                             episode.surgeries.isEmpty() &&
                             episode.doesNotIncludeAdjuvantOrNeoadjuvantTreatment()
                 }
-            }
 
-            val patientsByTreatment = referencePop.groupBy { it.episode.systemicTreatmentPlan?.treatment?.treatmentGroup ?: TreatmentGroup.NONE }
+            val patientsByTreatment = referencePop.groupBy { it.episode.systemicTreatmentPlan.treatment.treatmentGroup ?: TreatmentGroup.NONE }
                 .toList()
                 .sortedByDescending { it.second.size }
 

@@ -24,7 +24,7 @@ class PatientPopulationBreakdown(
     private fun populationFromDefinition(
         populationDefinition: PopulationDefinition, allPatients: List<DiagnosisEpisode>
     ): Population {
-        val matchingPatients = allPatients.filter { populationDefinition.criteria(it) }
+        val matchingPatients = allPatients.filter(populationDefinition.criteria)
         val patientsByMeasurementType = measurementTypes.associateWith { measurementType ->
             matchingPatients.filter(measurementType.calculation::isEligible)
         }

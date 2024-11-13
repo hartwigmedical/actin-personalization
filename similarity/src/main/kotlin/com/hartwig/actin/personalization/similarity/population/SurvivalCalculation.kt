@@ -4,8 +4,8 @@ import com.hartwig.actin.personalization.datamodel.DiagnosisEpisode
 import com.hartwig.actin.personalization.similarity.report.TableElement
 
 val PFS_CALCULATION = SurvivalCalculation(
-    timeFunction = { it.episode.systemicTreatmentPlan?.observedPfsDays },
-    eventFunction = { it.episode.systemicTreatmentPlan?.hadProgressionEvent },
+    timeFunction = { it.episode.systemicTreatmentPlan.observedPfsDays },
+    eventFunction = { it.episode.systemicTreatmentPlan.hadProgressionEvent },
     title = "Progression-free survival (median, IQR) in NCR real-world data set"
 )
 
@@ -17,8 +17,8 @@ val OS_CALCULATION = SurvivalCalculation(
 
 class SurvivalCalculation(
     internal val timeFunction: (DiagnosisEpisode) -> Int?,
-    internal val eventFunction: (DiagnosisEpisode) -> Boolean?,
-    internal val title: String
+    private val eventFunction: (DiagnosisEpisode) -> Boolean?,
+    private val title: String
 ) : Calculation {
 
     private val MIN_PATIENT_COUNT = 20
@@ -38,8 +38,8 @@ class SurvivalCalculation(
         return Measurement(
             survivalForQuartile(eventHistory, 0.5),
             eventHistory.size,
-            eventHistory.firstOrNull()?.daysSinceStartMeasurement,
-            eventHistory.lastOrNull()?.daysSinceStartMeasurement,
+            eventHistory.firstOrNull()?.daysSinceStart,
+            eventHistory.lastOrNull()?.daysSinceStart,
             survivalForQuartile(eventHistory, 0.75) - survivalForQuartile(eventHistory, 0.25))
     }
 
@@ -48,7 +48,7 @@ class SurvivalCalculation(
         val searchIndex = eventHistory.binarySearchBy(-expectedSurvivalFraction) { -it.survival }
         val realIndex = if (searchIndex < 0) -(searchIndex + 1) else searchIndex
 
-        return if (realIndex == eventHistory.size) Double.NaN else eventHistory[realIndex].daysSinceStartMeasurement.toDouble()
+        return if (realIndex == eventHistory.size) Double.NaN else eventHistory[realIndex].daysSinceStart.toDouble()
     }
 
 
@@ -84,7 +84,7 @@ class SurvivalCalculation(
             val previousEvent = eventHistory.lastOrNull() ?: EventCountAndSurvivalAtTime(0, 0, 1.0)
 
             val newEvent = EventCountAndSurvivalAtTime(
-                daysSinceStartMeasurement = time,
+                daysSinceStart = time,
                 numberOfEvents = if (eventOccurred) previousEvent.numberOfEvents + 1 else previousEvent.numberOfEvents,
                 survival = if (eventOccurred) {
                     previousEvent.survival * (1 - (1.0 / populationToProcess.size))

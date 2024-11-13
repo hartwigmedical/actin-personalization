@@ -13,7 +13,7 @@ data class SystemicTreatmentPlan(
     val observedPfsDays: Int? = null,
     val hadProgressionEvent: Boolean? = null,
     val observedOsFromTreatmentStartDays: Int? = null
-){
+) {
     companion object {
         val NONE = SystemicTreatmentPlan(
             treatment = Treatment.NONE,
@@ -25,5 +25,5 @@ data class SystemicTreatmentPlan(
             hadProgressionEvent = null,
             observedOsFromTreatmentStartDays = null
         )
-}
+    }
 }

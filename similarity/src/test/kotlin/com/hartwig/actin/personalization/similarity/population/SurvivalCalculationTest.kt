@@ -4,6 +4,7 @@ import com.hartwig.actin.personalization.datamodel.DiagnosisEpisode
 import com.hartwig.actin.personalization.datamodel.SystemicTreatmentPlan
 import com.hartwig.actin.personalization.datamodel.Treatment
 import com.hartwig.actin.personalization.similarity.DIAGNOSIS_EPISODE
+import com.hartwig.actin.personalization.similarity.population.OS_CALCULATION
 import com.hartwig.actin.personalization.similarity.report.TableElement
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
@@ -23,11 +24,7 @@ private val survivalList = listOf(
 )
 
 class SurvivalCalculationTest {
-    private val survivalCalculation = SurvivalCalculation(
-        timeFunction = { it.diagnosis.observedOsFromTumorIncidenceDays },
-        eventFunction = { it.diagnosis.hadSurvivalEvent },
-        title = "Overall survival"
-    )
+    private val survivalCalculation = OS_CALCULATION
     private val survivalCalculationsFunctions = listOf(
         OS_CALCULATION to "OS",
         PFS_CALCULATION to "PFS"
@@ -56,16 +53,16 @@ class SurvivalCalculationTest {
             }
         }
 
-        private fun testEligibility(calculation:  SurvivalCalculation,name: String) {
-            val createPatient: (Int?, Boolean?) -> DiagnosisEpisode = { days, hadEvent ->
+        private fun testEligibility(calculation: SurvivalCalculation, name: String) {
+            val createPatient: (Int?, Boolean) -> DiagnosisEpisode = { days, hadEvent ->
                 patientWithSurvivalDays(
                     osDays = if (name == "OS") days ?: 0 else 0,
                     pfsDays = if (name == "PFS") days else null,
                     hadEvent = hadEvent
                 )
             }
-            assertThat(calculation.isEligible(createPatient(100, true))).describedAs("Eligibility for  $name").isTrue()
-            assertThat(calculation.isEligible(createPatient(100, null))).describedAs("Eligibility for  $name").isFalse()
+            assertThat(calculation.isEligible(createPatient(100, true))).describedAs("Eligibility for $name").isTrue()
+            assertThat(calculation.isEligible(createPatient(100, false))).describedAs("Eligibility for $name").isTrue()
 
             if (name == "PFS") {
                 assertThat(calculation.isEligible(createPatient(null, true))).describedAs("Eligibility for $name with null days").isFalse()
@@ -119,7 +116,7 @@ class SurvivalCalculationTest {
     private fun patientWithSurvivalDays(
         osDays: Int= 0,
         pfsDays: Int? = null,
-        hadEvent: Boolean? = true
+        hadEvent: Boolean = true
     ): DiagnosisEpisode {
         val diagnosis = DIAGNOSIS_EPISODE.diagnosis.copy(
             observedOsFromTumorIncidenceDays = osDays,
