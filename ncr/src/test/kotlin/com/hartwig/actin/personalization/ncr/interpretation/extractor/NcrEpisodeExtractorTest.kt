@@ -58,6 +58,24 @@ class NcrEpisodeExtractorTest {
         assertThat(episode.systemicTreatmentPlan).isNotNull
         assertThat(episode.copy(systemicTreatmentPlan = SystemicTreatmentPlan.NONE)).isEqualTo(expectedModifiedEpisode)
     }
+    @Test
+    fun `Should set maximumSizeOfLiverMetastasisMm to null when value is 999`() {
+        val modifiedNcrRecord = NCR_RECORD.copy(
+            metastaticDiagnosis = NCR_METASTATIC_DIAGNOSIS.copy(
+                metaLeverAfm = 999
+            )
+        )
+
+        val expectedEpisodeWithNullMetastasisSize = expectedEpisode.copy(
+            maximumSizeOfLiverMetastasisMm = null
+        )
+
+        val episode = NcrEpisodeExtractor(NcrSystemicTreatmentPlanExtractor()).extractEpisode(modifiedNcrRecord, 80)
+
+        assertThat(episode.systemicTreatmentPlan).isNotNull
+        assertThat(episode.copy(systemicTreatmentPlan = SystemicTreatmentPlan.NONE)).isEqualTo(expectedEpisodeWithNullMetastasisSize)
+    }
+
 
     companion object {
         private val expectedEpisode = Episode(
