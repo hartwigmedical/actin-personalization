@@ -43,16 +43,17 @@ data class PopulationDefinition(val name: String, val criteria: (DiagnosisEpisod
             metastasisLocationGroups: Set<LocationGroup>
         ): Boolean {
             val planStart = episode.systemicTreatmentPlan.intervalTumorIncidenceTreatmentPlanStartDays
-            if (episode.systemicTreatmentPlan.treatment == Treatment.NONE || planStart == null) {
-                return episode.metastases.isNotEmpty() && metastasisLocationGroups.isNotEmpty()
-            }
+            val cutoffDays = planStart ?: Int.MAX_VALUE
+
             val groups = episode.metastases.filter { metastasis ->
-                metastasis.intervalTumorIncidenceMetastasisDetectionDays?.let { it < planStart } == true
+                metastasis.intervalTumorIncidenceMetastasisDetectionDays?.let { it < cutoffDays } == true
             }
                 .map { it.location.locationGroup.topLevelGroup() }
                 .toSet()
+
             return groups == metastasisLocationGroups
         }
+
 
     }
 }
