@@ -43,6 +43,6 @@ class NcrSystemicTreatmentPlanExtractorTest {
         val ncrSystemicTreatment = NCR_SYSTEMIC_TREATMENT.copy(systCode7 = "L01FE02") // Add Panitumumab to last scheme
         val plan = NcrSystemicTreatmentPlanExtractor()
             .extractSystemicTreatmentPlan(ncrSystemicTreatment, emptyList(), ResponseMeasure(ResponseType.PD, 3), 80)
-        assertThat(plan!!.treatment).isEqualTo(Treatment.OTHER)
+        assertThat(plan.treatment).isEqualTo(Treatment.OTHER)
     }
 }
