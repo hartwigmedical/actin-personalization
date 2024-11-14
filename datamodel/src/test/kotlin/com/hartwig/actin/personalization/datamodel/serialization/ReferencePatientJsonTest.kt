@@ -1,7 +1,7 @@
 package com.hartwig.actin.personalization.datamodel.serialization
 
 import com.hartwig.actin.personalization.datamodel.Diagnosis
-import com.hartwig.actin.personalization.datamodel.DistantMetastasesStatus
+import com.hartwig.actin.personalization.datamodel.MetastasesDetectionStatus
 import com.hartwig.actin.personalization.datamodel.Episode
 import com.hartwig.actin.personalization.datamodel.Location
 import com.hartwig.actin.personalization.datamodel.ReferencePatient
@@ -19,9 +19,12 @@ private val DIAGNOSIS = Diagnosis(
     tumorLocations = emptySet(),
     hasHadTumorDirectedSystemicTherapy = false,
     ageAtDiagnosis = 50,
-    intervalTumorIncidenceLatestAliveStatus = 100,
+    observedOsFromTumorIncidenceDays = 100,
     hasHadPriorTumor = false,
-    priorTumors = emptyList()
+    hadSurvivalEvent = false,
+    priorTumors = emptyList(),
+    orderOfFirstDistantMetastasesEpisode = 1,
+    isMetachronous = false
 )
 private val EPISODE = Episode(
     id = 123,
@@ -29,7 +32,7 @@ private val EPISODE = Episode(
     tumorIncidenceYear = 2020,
     tumorBasisOfDiagnosis = TumorBasisOfDiagnosis.CLINICAL_AND_DIAGNOSTIC_INVESTIGATION,
     tumorLocation = Location.COLON_NOS,
-    distantMetastasesStatus = DistantMetastasesStatus.AT_START,
+    distantMetastasesDetectionStatus = MetastasesDetectionStatus.AT_START,
     metastases = emptyList(),
     hasReceivedTumorDirectedTreatment = false,
     hasHadHipecTreatment = false,

@@ -6,6 +6,7 @@ import com.hartwig.actin.personalization.datamodel.Drug
 import com.hartwig.actin.personalization.datamodel.Location
 import com.hartwig.actin.personalization.datamodel.NumberOfCciCategories
 import com.hartwig.actin.personalization.datamodel.PriorTumor
+import com.hartwig.actin.personalization.datamodel.Sidedness
 import com.hartwig.actin.personalization.datamodel.StageTnm
 import com.hartwig.actin.personalization.datamodel.TumorLocationCategory
 import com.hartwig.actin.personalization.datamodel.TumorType
@@ -16,7 +17,7 @@ class NcrTumorEntryExtractorTest {
 
     @Test
     fun `Should extract diagnosis and episodes from NCR records`() {
-        val diagnosisRecord = NCR_RECORD.copy(identification = NCR_IDENTIFICATION.copy(keyEid = 101, teller = 1, epis = "DIA"))
+        val diagnosisRecord = NCR_RECORD.copy(identification = NCR_IDENTIFICATION.copy(keyEid = 101, teller = 1, epis = "DIA", metaEpis = 0))
         val records = listOf(diagnosisRecord, NCR_RECORD)
         val (diagnosis, episodes) =
             NcrTumorEntryExtractor(NcrEpisodeExtractor(NcrSystemicTreatmentPlanExtractor())).extractTumorEntry(records)
@@ -26,6 +27,7 @@ class NcrTumorEntryExtractorTest {
                 consolidatedTumorType = TumorType.CRC_ADENOCARCINOMA,
                 tumorLocations = setOf(Location.ASCENDING_COLON),
                 hasHadTumorDirectedSystemicTherapy = false,
+                sidedness = Sidedness.RIGHT,
                 ageAtDiagnosis = 50,
                 observedOsFromTumorIncidenceDays = 80,
                 hadSurvivalEvent = false,
@@ -42,6 +44,8 @@ class NcrTumorEntryExtractorTest {
                         systemicTreatments = listOf(Drug.EXTERNAL_RADIOTHERAPY_WITH_SENSITIZER)
                     )
                 ),
+                orderOfFirstDistantMetastasesEpisode = 2,
+                isMetachronous = true,
                 cci = 1,
                 cciNumberOfCategories = NumberOfCciCategories.ONE_CATEGORY,
                 cciHasAids = null,
