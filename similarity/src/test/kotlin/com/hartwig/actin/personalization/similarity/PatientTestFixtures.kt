@@ -21,7 +21,9 @@ val DIAGNOSIS = Diagnosis(
     observedOsFromTumorIncidenceDays = 100,
     hadSurvivalEvent = true,
     hasHadPriorTumor = true,
-    priorTumors = emptyList()
+    priorTumors = emptyList(),
+    orderOfFirstDistantMetastasesEpisode = 1,
+    isMetachronous = false
 )
 val EPISODE = Episode(
     id = 123,
@@ -69,7 +71,7 @@ fun recordWithEpisode(
     return ReferencePatient(
         ncrId = PATIENT_RECORD.ncrId,
         sex = PATIENT_RECORD.sex,
-        isAlive = !(updatedDiagnosis.hadSurvivalEvent ?: false),
+        isAlive = !(updatedDiagnosis.hadSurvivalEvent),
         tumorEntries = listOf(TumorEntry(updatedDiagnosis, listOf(episode)))
     )
 }

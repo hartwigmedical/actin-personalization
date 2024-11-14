@@ -35,7 +35,6 @@ class NcrSystemicTreatmentPlanExtractorTest {
         assertThat(plan.intervalTumorIncidenceTreatmentPlanStartDays).isEqualTo(1)
         assertThat(plan.intervalTumorIncidenceTreatmentPlanStopDays).isEqualTo(7)
         assertThat(plan.intervalTreatmentPlanStartResponseDays).isEqualTo(2)
-        assertThat(plan.observedOsFromTreatmentStartDays).isEqualTo(79)
     }
 
     @Test
