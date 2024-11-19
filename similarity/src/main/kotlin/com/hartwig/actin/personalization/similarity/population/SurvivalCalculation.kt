@@ -4,8 +4,8 @@ import com.hartwig.actin.personalization.datamodel.DiagnosisEpisode
 import com.hartwig.actin.personalization.similarity.report.TableElement
 
 val PFS_CALCULATION = SurvivalCalculation(
-    timeFunction = { it.episode.systemicTreatmentPlan.observedPfsDays },
-    eventFunction = { it.episode.systemicTreatmentPlan.hadProgressionEvent },
+    timeFunction = { it.episode.systemicTreatmentPlan!!.observedPfsDays },
+    eventFunction = { it.episode.systemicTreatmentPlan!!.hadProgressionEvent },
     title = "Progression-free survival (median, IQR) in NCR real-world data set"
 )
 

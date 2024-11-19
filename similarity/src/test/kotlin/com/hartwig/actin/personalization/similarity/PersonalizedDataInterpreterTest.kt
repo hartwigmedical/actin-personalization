@@ -23,7 +23,7 @@ class PersonalizedDataInterpreterTest {
             recordWithEpisode(fluourouracilEpisode),
             recordWithEpisode(fluourouracilEpisode.copy(distantMetastasesDetectionStatus = MetastasesDetectionStatus.AT_PROGRESSION)),
             recordWithEpisode(patientWithTreatment(treatment = Treatment.OTHER).episode),
-            recordWithEpisode(patientWithTreatment(treatment = Treatment.NONE).episode),
+            recordWithEpisode(fluourouracilEpisode.copy(systemicTreatmentPlan = null)),
             recordWithEpisode(fluourouracilEpisode.copy(surgeries = listOf(Surgery(SurgeryType.NOS_OR_OTHER)))),
             recordWithEpisode(fluourouracilEpisode.copy(hasHadPostSurgerySystemicChemotherapy = true)),
             recordWithEpisode(capecitabineEpisode),
@@ -39,9 +39,6 @@ class PersonalizedDataInterpreterTest {
             ),
             TreatmentGroup.CAPOX_OR_FOLFOX to listOf(
                 DiagnosisEpisode(DIAGNOSIS, capoxEpisode)
-            ),
-            TreatmentGroup.NONE to listOf(
-                DiagnosisEpisode(DIAGNOSIS, patientWithTreatment().episode)
             )
         )
         assertThat(interpreter.patientsByTreatment).containsExactlyInAnyOrder(

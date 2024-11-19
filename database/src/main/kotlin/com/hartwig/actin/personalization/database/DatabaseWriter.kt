@@ -129,7 +129,7 @@ class DatabaseWriter(private val context: DSLContext, private val connection: ja
             dbRecord.set(table.RESPONSE, episode.responseMeasure?.responseType?.name)
             dbRecord.set(table.INTERVALTUMORINCIDENCERESPONSEDAYS, episode.responseMeasure?.intervalTumorIncidenceResponseDays)
             
-            episode.systemicTreatmentPlan.let { plan ->
+            episode.systemicTreatmentPlan?.let { plan ->
                 dbRecord.set(table.SYSTEMICTREATMENTPLAN, plan.treatment.name)
                 dbRecord.set(table.INTERVALTUMORINCIDENCETREATMENTPLANSTARTDAYS, plan.intervalTumorIncidenceTreatmentPlanStartDays)
                 dbRecord.set(table.INTERVALTUMORINCIDENCETREATMENTPLANSTOPDAYS, plan.intervalTumorIncidenceTreatmentPlanStopDays)

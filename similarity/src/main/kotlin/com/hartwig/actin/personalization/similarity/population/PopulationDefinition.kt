@@ -3,7 +3,6 @@ package com.hartwig.actin.personalization.similarity.population
 import com.hartwig.actin.personalization.datamodel.DiagnosisEpisode
 import com.hartwig.actin.personalization.datamodel.Episode
 import com.hartwig.actin.personalization.datamodel.LocationGroup
-import com.hartwig.actin.personalization.datamodel.Treatment
 
 const val ALL_PATIENTS_POPULATION_NAME = "All"
 
@@ -42,7 +41,7 @@ data class PopulationDefinition(val name: String, val criteria: (DiagnosisEpisod
             episode: Episode,
             metastasisLocationGroups: Set<LocationGroup>
         ): Boolean {
-            val planStart = episode.systemicTreatmentPlan.intervalTumorIncidenceTreatmentPlanStartDays
+            val planStart = episode.systemicTreatmentPlan?.intervalTumorIncidenceTreatmentPlanStartDays
             val cutoffDays = planStart ?: Int.MAX_VALUE
 
             val groups = episode.metastases.filter { metastasis ->

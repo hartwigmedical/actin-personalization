@@ -14,6 +14,5 @@ enum class TreatmentGroup(val display: String) {
     IRINOTECAN("Irinotecan"),
     NIVOLUMAB("Nivolumab"),
     OTHER("Other"),
-    PEMBROLIZUMAB("Pembrolizumab"),
-    NONE("None");
+    PEMBROLIZUMAB("Pembrolizumab");
 }

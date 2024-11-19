@@ -62,5 +62,5 @@ data class Episode(
 
     val responseMeasure: ResponseMeasure? = null,
     val pfsMeasures: List<PfsMeasure>,
-    val systemicTreatmentPlan: SystemicTreatmentPlan = SystemicTreatmentPlan.NONE
+    val systemicTreatmentPlan: SystemicTreatmentPlan? = null
 )

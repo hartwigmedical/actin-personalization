@@ -36,7 +36,7 @@ class NcrEpisodeExtractorTest {
     fun `Should extract episode from NCR record`() {
         val episode = NcrEpisodeExtractor(NcrSystemicTreatmentPlanExtractor()).extractEpisode(NCR_RECORD, 80)
         assertThat(episode.systemicTreatmentPlan).isNotNull
-        assertThat(episode.copy(systemicTreatmentPlan = SystemicTreatmentPlan.NONE)).isEqualTo(expectedEpisode)
+        assertThat(episode.copy(systemicTreatmentPlan = null)).isEqualTo(expectedEpisode)
     }
 
     @Test
@@ -56,7 +56,7 @@ class NcrEpisodeExtractorTest {
         )
         val episode = NcrEpisodeExtractor(NcrSystemicTreatmentPlanExtractor()).extractEpisode(modifiedNcrRecord, 80)
         assertThat(episode.systemicTreatmentPlan).isNotNull
-        assertThat(episode.copy(systemicTreatmentPlan = SystemicTreatmentPlan.NONE)).isEqualTo(expectedModifiedEpisode)
+        assertThat(episode.copy(systemicTreatmentPlan = null)).isEqualTo(expectedModifiedEpisode)
     }
     @Test
     fun `Should set maximumSizeOfLiverMetastasisMm to null when value is 999`() {
@@ -73,7 +73,7 @@ class NcrEpisodeExtractorTest {
         val episode = NcrEpisodeExtractor(NcrSystemicTreatmentPlanExtractor()).extractEpisode(modifiedNcrRecord, 80)
 
         assertThat(episode.systemicTreatmentPlan).isNotNull
-        assertThat(episode.copy(systemicTreatmentPlan = SystemicTreatmentPlan.NONE)).isEqualTo(expectedEpisodeWithNullMetastasisSize)
+        assertThat(episode.copy(systemicTreatmentPlan = null)).isEqualTo(expectedEpisodeWithNullMetastasisSize)
     }
 
 
@@ -138,7 +138,7 @@ class NcrEpisodeExtractorTest {
             hasHadPreSurgerySystemicTargetedTherapy = false,
             hasHadPostSurgerySystemicTargetedTherapy = true,
             responseMeasure = ResponseMeasure(ResponseType.PD, 5),
-            systemicTreatmentPlan = SystemicTreatmentPlan.NONE,
+            systemicTreatmentPlan = null,
             pfsMeasures = listOf(
                 PfsMeasure(PfsMeasureType.PROGRESSION, PfsMeasureFollowUpEvent.LOCAL_ONLY, 4),
                 PfsMeasure(PfsMeasureType.DEATH, PfsMeasureFollowUpEvent.REGIONAL, 80),

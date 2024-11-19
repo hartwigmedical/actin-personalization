@@ -21,7 +21,7 @@ class NcrSystemicTreatmentPlanExtractorTest {
 
         val plan = NcrSystemicTreatmentPlanExtractor()
             .extractSystemicTreatmentPlan(NCR_SYSTEMIC_TREATMENT, pfsMeasures, ResponseMeasure(ResponseType.PD, 3), 80)
-        assertThat(plan.treatment).isEqualTo(Treatment.FOLFOXIRI_B)
+        assertThat(plan?.treatment).isEqualTo(Treatment.FOLFOXIRI_B)
 
         val expectedDrugs = mapOf(
             1 to listOf(Drug.OXALIPLATIN, Drug.BEVACIZUMAB, Drug.IRINOTECAN, Drug.FLUOROURACIL),
@@ -29,12 +29,12 @@ class NcrSystemicTreatmentPlanExtractorTest {
             3 to listOf(Drug.TEGAFUR_OR_GIMERACIL_OR_OTERACIL)
         )
         val drugsByScheme =
-            plan.systemicTreatmentSchemes.associate { it.schemeNumber to it.treatmentComponents.map(SystemicTreatmentSchemeDrug::drug) }
+            plan?.systemicTreatmentSchemes?.associate { it.schemeNumber to it.treatmentComponents.map(SystemicTreatmentSchemeDrug::drug) }
         assertThat(drugsByScheme).isEqualTo(expectedDrugs)
 
-        assertThat(plan.intervalTumorIncidenceTreatmentPlanStartDays).isEqualTo(1)
-        assertThat(plan.intervalTumorIncidenceTreatmentPlanStopDays).isEqualTo(7)
-        assertThat(plan.intervalTreatmentPlanStartResponseDays).isEqualTo(2)
+        assertThat(plan?.intervalTumorIncidenceTreatmentPlanStartDays).isEqualTo(1)
+        assertThat(plan?.intervalTumorIncidenceTreatmentPlanStopDays).isEqualTo(7)
+        assertThat(plan?.intervalTreatmentPlanStartResponseDays).isEqualTo(2)
     }
 
     @Test
@@ -42,6 +42,6 @@ class NcrSystemicTreatmentPlanExtractorTest {
         val ncrSystemicTreatment = NCR_SYSTEMIC_TREATMENT.copy(systCode7 = "L01FE02") // Add Panitumumab to last scheme
         val plan = NcrSystemicTreatmentPlanExtractor()
             .extractSystemicTreatmentPlan(ncrSystemicTreatment, emptyList(), ResponseMeasure(ResponseType.PD, 3), 80)
-        assertThat(plan.treatment).isEqualTo(Treatment.OTHER)
+        assertThat(plan!!.treatment).isEqualTo(Treatment.OTHER)
     }
 }

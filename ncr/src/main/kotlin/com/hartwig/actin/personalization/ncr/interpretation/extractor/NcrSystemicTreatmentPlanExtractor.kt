@@ -23,22 +23,10 @@ class NcrSystemicTreatmentPlanExtractor {
         pfsMeasures: List<PfsMeasure>,
         responseMeasure: ResponseMeasure?,
         intervalTumorIncidenceLatestAliveStatus: Int
-    ): SystemicTreatmentPlan {
+    ): SystemicTreatmentPlan? {
         val treatmentSchemes = extractSystemicTreatmentSchemes(systemicTreatment)
+        val firstScheme = treatmentSchemes.firstOrNull() ?: return null
 
-        if (treatmentSchemes.isEmpty()) {
-            return SystemicTreatmentPlan(
-                treatment = Treatment.NONE,
-                systemicTreatmentSchemes = emptyList(),
-                intervalTumorIncidenceTreatmentPlanStartDays = null,
-                intervalTumorIncidenceTreatmentPlanStopDays = null,
-                intervalTreatmentPlanStartResponseDays = null,
-                observedPfsDays = null,
-                hadProgressionEvent = null
-            )
-        }
-
-        val firstScheme = treatmentSchemes.first()
         val treatment = extractTreatmentFromSchemes(treatmentSchemes)
         val daysUntilPlanStart = firstScheme.intervalTumorIncidenceTreatmentLineStartMinDays
         val daysUntilPlanEnd = treatmentSchemes.last().intervalTumorIncidenceTreatmentLineStopMaxDays
@@ -58,6 +46,9 @@ class NcrSystemicTreatmentPlanExtractor {
                 ?.let { responseInterval -> daysUntilPlanStart?.let { responseInterval - daysUntilPlanStart } },
             observedPfsDays = observedPfsDays,
             hadProgressionEvent = hadProgressionEvent,
+            observedOsFromTreatmentStartDays = daysUntilPlanStart
+                ?.let { intervalTumorIncidenceLatestAliveStatus - daysUntilPlanStart }
+                ?.takeIf { it >= 0 },
         )
     }
 
@@ -66,9 +57,7 @@ class NcrSystemicTreatmentPlanExtractor {
     }
 
     private fun extractTreatmentFromSchemes(treatmentSchemes: Iterable<SystemicTreatmentScheme>): Treatment {
-
         val firstSchemeDrugs = drugsFromScheme(treatmentSchemes.first()).toSet()
-
         val followUpDrugs = treatmentSchemes.drop(1).flatMap(::drugsFromScheme).toSet()
         val newDrugsToIgnore = if (firstSchemeDrugs.intersect(ALLOWED_SUBSTITUTIONS).isNotEmpty()) ALLOWED_SUBSTITUTIONS else emptySet()
 

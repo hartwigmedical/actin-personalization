@@ -77,7 +77,7 @@ fun recordWithEpisode(
 }
 
 fun patientWithTreatment(
-    treatment: Treatment = Treatment.NONE,
+    treatment: Treatment,
     pfsDays: Int? = null,
     planStart: Int? = null,
     osDays: Int = 0,

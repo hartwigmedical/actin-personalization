@@ -96,6 +96,5 @@ enum class Drug(val category: TreatmentCategory) {
     TRIFLURIDINE_AND_TIPIRACIL(TreatmentCategory.CHEMOTHERAPY),
     TRIPTORELIN_PAMORELIN(TreatmentCategory.HORMONAL_THERAPY),
     VEMURAFENIB(TreatmentCategory.TARGETED_THERAPY),
-    VINCRISTINE(TreatmentCategory.CHEMOTHERAPY),
-    NONE(TreatmentCategory.NONE)
+    VINCRISTINE(TreatmentCategory.CHEMOTHERAPY);
 }

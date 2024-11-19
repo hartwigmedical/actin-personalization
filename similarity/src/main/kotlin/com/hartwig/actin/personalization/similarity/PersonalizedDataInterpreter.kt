@@ -52,12 +52,14 @@ class PersonalizedDataInterpreter(val patientsByTreatment: List<Pair<TreatmentGr
                 .filter { diagnosisEpisode ->
                     val episode = diagnosisEpisode.episode
                     episode.distantMetastasesDetectionStatus == MetastasesDetectionStatus.AT_START &&
-                            episode.systemicTreatmentPlan.treatment != Treatment.OTHER &&
+                            episode.systemicTreatmentPlan?.treatment != Treatment.OTHER &&
                             episode.surgeries.isEmpty() &&
                             episode.doesNotIncludeAdjuvantOrNeoadjuvantTreatment()
                 }
 
-            val patientsByTreatment = referencePop.groupBy { it.episode.systemicTreatmentPlan.treatment.treatmentGroup ?: TreatmentGroup.NONE }
+            val patientsByTreatment = referencePop.groupBy { (_, episode) ->
+                episode.systemicTreatmentPlan!!.treatment.treatmentGroup
+            }
                 .toList()
                 .sortedByDescending { it.second.size }
 
