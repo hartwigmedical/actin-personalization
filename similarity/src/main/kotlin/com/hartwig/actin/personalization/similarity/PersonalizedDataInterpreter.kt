@@ -52,7 +52,7 @@ class PersonalizedDataInterpreter(val patientsByTreatment: List<Pair<TreatmentGr
                 .filter { diagnosisEpisode ->
                     val episode = diagnosisEpisode.episode
                     episode.distantMetastasesDetectionStatus == MetastasesDetectionStatus.AT_START &&
-                            episode.systemicTreatmentPlan?.treatment != Treatment.OTHER &&
+                            episode.systemicTreatmentPlan?.treatment?.let{it != Treatment.OTHER} == true &&
                             episode.surgeries.isEmpty() &&
                             episode.doesNotIncludeAdjuvantOrNeoadjuvantTreatment()
                 }
