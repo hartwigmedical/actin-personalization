@@ -10,7 +10,7 @@ val PFS_CALCULATION = SurvivalCalculation(
 )
 
 val OS_CALCULATION = SurvivalCalculation(
-    timeFunction = { it.diagnosis.observedOsFromTumorIncidenceDays },
+    timeFunction = { it.episode.systemicTreatmentPlan!!.observedOsFromTreatmentStartDays },
     eventFunction = { it.diagnosis.hadSurvivalEvent },
     title = "Overall survival (median, IQR) in NCR real-world data set"
 )

@@ -121,14 +121,14 @@ class SurvivalCalculationTest {
         hadEvent: Boolean = true
     ): DiagnosisEpisode {
         val diagnosis = DIAGNOSIS_EPISODE.diagnosis.copy(
-            observedOsFromTumorIncidenceDays = osDays,
             hadSurvivalEvent = hadEvent
         )
         val systemicTreatmentPlan = SystemicTreatmentPlan(
             treatment = Treatment.FLUOROURACIL,
             systemicTreatmentSchemes = emptyList(),
             observedPfsDays = pfsDays,
-            hadProgressionEvent = hadEvent
+            hadProgressionEvent = hadEvent,
+            observedOsFromTreatmentStartDays = osDays
         )
         val episode = DIAGNOSIS_EPISODE.episode.copy(
             systemicTreatmentPlan = systemicTreatmentPlan
