@@ -14,8 +14,8 @@ data class Diagnosis(
     val hadSurvivalEvent: Boolean,
     val hasHadPriorTumor: Boolean,
     val priorTumors: List<PriorTumor>,
-    val orderOfFirstDistantMetastasesEpisode: Int = 1,
-    val isMetachronous: Boolean = false,
+    val orderOfFirstDistantMetastasesEpisode: Int,
+    val isMetachronous: Boolean,
 
     val cci: Int? = null,
     val cciNumberOfCategories: NumberOfCciCategories? = null,
