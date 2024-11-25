@@ -28,8 +28,8 @@ class SurvivalCalculation(
     }
 
     override fun calculate(patients: List<DiagnosisEpisode>, eligiblePopulationSize: Int): Measurement {
-
-        val eventHistory = eventHistory(patients.sortedBy { timeFunction(it)})
+        val eligiblePatients = patients.filter { isEligible(it) }
+        val eventHistory = buildEventHistory(eligiblePatients.sortedBy(timeFunction))
 
         if (eventHistory.isEmpty()) {
             return Measurement(Double.NaN, 0, null, null, Double.NaN)
@@ -37,10 +37,11 @@ class SurvivalCalculation(
 
         return Measurement(
             survivalForQuartile(eventHistory, 0.5),
-            eventHistory.size,
+            eligiblePatients.size,
             eventHistory.firstOrNull()?.daysSinceStart,
             eventHistory.lastOrNull()?.daysSinceStart,
-            survivalForQuartile(eventHistory, 0.75) - survivalForQuartile(eventHistory, 0.25))
+            survivalForQuartile(eventHistory, 0.75) - survivalForQuartile(eventHistory, 0.25)
+        )
     }
 
     private fun survivalForQuartile(eventHistory: List<EventCountAndSurvivalAtTime>, quartileAsDecimal: Double): Double {
@@ -66,35 +67,30 @@ class SurvivalCalculation(
     override fun title(): String {
         return title
     }
-    tailrec fun eventHistory(
+
+    tailrec fun buildEventHistory(
         populationToProcess: List<DiagnosisEpisode>,
         eventHistory: List<EventCountAndSurvivalAtTime> = emptyList(),
     ): List<EventCountAndSurvivalAtTime> {
-        if (populationToProcess.isEmpty()) {
-            return eventHistory
-        }
+        if (populationToProcess.isEmpty()) return eventHistory
 
-        val current = populationToProcess.first()
-        val eventOccurred = eventFunction(current)
-        val time = timeFunction(current)
+        val currentPatient = populationToProcess.first()
+        val time = timeFunction(currentPatient)!!
+        val eventOccurred = eventFunction(currentPatient)!!
 
-        return if (eventOccurred == null || time == null) {
-            eventHistory(populationToProcess.drop(1), eventHistory)
-        } else {
-            val previousEvent = eventHistory.lastOrNull() ?: EventCountAndSurvivalAtTime(0, 0, 1.0)
+        val previousEvent = eventHistory.lastOrNull() ?: EventCountAndSurvivalAtTime(0, 0, 1.0)
+        val populationSize = populationToProcess.size
 
+        val newEventHistory = if (eventOccurred) {
             val newEvent = EventCountAndSurvivalAtTime(
                 daysSinceStart = time,
-                numberOfEvents = if (eventOccurred) previousEvent.numberOfEvents + 1 else previousEvent.numberOfEvents,
-                survival = if (eventOccurred) {
-                    previousEvent.survival * (1 - (1.0 / populationToProcess.size))
-                } else {
-                    previousEvent.survival
-                }
+                numberOfEvents = previousEvent.numberOfEvents + 1,
+                survival = previousEvent.survival * (1 - (1.0 / populationSize))
             )
-
-            eventHistory(populationToProcess.drop(1), eventHistory + newEvent)
+            eventHistory + newEvent
+        } else {
+            eventHistory
         }
+        return buildEventHistory(populationToProcess.drop(1), newEventHistory)
     }
-
 }

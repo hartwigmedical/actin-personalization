@@ -18,7 +18,7 @@ object SurvivalPlot {
     ): Plot? {
         val historiesByName = sortedPopulationsByName.mapValues { (_, patients) ->
             val eligiblePatients = patients.filter(calculation::isEligible)
-            calculation.eventHistory(eligiblePatients)
+            calculation.buildEventHistory(eligiblePatients)
         }.filter { (_, histories) ->
             histories.size >= MIN_PATIENT_COUNT
         }

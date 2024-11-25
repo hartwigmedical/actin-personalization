@@ -110,7 +110,7 @@ class SurvivalCalculationTest {
             assertThat(measurement.value).describedAs("Censored values median for $type").isEqualTo(800.0)
             assertThat(measurement.numPatients).describedAs("Total patients for  $type with censored values").isEqualTo(12)
             assertThat(measurement.min).describedAs("Minimum survival for $type with censored values").isEqualTo(25)
-            assertThat(measurement.max).describedAs("Maximum survival for $type with censored values").isEqualTo(1825)
+            assertThat(measurement.max).describedAs("Maximum survival for $type with censored values").isEqualTo(1600)
             assertThat(measurement.iqr).describedAs("IQR for $type with censored values").isEqualTo(1500.0)
         }
     }

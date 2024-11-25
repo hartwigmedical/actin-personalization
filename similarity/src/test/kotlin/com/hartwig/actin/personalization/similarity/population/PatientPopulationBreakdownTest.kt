@@ -26,14 +26,13 @@ class PatientPopulationBreakdownTest {
             hadSurvivalEvent = true,
             hadProgressionEvent = true
         )
-        val capoxDiagnosis = DIAGNOSIS.copy(ageAtDiagnosis = 85)
         val capoxPatient = patientWithTreatment(
             treatment = Treatment.CAPOX,
             pfsDays = 100,
             osDays = 400,
             hadSurvivalEvent = true,
             hadProgressionEvent = true,
-            diagnosis = capoxDiagnosis
+            ageAtDiagnosis = 85
         )
         val patientsByTreatment = listOf(
             TreatmentGroup.CAPECITABINE_OR_FLUOROURACIL to listOf(fluourouracilPatient, capecitabinePatient),

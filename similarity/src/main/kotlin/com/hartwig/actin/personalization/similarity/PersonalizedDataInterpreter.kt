@@ -45,14 +45,11 @@ class PersonalizedDataInterpreter(val patientsByTreatment: List<Pair<TreatmentGr
         fun createFromReferencePatients(patients: List<ReferencePatient>): PersonalizedDataInterpreter {
             val referencePop = patients
                 .flatMap(ReferencePatient::tumorEntries)
-                .map { (diagnosis, episodes) ->
-                    val episode = episodes.single { it.order == 1 }
-                    DiagnosisEpisode(diagnosis, episode)
-                }
+                .map { (diagnosis, episodes) -> DiagnosisEpisode(diagnosis, episodes.single { it.order == 1 }) }
                 .filter { diagnosisEpisode ->
                     val episode = diagnosisEpisode.episode
                     episode.distantMetastasesDetectionStatus == MetastasesDetectionStatus.AT_START &&
-                            episode.systemicTreatmentPlan?.treatment?.let{it != Treatment.OTHER} == true &&
+                            episode.systemicTreatmentPlan?.treatment?.let{ it != Treatment.OTHER } == true &&
                             episode.surgeries.isEmpty() &&
                             episode.doesNotIncludeAdjuvantOrNeoadjuvantTreatment()
                 }

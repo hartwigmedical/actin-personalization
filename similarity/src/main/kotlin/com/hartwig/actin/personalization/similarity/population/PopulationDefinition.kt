@@ -41,8 +41,7 @@ data class PopulationDefinition(val name: String, val criteria: (DiagnosisEpisod
             episode: Episode,
             metastasisLocationGroups: Set<LocationGroup>
         ): Boolean {
-            val planStart = episode.systemicTreatmentPlan?.intervalTumorIncidenceTreatmentPlanStartDays
-            val cutoffDays = planStart ?: Int.MAX_VALUE
+            val cutoffDays = episode.systemicTreatmentPlan?.intervalTumorIncidenceTreatmentPlanStartDays ?: Int.MAX_VALUE
 
             val groups = episode.metastases.filter { metastasis ->
                 metastasis.intervalTumorIncidenceMetastasisDetectionDays?.let { it < cutoffDays } == true

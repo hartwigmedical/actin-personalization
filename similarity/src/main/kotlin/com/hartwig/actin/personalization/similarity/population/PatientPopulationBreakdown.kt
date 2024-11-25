@@ -60,9 +60,9 @@ class PatientPopulationBreakdown(
                 "$yAxisLabel by population" to it
             },
             SurvivalPlot.createSurvivalPlot(groupByWho(filteredPatients), calculation, yAxisLabel)?.let {
-                "WHO" to it
+                "$yAxisLabel by WHO" to it
             }
-        ).toMap()
+        )
 
         val populationPlotsByTreatment = populationDefinitions.mapNotNull { definition ->
             val patientsByTreatment = filteredPatients.filter { definition.criteria(it) }.groupBy {

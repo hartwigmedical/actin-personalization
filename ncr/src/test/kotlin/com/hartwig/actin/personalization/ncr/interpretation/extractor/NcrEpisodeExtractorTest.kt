@@ -17,7 +17,6 @@ import com.hartwig.actin.personalization.datamodel.ReasonRefrainmentFromTumorDir
 import com.hartwig.actin.personalization.datamodel.ResponseMeasure
 import com.hartwig.actin.personalization.datamodel.ResponseType
 import com.hartwig.actin.personalization.datamodel.StageTnm
-import com.hartwig.actin.personalization.datamodel.SystemicTreatmentPlan
 import com.hartwig.actin.personalization.datamodel.TnmM
 import com.hartwig.actin.personalization.datamodel.TnmN
 import com.hartwig.actin.personalization.datamodel.TnmT
@@ -40,24 +39,39 @@ class NcrEpisodeExtractorTest {
     }
 
     @Test
-    fun `Should filter out invalid lab measurements (9999 or null)`() {
+    fun `Should filter out invalid lab measurements (9999, null, or out of extreme ranges)`() {
         val modifiedNcrRecord = NCR_RECORD.copy(
             labValues = NCR_LAB_VALUES.copy(
                 ldh1 = null,
+                ldh2 = 9999,
+                ldh3 = 5000,
                 albumine1 = 9999.0,
-                ldh2 = 9999
+                albumine2 = 90.0,
+                albumine3 = 40.5,
+                neutro1 = 500.0,
+                neutro2 = 30.5,
+                leuko1 = 50.5,
+                prechirCea = 9999.0,
+                postchirCea = null
             )
         )
 
-        val expectedModifiedEpisode = expectedEpisode.copy(
-            labMeasurements = expectedEpisode.labMeasurements.filterNot {
-                it.name == LabMeasure.LACTATE_DEHYDROGENASE || it.name == LabMeasure.ALBUMINE
-            }
+        val expectedEpisodeInvalidLabMeasurements = expectedEpisode.copy(
+            labMeasurements = listOf(
+                LabMeasurement(LabMeasure.ALKALINE_PHOSPHATASE, 20.0, Unit.UNIT_PER_LITER, 2, null, null),
+                LabMeasurement(LabMeasure.NEUTROPHILS_ABSOLUTE, 30.5, Unit.BILLIONS_PER_LITER, null, null, null),
+                LabMeasurement(LabMeasure.ALBUMINE, 40.5, Unit.GRAM_PER_LITER, null, null, null),
+                LabMeasurement(LabMeasure.LEUKOCYTES_ABSOLUTE, 50.5, Unit.BILLIONS_PER_LITER, 5, null, null)
+            )
         )
+
         val episode = NcrEpisodeExtractor(NcrSystemicTreatmentPlanExtractor()).extractEpisode(modifiedNcrRecord, 80)
+
         assertThat(episode.systemicTreatmentPlan).isNotNull
-        assertThat(episode.copy(systemicTreatmentPlan = null)).isEqualTo(expectedModifiedEpisode)
+        assertThat(episode.copy(systemicTreatmentPlan = null)).isEqualTo(expectedEpisodeInvalidLabMeasurements)
     }
+
+
     @Test
     fun `Should set maximumSizeOfLiverMetastasisMm to null when value is 999`() {
         val modifiedNcrRecord = NCR_RECORD.copy(
@@ -75,7 +89,6 @@ class NcrEpisodeExtractorTest {
         assertThat(episode.systemicTreatmentPlan).isNotNull
         assertThat(episode.copy(systemicTreatmentPlan = null)).isEqualTo(expectedEpisodeWithNullMetastasisSize)
     }
-
 
     companion object {
         private val expectedEpisode = Episode(
@@ -145,4 +158,5 @@ class NcrEpisodeExtractorTest {
             )
         )
     }
+
 }
