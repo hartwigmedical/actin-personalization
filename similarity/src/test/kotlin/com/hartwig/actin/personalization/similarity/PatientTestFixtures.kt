@@ -69,7 +69,7 @@ fun patientWithTreatment(
     hadProgressionEvent: Boolean? = null,
     ageAtDiagnosis: Int? = null
 ): DiagnosisEpisode {
-    val SystemicTreatmentPlan = SystemicTreatmentPlan(
+    val systemicTreatmentPlan = SystemicTreatmentPlan(
         treatment = treatment,
         systemicTreatmentSchemes = emptyList(),
         intervalTumorIncidenceTreatmentPlanStartDays = planStart,
@@ -78,7 +78,7 @@ fun patientWithTreatment(
         hadProgressionEvent = hadProgressionEvent
     )
     val updatedEpisode = EPISODE.copy(
-        systemicTreatmentPlan = SystemicTreatmentPlan
+        systemicTreatmentPlan = systemicTreatmentPlan
     )
     val updatedDiagnosis = DIAGNOSIS.copy(
         ageAtDiagnosis = ageAtDiagnosis ?: DIAGNOSIS.ageAtDiagnosis,
