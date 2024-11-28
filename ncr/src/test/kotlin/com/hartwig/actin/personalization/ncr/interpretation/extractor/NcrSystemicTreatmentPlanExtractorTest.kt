@@ -14,12 +14,13 @@ class NcrSystemicTreatmentPlanExtractorTest {
     @Test
     fun `Should extract systemic treatment plan`() {
         val pfsMeasures = listOf(
-            PfsMeasure(PfsMeasureType.PROGRESSION, null, 100),
-            PfsMeasure(PfsMeasureType.DEATH, null, 200),
+            PfsMeasure(PfsMeasureType.CENSOR, null, 1),
+            PfsMeasure(PfsMeasureType.PROGRESSION, null, 4),
+            PfsMeasure(PfsMeasureType.DEATH, null, 100),
         )
 
         val plan = NcrSystemicTreatmentPlanExtractor()
-            .extractSystemicTreatmentPlan(NCR_SYSTEMIC_TREATMENT, pfsMeasures, ResponseMeasure(ResponseType.PD, 3), 300)
+            .extractSystemicTreatmentPlan(NCR_SYSTEMIC_TREATMENT, pfsMeasures, ResponseMeasure(ResponseType.PD, 3), 80)
         assertThat(plan!!.treatment).isEqualTo(Treatment.FOLFOXIRI_B)
 
         val expectedDrugs = mapOf(
@@ -34,7 +35,7 @@ class NcrSystemicTreatmentPlanExtractorTest {
         assertThat(plan.intervalTumorIncidenceTreatmentPlanStartDays).isEqualTo(1)
         assertThat(plan.intervalTumorIncidenceTreatmentPlanStopDays).isEqualTo(7)
         assertThat(plan.intervalTreatmentPlanStartResponseDays).isEqualTo(2)
-        assertThat(plan.observedOsFromTreatmentStartDays).isEqualTo(299)
+        assertThat(plan.observedOsFromTreatmentStartDays).isEqualTo(79)
     }
 
     @Test

@@ -5,5 +5,5 @@ enum class TreatmentCategory {
     CHEMORADIATION,
     HORMONAL_THERAPY,
     OTHER_TREATMENTS,
-    TARGETED_THERAPY,
+    TARGETED_THERAPY
 }

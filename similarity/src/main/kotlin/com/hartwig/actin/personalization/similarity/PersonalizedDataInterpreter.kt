@@ -1,13 +1,14 @@
 package com.hartwig.actin.personalization.similarity
 
-import com.hartwig.actin.personalization.datamodel.MetastasesDetectionStatus
 import com.hartwig.actin.personalization.datamodel.Episode
+import com.hartwig.actin.personalization.datamodel.TreatmentGroup
+import com.hartwig.actin.personalization.datamodel.DiagnosisEpisode
 import com.hartwig.actin.personalization.datamodel.LocationGroup
 import com.hartwig.actin.personalization.datamodel.ReferencePatient
+import com.hartwig.actin.personalization.datamodel.MetastasesDetectionStatus
 import com.hartwig.actin.personalization.datamodel.Treatment
-import com.hartwig.actin.personalization.datamodel.TreatmentGroup
 import com.hartwig.actin.personalization.datamodel.serialization.ReferencePatientJson
-import com.hartwig.actin.personalization.similarity.population.DiagnosisAndEpisode
+
 import com.hartwig.actin.personalization.similarity.population.PatientPopulationBreakdown
 import com.hartwig.actin.personalization.similarity.population.PersonalizedDataAnalysis
 import io.github.oshai.kotlinlogging.KotlinLogging
@@ -20,7 +21,7 @@ private fun Episode.doesNotIncludeAdjuvantOrNeoadjuvantTreatment(): Boolean {
             !hasHadPostSurgerySystemicTargetedTherapy
 }
 
-class PersonalizedDataInterpreter(val patientsByTreatment: List<Pair<TreatmentGroup, List<DiagnosisAndEpisode>>>) {
+class PersonalizedDataInterpreter(val patientsByTreatment: List<Pair<TreatmentGroup, List<DiagnosisEpisode>>>) {
 
     fun analyzePatient(
         age: Int, whoStatus: Int, hasRasMutation: Boolean, metastasisLocationGroups: Set<LocationGroup>
@@ -42,12 +43,13 @@ class PersonalizedDataInterpreter(val patientsByTreatment: List<Pair<TreatmentGr
         }
 
         fun createFromReferencePatients(patients: List<ReferencePatient>): PersonalizedDataInterpreter {
-            val referencePop = patients.flatMap(ReferencePatient::tumorEntries).map { (diagnosis, episodes) ->
-                diagnosis to episodes.single { it.order == 1 }
-            }
-                .filter { (_, episode) ->
+            val referencePop = patients
+                .flatMap(ReferencePatient::tumorEntries)
+                .map { (diagnosis, episodes) -> DiagnosisEpisode(diagnosis, episodes.single { it.order == 1 }) }
+                .filter { diagnosisEpisode ->
+                    val episode = diagnosisEpisode.episode
                     episode.distantMetastasesDetectionStatus == MetastasesDetectionStatus.AT_START &&
-                            episode.systemicTreatmentPlan?.treatment?.let { it != Treatment.OTHER } == true &&
+                            episode.systemicTreatmentPlan?.treatment?.let{ it != Treatment.OTHER } == true &&
                             episode.surgeries.isEmpty() &&
                             episode.doesNotIncludeAdjuvantOrNeoadjuvantTreatment()
                 }
@@ -60,5 +62,7 @@ class PersonalizedDataInterpreter(val patientsByTreatment: List<Pair<TreatmentGr
 
             return PersonalizedDataInterpreter(patientsByTreatment)
         }
+
+
     }
 }

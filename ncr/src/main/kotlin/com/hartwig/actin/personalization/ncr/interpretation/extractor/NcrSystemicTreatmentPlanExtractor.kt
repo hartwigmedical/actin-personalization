@@ -26,6 +26,7 @@ class NcrSystemicTreatmentPlanExtractor {
     ): SystemicTreatmentPlan? {
         val treatmentSchemes = extractSystemicTreatmentSchemes(systemicTreatment)
         val firstScheme = treatmentSchemes.firstOrNull() ?: return null
+
         val treatment = extractTreatmentFromSchemes(treatmentSchemes)
         val daysUntilPlanStart = firstScheme.intervalTumorIncidenceTreatmentLineStartMinDays
         val daysUntilPlanEnd = treatmentSchemes.last().intervalTumorIncidenceTreatmentLineStopMaxDays
