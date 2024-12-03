@@ -1,0 +1,150 @@
+import numpy as np
+
+stageTnm_lookup = {
+    "ZERO": 0.0, "I": 1.0, "IA1": 1.0, "IA": 1.0, "IA2": 1.0, "IA3": 1.0, "IB": 1.0,
+    "II": 2.0, "IIA": 2.0, "IIB": 2.0, "IIC": 2.0,
+    "III": 3.0, "IIIA": 3.0, "IIIB": 3.0, "IIIC": 3.0,
+    "IV": 4.0, "IVA": 4.0, "IVB": 4.0, "IVC": 4.0,
+    "M": 4.0, "NA": np.nan, "X": np.nan,
+}
+
+tnmM_lookup = {
+    "M0": 0,
+    "M1": 1, "M1A": 1.0, "M1B": 1.0, "M1C": 1.0,
+    "M_MINUS": 0,
+    "X": np.nan,
+}
+
+tnmN_lookup = {
+    "N0": 0,
+    "N1": 1, "N1A": 1,"N1B": 1, "N1C": 1.0, "N1M": 1,
+    "N2": 2, "N2A": 2.0, "N2B": 2.0,
+    "X": np.nan
+}
+
+tnmT_lookup = {
+    "T0": 0,
+    "T_IS": 0.5,
+    "T1": 1,
+    "T2": 2,
+    "T3": 3,
+    "T4A": 4.0,
+    "T4B": 4.0,
+    "X": np.nan
+}
+
+lookup_dictionary = {
+    "anorectalVergeDistanceCategory": {
+        "ZERO_TO_FIVE_CM": 2.5,
+        "FIVE_TO_TEN_CM": 7.5,
+        "TEN_TO_FIFTEEN_CM": 12.5,
+        "OVER_FIFTEEN_CM": 17.5,
+    },
+    "cciNumberOfCategories": {
+        "ZERO_CATEGORIES": 0,
+        "ONE_CATEGORY": 1,
+    },
+    "numberOfLiverMetastases": {
+        "ONE": 1,
+        "TWO": 2,
+        "THREE": 3,
+        "FOUR": 4,
+        "FIVE_OR_MORE": 5,
+        "MULTIPLE_BUT_EXACT_NUMBER_UNKNOWN": 5  # The median number of multiple metastases is 5+
+    },
+    "asaClassificationPreSurgeryOrEndoscopy": {
+        "I": 1,
+        "II": 2,
+        "III": 3,
+        "IV": 4,
+        "V": 5,
+        "VI": 6,
+    },
+    "tumorRegression": {
+        "CANNOT_BE_DETERMINED": np.nan,
+        "FULL_REGRESSION": 1,
+        "MINIMAL_FOCI": 0.9,  # https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4946373/
+        "MINIMAL_REGRESSION": 0.2,
+        "MODERATE_REGRESSION": 0.5,
+        "NO_SIGNS_OF_REGRESSION": 0,
+        "NA": np.nan,
+    },
+    "tumorDifferentiationGrade": {
+        "GRADE_1_OR_WELL_DIFFERENTIATED": 1,
+        "GRADE_2_OR_MODERATELY_DIFFERENTIATED": 2,
+        "GRADE_3_OR_POORLY_DIFFERENTIATED": 3,
+        "GRADE_4_OR_UNDIFFERENTIATED_OR_ANAPLASTIC_OR_GGG4": 4
+    },
+    "tnmCT": tnmT_lookup,
+    "tnmPT": tnmT_lookup,
+    "tnmCN": tnmN_lookup,
+    "tnmPN": tnmN_lookup,
+    "tnmCM": tnmM_lookup,
+    "tnmPM": tnmM_lookup,
+    "stageCTNM": stageTnm_lookup,
+    "stagePTNM": stageTnm_lookup,
+    "stageTNM": stageTnm_lookup,
+}
+
+
+features = [
+     'ageAtDiagnosis',
+     'tumorIncidenceYear',
+     'sex',
+     'whoStatusPreTreatmentStart',
+     'consolidatedTumorType',
+     'hasHadPriorTumor',
+     'cci',
+     'cciNumberOfCategories',
+     'cciHasAids',
+     'cciHasCongestiveHeartFailure',
+     'cciHasCollagenosis',
+     'cciHasCopd',
+     'cciHasCerebrovascularDisease',
+     'cciHasDementia',
+     'cciHasDiabetesMellitus',
+     'cciHasDiabetesMellitusWithEndOrganDamage',
+     'cciHasOtherMalignancy',
+     'cciHasOtherMetastaticSolidTumor',
+     'cciHasMyocardialInfarct',
+     'cciHasMildLiverDisease',
+     'cciHasHemiplegiaOrParaplegia',
+     'cciHasPeripheralVascularDisease',
+     'cciHasRenalDisease',
+     'cciHasLiverDisease',
+     'cciHasUlcerDisease',
+     'presentedWithIleus',
+     'presentedWithPerforation',
+     'anorectalVergeDistanceCategory',
+     'hasMsi',
+     'hasBrafMutation',
+     'hasBrafV600EMutation',
+     'hasRasMutation',
+     'hasKrasG12CMutation',
+     'asaClassificationPreSurgeryOrEndoscopy',
+     'tumorBasisOfDiagnosis',
+     'tumorLocation',
+     'tumorDifferentiationGrade',
+     'tnmCT',
+     'tnmCN',
+     'tnmCM',
+     'stageCTNM',
+     'stageTNM',
+     'investigatedLymphNodesNumber',
+     'positiveLymphNodesNumber',
+     'distantMetastasesDetectionStatus',
+     'numberOfLiverMetastases',
+     'maximumSizeOfLiverMetastasisMm',
+     'hasDoublePrimaryTumor',
+     'mesorectalFasciaIsClear',
+     'distanceToMesorectalFasciaMm',
+     'venousInvasionDescription',
+     'lymphaticInvasionCategory',
+     'extraMuralInvasionCategory',
+     'tumorRegression',
+     'hasParticipatedInTrial',
+     'metastasesSurgeries',
+     'radiotherapies',
+     'metastasisLocationGroupsPriorToSystemicTreatment',
+     'systemicTreatmentPlan'
+]
