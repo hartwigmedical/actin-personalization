@@ -35,7 +35,9 @@ class PersonalizationReportWriterApplication : Callable<Int> {
             .analyzePatient(age, whoStatus, hasRasMutation, extractTopLevelLocationGroups(metastasisLocationString))
 
         val measurementTables = listOf(
-            MeasurementType.TREATMENT_DECISION, MeasurementType.PROGRESSION_FREE_SURVIVAL,
+            MeasurementType.TREATMENT_DECISION,
+            MeasurementType.PROGRESSION_FREE_SURVIVAL,
+            MeasurementType.OVERALL_SURVIVAL
         ).map { TableContent.createForMeasurementType(analysis, it) }
 
         LOGGER.info { "Writing PDF report to $outputPath" }

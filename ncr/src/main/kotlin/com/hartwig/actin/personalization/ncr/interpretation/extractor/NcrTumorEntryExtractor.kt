@@ -2,6 +2,7 @@ package com.hartwig.actin.personalization.ncr.interpretation.extractor
 
 import com.hartwig.actin.personalization.datamodel.Diagnosis
 import com.hartwig.actin.personalization.datamodel.Episode
+import com.hartwig.actin.personalization.datamodel.MetastasesDetectionStatus
 import com.hartwig.actin.personalization.datamodel.PriorTumor
 import com.hartwig.actin.personalization.datamodel.TumorEntry
 import com.hartwig.actin.personalization.ncr.datamodel.NcrRecord
@@ -20,7 +21,15 @@ class NcrTumorEntryExtractor(private val episodeExtractor: NcrEpisodeExtractor) 
     fun extractTumorEntry(records: List<NcrRecord>): TumorEntry {
         val diagnosisRecord = records.single { it.identification.epis == DIAGNOSIS_EPISODE }
         val intervalTumorIncidenceLatestAliveStatus = diagnosisRecord.patientCharacteristics.vitStatInt!!
-        val episodes = records.map { record -> episodeExtractor.extractEpisode(record, intervalTumorIncidenceLatestAliveStatus) }
+        val episodes = records.map { record ->
+            episodeExtractor.extractEpisode(record, intervalTumorIncidenceLatestAliveStatus)
+        }.sortedBy(Episode::order)
+        val orderOfFirstDistantMetastasesEpisode = episodes.firstOrNull { episode ->
+            episode.distantMetastasesDetectionStatus in setOf(
+                MetastasesDetectionStatus.AT_START,
+                MetastasesDetectionStatus.AT_PROGRESSION
+            )
+        }?.order ?: throw IllegalStateException("orderOfFirstDistantMetastasesEpisode is not allowed to be null")
         val locations = episodes.map(Episode::tumorLocation).toSet()
         val priorTumors = extractPriorTumors(diagnosisRecord)
 
@@ -51,6 +60,8 @@ class NcrTumorEntryExtractor(private val episodeExtractor: NcrEpisodeExtractor) 
                 hadSurvivalEvent = patientCharacteristics.vitStat!! == 1,
                 hasHadPriorTumor = priorTumors.isNotEmpty(),
                 priorTumors = priorTumors,
+                orderOfFirstDistantMetastasesEpisode = orderOfFirstDistantMetastasesEpisode,
+                isMetachronous = orderOfFirstDistantMetastasesEpisode > 1,
                 cci = comorbidities.cci,
                 cciNumberOfCategories = NcrCciNumberOfCategoriesMapper.resolve(comorbidities.cciCat),
                 cciHasAids = NcrBooleanMapper.resolve(comorbidities.cciAids),
