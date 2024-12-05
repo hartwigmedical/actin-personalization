@@ -25,7 +25,7 @@ def generate_suggestions(input_series, output_dir, timeout_seconds, hf_token):
     output = {}
     try:
         logger.info(f'Generating suggestions')
-        results = Parallel(n_jobs=4)(delayed(_suggestion_for_input)(palga_input) for palga_input in input_series)
+        results = Parallel(n_jobs=2)(delayed(_suggestion_for_input)(palga_input) for palga_input in input_series)
         output = {input_text: extracted for (input_text, extracted) in results}
 
     except TimeoutException:
@@ -47,7 +47,7 @@ def _suggestion_for_input(palga_input):
             "relevantText": {"type": "string", "comment": "The input text used to determine the appropriate value. This should always be provided when the value is not null"},
             "textInEnglish": {"type": "string", "comment": "The relevant input text translated to English"},
             "explanation": {"type": "string", "comment": "Describe how the value is specified by the input, when applicable"},
-            "selfEvaluation": {"type": "string", "comment": "Evaluation of the explanation given for how the value was derived from the relevant text"},
+            "selfEvaluation": {"type": "string", "comment": "Evaluation of the explanation given for how the value was determined from the relevant text, and whether any assumptions were made"},
             "confidence": {"type": "number", "comment": "Confidence level in extracted value as a percentage"},
             "nullableBoolean": {
                 "type": "object",
@@ -64,11 +64,34 @@ def _suggestion_for_input(palga_input):
         },
         "type": "object",
         "properties": {
-            "hasBrafV600EMutation": {"$ref": "#/$defs/nullableBoolean", "comment": "Indicates the presence of a V-to-E substitution in codon 600 of gene BRAF"},
-            "hasBrafMutation": {"$ref": "#/$defs/nullableBoolean", "comment": "Indicates the presence of any mutation in gene BRAF"},
-            "hasKrasG12CMutation": {"$ref": "#/$defs/nullableBoolean", "comment": "Indicates the presence of a G-to-C substitution in codon 12 of gene KRAS"},
-            "hasRasMutation": {"$ref": "#/$defs/nullableBoolean", "comment": "Indicates the presence of any mutation in the RAS family of genes"},
-            "microsatelliteInstability": {"$ref": "#/$defs/nullableBoolean", "comment": "Indicates whether the tumor is microsatellite-unstable"},
+            "hasBrafV600EMutation": {
+                "$ref": "#/$defs/nullableBoolean",
+                "comment": "True if the report indicates a V-to-E substitution in codon 600 of gene BRAF. " +
+                           "False if the report indicates another mutation at this position, no mutation at this " +
+                           "position, or no BRAF mutations. In all other cases, this field should be null."
+            },
+            "hasBrafMutation": {
+                "$ref": "#/$defs/nullableBoolean",
+                "comment": "True if the report indicates any mutation in gene BRAF. " +
+                           "False if the report indicates no mutations in this gene. " +
+                           "In all other cases, this field should be null."
+            },
+            "hasKrasG12CMutation": {
+                "$ref": "#/$defs/nullableBoolean",
+                "comment": "True if the report indicates a G-to-C substitution in codon 12 of gene KRAS. " +
+                           "False if the report indicates another mutation at this position, no mutation at this " +
+                           "position, or no KRAS mutations. In all other cases, this field should be null."
+            },
+            "hasRasMutation": {
+                "$ref": "#/$defs/nullableBoolean",
+                "comment": "True if the report indicates any mutation in the RAS family of genes. " +
+                           "False if the report indicates that there are no mutations in any RAS genes. " +
+                           "In all other cases, this field should be null."
+            },
+            "microsatelliteInstability": {
+                "$ref": "#/$defs/nullableBoolean",
+                "comment": "Indicates whether the tumor is microsatellite-unstable"
+            },
             "tumorMutationalBurden": {
                 "type": "object",
                 "properties": {
@@ -100,7 +123,59 @@ def _suggestion_for_input(palga_input):
         },
         {
             "role": "user",
-            "content": "Please summarize the following report delimited by triple-quotes: \"\"\"" + palga_input + "\"\"\""
+            "content": "Please summarize the following report delimited by triple-quotes: \"\"\"\n" +
+                       "Geen mutaties gedetecteerd in B-Raf codon 600. " +
+                       "Door middel MMR eiwitaankleuring werd geen deficientie in mismatch repair genen aangetoond." +
+                       "\n\"\"\""
+        },
+        {
+            "role": "assistant",
+            "content": json.dumps({
+                "hasBrafV600EMutation": {
+                    'relevantText': 'Geen mutaties gedetecteerd in B-Raf codon 600.',
+                    'textInEnglish': 'No mutations detected in B-Raf codon 600.',
+                    'value': False,
+                    'explanation': 'The report explicitly states that no mutations were detected in B-Raf codon 600.',
+                    'selfEvaluation': 'The explanation is clear and accurate based on the provided text.',
+                    'confidence': 100
+                },
+                "hasBrafMutation": {
+                    'relevantText': 'Geen mutaties gedetecteerd in B-Raf codon 600.',
+                    'textInEnglish': 'No mutations detected in B-Raf codon 600.',
+                    'value': False,
+                    'explanation': 'The report indicates that no mutations were detected in the B-Raf gene.',
+                    'selfEvaluation': 'The explanation is accurate and reflects the information given in the report.',
+                    'confidence': 100
+                },
+                "hasKrasG12CMutation": {
+                    'value': None,
+                    'explanation': 'The report does not provide information about KRAS.',
+                    'selfEvaluation': 'The explanation is accurate.',
+                },
+                "hasRasMutation": {
+                    'value': None,
+                    'explanation': 'The report does not provide information about RAS genes',
+                    'selfEvaluation': 'The explanation accurately reflects the information given in the report.',
+                },
+                "microsatelliteInstability": {
+                    'relevantText': 'Door middel MMR eiwitaankleuring werd geen deficientie in mismatch repair genen aangetoond.',
+                    'textInEnglish': 'MMR protein staining did not demonstrate a deficiency in mismatch repair genes.',
+                    'value': False,
+                    'explanation': 'The report states that no mismatch repair gene deficiency was observed, ' +
+                                   'which implies microsatellite stability',
+                    'selfEvaluation': 'This determination required inferring microsatellite stability from mismatch repair gene observations.',
+                    'confidence': 85
+                },
+                "tumorMutationalBurden": {
+                    'value': None,
+                    'explanation': 'The report does not provide information about TMB',
+                    'selfEvaluation': 'The explanation accurately reflects the information given in the report.',
+                }
+            })
+        },
+        {
+            "role": "user",
+            "content": "Please summarize the following report delimited by triple-quotes: \"\"\"\n" + palga_input + "\n\"\"\""
         }
     ]
     client = OpenAI(base_url="http://localhost:8000/v1", api_key="key")
