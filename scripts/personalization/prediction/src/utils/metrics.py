@@ -1,12 +1,16 @@
 import numpy as np
 from lifelines.utils import concordance_index
-from sksurv.metrics import concordance_index_censored, integrated_brier_score, brier_score
+from sksurv.metrics import concordance_index_censored, integrated_brier_score, brier_score, cumulative_dynamic_auc
 import pandas as pd
 from sklearn.calibration import calibration_curve
 
 def calculate_c_index(event_times, predicted_scores, event_observed):
     c_index = concordance_index_censored(event_observed, event_times, predicted_scores)[0]
     return c_index
+
+def calculate_time_dependent_auc(y_train, y_test, risk_scores, times):
+    auc_times, auc_scores = cumulative_dynamic_auc(y_train, y_test, risk_scores, times)
+    return auc_times, auc_scores
 
 def calculate_brier_score(y_train, y_test, prediction, times, ipcw = False):
     """
@@ -22,7 +26,6 @@ def calculate_brier_score(y_train, y_test, prediction, times, ipcw = False):
         ibs = integrated_brier_score(y_train, y_test, prediction, times)
         
     return ibs
-
 
 def calibration_assessment(predictions, y_test, times, n_bins=10):
     """

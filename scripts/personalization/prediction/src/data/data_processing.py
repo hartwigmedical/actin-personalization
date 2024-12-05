@@ -5,34 +5,20 @@ from sklearn.impute import KNNImputer
 from sklearn.preprocessing import LabelEncoder, OneHotEncoder
 from sklearn.preprocessing import MinMaxScaler, StandardScaler
 from sklearn.model_selection import train_test_split
-from lookups import *
 
-import re
+from .lookups import LookupManager
+from ..utils.utils import stratify_by_treatment
 
 class DataSplitter:
     def __init__(self, test_size=0.1, random_state=42):
         self.test_size = test_size
         self.random_state = random_state
 
-    def stratify_by_treatment(self, X, treatment_col, encoded_columns):
-        """
-        Create a stratification label based only on treatment type.
-        """
-        if treatment_col in encoded_columns:
-            treatment_col_encoded = encoded_columns[treatment_col]
-            if len(treatment_col_encoded) == 1:
-                treatment_data = X[treatment_col_encoded[0]]
-            else:
-                treatment_data = X[treatment_col_encoded].idxmax(axis=1)
- 
-        return treatment_data.astype(str)
-
-
     def split(self, X, y, treatment_col, encoded_columns):
         """
         Split the data into training and test sets, stratified by treatment type and censoring status.
         """
-        stratify_labels = self.stratify_by_treatment(X, treatment_col, encoded_columns)
+        stratify_labels = stratify_by_treatment(X, treatment_col, encoded_columns)
         
         label_counts = stratify_labels.value_counts()
        
@@ -60,8 +46,8 @@ class DataPreprocessor:
         df = df[~df[features].isna().all(axis=1)].copy()
 
         df = self.impute_knn(df, ['whoStatusPreTreatmentStart'], k=7)
-
-        df = self.numerize(df, lookup_dictionary)
+        lookup = LookupManager()
+        df = self.numerize(df, lookup.lookup_dictionary)
         df = self.handle_missing_values(df)
         
         df = self.expand_column_groups(df, column_name = 'metastasisLocationGroupsPriorToSystemicTreatment')
