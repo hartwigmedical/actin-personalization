@@ -72,7 +72,7 @@ class ModelTrainer:
 
         Args:
             X: Feature DataFrame.
-            y: Target DataFrame.
+            y: Target DataFrame (structured array or DataFrame).
             indices: Train and validation indices.
             event_col: Column name for event indicator.
             duration_col: Column name for duration.
@@ -82,20 +82,15 @@ class ModelTrainer:
         """
         train_idx, val_idx = indices
         X_train, X_val = X.iloc[train_idx], X.iloc[val_idx]
-        y_train, y_val = y[train_idx], y[val_idx]
-        
-        y_train_df = pd.DataFrame({'duration': y_train[duration_col], 'event': y_train[event_col]}, index=X_train.index)
-        y_val_df = pd.DataFrame({'duration': y_val[duration_col], 'event': y_val[event_col]}, index=X_val.index)
-        
-        X_train.reset_index(drop=True, inplace=True)
-        X_val.reset_index(drop=True, inplace=True)
-        y_train_df.reset_index(drop=True, inplace=True)
-        y_val_df.reset_index(drop=True, inplace=True)
+
+        y_df = pd.DataFrame({'duration': y[duration_col], 'event': y[event_col]}, index=X.index)
+        y_train_df, y_val_df = y_df.iloc[train_idx], y_df.iloc[val_idx]
 
         y_train_structured = Surv.from_dataframe('event', 'duration', y_train_df)
         y_val_structured = Surv.from_dataframe('event', 'duration', y_val_df)
 
         return X_train, y_train_structured, X_val, y_val_structured, y_val_df
+
     
     def _get_survival_metrics(self, model, model_name, surv_funcs, risk_scores, X_val, y_val_df, y_val_structured):
         """
@@ -207,7 +202,6 @@ class ModelTrainer:
         folds = self.cross_validate(X_train, y_train, treatment_col, encoded_columns)
 
         for model_name, model_template in self.models.items():
-            print(f"Training {model_name}...")
             model_metrics = {'c_index': [], 'ibs': [], 'ce': [], 'auc': []}
 
             for fold_indices in folds:
@@ -237,7 +231,6 @@ class ModelTrainer:
             self.results[model_name] = {key: np.nanmean(values) for key, values in model_metrics.items()}
             print(f"{model_name} Results: {self.results[model_name]}")
             
-            print(f"Retraining {model_name} on the full training dataset...")
             final_model = self._initialize_model(model_template, input_size=X_train.shape[1])
 
             y_train_df = pd.DataFrame({'duration': y_train[duration_col], 'event': y_train[event_col]}, index=X_train.index)
@@ -256,6 +249,6 @@ class ModelTrainer:
 
             self.trained_models[model_name] = final_model
 
-        return self.results
+        return self.results, self.trained_models
 
 
