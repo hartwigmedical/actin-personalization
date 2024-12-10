@@ -66,9 +66,10 @@ class BaseSurvivalModel:
         return X.drop(columns=to_drop, errors="ignore")
         
 class CoxPHModel(BaseSurvivalModel):
-    def __init__(self):
+    def __init__(self, **kwargs):
         super().__init__()
-        self.model = CoxPHSurvivalAnalysis()
+        self.kwargs = kwargs
+        self.model = CoxPHSurvivalAnalysis(**self.kwargs)
         self.selected_features = None
 
     def fit(self, X, y):       
@@ -86,9 +87,11 @@ class CoxPHModel(BaseSurvivalModel):
         return self.model.predict(X[self.selected_features])
     
 class AalenAdditiveModel(BaseSurvivalModel):
-    def __init__(self, coef_penalizer=1.0):
+    def __init__(self, **kwargs):
         super().__init__()
-        self.model = AalenAdditiveFitter(coef_penalizer=coef_penalizer)
+        self.kwargs = kwargs
+        self.model = AalenAdditiveFitter(**self.kwargs)
+
         self.selected_features = None
 
     def fit(self, X, y):
@@ -145,14 +148,10 @@ class AalenAdditiveModel(BaseSurvivalModel):
         return risk_scores
 
 class RandomSurvivalForestModel(BaseSurvivalModel):
-    def __init__(self, n_estimators=100, min_samples_split=10, min_samples_leaf=15):
+    def __init__(self, **kwargs):
         super().__init__()
-        self.model = RandomSurvivalForest(
-            n_estimators=n_estimators,
-            min_samples_split=min_samples_split,
-            min_samples_leaf=min_samples_leaf,
-            random_state=42,
-        )
+        self.kwargs = kwargs
+        self.model = RandomSurvivalForest(**self.kwargs)
 
     def fit(self, X, y):
         self.model.fit(X, y)
@@ -164,9 +163,10 @@ class RandomSurvivalForestModel(BaseSurvivalModel):
         return self.model.predict(X)
 
 class GradientBoostingSurvivalModel(BaseSurvivalModel):
-    def __init__(self):
+    def __init__(self, **kwargs):
         super().__init__()
-        self.model = GradientBoostingSurvivalAnalysis(loss="coxph", learning_rate=0.1, n_estimators=100, subsample=0.8, max_depth=3, random_state=42)
+        self.kwargs = kwargs
+        self.model = GradientBoostingSurvivalAnalysis(random_state=42, **self.kwargs)
         
     def fit(self, X, y):
         self.model.fit(X, y)
@@ -178,7 +178,7 @@ class GradientBoostingSurvivalModel(BaseSurvivalModel):
         return self.model.predict(X)
 
 class NNSurvivalModel(BaseSurvivalModel):
-    def __init__(self, model_class, input_size, num_nodes=[128, 64, 32], dropout=0.1, lr=1e-3, batch_size=64, epochs=100, num_durations=None, early_stopping_patience=5, **kwargs):
+    def __init__(self, model_class, input_size, num_nodes=[128, 64, 32], dropout=0.1, lr=1e-3, batch_size=64, epochs=100, num_durations=None, early_stopping_patience=5, batch_norm=False, weight_decay=1e-4, activation='relu', optimizer='Adam', **kwargs):
         """
         Generalized neural survival model.
         :param model_class: The specific survival model class (e.g., LogisticHazard, DeepHitSingle, etc.).
@@ -203,8 +203,14 @@ class NNSurvivalModel(BaseSurvivalModel):
         self.early_stopping_patience = early_stopping_patience
 
         # Define the neural network architecture
-        self.net = tt.practical.MLPVanilla(self.input_size, self.num_nodes, self.num_durations if self.num_durations else 1, self.dropout)
-        self.optimizer = tt.optim.Adam(self.lr, weight_decay=1e-4)
+        self.net = tt.practical.MLPVanilla(in_features=self.input_size, num_nodes=self.num_nodes, out_features=self.num_durations if self.num_durations else 1, activation=activation, batch_norm=batch_norm, dropout=self.dropout)
+        if optimizer.lower() == "adam":
+            self.optimizer = tt.optim.Adam(self.lr, weight_decay=weight_decay)
+        elif optimizer.lower() == "rmsprop":
+            self.optimizer = tt.optim.RMSProp(self.lr, weight_decay=weight_decay)
+        else:
+            raise ValueError(f"Unknown optimizer: {optimizer}")
+
         self.model = model_class(self.net, self.optimizer, **kwargs)
 
     def fit(self, X, y, val_data=None):
@@ -274,21 +280,21 @@ class NNSurvivalModel(BaseSurvivalModel):
         return risk_scores
     
 class DeepSurv(NNSurvivalModel):
-    def __init__(self, input_size, num_nodes=[64, 32], dropout=0.1, lr=1e-3, batch_size=32, epochs=500):
-        super().__init__(CoxPH, input_size, num_nodes, dropout, lr, batch_size, epochs)
+    def __init__(self, **kwargs):
+        super().__init__(CoxPH, **kwargs)
 
 class LogisticHazardModel(NNSurvivalModel):
-    def __init__(self, input_size, num_nodes=[64, 32], dropout=0.1, lr=1e-3, batch_size=32, epochs=500, num_durations=60):
-        super().__init__(LogisticHazard, input_size, num_nodes, dropout, lr, batch_size, epochs, num_durations=num_durations)
+    def __init__(self, **kwargs):
+        super().__init__(LogisticHazard, **kwargs)
 
 class DeepHitModel(NNSurvivalModel):
-    def __init__(self, input_size, num_nodes=[64, 32], dropout=0.1, lr=1e-3, batch_size=32, epochs=500, alpha=0.2, sigma=0.1, num_durations=60):
-        super().__init__(DeepHitSingle, input_size, num_nodes, dropout, lr, batch_size, epochs, alpha=alpha, sigma=sigma, num_durations=num_durations)
+    def __init__(self, **kwargs):
+        super().__init__(DeepHitSingle, **kwargs)
 
 class PCHazardModel(NNSurvivalModel):
-    def __init__(self, input_size, num_nodes=[64, 32], batch_norm=True, dropout=0.1, lr=1e-3, batch_size=32, epochs=500, num_durations=60):
-        super().__init__(PCHazard, input_size, num_nodes, dropout, lr, batch_size, epochs, num_durations=num_durations)
+    def __init__(self, **kwargs):
+        super().__init__(PCHazard, **kwargs)
 
 class MTLRModel(NNSurvivalModel):
-    def __init__(self, input_size, num_nodes=[64, 32], batch_norm=True, dropout=0.1, lr=1e-3, batch_size=32, epochs=500, num_durations=60):
-        super().__init__(MTLR, input_size, num_nodes, dropout, lr, batch_size, epochs, num_durations=num_durations)
+    def __init__(self, **kwargs):
+        super().__init__(MTLR, **kwargs)

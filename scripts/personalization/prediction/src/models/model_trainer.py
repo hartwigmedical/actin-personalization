@@ -52,19 +52,15 @@ class ModelTrainer:
     def _initialize_model(self, model_template, input_size=None):
         """
         Create a new instance of a model from the template.
-
-        Args:
-            model_template: A model instance to clone.
-            input_size: Number of input features, if required.
-
-        Returns:
-            A new instance of the model.
         """
         model_class = type(model_template)
-        if issubclass(model_class, NNSurvivalModel):
-            return model_class(input_size=input_size, **model_template.__dict__.get('kwargs', {}))
+        kwargs = getattr(model_template, 'kwargs', {})
 
-        return model_class(**model_template.__dict__.get('kwargs', {}))
+        if issubclass(model_class, NNSurvivalModel):
+            kwargs['input_size'] = input_size
+        
+        return model_class(**kwargs)
+
     
     def _prepare_fold_data(self, X: pd.DataFrame, y: pd.DataFrame, indices: Tuple[np.ndarray, np.ndarray], event_col: str, duration_col: str):
         """
