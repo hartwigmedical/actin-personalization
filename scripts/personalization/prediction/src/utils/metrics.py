@@ -16,6 +16,15 @@ def calculate_brier_score(y_train, y_test, prediction, times, ipcw = False):
     """
     Calculate the Integrated Brier Score (IBS) for survival predictions.
     """
+    
+    # Inside _evaluate_model or before calculate_brier_score call
+    if np.isnan(prediction).any() or np.isinf(prediction).any():
+        print(f"Warning:  produced invalid predictions (NaN/Inf). Skipping Brier score calculation.")
+        results['ibs'] = np.nan
+        results['ce'] = np.nan
+        results['auc'] = np.nan
+        return results
+
     if ipcw:
         bs_scores = []
         for t in times:

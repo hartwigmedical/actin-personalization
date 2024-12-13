@@ -6,7 +6,10 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import MinMaxScaler
 
 from sksurv.util import Surv
-
+import os
+import torch
+import joblib
+import dill
 
 from lifelines.utils import concordance_index
 from typing import Dict, Any, Tuple, List
@@ -60,7 +63,21 @@ class ModelTrainer:
             kwargs['input_size'] = input_size
         
         return model_class(**kwargs)
+    
+    def save_model(self, model, model_name, title, save_path="src/models/trained_models"):
+        if not os.path.exists(save_path):
+            os.makedirs(save_path)
 
+        model_file = os.path.join(save_path, f"{title}_{model_name}")
+
+        if isinstance(model, NNSurvivalModel):
+            torch.save(model.model.net.state_dict(), model_file + ".pt")
+            print(f"NN Model weights for {model_name} saved to {model_file}.pt")
+        else:
+            with open(model_file + ".pkl", "wb") as f:
+                dill.dump(model, f)
+
+    
     
     def _prepare_fold_data(self, X: pd.DataFrame, y: pd.DataFrame, indices: Tuple[np.ndarray, np.ndarray], event_col: str, duration_col: str):
         """
@@ -86,6 +103,8 @@ class ModelTrainer:
         y_val_structured = Surv.from_dataframe('event', 'duration', y_val_df)
 
         return X_train, y_train_structured, X_val, y_val_structured, y_val_df
+    
+
 
     
     def _get_survival_metrics(self, model, model_name, surv_funcs, risk_scores, X_val, y_val_df, y_val_structured):
@@ -178,28 +197,27 @@ class ModelTrainer:
 
         return results    
     
-    def train_and_evaluate(self, X_train, y_train, X_test, y_test, treatment_col, encoded_columns, event_col, duration_col):
+    def train_and_evaluate(self, X_train, y_train, X_test, y_test, treatment_col, encoded_columns, event_col, duration_col, title, save_models=True, save_path="src/models/trained_models"):
         """
-        Train and evaluate all models.
+        Train and evaluate all models with cross-validation and hold-out evaluation.
 
         Args:
-            X_train: Training feature DataFrame.
-            y_train: Training target DataFrame.
-            X_test: Testing feature DataFrame.
-            y_test: Testing target DataFrame.
-            treatment_col: The column name representing treatments.
-            encoded_columns: Dictionary of encoded column mappings.
-            event_col: Column name for event indicator.
-            duration_col: Column name for duration.
+            X_train, y_train: Training data.
+            X_test, y_test: Hold-out test data.
+            treatment_col: Column name for treatment stratification.
+            encoded_columns: Dictionary of encoded columns.
+            event_col, duration_col: Survival event and duration columns.
 
         Returns:
-            A dictionary of evaluation results for each model.
+            results: Nested dictionary of evaluation metrics.
+            trained_models: Dictionary of final trained models.
         """
         folds = self.cross_validate(X_train, y_train, treatment_col, encoded_columns)
 
         for model_name, model_template in self.models.items():
-            model_metrics = {'c_index': [], 'ibs': [], 'ce': [], 'auc': []}
+            model_metrics = {'cv': {'c_index': [], 'ibs': [], 'ce': [], 'auc': []}}
 
+            # Cross-validation
             for fold_indices in folds:
                 X_fold_train, y_fold_train_structured, X_fold_val, y_fold_val_structured, y_fold_val_df = self._prepare_fold_data(
                     X_train, y_train, fold_indices, event_col, duration_col
@@ -211,7 +229,7 @@ class ModelTrainer:
                     model.fit(X_fold_train, y_fold_train_structured, val_data=val_data)
                 else:
                     model.fit(X_fold_train, y_fold_train_structured)
-               
+
                 metrics = self._evaluate_model(
                     model,
                     X_fold_val,
@@ -222,15 +240,18 @@ class ModelTrainer:
                     event_col
                 )
                 for key, value in metrics.items():
-                    model_metrics[key].append(value)
+                    model_metrics['cv'][key].append(value)
 
-            self.results[model_name] = {key: np.nanmean(values) for key, values in model_metrics.items()}
-            print(f"{model_name} Results: {self.results[model_name]}")
-            
+            # Average cross-validation metrics
+            self.results[model_name] = {key: np.nanmean(values) for key, values in model_metrics['cv'].items()}
+            print(f"{model_name} CV Results: {self.results[model_name]}")
+
+            # Train final model on the entire training set
             final_model = self._initialize_model(model_template, input_size=X_train.shape[1])
-
             y_train_df = pd.DataFrame({'duration': y_train[duration_col], 'event': y_train[event_col]}, index=X_train.index)
             y_train_structured = Surv.from_dataframe('event', 'duration', y_train_df)
+            y_test_df = pd.DataFrame({'duration': y_test[duration_col], 'event': y_test[event_col]}, index=y_test.index)
+            y_test_structured = Surv.from_dataframe('event', 'duration', y_test_df)
 
             if isinstance(final_model, NNSurvivalModel):
                 X_train_final, X_val_final, y_train_final, y_val_final = train_test_split(X_train, y_train_df, test_size=0.1, random_state=self.random_state)
@@ -243,7 +264,23 @@ class ModelTrainer:
             else:
                 final_model.fit(X_train, y_train_structured)
 
+            # Evaluate on hold-out set
+            holdout_metrics = self._evaluate_model(
+                final_model,
+                X_test,
+                y_train_structured,
+                y_test_structured,
+                y_test_df,
+                model_name,
+                event_col
+            )
+            print(f"{model_name} Hold-Out Results: {holdout_metrics}")
+
             self.trained_models[model_name] = final_model
+            self.results[model_name]['holdout'] = holdout_metrics
+            
+            if save_models:
+                self.save_model(final_model, model_name, title, save_path=save_path)
 
         return self.results, self.trained_models
 

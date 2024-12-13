@@ -12,6 +12,7 @@ from sklearn.model_selection import train_test_split
 from scipy.interpolate import interp1d
 
 import torch
+import torch.nn as nn
 import torchtuples as tt
 
 from pycox.models import CoxPH    
@@ -178,7 +179,7 @@ class GradientBoostingSurvivalModel(BaseSurvivalModel):
         return self.model.predict(X)
 
 class NNSurvivalModel(BaseSurvivalModel):
-    def __init__(self, model_class, input_size, num_nodes=[128, 64, 32], dropout=0.1, lr=1e-3, batch_size=64, epochs=100, num_durations=None, early_stopping_patience=5, batch_norm=False, weight_decay=1e-4, activation='relu', optimizer='Adam', **kwargs):
+    def __init__(self, model_class, input_size, num_nodes=[128, 64, 32], dropout=0.1, lr=1e-3, batch_size=64, epochs=100, num_durations=1, early_stopping_patience=5, batch_norm=False, weight_decay=1e-4, activation='relu', optimizer='Adam', **kwargs):
         """
         Generalized neural survival model.
         :param model_class: The specific survival model class (e.g., LogisticHazard, DeepHitSingle, etc.).
@@ -201,17 +202,51 @@ class NNSurvivalModel(BaseSurvivalModel):
         self.duration_index = None
         self.num_durations = num_durations
         self.early_stopping_patience = early_stopping_patience
+        self.kwargs = {
+            'model_class': model_class,
+            'input_size': input_size,
+            'num_nodes': num_nodes,
+            'dropout': dropout,
+            'lr': lr,
+            'batch_size': batch_size,
+            'epochs': epochs,
+            'num_durations': num_durations,
+            'early_stopping_patience': early_stopping_patience,
+            'batch_norm': batch_norm,
+            'weight_decay': weight_decay,
+            'activation': activation,
+            'optimizer': optimizer,
+        }
 
+        activation_map = {
+            'relu': nn.ReLU,
+            'elu': nn.ELU,
+            'swish': lambda: nn.SiLU()
+        }
+
+        # If activation is in the map, use it, else raise error or provide a default
+        if activation in activation_map:
+            activation_fn = activation_map[activation]
+        else:
+            raise ValueError(f"Unknown activation function: {activation}")
+        
         # Define the neural network architecture
-        self.net = tt.practical.MLPVanilla(in_features=self.input_size, num_nodes=self.num_nodes, out_features=self.num_durations if self.num_durations else 1, activation=activation, batch_norm=batch_norm, dropout=self.dropout)
+        self.net = tt.practical.MLPVanilla(in_features=self.input_size, num_nodes=self.num_nodes, out_features=self.num_durations, activation=activation_fn, batch_norm=batch_norm, dropout=self.dropout)
+        
         if optimizer.lower() == "adam":
             self.optimizer = tt.optim.Adam(self.lr, weight_decay=weight_decay)
         elif optimizer.lower() == "rmsprop":
-            self.optimizer = tt.optim.RMSProp(self.lr, weight_decay=weight_decay)
+            self.optimizer = torch.optim.RMSprop(self.net.parameters(), self.lr, weight_decay=weight_decay)
         else:
             raise ValueError(f"Unknown optimizer: {optimizer}")
 
-        self.model = model_class(self.net, self.optimizer, **kwargs)
+        model_specific_kwargs = {k:v for k,v in self.kwargs.items() if k not in {
+            'model_class', 'input_size', 'num_nodes', 'dropout', 'lr',
+            'batch_size', 'epochs', 'num_durations', 'early_stopping_patience',
+            'batch_norm', 'weight_decay', 'activation', 'optimizer'
+        }}
+
+        self.model = model_class(self.net, self.optimizer, **model_specific_kwargs)
 
     def fit(self, X, y, val_data=None):
         durations = y['duration'].astype('float32')
@@ -281,20 +316,29 @@ class NNSurvivalModel(BaseSurvivalModel):
     
 class DeepSurv(NNSurvivalModel):
     def __init__(self, **kwargs):
-        super().__init__(CoxPH, **kwargs)
+        kwargs.pop('model_class', None)
+        super().__init__(model_class = CoxPH, **kwargs)
 
 class LogisticHazardModel(NNSurvivalModel):
     def __init__(self, **kwargs):
-        super().__init__(LogisticHazard, **kwargs)
+        kwargs.pop('model_class', None)
+        kwargs.pop('num_durations', None) 
+        super().__init__(model_class = LogisticHazard, num_durations=60, **kwargs)
 
 class DeepHitModel(NNSurvivalModel):
     def __init__(self, **kwargs):
-        super().__init__(DeepHitSingle, **kwargs)
+        kwargs.pop('num_durations', None) 
+        kwargs.pop('model_class', None)
+        super().__init__(model_class = DeepHitSingle, num_durations=60, **kwargs)
 
 class PCHazardModel(NNSurvivalModel):
     def __init__(self, **kwargs):
-        super().__init__(PCHazard, **kwargs)
+        kwargs.pop('num_durations', None) 
+        kwargs.pop('model_class', None)
+        super().__init__(model_class = PCHazard, num_durations=60, **kwargs)
 
 class MTLRModel(NNSurvivalModel):
     def __init__(self, **kwargs):
-        super().__init__(MTLR, **kwargs)
+        kwargs.pop('num_durations', None) 
+        kwargs.pop('model_class', None)
+        super().__init__(model_class = MTLR, num_durations=60, **kwargs)

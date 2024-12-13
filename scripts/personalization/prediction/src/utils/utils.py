@@ -23,3 +23,5 @@ def stratify_by_treatment(X, treatment_col, encoded_columns):
         treatment_data = X[treatment_col]
 
     return treatment_data.astype(str)
+
+
