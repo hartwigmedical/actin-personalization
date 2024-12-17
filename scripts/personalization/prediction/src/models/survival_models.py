@@ -224,7 +224,6 @@ class NNSurvivalModel(BaseSurvivalModel):
             'swish': lambda: nn.SiLU()
         }
 
-        # If activation is in the map, use it, else raise error or provide a default
         if activation in activation_map:
             activation_fn = activation_map[activation]
         else:
