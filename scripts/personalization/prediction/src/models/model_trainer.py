@@ -190,9 +190,7 @@ class ModelTrainer:
         )
         results['ibs'] = calculate_brier_score(y_train_structured, y_val_structured, predictions, times)
         results['ce'] = calibration_assessment(predictions, y_val_structured, times)
-        auc_times, auc_scores = calculate_time_dependent_auc(
-            y_train_structured, y_val_structured, auc_input, times
-        )
+        auc_times, auc_scores = calculate_time_dependent_auc(y_train_structured, y_val_structured, auc_input, times)
         results['auc'] = np.nanmean(auc_scores)
 
         return results    
