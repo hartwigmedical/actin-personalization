@@ -11,8 +11,7 @@ Below is the organized structure of the repository, detailing the role of each f
 ### **Root Directory**  
 | File/Folders                    | Description                                                                 |
 |---------------------------------|-----------------------------------------------------------------------------|
-| `ACTIN-1393_Predictive_algorithms_pipeline.ipynb` | Main Jupyter Notebook for building, evaluating, and interpreting predictive survival models. |
-| `test.ipynb`                    | Auxiliary test notebook for experiments and debugging.                     |
+| `ACTIN-1393_Predictive_algorithms_pipeline.ipynb` | Main Jupyter Notebook for building, evaluating, and interpreting predictive survival models. |                 |
 | `__init__.py`                   | Makes the root directory importable as a package.                          |
 
 ---
