@@ -32,13 +32,13 @@ Contains implementations of survival models, hyperparameter optimization, and tr
 
 | File/Folder                     | Description                                                                 |
 |---------------------------------|-----------------------------------------------------------------------------|
-| `hyperparameter_optimization.py`| Handles hyperparameter tuning using grid search or random search techniques. |
+| `hyperparameter_optimization.py`| Handles hyperparameter tuning using random search. |
 | `model_trainer.py`              | Manages model training, cross-validation, and evaluation.                  |
 | `survival_models.py`            | Implements survival models, including CoxPH, Aalen Additive, and neural network models. |
 | `configs/`                      | Stores model and hyperparameter configurations.                            |
 | ├── `hyperparameter_grids.py`   | Defines the grid of hyperparameters for optimization.                      |
 | ├── `model_configurations.py`   | Contains the best model configurations.                                    |
-| `trained_models/`               | Directory for storing trained model artifacts and evaluation results.      |
+| to be made by the code: `trained_models/`               | Directory for storing trained model artifacts and evaluation results.      |
 | ├── `OS_*` & `PFS_*` files      | Trained models for OS and PFS tasks (CoxPH, Aalen Additive, DeepHit, etc.). |
 | ├── `OS_model_outcomes.csv`     | Performance metrics for OS models.                                         |
 | ├── `PFS_model_outcomes.csv`    | Performance metrics for PFS models.                                        |
@@ -51,7 +51,7 @@ Utility functions for evaluation metrics and other supporting operations.
 | File                            | Description                                                                 |
 |---------------------------------|-----------------------------------------------------------------------------|
 | `metrics.py`                    | Defines metrics like C-Index, Integrated Brier Score, Calibration Error, and Time-Dependent AUC. |
-| `utils.py`                      | Contains helper functions for feature selection, data handling, and custom operations. |
+| `utils.py`                      | Contains helper functions|
 | `__init__.py`                   | Initializes the `utils` module.                                            |
 
 
@@ -66,14 +66,14 @@ Utility functions for evaluation metrics and other supporting operations.
    Train models using the `train_and_evaluate` method in the `ModelTrainer` class.
 
 3. **Feature Selection**:  
-   Perform feature selection for CoxPH and Aalen Additive models to improve interpretability.
+   Perform feature selection for CoxPH and Aalen Additive models.
 
 4. **Evaluation and Visualization**:  
    - Evaluate models using metrics like C-Index, IBS, CE, and AUC.  
    - Visualize survival curves and compare model performance.
 
 5. **Model Interpretation**:  
-   Use SHAP and custom importance methods to interpret the trained models.
+   Use SHAP to interpret the trained models.
 
 ---
 
