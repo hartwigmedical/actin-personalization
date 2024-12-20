@@ -7,20 +7,17 @@ from sklearn.preprocessing import MinMaxScaler, StandardScaler
 from sklearn.model_selection import train_test_split
 
 from .lookups import LookupManager
-from ..utils.utils import stratify_by_treatment
 
 class DataSplitter:
     def __init__(self, test_size=0.1, random_state=42):
         self.test_size = test_size
         self.random_state = random_state
 
-    def split(self, X, y, treatment_col, encoded_columns):
+    def split(self, X, y, event_col, encoded_columns):
         """
         Split the data into training and test sets, stratified by treatment type and censoring status.
         """
-        stratify_labels = stratify_by_treatment(X, treatment_col, encoded_columns)
-        
-        label_counts = stratify_labels.value_counts()
+        stratify_labels = y[event_col].astype(str)
        
         X_train, X_test, y_train, y_test = train_test_split(
             X, y, test_size=self.test_size, random_state=self.random_state, stratify=stratify_labels

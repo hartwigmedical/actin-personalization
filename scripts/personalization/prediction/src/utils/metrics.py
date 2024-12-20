@@ -9,14 +9,13 @@ def calculate_c_index(event_times, predicted_scores, event_observed):
     return c_index
 
 def calculate_time_dependent_auc(y_train, y_test, risk_scores, times):
-    auc_times, auc_scores = cumulative_dynamic_auc(y_train, y_test, risk_scores, times)
-    return auc_times, auc_scores
+    auc_times, mean_auc = cumulative_dynamic_auc(y_train, y_test, risk_scores, times)
+    return auc_times, mean_auc
 
 def calculate_brier_score(y_train, y_test, prediction, times, ipcw = False):
     """
     Calculate the Integrated Brier Score (IBS) for survival predictions.
     """
-
     if ipcw:
         bs_scores = []
         for t in times:
