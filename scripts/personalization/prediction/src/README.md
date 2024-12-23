@@ -38,7 +38,7 @@ Contains implementations of survival models, hyperparameter optimization, and tr
 | `configs/`                      | Stores model and hyperparameter configurations.                            |
 | ├── `hyperparameter_grids.py`   | Defines the grid of hyperparameters for optimization.                      |
 | ├── `model_configurations.py`   | Contains the best model configurations.                                    |
-| to be made by the code: `trained_models/`               | Directory for storing trained model artifacts and evaluation results.      |
+| to be made by the code/copied by the user: `trained_models/`               | Directory for storing trained model artifacts and evaluation results.      |
 | ├── `OS_*` & `PFS_*` files      | Trained models for OS and PFS tasks (CoxPH, Aalen Additive, DeepHit, etc.). |
 | ├── `OS_model_outcomes.csv`     | Performance metrics for OS models.                                         |
 | ├── `PFS_model_outcomes.csv`    | Performance metrics for PFS models.                                        |
@@ -79,5 +79,4 @@ Utility functions for evaluation metrics and other supporting operations.
 
 ## 📥 **Loading Pretrained Models**
 
-To load pretrained models into your `trained_models` directory, use the following command:
-`gsutil -m cp -r gs://actin-personalization-models-v1/trained_models/ ./models/trained_models/'
+You need to load the pretrained models into your `trained_models` directory, they can be found gs://actin-personalization-models-v1/trained_models/
