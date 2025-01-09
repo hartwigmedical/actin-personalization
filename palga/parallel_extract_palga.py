@@ -10,7 +10,7 @@ from pandas import read_csv
 
 PROMPT_TEXT = 'Parse "{0}" into JSON.'
 MODEL_NAME = "neuralmagic/Mistral-Nemo-Instruct-2407-FP8"
-MAX_TOKENS = 750
+MAX_TOKENS = 8192
 MODEL_TEMPERATURE = 0
 MODEL_TOP_K = 1
 MODEL_TOP_P = 1
@@ -68,7 +68,8 @@ def _suggestion_for_input(palga_input):
                 "$ref": "#/$defs/nullableBoolean",
                 "comment": "True if the report indicates a V-to-E substitution in codon 600 of gene BRAF. " +
                            "False if the report indicates another mutation at this position, no mutation at this " +
-                           "position, or no BRAF mutations. In all other cases, this field should be null."
+                           "position, no mutations in BRAF exon 15, or no BRAF mutations. In all other cases, this " +
+                           "field should be null."
             },
             "hasBrafMutation": {
                 "$ref": "#/$defs/nullableBoolean",
@@ -80,7 +81,8 @@ def _suggestion_for_input(palga_input):
                 "$ref": "#/$defs/nullableBoolean",
                 "comment": "True if the report indicates a G-to-C substitution in codon 12 of gene KRAS. " +
                            "False if the report indicates another mutation at this position, no mutation at this " +
-                           "position, or no KRAS mutations. In all other cases, this field should be null."
+                           "position, no mutation in KRAS exon 2, or no KRAS mutations. In all other cases, this " +
+                           "field should be null."
             },
             "hasRasMutation": {
                 "$ref": "#/$defs/nullableBoolean",
@@ -90,7 +92,10 @@ def _suggestion_for_input(palga_input):
             },
             "microsatelliteInstability": {
                 "$ref": "#/$defs/nullableBoolean",
-                "comment": "Indicates whether the tumor is microsatellite-unstable"
+                "comment": "True if the report indicates that the tumor is microsatellite-unstable or MMR-deficient. " +
+                           "False if the report indicates that the tumor is microsatellite-stable, or if MMR " +
+                           "proteins MLH1, PMS2, MSH2, and MSH6 are detected." +
+                           "In all other cases, this field should be null."
             },
             "tumorMutationalBurden": {
                 "type": "object",
@@ -117,7 +122,7 @@ def _suggestion_for_input(palga_input):
                 "The \"comment\" provided for each field in the JSON schema describes what the field is meant to capture.\n" +
                 "2. If relevant text was extracted, translate it to English and store in \"textInEnglish\".\n" +
                 "3. Explain how the value can be unambiguously determined from the input in \"explanation\".\n" +
-                "4. Set \"value\" if it was determined sucessfully, or set to null otherwise.\n" +
+                "4. Set \"value\" if it was determined successfully, or set to null otherwise.\n" +
                 "5. If a value was determined, reflect on how it was extracted from the relevant input based on the provided explanation and evaluate its correctness. Store the evaluation in \"selfEvaluation\".\n" +
                 "6. Express your confidence in the extracted value as a percentage and store in \"confidence\"."
         },
@@ -175,7 +180,8 @@ def _suggestion_for_input(palga_input):
         },
         {
             "role": "user",
-            "content": "Please summarize the following report delimited by triple-quotes: \"\"\"\n" + palga_input + "\n\"\"\""
+            "content": "Please summarize the following report delimited by triple-quotes: \"\"\"\n" +
+                       str(palga_input) + "\n\"\"\""
         }
     ]
     client = OpenAI(base_url="http://localhost:8000/v1", api_key="key")
@@ -183,7 +189,7 @@ def _suggestion_for_input(palga_input):
     response = client.chat.completions.create(
         model=MODEL_NAME,
         messages=messages,
-        max_tokens=8192,
+        max_tokens=MAX_TOKENS,
         temperature=MODEL_TEMPERATURE,
         top_p=MODEL_TOP_P,
         extra_body=dict(guided_json=json_schema)
@@ -236,10 +242,10 @@ def main():
     try:
         df = read_csv(args.palga_report_csv, sep=";")
         logger.info(f'Read {len(df)} row(s) from {args.palga_report_csv}')
-        df['report'] = df['Microscopie'] + "\n" + df['Conclusie']
+        s = df['Microscopie'].fillna('') + "\n" + df['Conclusie'].fillna('')
 
         generate_suggestions(
-            df['report'][args.start_index:args.stop_index],
+            s[s != "\n"][args.start_index:args.stop_index],
             args.output_dir,
             args.timeout_seconds,
             args.hf_token
