@@ -16,7 +16,6 @@ import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrTreatmentN
 import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrTumorLocationCategoryMapper
 import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrTumorTypeMapper
 
-import kotlin.math.roundToInt
 
 class NcrTumorEntryExtractor(private val episodeExtractor: NcrEpisodeExtractor) {
 
@@ -34,12 +33,7 @@ class NcrTumorEntryExtractor(private val episodeExtractor: NcrEpisodeExtractor) 
         }?.order ?: throw IllegalStateException("orderOfFirstDistantMetastasesEpisode is not allowed to be null")
         val locations = episodes.map(Episode::tumorLocation).toSet()
         val priorTumors = extractPriorTumors(diagnosisRecord)
-        val systemicTreatmentPlan = episodes.firstOrNull()?.systemicTreatmentPlan
-        val adjustedAgeAtDiagnosis = diagnosisRecord.patientCharacteristics.leeft.let { age ->
-            systemicTreatmentPlan?.intervalTumorIncidenceTreatmentPlanStartDays?.let { interval ->
-                age + (interval / 365.0).roundToInt()
-            } ?: age
-        }
+
 
         val diagnosis = with(diagnosisRecord) {
             val (hasBrafMutation, hasBrafV600EMutation) = when (molecularCharacteristics.brafMut) {
@@ -63,7 +57,7 @@ class NcrTumorEntryExtractor(private val episodeExtractor: NcrEpisodeExtractor) 
                 consolidatedTumorType = NcrTumorTypeMapper.resolve(diagnosisRecord.primaryDiagnosis.morfCat!!),
                 tumorLocations = locations,
                 hasHadTumorDirectedSystemicTherapy = episodes.any(Episode::hasReceivedTumorDirectedTreatment),
-                ageAtDiagnosis = adjustedAgeAtDiagnosis,
+                ageAtDiagnosis = patientCharacteristics.leeft,
                 observedOsFromTumorIncidenceDays = intervalTumorIncidenceLatestAliveStatus,
                 hadSurvivalEvent = patientCharacteristics.vitStat!! == 1,
                 hasHadPriorTumor = priorTumors.isNotEmpty(),

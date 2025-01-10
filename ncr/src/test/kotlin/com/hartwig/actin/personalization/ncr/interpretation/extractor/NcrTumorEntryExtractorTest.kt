@@ -17,10 +17,8 @@ class NcrTumorEntryExtractorTest {
 
     @Test
     fun `Should extract diagnosis and episodes from NCR records`() {
-        val diagnosisRecord = NCR_RECORD.copy(
-            identification = NCR_IDENTIFICATION.copy(keyEid = 101, teller = 1, epis = "DIA", metaEpis = 0),
-            treatment = NCR_RECORD.treatment.copy(systemicTreatment = NCR_SYSTEMIC_TREATMENT.copy(systStartInt1 = 721, systStartInt2 = 722, systStartInt3 = 723, systStartInt4 = 724, systStartInt5 = 725, systStartInt6 = 726, systStartInt7 = 727))
-        )
+        val diagnosisRecord = NCR_RECORD.copy(identification = NCR_IDENTIFICATION.copy(keyEid = 101, teller = 1, epis = "DIA", metaEpis = 0),
+            )
         val records = listOf(diagnosisRecord, NCR_RECORD)
         val (diagnosis, episodes) =
             NcrTumorEntryExtractor(NcrEpisodeExtractor(NcrSystemicTreatmentPlanExtractor())).extractTumorEntry(records)
@@ -31,7 +29,7 @@ class NcrTumorEntryExtractorTest {
                 tumorLocations = setOf(Location.ASCENDING_COLON),
                 hasHadTumorDirectedSystemicTherapy = false,
                 sidedness = Sidedness.RIGHT,
-                ageAtDiagnosis = 52,
+                ageAtDiagnosis = 50,
                 observedOsFromTumorIncidenceDays = 80,
                 hadSurvivalEvent = false,
                 hasHadPriorTumor = true,

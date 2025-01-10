@@ -52,6 +52,8 @@ import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrVenousInva
 import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrWhoStatusMapper
 import com.hartwig.actin.personalization.ncr.interpretation.mapper.resolvePreAndPostSurgery
 
+import kotlin.math.roundToInt
+
 class NcrEpisodeExtractor(private val systemicTreatmentPlanExtractor: NcrSystemicTreatmentPlanExtractor) {
 
     fun extractEpisode(record: NcrRecord, intervalTumorIncidenceLatestAliveStatus: Int): Episode {
@@ -65,6 +67,12 @@ class NcrEpisodeExtractor(private val systemicTreatmentPlanExtractor: NcrSystemi
             val systemicTreatmentPlan = systemicTreatmentPlanExtractor.extractSystemicTreatmentPlan(
                 treatment.systemicTreatment, pfsMeasures, responseMeasure, intervalTumorIncidenceLatestAliveStatus
             )
+            val ageAtTreatmentPlanStart = patientCharacteristics.leeft.let { age ->
+                systemicTreatmentPlan?.intervalTumorIncidenceTreatmentPlanStartDays?.let { interval ->
+                    age + (interval / 365.0).roundToInt()
+                } ?: age
+            }
+
             val (distanceToMesorectalFascia, mesorectalFasciaIsClear) = extractDistanceToMesorectalFascia(clinicalCharacteristics.mrfAfst)
             val (hasHadPreSurgeryRadiotherapy, hasHadPostSurgeryRadiotherapy) = resolvePreAndPostSurgery(treatment.primaryRadiotherapy.rt)
             val (hasHadPreSurgeryChemoRadiotherapy, hasHadPostSurgeryChemoRadiotherapy) =
@@ -128,7 +136,8 @@ class NcrEpisodeExtractor(private val systemicTreatmentPlanExtractor: NcrSystemi
                 hasHadPostSurgerySystemicTargetedTherapy = hasHadPostSurgerySystemicTargetedTherapy,
                 responseMeasure = responseMeasure,
                 systemicTreatmentPlan = systemicTreatmentPlan,
-                pfsMeasures = pfsMeasures
+                pfsMeasures = pfsMeasures,
+                ageAtTreatmentPlanStart = ageAtTreatmentPlanStart
             )
         }
     }
