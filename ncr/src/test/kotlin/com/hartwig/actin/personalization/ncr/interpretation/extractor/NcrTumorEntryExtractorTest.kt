@@ -17,8 +17,7 @@ class NcrTumorEntryExtractorTest {
 
     @Test
     fun `Should extract diagnosis and episodes from NCR records`() {
-        val diagnosisRecord = NCR_RECORD.copy(identification = NCR_IDENTIFICATION.copy(keyEid = 101, teller = 1, epis = "DIA", metaEpis = 0),
-            )
+        val diagnosisRecord = NCR_RECORD.copy(identification = NCR_IDENTIFICATION.copy(keyEid = 101, teller = 1, epis = "DIA", metaEpis = 0))
         val records = listOf(diagnosisRecord, NCR_RECORD)
         val (diagnosis, episodes) =
             NcrTumorEntryExtractor(NcrEpisodeExtractor(NcrSystemicTreatmentPlanExtractor())).extractTumorEntry(records)
