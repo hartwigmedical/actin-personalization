@@ -38,7 +38,7 @@ class DataPreprocessor:
         self.event_col = event_col
 
         df = self.load_data(query)
-     
+
         df = df[features + [self.duration_col, self.event_col]]
         df = df[~df[features].isna().all(axis=1)].copy()
 
@@ -96,6 +96,7 @@ class DataPreprocessor:
         - For numerical columns, fill NaN with -1.
         - For categorical columns, fill NaN with 'Missing'.
         """
+       
         numerical_cols = df.select_dtypes(include=['float64', 'int64']).columns.tolist()
         numerical_cols = [col for col in numerical_cols if col not in [self.event_col, self.duration_col]]
         for col in numerical_cols:

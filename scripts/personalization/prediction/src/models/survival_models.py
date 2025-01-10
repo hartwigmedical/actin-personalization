@@ -15,11 +15,7 @@ import torch
 import torch.nn as nn
 import torchtuples as tt
 
-from pycox.models import CoxPH    
-from pycox.models import LogisticHazard
-from pycox.models import DeepHitSingle
-from pycox.models import PCHazard
-from pycox.models import MTLR
+from pycox.models import CoxPH, LogisticHazard, DeepHitSingle, PCHazard, MTLR
 
 torch.manual_seed(0)
 

@@ -105,25 +105,31 @@ class ModelTrainer:
 
         Returns:
             Tuple containing times, predictions, and risk_scores for AUC calculation.
-        """
+        """        
         max_follow_up = y_val_structured['duration'].max()
+        min_follow_up = y_val_structured['duration'].min()
         upper_bound = min(1825, max_follow_up)
+        
         if surv_funcs is not None and model_name != 'AalenAdditive':
             max_times = [fn.x[-1] for fn in surv_funcs]
             global_max_time = min(max_times)
             upper_bound = min(upper_bound, global_max_time)
-            
+         
+        # --- Build the initial time grid ---
         if upper_bound < 30: 
             times = np.array([upper_bound])
-        else: # Calculate how many monthly intervals we can have from 30 days to upper_bound
+        else:
+            start_time = max(30, min_follow_up)
             months_count = int((upper_bound - 30) // 30) + 1
-            end_time = 30 + (months_count - 1)*30
-            times = np.arange(30, end_time + 1, 30)
-            times = times[times <= upper_bound]
-
+            end_time = start_time + (months_count - 1)*30
+            times = np.arange(start_time, end_time + 1, 30)
+    
             if times.size == 0:
                 times = np.array([upper_bound])
+    
+        times = times[(times > min_follow_up) & (times < max_follow_up)].astype(int)
         
+        # --- Determine predictions ---
         if surv_funcs is None:  
             predictions = risk_scores
             auc_input = -risk_scores

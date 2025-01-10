@@ -2,24 +2,24 @@ import numpy as np
 class LookupManager:
     def __init__(self):
         self.stageTnm_lookup = {
-            "ZERO": 0.0, "I": 1.0, "IA1": 1.0, "IA": 1.0, "IA2": 1.0, "IA3": 1.0, "IB": 1.0,
-            "II": 2.0, "IIA": 2.0, "IIB": 2.0, "IIC": 2.0,
-            "III": 3.0, "IIIA": 3.0, "IIIB": 3.0, "IIIC": 3.0,
-            "IV": 4.0, "IVA": 4.0, "IVB": 4.0, "IVC": 4.0,
-            "M": 4.0, "NA": np.nan, "X": np.nan,
+            "ZERO": 0.0, "I": 1.5, "IA1": 1.3125, "IA": 1.375, "IA2": 1.375, "IA3": 1.4375, "IB": 1.5,
+            "II": 2.5, "IIA": 2.25, "IIB": 2.5, "IIC": 2.75,
+            "III": 3.5, "IIIA": 3.25, "IIIB": 3.5, "IIIC": 3.75,
+            "IV": 4.5, "IVA": 4.25, "IVB": 4.5, "IVC": 4.75,
+            "M": 4.5, "NA": np.nan, "X": np.nan,
         }
 
         self.tnmM_lookup = {
             "M0": 0,
-            "M1": 1, "M1A": 1.0, "M1B": 1.0, "M1C": 1.0,
+            "M1": 1, "M1A": 1.25, "M1B": 1.5, "M1C": 1.75,
             "M_MINUS": 0,
             "X": np.nan,
         }
 
         self.tnmN_lookup = {
             "N0": 0,
-            "N1": 1, "N1A": 1,"N1B": 1, "N1C": 1.0, "N1M": 1,
-            "N2": 2, "N2A": 2.0, "N2B": 2.0,
+            "N1": 1.5, "N1A": 1.25,"N1B": 1.5, "N1C": 1.75, "N1M": 1.5,
+            "N2": 2.5, "N2A": 2.25, "N2B": 2.5,
             "X": np.nan
         }
 
@@ -29,8 +29,8 @@ class LookupManager:
             "T1": 1,
             "T2": 2,
             "T3": 3,
-            "T4A": 4.0,
-            "T4B": 4.0,
+            "T4A": 4.25,
+            "T4B": 4.5,
             "X": np.nan
         }
 
@@ -146,6 +146,6 @@ class LookupManager:
              'hasParticipatedInTrial',
              'metastasesSurgeries',
              'radiotherapies',
-             'metastasisLocationGroupsPriorToSystemicTreatment',
+            'metastasisLocationGroupsPriorToSystemicTreatment',
              'systemicTreatmentPlan'
         ]
