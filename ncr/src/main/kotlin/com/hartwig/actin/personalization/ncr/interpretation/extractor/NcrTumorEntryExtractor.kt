@@ -16,7 +16,6 @@ import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrTreatmentN
 import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrTumorLocationCategoryMapper
 import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrTumorTypeMapper
 
-
 class NcrTumorEntryExtractor(private val episodeExtractor: NcrEpisodeExtractor) {
 
     fun extractTumorEntry(records: List<NcrRecord>): TumorEntry {
@@ -33,7 +32,6 @@ class NcrTumorEntryExtractor(private val episodeExtractor: NcrEpisodeExtractor) 
         }?.order ?: throw IllegalStateException("orderOfFirstDistantMetastasesEpisode is not allowed to be null")
         val locations = episodes.map(Episode::tumorLocation).toSet()
         val priorTumors = extractPriorTumors(diagnosisRecord)
-
 
         val diagnosis = with(diagnosisRecord) {
             val (hasBrafMutation, hasBrafV600EMutation) = when (molecularCharacteristics.brafMut) {
