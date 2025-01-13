@@ -69,8 +69,8 @@ class NcrEpisodeExtractor(private val systemicTreatmentPlanExtractor: NcrSystemi
             )
             val ageAtTreatmentPlanStart = patientCharacteristics.leeft.let { age ->
                 systemicTreatmentPlan?.intervalTumorIncidenceTreatmentPlanStartDays?.let { interval ->
-                    age + (interval / 365.0).roundToInt()
-                } ?: age
+                    (age + 0.5 + (interval / 365.0)).roundToInt()
+                }
             }
 
             val (distanceToMesorectalFascia, mesorectalFasciaIsClear) = extractDistanceToMesorectalFascia(clinicalCharacteristics.mrfAfst)
