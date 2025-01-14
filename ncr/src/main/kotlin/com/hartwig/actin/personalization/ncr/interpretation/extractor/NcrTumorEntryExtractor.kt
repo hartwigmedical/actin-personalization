@@ -55,7 +55,7 @@ class NcrTumorEntryExtractor(private val episodeExtractor: NcrEpisodeExtractor) 
                 consolidatedTumorType = NcrTumorTypeMapper.resolve(diagnosisRecord.primaryDiagnosis.morfCat!!),
                 tumorLocations = locations,
                 hasHadTumorDirectedSystemicTherapy = episodes.any(Episode::hasReceivedTumorDirectedTreatment),
-                ageAtDiagnosis = diagnosisRecord.patientCharacteristics.leeft,
+                ageAtDiagnosis = patientCharacteristics.leeft,
                 observedOsFromTumorIncidenceDays = intervalTumorIncidenceLatestAliveStatus,
                 hadSurvivalEvent = patientCharacteristics.vitStat!! == 1,
                 hasHadPriorTumor = priorTumors.isNotEmpty(),

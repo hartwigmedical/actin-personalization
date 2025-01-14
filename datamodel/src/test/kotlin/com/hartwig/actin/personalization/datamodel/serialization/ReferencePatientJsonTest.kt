@@ -44,7 +44,8 @@ private val EPISODE = Episode(
     hasHadPostSurgerySystemicChemotherapy = false,
     hasHadPreSurgerySystemicTargetedTherapy = false,
     hasHadPostSurgerySystemicTargetedTherapy = false,
-    pfsMeasures = emptyList()
+    pfsMeasures = emptyList(),
+    ageAtTreatmentPlanStart = 52,
 )
 private val PATIENT_RECORDS = listOf(
     ReferencePatient(

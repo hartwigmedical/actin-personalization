@@ -43,7 +43,8 @@ val EPISODE = Episode(
     hasHadPostSurgerySystemicChemotherapy = false,
     hasHadPreSurgerySystemicTargetedTherapy = false,
     hasHadPostSurgerySystemicTargetedTherapy = false,
-    pfsMeasures = emptyList()
+    pfsMeasures = emptyList(),
+    ageAtTreatmentPlanStart = 50
 )
 val DIAGNOSIS_EPISODE = DiagnosisEpisode(
     diagnosis = DIAGNOSIS,
