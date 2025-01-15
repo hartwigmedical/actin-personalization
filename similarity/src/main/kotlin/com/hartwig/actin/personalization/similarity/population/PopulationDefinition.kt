@@ -51,7 +51,5 @@ data class PopulationDefinition(val name: String, val criteria: (DiagnosisEpisod
 
             return groups == metastasisLocationGroups
         }
-
-
     }
 }
