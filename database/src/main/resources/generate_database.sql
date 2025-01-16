@@ -119,6 +119,7 @@ CREATE TABLE `episode` (
     `observedPfsDays` int,
     `hadProgressionEvent` bool,
     `observedOsFromTreatmentStartDays` int,
+    `ageAtTreatmentPlanStart` int,
     FOREIGN KEY (`diagnosisId`) REFERENCES `diagnosis`(`id`),
     PRIMARY KEY (`id`)
 );
