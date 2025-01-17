@@ -60,8 +60,10 @@ class ReportWriter(
     fun writeReport(title: String, tables: List<TableContent>, plots: Map<String, Plot>) {
         val document = document()
         addChapterTitle(document, title)
+
         writeTables(document, tables)
         addPlots(document, plots)
+
         document.close()
     }
 
@@ -98,10 +100,10 @@ class ReportWriter(
     private fun addPlots(document: Document, plots: Map<String, Plot>) {
         val outputDir = Path(outputPath).parent
         plots.forEach { (name, plot) ->
-            val filename = "pfs_${name.replace(" ", "_")}$IMAGE_FILE_EXTENSION"
+            val filename = "${name.replace(" ", "_")}$IMAGE_FILE_EXTENSION"
             plot.save("$outputDir/$filename")
 
-            document.add(titleCellWithText("Progression-free survival $name"))
+            document.add(titleCellWithText("$name"))
             val image = Image(ImageDataFactory.create("$outputDir/$filename"))
             image.setWidth(contentWidth())
             document.add(image)

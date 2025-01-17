@@ -30,32 +30,67 @@ import org.junit.jupiter.api.Test
 
 
 class NcrEpisodeExtractorTest {
+    private val treatmentRecord = NCR_RECORD.copy(
+        treatment = NCR_RECORD.treatment.copy(systemicTreatment = NCR_SYSTEMIC_TREATMENT.copy(systStartInt1 = 721, systStartInt2 = 722, systStartInt3 = 723, systStartInt4 = 724, systStartInt5 = 725, systStartInt6 = 726, systStartInt7 = 727))
+    )
 
     @Test
     fun `Should extract episode from NCR record`() {
-        val episode = NcrEpisodeExtractor(NcrSystemicTreatmentPlanExtractor()).extractEpisode(NCR_RECORD, 80)
+        val episode = NcrEpisodeExtractor(NcrSystemicTreatmentPlanExtractor()).extractEpisode(treatmentRecord, 80)
         assertThat(episode.systemicTreatmentPlan).isNotNull
         assertThat(episode.copy(systemicTreatmentPlan = null)).isEqualTo(expectedEpisode)
     }
 
     @Test
-    fun `Should filter out invalid lab measurements (9999 or null)`() {
-        val modifiedNcrRecord = NCR_RECORD.copy(
+    fun `Should filter out invalid lab measurements (9999, null, or out of extreme ranges)`() {
+        val modifiedNcrRecord = treatmentRecord.copy(
             labValues = NCR_LAB_VALUES.copy(
                 ldh1 = null,
+                ldh2 = 9999,
+                ldh3 = 5000,
                 albumine1 = 9999.0,
-                ldh2 = 9999
+                albumine2 = 90.0,
+                albumine3 = 40.5,
+                neutro1 = 500.0,
+                neutro2 = 30.5,
+                leuko1 = 50.5,
+                prechirCea = 9999.0,
+                postchirCea = null
             )
         )
 
-        val expectedModifiedEpisode = expectedEpisode.copy(
-            labMeasurements = expectedEpisode.labMeasurements.filterNot {
-                it.name == LabMeasure.LACTATE_DEHYDROGENASE || it.name == LabMeasure.ALBUMINE
-            }
+        val expectedEpisodeInvalidLabMeasurements = expectedEpisode.copy(
+            labMeasurements = listOf(
+                LabMeasurement(LabMeasure.ALKALINE_PHOSPHATASE, 20.0, Unit.UNIT_PER_LITER, 2, null, null),
+                LabMeasurement(LabMeasure.NEUTROPHILS_ABSOLUTE, 30.5, Unit.BILLIONS_PER_LITER, null, null, null),
+                LabMeasurement(LabMeasure.ALBUMINE, 40.5, Unit.GRAM_PER_LITER, null, null, null),
+                LabMeasurement(LabMeasure.LEUKOCYTES_ABSOLUTE, 50.5, Unit.BILLIONS_PER_LITER, 5, null, null)
+            )
         )
+
         val episode = NcrEpisodeExtractor(NcrSystemicTreatmentPlanExtractor()).extractEpisode(modifiedNcrRecord, 80)
+
         assertThat(episode.systemicTreatmentPlan).isNotNull
-        assertThat(episode.copy(systemicTreatmentPlan = null)).isEqualTo(expectedModifiedEpisode)
+        assertThat(episode.copy(systemicTreatmentPlan = null)).isEqualTo(expectedEpisodeInvalidLabMeasurements)
+    }
+
+
+    @Test
+    fun `Should set maximumSizeOfLiverMetastasisMm to null when value is 999`() {
+        val modifiedNcrRecord = treatmentRecord.copy(
+            metastaticDiagnosis = NCR_METASTATIC_DIAGNOSIS.copy(
+                metaLeverAfm = 999
+            )
+        )
+
+        val expectedEpisodeWithNullMetastasisSize = expectedEpisode.copy(
+            maximumSizeOfLiverMetastasisMm = null
+        )
+
+        val episode = NcrEpisodeExtractor(NcrSystemicTreatmentPlanExtractor()).extractEpisode(modifiedNcrRecord, 80)
+
+        assertThat(episode.systemicTreatmentPlan).isNotNull
+        assertThat(episode.copy(systemicTreatmentPlan = null)).isEqualTo(expectedEpisodeWithNullMetastasisSize)
     }
 
     companion object {
@@ -79,7 +114,7 @@ class NcrEpisodeExtractorTest {
             stageTNM = StageTnm.IIC,
             investigatedLymphNodesNumber = INVESTIGATED_LYMPH_NODES,
             positiveLymphNodesNumber = POSITIVE_LYMPH_NODES,
-            distantMetastasesDetectionStatus = MetastasesDetectionStatus.AT_START,
+            distantMetastasesDetectionStatus = MetastasesDetectionStatus.AT_PROGRESSION,
             metastases = listOf(Metastasis(Location.ADRENAL_CORTEX, 20, true)),
             numberOfLiverMetastases = NumberOfLiverMetastases.FIVE_OR_MORE,
             maximumSizeOfLiverMetastasisMm = 15,
@@ -123,7 +158,9 @@ class NcrEpisodeExtractorTest {
             pfsMeasures = listOf(
                 PfsMeasure(PfsMeasureType.PROGRESSION, PfsMeasureFollowUpEvent.LOCAL_ONLY, 4),
                 PfsMeasure(PfsMeasureType.DEATH, PfsMeasureFollowUpEvent.REGIONAL, 80),
-            )
+            ),
+            ageAtTreatmentPlanStart = 52
         )
     }
+
 }

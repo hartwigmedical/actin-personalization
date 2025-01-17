@@ -1,6 +1,6 @@
 package com.hartwig.actin.personalization.similarity.population
 
-import com.hartwig.actin.personalization.similarity.DIAGNOSIS_AND_EPISODE
+import com.hartwig.actin.personalization.similarity.DIAGNOSIS_EPISODE
 import com.hartwig.actin.personalization.similarity.report.TableElement
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -11,12 +11,12 @@ class TreatmentDecisionCalculationTest {
 
     @Test
     fun `Should evaluate all patients as eligible`() {
-        assertThat(TreatmentDecisionCalculation.isEligible(DIAGNOSIS_AND_EPISODE)).isTrue
+        assertThat(TreatmentDecisionCalculation.isEligible(DIAGNOSIS_EPISODE)).isTrue
     }
 
     @Test
     fun `Should calculate measurement as percentage of population`() {
-        val patients = listOf(DIAGNOSIS_AND_EPISODE, DIAGNOSIS_AND_EPISODE, DIAGNOSIS_AND_EPISODE)
+        val patients = listOf(DIAGNOSIS_EPISODE, DIAGNOSIS_EPISODE, DIAGNOSIS_EPISODE)
         val measurement = TreatmentDecisionCalculation.calculate(patients, ELIGIBLE_SUB_POPULATION_SIZE)
         assertThat(measurement.value).isEqualTo(0.03)
         assertThat(measurement.numPatients).isEqualTo(3)

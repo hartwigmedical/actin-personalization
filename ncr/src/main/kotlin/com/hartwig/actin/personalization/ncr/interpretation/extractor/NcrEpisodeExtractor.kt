@@ -52,6 +52,8 @@ import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrVenousInva
 import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrWhoStatusMapper
 import com.hartwig.actin.personalization.ncr.interpretation.mapper.resolvePreAndPostSurgery
 
+import kotlin.math.roundToInt
+
 class NcrEpisodeExtractor(private val systemicTreatmentPlanExtractor: NcrSystemicTreatmentPlanExtractor) {
 
     fun extractEpisode(record: NcrRecord, intervalTumorIncidenceLatestAliveStatus: Int): Episode {
@@ -65,6 +67,12 @@ class NcrEpisodeExtractor(private val systemicTreatmentPlanExtractor: NcrSystemi
             val systemicTreatmentPlan = systemicTreatmentPlanExtractor.extractSystemicTreatmentPlan(
                 treatment.systemicTreatment, pfsMeasures, responseMeasure, intervalTumorIncidenceLatestAliveStatus
             )
+            val ageAtTreatmentPlanStart = patientCharacteristics.leeft.let { age ->
+                systemicTreatmentPlan?.intervalTumorIncidenceTreatmentPlanStartDays?.let { interval ->
+                    (age + 0.5 + (interval / 365.0)).roundToInt()
+                }
+            }
+
             val (distanceToMesorectalFascia, mesorectalFasciaIsClear) = extractDistanceToMesorectalFascia(clinicalCharacteristics.mrfAfst)
             val (hasHadPreSurgeryRadiotherapy, hasHadPostSurgeryRadiotherapy) = resolvePreAndPostSurgery(treatment.primaryRadiotherapy.rt)
             val (hasHadPreSurgeryChemoRadiotherapy, hasHadPostSurgeryChemoRadiotherapy) =
@@ -98,7 +106,7 @@ class NcrEpisodeExtractor(private val systemicTreatmentPlanExtractor: NcrSystemi
                 distantMetastasesDetectionStatus = NcrDistantMetastasesStatusMapper.resolve(identification.metaEpis),
                 metastases = extractMetastases(metastaticDiagnosis),
                 numberOfLiverMetastases = NcrNumberOfLiverMetastasesMapper.resolve(metastaticDiagnosis.metaLeverAantal),
-                maximumSizeOfLiverMetastasisMm = metastaticDiagnosis.metaLeverAfm,
+                maximumSizeOfLiverMetastasisMm = metastaticDiagnosis.metaLeverAfm.takeIf { it != 999 },
                 hasDoublePrimaryTumor = NcrBooleanMapper.resolve(clinicalCharacteristics.dubbeltum),
                 mesorectalFasciaIsClear = mesorectalFasciaIsClear,
                 distanceToMesorectalFasciaMm = distanceToMesorectalFascia,
@@ -128,7 +136,8 @@ class NcrEpisodeExtractor(private val systemicTreatmentPlanExtractor: NcrSystemi
                 hasHadPostSurgerySystemicTargetedTherapy = hasHadPostSurgerySystemicTargetedTherapy,
                 responseMeasure = responseMeasure,
                 systemicTreatmentPlan = systemicTreatmentPlan,
-                pfsMeasures = pfsMeasures
+                pfsMeasures = pfsMeasures,
+                ageAtTreatmentPlanStart = ageAtTreatmentPlanStart
             )
         }
     }
@@ -265,21 +274,20 @@ class NcrEpisodeExtractor(private val systemicTreatmentPlanExtractor: NcrSystemi
                     leuko3 to leukoInt3,
                     leuko4 to leukoInt4
                 )
-            )
-                .flatMap { (measure, values) ->
-                    values.mapNotNull { (value, interval) ->
-                        value?.toDouble()?.takeIf { it != 9999.0 }?.let { LabMeasurement(measure, it, measure.unit, interval, null, null) }
+            ).flatMap { (measure, values) ->
+                values.mapNotNull { (value, interval) ->
+                    value?.toDouble()?.takeIf { it != 9999.0 && it <= measure.upperBound }?.let {
+                        LabMeasurement(measure, it, measure.unit, interval, null, null)
                     }
                 }
-
+            }
             return measurements + listOfNotNull(
                 periSurgicalCeaMeasurement(prechirCea, true),
                 periSurgicalCeaMeasurement(postchirCea, false)
             )
         }
     }
-
-    private fun periSurgicalCeaMeasurement(measurement: Double?, isPreSurgical: Boolean) = measurement?.takeIf { it != 9999.0 }?.let {
+    private fun periSurgicalCeaMeasurement(measurement: Double?, isPreSurgical: Boolean) = measurement?.takeIf { it != 9999.0 && it <= LabMeasure.CARCINOEMBRYONIC_ANTIGEN.upperBound }?.let {
         LabMeasurement(
             LabMeasure.CARCINOEMBRYONIC_ANTIGEN, it, LabMeasure.CARCINOEMBRYONIC_ANTIGEN.unit, null, isPreSurgical, !isPreSurgical
         )

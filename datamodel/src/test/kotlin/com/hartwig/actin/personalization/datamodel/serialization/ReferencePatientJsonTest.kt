@@ -22,7 +22,9 @@ private val DIAGNOSIS = Diagnosis(
     observedOsFromTumorIncidenceDays = 100,
     hasHadPriorTumor = false,
     hadSurvivalEvent = false,
-    priorTumors = emptyList()
+    priorTumors = emptyList(),
+    orderOfFirstDistantMetastasesEpisode = 1,
+    isMetachronous = false
 )
 private val EPISODE = Episode(
     id = 123,
@@ -42,7 +44,8 @@ private val EPISODE = Episode(
     hasHadPostSurgerySystemicChemotherapy = false,
     hasHadPreSurgerySystemicTargetedTherapy = false,
     hasHadPostSurgerySystemicTargetedTherapy = false,
-    pfsMeasures = emptyList()
+    pfsMeasures = emptyList(),
+    ageAtTreatmentPlanStart = 52,
 )
 private val PATIENT_RECORDS = listOf(
     ReferencePatient(

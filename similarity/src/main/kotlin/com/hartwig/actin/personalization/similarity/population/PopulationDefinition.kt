@@ -1,11 +1,12 @@
 package com.hartwig.actin.personalization.similarity.population
 
+import com.hartwig.actin.personalization.datamodel.DiagnosisEpisode
 import com.hartwig.actin.personalization.datamodel.Episode
 import com.hartwig.actin.personalization.datamodel.LocationGroup
 
 const val ALL_PATIENTS_POPULATION_NAME = "All"
 
-data class PopulationDefinition(val name: String, val criteria: (DiagnosisAndEpisode) -> Boolean) {
+data class PopulationDefinition(val name: String, val criteria: (DiagnosisEpisode) -> Boolean) {
 
     companion object {
         fun createAllForPatientProfile(
@@ -16,8 +17,8 @@ data class PopulationDefinition(val name: String, val criteria: (DiagnosisAndEpi
 
             return listOf(
                 PopulationDefinition(ALL_PATIENTS_POPULATION_NAME) { true },
-                PopulationDefinition("Age $minAge-${maxAge}y") { it.first.ageAtDiagnosis in minAge..maxAge },
-                PopulationDefinition("WHO $whoStatus") { it.second.whoStatusPreTreatmentStart == whoStatus },
+                PopulationDefinition("Age $minAge-${maxAge}y") { it.diagnosis.ageAtDiagnosis in minAge..maxAge },
+                PopulationDefinition("WHO $whoStatus") { it.episode.whoStatusPreTreatmentStart == whoStatus },
                 PopulationDefinition(
                     "RAS ${if (hasRasMutation) "positive" else "negative"}"
                 ) { (diagnosis, _) -> diagnosis.hasRasMutation == hasRasMutation },
@@ -36,14 +37,19 @@ data class PopulationDefinition(val name: String, val criteria: (DiagnosisAndEpi
             }
         }
 
-        private fun episodeMatchesMetastasisLocationGroups(episode: Episode, metastasisLocationGroups: Set<LocationGroup>): Boolean =
-            episode.systemicTreatmentPlan?.intervalTumorIncidenceTreatmentPlanStartDays?.let { planStart ->
-                val groups = episode.metastases.filter { metastasis ->
-                    metastasis.intervalTumorIncidenceMetastasisDetectionDays?.let { it < planStart } == true
-                }
-                    .map { it.location.locationGroup.topLevelGroup() }
-                    .toSet()
-                groups == metastasisLocationGroups
-            } == true
+        private fun episodeMatchesMetastasisLocationGroups(
+            episode: Episode,
+            metastasisLocationGroups: Set<LocationGroup>
+        ): Boolean {
+            val cutoffDays = episode.systemicTreatmentPlan?.intervalTumorIncidenceTreatmentPlanStartDays ?: Int.MAX_VALUE
+
+            val groups = episode.metastases.filter { metastasis ->
+                metastasis.intervalTumorIncidenceMetastasisDetectionDays?.let { it < cutoffDays } == true
+            }
+                .map { it.location.locationGroup.topLevelGroup() }
+                .toSet()
+
+            return groups == metastasisLocationGroups
+        }
     }
 }
