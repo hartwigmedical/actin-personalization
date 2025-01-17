@@ -30,17 +30,20 @@ import org.junit.jupiter.api.Test
 
 
 class NcrEpisodeExtractorTest {
+    private val treatmentRecord = NCR_RECORD.copy(
+        treatment = NCR_RECORD.treatment.copy(systemicTreatment = NCR_SYSTEMIC_TREATMENT.copy(systStartInt1 = 721, systStartInt2 = 722, systStartInt3 = 723, systStartInt4 = 724, systStartInt5 = 725, systStartInt6 = 726, systStartInt7 = 727))
+    )
 
     @Test
     fun `Should extract episode from NCR record`() {
-        val episode = NcrEpisodeExtractor(NcrSystemicTreatmentPlanExtractor()).extractEpisode(NCR_RECORD, 80)
+        val episode = NcrEpisodeExtractor(NcrSystemicTreatmentPlanExtractor()).extractEpisode(treatmentRecord, 80)
         assertThat(episode.systemicTreatmentPlan).isNotNull
         assertThat(episode.copy(systemicTreatmentPlan = null)).isEqualTo(expectedEpisode)
     }
 
     @Test
     fun `Should filter out invalid lab measurements (9999, null, or out of extreme ranges)`() {
-        val modifiedNcrRecord = NCR_RECORD.copy(
+        val modifiedNcrRecord = treatmentRecord.copy(
             labValues = NCR_LAB_VALUES.copy(
                 ldh1 = null,
                 ldh2 = 9999,
@@ -74,7 +77,7 @@ class NcrEpisodeExtractorTest {
 
     @Test
     fun `Should set maximumSizeOfLiverMetastasisMm to null when value is 999`() {
-        val modifiedNcrRecord = NCR_RECORD.copy(
+        val modifiedNcrRecord = treatmentRecord.copy(
             metastaticDiagnosis = NCR_METASTATIC_DIAGNOSIS.copy(
                 metaLeverAfm = 999
             )
@@ -155,7 +158,8 @@ class NcrEpisodeExtractorTest {
             pfsMeasures = listOf(
                 PfsMeasure(PfsMeasureType.PROGRESSION, PfsMeasureFollowUpEvent.LOCAL_ONLY, 4),
                 PfsMeasure(PfsMeasureType.DEATH, PfsMeasureFollowUpEvent.REGIONAL, 80),
-            )
+            ),
+            ageAtTreatmentPlanStart = 52
         )
     }
 
