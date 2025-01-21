@@ -38,7 +38,7 @@ param_grids = {
     ],
     'AalenAdditive': [
         {
-            'fit_intercept': [True, False],
+            'fit_intercept': [True],
             'alpha': [0.01, 0.05, 0.1],
             'coef_penalizer': [0.5, 1.0, 2.0, 5.0, 10.0],
             'smoothing_penalizer': [0.0, 0.5, 1.0],

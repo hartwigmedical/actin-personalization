@@ -1,5 +1,6 @@
 import random
 from itertools import product
+from .model_trainer import *
 
 def random_parameter_search(param_dict, n_samples):
     """
@@ -21,7 +22,7 @@ def random_parameter_search(param_dict, n_samples):
     return [dict(zip(keys, combo)) for combo in sampled_combos]
 
 def hyperparameter_search(
-    X_train, y_train, X_test, y_test, treatment_col, encoded_columns, event_col, duration_col,
+    X_train, y_train, X_test, y_test, treatment_col, encoded_columns, event_col, duration_col, max_time,
     base_models, param_grids, metric_comparison='auc', n_samples=20, random_state=42
 ):
     random.seed(random_state)
@@ -55,12 +56,12 @@ def hyperparameter_search(
                 trainer.models = {model_name: new_model}
                 results, trained_models = trainer.train_and_evaluate(
                     X_train, y_train, X_test, y_test,
-                    treatment_col=treatment_col,
                     encoded_columns=encoded_columns,
                     event_col=event_col,
-                    duration_col=duration_col
+                    duration_col=duration_col, 
+                    save_models = False
                 )
-
+                
                 current_score = results[model_name][metric_comparison]
                 all_results[model_name].append((params, results[model_name]))
 

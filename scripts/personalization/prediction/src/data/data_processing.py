@@ -33,7 +33,7 @@ class DataPreprocessor:
         self.event_col = None
         self.duration_col = None
 
-    def preprocess_data(self, query, duration_col, event_col, features):
+    def preprocess_data(self, query, duration_col, event_col, features, group_treatments=False):
         self.duration_col = duration_col
         self.event_col = event_col
 
@@ -48,6 +48,8 @@ class DataPreprocessor:
         df = self.handle_missing_values(df)
         
         df = self.expand_column_groups(df, column_name = 'metastasisLocationGroupsPriorToSystemicTreatment')
+        if group_treatments:
+            df = self.group_treatments(df) 
         df = self.encode_categorical(df)
         
         updated_features = [col for col in df.columns if col not in [self.duration_col, self.event_col]]
@@ -128,7 +130,26 @@ class DataPreprocessor:
         df = df.drop(columns=[column_name], errors='ignore')
 
         return df
+    
+    def group_treatments(self, df, treatment_col = 'systemicTreatmentPlan'):
+    
+        treatment_groups = {
+            "MONO": ["CAPECITABINE", "IRINOTECAN", "FLUOROURACIL", "CAPECITABINE_BEVACIZUMAB", "FLUOROURACIL_BEVACIZUMAB"],
+            "DOUBLET": ["FOLFOX", "FOLFOX_B", "FOLFOX_P", "CAPOX", "CAPOX_B", "FOLFIRI", "FOLFIRI_B", "FOLFIRI_P"],
+            "TRIPLET": ["FOLFOXIRI", "FOLFOXIRI_B"],
+            "IMMUNOTHERAPY": ["PEMBROLIZUMAB", "NIVOLUMAB"],
+        }
 
+        group_lookup = {treatment: group for group, treatments in treatment_groups.items() for treatment in treatments}
+
+        df[f"{treatment_col}_Group"] = df[treatment_col].map(group_lookup).fillna("OTHER")
+
+        df["Bevacizumab"] = df[treatment_col].str.contains("_B", case=False, na=False).astype(int)
+        df["Panitumumab"] = df[treatment_col].str.contains("_P", case=False, na=False).astype(int)
+        
+        df = df.drop(columns = ['systemicTreatmentPlan'])
+
+        return df
 
     def encode_categorical(self, df):
         categorical_cols = df.select_dtypes(include=['object', 'category']).columns.tolist()

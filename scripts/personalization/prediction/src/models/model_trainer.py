@@ -18,7 +18,7 @@ from ..utils.metrics import calculate_c_index, calculate_brier_score, calibratio
 from .survival_models import BaseSurvivalModel, NNSurvivalModel
 
 class ModelTrainer:
-    def __init__(self, models, n_splits=5, random_state=42):
+    def __init__(self, models, n_splits=5, random_state=42, max_time=1825):
         """
         Initialize ModelTrainer with multiple models.
         
@@ -32,6 +32,8 @@ class ModelTrainer:
         self.random_state = random_state
         self.results = dict()
         self.trained_models = dict()
+        
+        self.max_time = max_time
 
     def cross_validate(self, X, y, event_col, encoded_columns):
         """
@@ -108,14 +110,13 @@ class ModelTrainer:
         """        
         max_follow_up = y_val_structured['duration'].max()
         min_follow_up = y_val_structured['duration'].min()
-        upper_bound = min(1825, max_follow_up)
+        upper_bound = min(self.max_time, max_follow_up)
         
         if surv_funcs is not None and model_name != 'AalenAdditive':
             max_times = [fn.x[-1] for fn in surv_funcs]
             global_max_time = min(max_times)
             upper_bound = min(upper_bound, global_max_time)
          
-        # --- Build the initial time grid ---
         if upper_bound < 30: 
             times = np.array([upper_bound])
         else:
@@ -129,7 +130,6 @@ class ModelTrainer:
     
         times = times[(times > min_follow_up) & (times < max_follow_up)].astype(int)
         
-        # --- Determine predictions ---
         if surv_funcs is None:  
             predictions = risk_scores
             auc_input = -risk_scores
@@ -180,7 +180,7 @@ class ModelTrainer:
         return results
 
     
-    def train_and_evaluate(self, X_train, y_train, X_test, y_test, encoded_columns, event_col, duration_col, title, save_models=False, save_path="src/models/trained_models"):
+    def train_and_evaluate(self, X_train, y_train, X_test, y_test, encoded_columns, event_col, duration_col, title='', save_models=False, save_path="src/models/trained_models"):
         """
         Train and evaluate all models with cross-validation and hold-out evaluation.
 
