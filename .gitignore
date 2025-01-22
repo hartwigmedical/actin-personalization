@@ -8,3 +8,13 @@ target
 
 # Ignore notebook checkpoints
 **/.ipynb_checkpoints/
+
+# Ignore pycache
+*.pyc
+*.pyo
+*.pyd
+__pycache__/
+*.log
+*.egg-info/
+
+
