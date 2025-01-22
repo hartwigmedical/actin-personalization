@@ -13,8 +13,9 @@ Below is the organized structure of the repository, detailing the role of each f
 
 | File/Folders                                      | Description                                                                                  |
 |---------------------------------------------------|----------------------------------------------------------------------------------------------|
-| `ACTIN-1393_Predictive_algorithms_pipeline.ipynb` | Main Jupyter Notebook for building, evaluating, and interpreting predictive survival models. |                 |
+| `ACTIN-1393_Predictive_algorithms_pipeline.ipynb` | Main Jupyter Notebook for building, evaluating, and interpreting predictive survival models. |
 | `__init__.py`                                     | Makes the root directory importable as a package.                                            |
+| `requirements.txt`                                | Contains a list of all Python dependencies required to run the project.                      |
 
 ---
 
@@ -85,3 +86,15 @@ Utility functions for evaluation metrics and other supporting operations.
 
 You need to load the pretrained models into your `trained_models` directory, they can be found gs:
 //actin-personalization-models-v1/trained_models/
+
+## 🛠 Python Environment Setup
+
+To ensure that the code runs as intended, set up your Python environment with the required dependencies. This repository uses a requirements.txt file to manage dependencies. Run the following command in the root directory of the repository:
+`pip install -r requirements.txt`
+
+This will install all the packages required to run the project.
+
+
+
+
+
