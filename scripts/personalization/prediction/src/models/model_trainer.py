@@ -6,27 +6,18 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import MinMaxScaler
 
 from sksurv.util import Surv
-import os
-import torch
-import joblib
-import dill
 
-from lifelines.utils import concordance_index
-from typing import Dict, Any, Tuple, List
+import torch
+import dill
+import os
+
+from typing import List, Dict, Tuple, Any, Optional, Callable
 
 from ..utils.metrics import calculate_c_index, calculate_brier_score, calibration_assessment, calculate_time_dependent_auc
 from .survival_models import BaseSurvivalModel, NNSurvivalModel
 
 class ModelTrainer:
-    def __init__(self, models, n_splits=5, random_state=42, max_time=1825):
-        """
-        Initialize ModelTrainer with multiple models.
-        
-        Args:
-            models: A dictionary of model instances to train and evaluate.
-            n_splits: Number of folds for cross-validation.
-            random_state: Random seed for reproducibility.
-        """
+    def __init__(self, models: Dict[str, BaseSurvivalModel], n_splits: int = 5, random_state: int = 42, max_time: int = 1825):
         self.models = models
         self.n_splits = n_splits
         self.random_state = random_state
@@ -35,26 +26,12 @@ class ModelTrainer:
         
         self.max_time = max_time
 
-    def cross_validate(self, X, y, event_col, encoded_columns):
-        """
-        Perform stratified k-fold cross-validation.
-
-        Args:
-            X: Feature DataFrame.
-            y: Target DataFrame.
-            encoded_columns: Dictionary of encoded column mappings.
-
-        Returns:
-            A list of train-test index splits for cross-validation.
-        """
+    def cross_validate(self, X: pd.DataFrame, y: pd.DataFrame, event_col: str, encoded_columns: Dict[str, List[str]]) -> List[Tuple[np.ndarray, np.ndarray]]:
         skf = StratifiedKFold(n_splits=self.n_splits, shuffle=True, random_state=self.random_state)
       
         return list(skf.split(X, y[event_col].astype(str)))
     
-    def _initialize_model(self, model_template, input_size=None):
-        """
-        Create a new instance of a model from the template.
-        """
+    def _initialize_model(self, model_template: BaseSurvivalModel, input_size: Optional[int] = None) -> BaseSurvivalModel:
         model_class = type(model_template)
         kwargs = getattr(model_template, 'kwargs', {})
 
@@ -63,7 +40,7 @@ class ModelTrainer:
         
         return model_class(**kwargs)
     
-    def save_model(self, model, model_name, title, save_path="src/models/trained_models"):
+    def save_model(self, model: BaseSurvivalModel, model_name: str, title :str, save_path: str = "src/models/trained_models")-> None:
         if not os.path.exists(save_path):
             os.makedirs(save_path)
 
@@ -76,20 +53,14 @@ class ModelTrainer:
             with open(model_file + ".pkl", "wb") as f:
                 dill.dump(model, f)
     
-    def _prepare_fold_data(self, X: pd.DataFrame, y: pd.DataFrame, indices: Tuple[np.ndarray, np.ndarray], event_col: str, duration_col: str):
-        """
-        Prepare training and validation data for a fold.
-
-        Args:
-            X: Feature DataFrame.
-            y: Target DataFrame (structured array or DataFrame).
-            indices: Train and validation indices.
-            event_col: Column name for event indicator.
-            duration_col: Column name for duration.
-
-        Returns:
-            Prepared training and validation data, including feature DataFrames and survival-structured arrays.
-        """
+    def _prepare_fold_data(
+        self, 
+        X: pd.DataFrame, 
+        y: pd.DataFrame, 
+        indices: Tuple[np.ndarray, np.ndarray], 
+        event_col: str, 
+        duration_col: str
+    ) -> Tuple[pd.DataFrame, np.ndarray, pd.DataFrame, np.ndarray, pd.DataFrame]:
         train_idx, val_idx = indices
         X_train, X_val = X.iloc[train_idx], X.iloc[val_idx]
 
@@ -101,13 +72,16 @@ class ModelTrainer:
 
         return X_train, y_train_structured, X_val, y_val_structured, y_val_df
 
-    def _get_survival_metrics(self, model, model_name, surv_funcs, risk_scores, X_val, y_val_structured):
-        """
-        Helper function to handle survival function and risk score calculations.
-
-        Returns:
-            Tuple containing times, predictions, and risk_scores for AUC calculation.
-        """        
+    def _get_survival_metrics(
+        self, 
+        model: BaseSurvivalModel, 
+        model_name: str, 
+        surv_funcs: Optional[List[Callable[[np.ndarray], np.ndarray]]],
+        risk_scores: np.ndarray, 
+        X_val: pd.DataFrame, 
+        y_val_structured: np.ndarray
+    ) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:  
+        
         max_follow_up = y_val_structured['duration'].max()
         min_follow_up = y_val_structured['duration'].min()
         upper_bound = min(self.max_time, max_follow_up)
@@ -142,16 +116,16 @@ class ModelTrainer:
 
         return times, predictions, auc_input
 
-    def _evaluate_model(self, model, X_val, y_train_structured, y_val_structured, model_name):
-        """
-        Evaluate a model on validation data.
-
-        Returns:
-            A dictionary of evaluation metrics.
-        """
+    def _evaluate_model(
+        self, 
+        model: BaseSurvivalModel, 
+        X_val: pd.DataFrame, 
+        y_train_structured: pd.DataFrame, 
+        y_val_structured: pd.DataFrame, 
+        model_name: str
+    ) -> Dict[str, List[float]]:
         results = {}
 
-        # Predict risk scores or survival functions
         try:
             surv_funcs = model.predict_survival_function(X_val)
         except AttributeError:
@@ -167,7 +141,6 @@ class ModelTrainer:
             model, model_name, surv_funcs, risk_scores, X_val, y_val_structured
         )
 
-        # Calculate metrics
         results['c_index'] = calculate_c_index(
             y_val_structured['duration'], risk_scores, y_val_structured['event']
         )
@@ -180,27 +153,23 @@ class ModelTrainer:
         return results
 
     
-    def train_and_evaluate(self, X_train, y_train, X_test, y_test, encoded_columns, event_col, duration_col, title='', save_models=False, save_path="src/models/trained_models"):
-        """
-        Train and evaluate all models with cross-validation and hold-out evaluation.
-
-        Args:
-            X_train, y_train: Training data.
-            X_test, y_test: Hold-out test data.
-            encoded_columns: Dictionary of encoded columns.
-            event_col, duration_col: Survival event and duration columns.
-
-        Returns:
-            results: Nested dictionary of evaluation metrics.
-            trained_models: Dictionary of final trained models.
-        """
+    def train_and_evaluate(
+        self, 
+        X_train:  pd.DataFrame, y_train: pd.DataFrame, 
+        X_test: pd.DataFrame, y_test: pd.DataFrame, 
+        encoded_columns: Dict[str, List[str]], 
+        event_col: str, 
+        duration_col: str, 
+        title: str = '', 
+        save_models: bool = False, 
+        save_path: str = "src/models/trained_models"
+    ) -> Tuple[pd.DataFrame, Dict[str, BaseSurvivalModel]]:
         folds = self.cross_validate(X_train, y_train, event_col, encoded_columns)
 
         for model_name, model_template in self.models.items():
             print(f"training model: {model_name}")
             model_metrics = {'cv': {'c_index': [], 'ibs': [], 'ce': [], 'auc': []}}
 
-            # Cross-validation
             for fold_indices in folds:
                 X_fold_train, y_fold_train_structured, X_fold_val, y_fold_val_structured, y_fold_val_df = self._prepare_fold_data(
                     X_train, y_train, fold_indices, event_col, duration_col
@@ -222,7 +191,6 @@ class ModelTrainer:
             self.results[model_name] = {key: np.nanmean(values) for key, values in model_metrics['cv'].items()}
             print(f"{model_name} CV Results: {self.results[model_name]}")
 
-            # Train final model on the entire training set
             final_model = self._initialize_model(model_template, input_size=X_train.shape[1])
             y_train_df = pd.DataFrame({'duration': y_train[duration_col], 'event': y_train[event_col]}, index=X_train.index)
             y_train_structured = Surv.from_dataframe('event', 'duration', y_train_df)

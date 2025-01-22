@@ -1,6 +1,8 @@
 import numpy as np
 import pandas as pd
 
+from typing import Dict, Any, Optional, Tuple, List
+
 from lifelines import AalenAdditiveFitter
 
 from sksurv.linear_model import CoxPHSurvivalAnalysis
@@ -20,56 +22,44 @@ from pycox.models import CoxPH, LogisticHazard, DeepHitSingle, PCHazard, MTLR
 torch.manual_seed(0)
 
 class BaseSurvivalModel:
-    def __init__(self, drop_variance_threshold=1e-5, correlation_threshold=0.95):
+    def __init__(self, drop_variance_threshold: float = 1e-5, correlation_threshold: float = 0.95):
         self.drop_variance_threshold = drop_variance_threshold
         self.correlation_threshold = correlation_threshold
 
-    def fit(self, X, y) -> None:
-        """
-        Fit the survival model.
-        """
+    def fit(self, X: pd.DataFrame, y: pd.DataFrame) -> None:
+        
         raise NotImplementedError
 
-    def predict_survival_function(self, X):
-        """
-        Predict survival functions.
-        """
+    def predict_survival_function(self, X: pd.DataFrame) -> np.ndarray:
+    
         raise NotImplementedError
         
-    def predict(self, X) -> np.ndarray:
-        """
-        Predict survival probabilities or risk scores.
-        """
+    def predict(self, X: pd.DataFrame) -> np.ndarray:
+       
         raise NotImplementedError
         
     @staticmethod
-    def drop_low_variance_features(X, threshold=1e-5):
-        """
-        Drop features with variance below a given threshold.
-        """
+    def drop_low_variance_features(X: pd.DataFrame, threshold: float = 1e-5) -> pd.DataFrame:
         selector = VarianceThreshold(threshold=threshold)
         X_reduced = selector.fit_transform(X)
         retained_features = X.columns[selector.get_support()]
         return pd.DataFrame(X_reduced, columns=retained_features, index=X.index)
 
     @staticmethod
-    def drop_highly_correlated_features(X, threshold=0.95):
-        """
-        Drop highly correlated features above a given threshold.
-        """
+    def drop_highly_correlated_features(X: pd.DataFrame, threshold: float = 0.95) -> pd.DataFrame:
         corr_matrix = X.corr().abs()
         upper_triangle = corr_matrix.where(np.triu(np.ones(corr_matrix.shape), k=1).astype(bool))
         to_drop = [column for column in upper_triangle.columns if any(upper_triangle[column] > threshold)]
         return X.drop(columns=to_drop, errors="ignore")
         
 class CoxPHModel(BaseSurvivalModel):
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: Dict[str, Any]):
         super().__init__()
         self.kwargs = kwargs
         self.model = CoxPHSurvivalAnalysis(**self.kwargs)
         self.selected_features = None
 
-    def fit(self, X, y):       
+    def fit(self, X: pd.DataFrame, y: np.ndarray) -> None:       
         X = self.drop_low_variance_features(X)
         X = self.drop_highly_correlated_features(X)
         
@@ -77,21 +67,21 @@ class CoxPHModel(BaseSurvivalModel):
 
         self.model.fit(X, y)
 
-    def predict_survival_function(self, X):
+    def predict_survival_function(self, X: pd.DataFrame) -> np.ndarray:
         return self.model.predict_survival_function(X[self.selected_features])
 
-    def predict(self, X):       
+    def predict(self, X: pd.DataFrame) -> np.ndarray:       
         return self.model.predict(X[self.selected_features])
     
 class AalenAdditiveModel(BaseSurvivalModel):
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: Dict[str, Any]):
         super().__init__()
         self.kwargs = kwargs
         self.model = AalenAdditiveFitter(**self.kwargs)
 
         self.selected_features = None
 
-    def fit(self, X, y):
+    def fit(self, X: pd.DataFrame, y: pd.DataFrame) -> None:
         X = self.drop_low_variance_features(X, threshold=self.drop_variance_threshold)
         X = self.drop_highly_correlated_features(X, threshold=self.correlation_threshold)
         
@@ -104,7 +94,7 @@ class AalenAdditiveModel(BaseSurvivalModel):
         self.model.fit(df, duration_col='duration', event_col='event')
         self.selected_features = X.columns
         
-    def predict_survival_function(self, X, times=None):
+    def predict_survival_function(self, X: pd.DataFrame, times: Optional[np.ndarray] = None) -> np.ndarray:
         X = X[self.selected_features].copy()
         survival_functions = self.model.predict_survival_function(X)
         if times is not None:
@@ -117,7 +107,7 @@ class AalenAdditiveModel(BaseSurvivalModel):
         else:
             return survival_functions
 
-    def predict(self, X, durations):
+    def predict(self, X: pd.DataFrame, durations: np.ndarray) -> np.ndarray:
         X = X[self.selected_features].copy()
 
         cumulative_coefs = self.model.cumulative_hazards_
@@ -145,48 +135,53 @@ class AalenAdditiveModel(BaseSurvivalModel):
         return risk_scores
 
 class RandomSurvivalForestModel(BaseSurvivalModel):
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: Dict[str, Any]):
         super().__init__()
         self.kwargs = kwargs
         self.model = RandomSurvivalForest(**self.kwargs)
 
-    def fit(self, X, y):
+    def fit(self, X: pd.DataFrame, y: pd.DataFrame) -> None:
         self.model.fit(X, y)
         
-    def predict_survival_function(self, X):
+    def predict_survival_function(self, X: pd.DataFrame) -> np.ndarray:
         return self.model.predict_survival_function(X)
         
-    def predict(self, X):
+    def predict(self, X: pd.DataFrame) -> np.ndarray:
         return self.model.predict(X)
 
 class GradientBoostingSurvivalModel(BaseSurvivalModel):
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: Dict[str, Any]):
         super().__init__()
         self.kwargs = kwargs
         self.model = GradientBoostingSurvivalAnalysis(random_state=42, **self.kwargs)
         
-    def fit(self, X, y):
+    def fit(self, X: pd.DataFrame, y: pd.DataFrame) -> None:
         self.model.fit(X, y)
 
-    def predict_survival_function(self, X):
+    def predict_survival_function(self, X: pd.DataFrame) -> np.ndarray:
         return self.model.predict_survival_function(X)
 
-    def predict(self, X):
+    def predict(self, X: pd.DataFrame) -> np.ndarray:
         return self.model.predict(X)
 
 class NNSurvivalModel(BaseSurvivalModel):
-    def __init__(self, model_class, input_size, num_nodes=[128, 64, 32], dropout=0.1, lr=1e-3, batch_size=64, epochs=100, num_durations=1, early_stopping_patience=5, batch_norm=False, weight_decay=1e-4, activation='relu', optimizer='Adam', **kwargs):
-        """
-        Generalized neural survival model.
-        :param model_class: The specific survival model class (e.g., LogisticHazard, DeepHitSingle, etc.).
-        :param input_size: Number of input features.
-        :param num_nodes: List of nodes per hidden layer.
-        :param dropout: Dropout rate for regularization.
-        :param lr: Learning rate.
-        :param batch_size: Batch size for training.
-        :param epochs: Number of epochs for training.
-        :param kwargs: Additional model-specific parameters.
-        """
+    def __init__(
+        self, 
+        model_class, 
+        input_size: int, 
+        num_nodes: List[int] = [128, 64, 32], 
+        dropout: float = 0.1, 
+        lr: float = 1e-3, 
+        batch_size: int = 64, 
+        epochs: int = 100, 
+        num_durations: int = 1, 
+        early_stopping_patience: int = 5, 
+        batch_norm: bool = False, 
+        weight_decay: float = 1e-4, 
+        activation: str = 'relu', 
+        optimizer: str = 'Adam', 
+        **kwargs: Dict[str, Any]
+    ):
         super().__init__()
         self.model_class = model_class
         self.input_size = input_size
@@ -225,7 +220,6 @@ class NNSurvivalModel(BaseSurvivalModel):
         else:
             raise ValueError(f"Unknown activation function: {activation}")
         
-        # Define the neural network architecture
         self.net = tt.practical.MLPVanilla(in_features=self.input_size, num_nodes=self.num_nodes, out_features=self.num_durations, activation=activation_fn, batch_norm=batch_norm, dropout=self.dropout)
         
         if optimizer.lower() == "adam":
@@ -243,12 +237,11 @@ class NNSurvivalModel(BaseSurvivalModel):
 
         self.model = model_class(self.net, self.optimizer, **model_specific_kwargs)
 
-    def fit(self, X, y, val_data=None):
+    def fit(self, X: pd.DataFrame, y: pd.DataFrame, val_data: pd.DataFrame = None) -> None:
         durations = y['duration'].astype('float32')
         events = y['event'].astype('float32')
         X_tensor = X.values.astype('float32')
 
-        # Apply label transformation if required
         if hasattr(self.model_class, 'label_transform'):
             self.labtrans = self.model_class.label_transform(self.num_durations)
             y = self.labtrans.fit_transform(durations, events)
@@ -275,7 +268,7 @@ class NNSurvivalModel(BaseSurvivalModel):
             self.model.compute_baseline_hazards()
 
 
-    def predict_survival_function(self, X, times=None):
+    def predict_survival_function(self, X: pd.DataFrame, times: np.ndarray = None) -> np.ndarray:
         X_tensor = X.values.astype('float32')
         surv = self.model.predict_surv_df(X_tensor)
 
@@ -284,7 +277,7 @@ class NNSurvivalModel(BaseSurvivalModel):
 
         return [interp1d(surv.index.values, surv.iloc[:, i].values, bounds_error=False, fill_value='extrapolate') for i in range(surv.shape[1])]
 
-    def predict(self, X):
+    def predict(self, X: pd.DataFrame) -> np.ndarray:
         X_tensor = X.values.astype('float32')
         if hasattr(self.model, 'predict_risk'):
             risk_scores = self.model.predict_risk(X_tensor)
@@ -310,30 +303,30 @@ class NNSurvivalModel(BaseSurvivalModel):
         return risk_scores
     
 class DeepSurv(NNSurvivalModel):
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: Dict[str, Any]):
         kwargs.pop('model_class', None)
         super().__init__(model_class = CoxPH, **kwargs)
 
 class LogisticHazardModel(NNSurvivalModel):
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: Dict[str, Any]):
         kwargs.pop('model_class', None)
         kwargs.pop('num_durations', None) 
         super().__init__(model_class = LogisticHazard, num_durations=60, **kwargs)
 
 class DeepHitModel(NNSurvivalModel):
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: Dict[str, Any]):
         kwargs.pop('num_durations', None) 
         kwargs.pop('model_class', None)
         super().__init__(model_class = DeepHitSingle, num_durations=60, **kwargs)
 
 class PCHazardModel(NNSurvivalModel):
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: Dict[str, Any]):
         kwargs.pop('num_durations', None) 
         kwargs.pop('model_class', None)
         super().__init__(model_class = PCHazard, num_durations=60, **kwargs)
 
 class MTLRModel(NNSurvivalModel):
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: Dict[str, Any]):
         kwargs.pop('num_durations', None) 
         kwargs.pop('model_class', None)
         super().__init__(model_class = MTLR, num_durations=60, **kwargs)

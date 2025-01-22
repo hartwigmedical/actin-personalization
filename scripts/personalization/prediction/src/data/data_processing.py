@@ -1,6 +1,9 @@
 import os
 import pandas as pd
 import pymysql
+
+from typing import List, Dict, Tuple, Union, Any, Optional
+
 from sklearn.impute import KNNImputer
 from sklearn.preprocessing import LabelEncoder, OneHotEncoder
 from sklearn.preprocessing import MinMaxScaler, StandardScaler
@@ -9,11 +12,11 @@ from sklearn.model_selection import train_test_split
 from .lookups import LookupManager
 
 class DataSplitter:
-    def __init__(self, test_size=0.1, random_state=42):
+    def __init__(self, test_size: float=0.1, random_state: int=42) -> None:
         self.test_size = test_size
         self.random_state = random_state
 
-    def split(self, X, y, event_col, encoded_columns):
+    def split(self, X: pd.DataFrame, y: pd.DataFrame, event_col: str, encoded_columns: Dict[str, List[str]]) -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame]:
         """
         Split the data into training and test sets, stratified by treatment type and censoring status.
         """
@@ -25,7 +28,7 @@ class DataSplitter:
         return X_train, X_test, y_train, y_test
 
 class DataPreprocessor:
-    def __init__(self, db_config_path, db_name):
+    def __init__(self, db_config_path: str, db_name: str) -> None:
         self.db_config_path = db_config_path
         self.db_name = db_name
         self.data_dir = "data"
@@ -33,7 +36,7 @@ class DataPreprocessor:
         self.event_col = None
         self.duration_col = None
 
-    def preprocess_data(self, query, duration_col, event_col, features, group_treatments=False):
+    def preprocess_data(self, query: str, duration_col: str, event_col: str, features: List[str], group_treatments: bool = False) -> Tuple[pd.DataFrame, List[str], Dict[str, List[str]]]:
         self.duration_col = duration_col
         self.event_col = event_col
 
@@ -60,7 +63,7 @@ class DataPreprocessor:
         return df, updated_features, self.encoded_columns
 
     
-    def load_data(self, query):
+    def load_data(self, query: str) -> pd.DataFrame:
         db_connection = pymysql.connect(
             read_default_file=self.db_config_path,
             read_default_group='RAnalysis',
@@ -70,7 +73,7 @@ class DataPreprocessor:
         db_connection.close()
         return df.dropna(subset=[self.duration_col, self.event_col]).copy()
 
-    def impute_knn(self, df, columns, k):
+    def impute_knn(self, df: pd.DataFrame, columns: List[str], k: int) -> pd.DataFrame:
         """
         :param df: DataFrame to process.
         :param k: Number of neighbors for KNN imputation.
@@ -81,7 +84,7 @@ class DataPreprocessor:
     
         return df
 
-    def numerize(self, df, lookup_dictionary):
+    def numerize(self, df: pd.DataFrame, lookup_dictionary: Dict[str, Dict[Any, Any]]) -> pd.DataFrame:
         """
         :param df: DataFrame to process.
         :param lookup_dictionary: Dictionary mapping column names to their lookup values.
@@ -92,7 +95,7 @@ class DataPreprocessor:
                 df[column] = df[column].map(lookup)
         return df
     
-    def handle_missing_values(self, df):
+    def handle_missing_values(self, df: pd.DataFrame) -> pd.DataFrame:
         """
         Handle missing values in the DataFrame.
         - For numerical columns, fill NaN with -1.
@@ -114,7 +117,7 @@ class DataPreprocessor:
         
         return df
     
-    def expand_column_groups(self, df, column_name):
+    def expand_column_groups(self, df: pd.DataFrame, column_name: str) -> pd.DataFrame:
         """
         Expand a multi-label column into separate binary columns for each unique label.
         """
@@ -131,8 +134,7 @@ class DataPreprocessor:
 
         return df
     
-    def group_treatments(self, df, treatment_col = 'systemicTreatmentPlan'):
-    
+    def group_treatments(self, df: pd.DataFrame, treatment_col: str = 'systemicTreatmentPlan') -> pd.DataFrame:
         treatment_groups = {
             "MONO": ["CAPECITABINE", "IRINOTECAN", "FLUOROURACIL", "CAPECITABINE_BEVACIZUMAB", "FLUOROURACIL_BEVACIZUMAB"],
             "DOUBLET": ["FOLFOX", "FOLFOX_B", "FOLFOX_P", "CAPOX", "CAPOX_B", "FOLFIRI", "FOLFIRI_B", "FOLFIRI_P"],
@@ -151,7 +153,7 @@ class DataPreprocessor:
 
         return df
 
-    def encode_categorical(self, df):
+    def encode_categorical(self, df: pd.DataFrame) -> pd.DataFrame:
         categorical_cols = df.select_dtypes(include=['object', 'category']).columns.tolist()
         categorical_cols = [col for col in categorical_cols if col not in [self.event_col, self.duration_col]]
 
@@ -169,7 +171,7 @@ class DataPreprocessor:
         return df
 
 
-    def normalize(self, df, features):
+    def normalize(self, df: pd.DataFrame, features: List[str]) -> pd.DataFrame:
         """
         Normalize numerical features to a range of [0, 1].
         """
@@ -181,7 +183,7 @@ class DataPreprocessor:
         df[cols_to_normalize] = scaler.fit_transform(df[cols_to_normalize])
         return df
 
-    def standardize(self, df, features):
+    def standardize(self, df: pd.DataFrame, features: List[str]) -> pd.DataFrame:
         """
         Standardize numerical features to have a mean of 0 and std dev of 1.
         """

@@ -1,21 +1,20 @@
-import numpy as np
-from lifelines.utils import concordance_index
-from sksurv.metrics import concordance_index_censored, integrated_brier_score, brier_score, cumulative_dynamic_auc
 import pandas as pd
+import numpy as np
+
+from typing import List, Dict, Tuple, Union, Any, Optional
+
+from sksurv.metrics import concordance_index_censored, integrated_brier_score, brier_score, cumulative_dynamic_auc
 from sklearn.calibration import calibration_curve
 
-def calculate_c_index(event_times, predicted_scores, event_observed):
+def calculate_c_index(event_times: np.ndarray, predicted_scores: np.ndarray, event_observed: np.ndarray) -> float:
     c_index = concordance_index_censored(event_observed, event_times, predicted_scores)[0]
     return c_index
 
-def calculate_time_dependent_auc(y_train, y_test, risk_scores, times):
+def calculate_time_dependent_auc(y_train: np.ndarray, y_test: np.ndarray, risk_scores: np.ndarray, times: np.ndarray) -> Tuple[np.ndarray, float]:
     auc_times, mean_auc = cumulative_dynamic_auc(y_train, y_test, risk_scores, times)
     return auc_times, mean_auc
 
-def calculate_brier_score(y_train, y_test, prediction, times, ipcw = False):
-    """
-    Calculate the Integrated Brier Score (IBS) for survival predictions.
-    """
+def calculate_brier_score(y_train: np.ndarray, y_test: np.ndarray, prediction: np.ndarray, times: np.ndarray, ipcw: bool = False) -> float:
     if ipcw:
         bs_scores = []
         for t in times:
@@ -27,18 +26,7 @@ def calculate_brier_score(y_train, y_test, prediction, times, ipcw = False):
         
     return ibs
 
-def calibration_assessment(predictions, y_test, times, n_bins=10):
-    """
-    Assess calibration for all models (survival probabilities or risk scores).
-    Parameters:
-    - predictions: Risk scores or survival probabilities (1 - survival probability for event probabilities).
-    - y_test: Structured array with 'event' and 'duration'.
-    - times: Array of time points to assess calibration.
-    - n_bins: Number of bins for grouping predictions.
-
-    Returns:
-    - Mean calibration error across time points.
-    """
+def calibration_assessment(predictions: np.ndarray, y_test: pd.DataFrame, times: np.ndarray, n_bins: int = 10) -> float:
     calibration_errors = []
     for t in times:
         # Binarize event occurrence at time t
