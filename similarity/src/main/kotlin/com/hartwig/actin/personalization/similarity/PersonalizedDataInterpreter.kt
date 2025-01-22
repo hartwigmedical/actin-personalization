@@ -36,9 +36,10 @@ class PersonalizedDataInterpreter(val patientsByTreatment: List<Pair<TreatmentGr
         private val LOGGER = KotlinLogging.logger {}
 
         fun createFromFile(path: String): PersonalizedDataInterpreter {
-            LOGGER.info { "Loading patient records from file $path" }
+            LOGGER.info { "Loading reference patient database from $path" }
             val patients = ReferencePatientJson.read(path)
-            LOGGER.info { " Loaded ${patients.size} patient records" }
+
+            LOGGER.info { " Loaded ${patients.size} reference patients" }
             return createFromReferencePatients(patients)
         }
 
@@ -62,7 +63,5 @@ class PersonalizedDataInterpreter(val patientsByTreatment: List<Pair<TreatmentGr
 
             return PersonalizedDataInterpreter(patientsByTreatment)
         }
-
-
     }
 }

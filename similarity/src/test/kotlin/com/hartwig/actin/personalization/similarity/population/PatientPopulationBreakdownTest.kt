@@ -2,7 +2,6 @@ package com.hartwig.actin.personalization.similarity.population
 
 import com.hartwig.actin.personalization.datamodel.Treatment
 import com.hartwig.actin.personalization.datamodel.TreatmentGroup
-import com.hartwig.actin.personalization.similarity.DIAGNOSIS
 import com.hartwig.actin.personalization.similarity.patientWithTreatment
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -11,8 +10,7 @@ class PatientPopulationBreakdownTest {
 
     @Test
     fun `Should analyze treatments for each sub-population`() {
-
-        val fluourouracilPatient = patientWithTreatment(
+        val fluorouracilPatient = patientWithTreatment(
             treatment = Treatment.FLUOROURACIL,
             pfsDays = 70,
             osDays = 300,
@@ -35,7 +33,7 @@ class PatientPopulationBreakdownTest {
             ageAtDiagnosis = 85
         )
         val patientsByTreatment = listOf(
-            TreatmentGroup.CAPECITABINE_OR_FLUOROURACIL to listOf(fluourouracilPatient, capecitabinePatient),
+            TreatmentGroup.CAPECITABINE_OR_FLUOROURACIL to listOf(fluorouracilPatient, capecitabinePatient),
             TreatmentGroup.CAPOX_OR_FOLFOX to listOf(capoxPatient)
         )
         val ageSubPopulation = "Age 45-55"
@@ -53,16 +51,16 @@ class PatientPopulationBreakdownTest {
         assertThat(analysis.populations).containsExactlyInAnyOrder(
             Population(
                 ALL_PATIENTS_POPULATION_NAME, mapOf(
-                    MeasurementType.TREATMENT_DECISION to listOf(fluourouracilPatient, capecitabinePatient, capoxPatient),
-                    MeasurementType.PROGRESSION_FREE_SURVIVAL to listOf(fluourouracilPatient, capoxPatient),
-                    MeasurementType.OVERALL_SURVIVAL to listOf(fluourouracilPatient, capecitabinePatient, capoxPatient)
+                    MeasurementType.TREATMENT_DECISION to listOf(fluorouracilPatient, capecitabinePatient, capoxPatient),
+                    MeasurementType.PROGRESSION_FREE_SURVIVAL to listOf(fluorouracilPatient, capoxPatient),
+                    MeasurementType.OVERALL_SURVIVAL to listOf(fluorouracilPatient, capecitabinePatient, capoxPatient)
                 )
             ),
             Population(
                 ageSubPopulation, mapOf(
-                    MeasurementType.TREATMENT_DECISION to listOf(fluourouracilPatient, capecitabinePatient),
-                    MeasurementType.PROGRESSION_FREE_SURVIVAL to listOf(fluourouracilPatient),
-                    MeasurementType.OVERALL_SURVIVAL to listOf(fluourouracilPatient, capecitabinePatient)
+                    MeasurementType.TREATMENT_DECISION to listOf(fluorouracilPatient, capecitabinePatient),
+                    MeasurementType.PROGRESSION_FREE_SURVIVAL to listOf(fluorouracilPatient),
+                    MeasurementType.OVERALL_SURVIVAL to listOf(fluorouracilPatient, capecitabinePatient)
                 )
             )
         )
