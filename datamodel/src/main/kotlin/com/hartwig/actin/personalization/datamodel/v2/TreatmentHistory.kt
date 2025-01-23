@@ -1,0 +1,89 @@
+package com.hartwig.actin.personalization.datamodel.v2
+
+import com.hartwig.actin.personalization.datamodel.AsaClassification
+import com.hartwig.actin.personalization.datamodel.ExtraMuralInvasionCategory
+import com.hartwig.actin.personalization.datamodel.GastroenterologyResection
+import com.hartwig.actin.personalization.datamodel.LabMeasurement
+import com.hartwig.actin.personalization.datamodel.Location
+import com.hartwig.actin.personalization.datamodel.LymphaticInvasionCategory
+import com.hartwig.actin.personalization.datamodel.MetastasesDetectionStatus
+import com.hartwig.actin.personalization.datamodel.MetastasesRadiotherapy
+import com.hartwig.actin.personalization.datamodel.MetastasesSurgery
+import com.hartwig.actin.personalization.datamodel.Metastasis
+import com.hartwig.actin.personalization.datamodel.NumberOfLiverMetastases
+import com.hartwig.actin.personalization.datamodel.PfsMeasure
+import com.hartwig.actin.personalization.datamodel.Radiotherapy
+import com.hartwig.actin.personalization.datamodel.ReasonRefrainmentFromTumorDirectedTreatment
+import com.hartwig.actin.personalization.datamodel.ResponseMeasure
+import com.hartwig.actin.personalization.datamodel.StageTnm
+import com.hartwig.actin.personalization.datamodel.Surgery
+import com.hartwig.actin.personalization.datamodel.SystemicTreatmentPlan
+import com.hartwig.actin.personalization.datamodel.TnmM
+import com.hartwig.actin.personalization.datamodel.TnmN
+import com.hartwig.actin.personalization.datamodel.TnmT
+import com.hartwig.actin.personalization.datamodel.TumorBasisOfDiagnosis
+import com.hartwig.actin.personalization.datamodel.TumorDifferentiationGrade
+import com.hartwig.actin.personalization.datamodel.TumorRegression
+import com.hartwig.actin.personalization.datamodel.VenousInvasionDescription
+
+data class TreatmentHistory(
+    val id: Int,
+    val order: Int,
+    val whoStatusPreTreatmentStart: Int? = null,
+    val asaClassificationPreSurgeryOrEndoscopy: AsaClassification? = null,
+
+    val tumorBasisOfDiagnosis: TumorBasisOfDiagnosis,
+    val tumorLocation: Location,
+    val tumorDifferentiationGrade: TumorDifferentiationGrade? = null,
+    val tnmCT: TnmT? = null,
+    val tnmCN: TnmN? = null,
+    val tnmCM: TnmM? = null,
+    val tnmPT: TnmT? = null,
+    val tnmPN: TnmN? = null,
+    val tnmPM: TnmM? = null,
+    val stageCTNM: StageTnm? = null,
+    val stagePTNM: StageTnm? = null,
+    val stageTNM: StageTnm? = null,
+    val investigatedLymphNodesNumber: Int? = null,
+    val positiveLymphNodesNumber: Int? = null,
+
+    val distantMetastasesDetectionStatus: MetastasesDetectionStatus,
+    val metastases: List<Metastasis>,
+    val numberOfLiverMetastases: NumberOfLiverMetastases? = null,
+    val maximumSizeOfLiverMetastasisMm: Int? = null,
+
+    val hasDoublePrimaryTumor: Boolean? = null,
+    val mesorectalFasciaIsClear: Boolean? = null,
+    val distanceToMesorectalFasciaMm: Int? = null,
+    val venousInvasionDescription: VenousInvasionDescription? = null,
+    val lymphaticInvasionCategory: LymphaticInvasionCategory? = null,
+    val extraMuralInvasionCategory: ExtraMuralInvasionCategory? = null,
+    val tumorRegression: TumorRegression? = null,
+
+    val labMeasurements: List<LabMeasurement> = emptyList(),
+
+    val hasReceivedTumorDirectedTreatment: Boolean,
+    val reasonRefrainmentFromTumorDirectedTreatment: ReasonRefrainmentFromTumorDirectedTreatment? = null,
+    val hasParticipatedInTrial: Boolean? = null,
+
+    val gastroenterologyResections: List<GastroenterologyResection> = emptyList(),
+    val surgeries: List<Surgery> = emptyList(),
+    val metastasesSurgeries: List<MetastasesSurgery> = emptyList(),
+    val radiotherapies: List<Radiotherapy> = emptyList(),
+    val metastasesRadiotherapies: List<MetastasesRadiotherapy> = emptyList(),
+    val hasHadHipecTreatment: Boolean,
+    val intervalTumorIncidenceHipecTreatmentDays: Int? = null,
+    val hasHadPreSurgeryRadiotherapy: Boolean,
+    val hasHadPostSurgeryRadiotherapy: Boolean,
+    val hasHadPreSurgeryChemoRadiotherapy: Boolean,
+    val hasHadPostSurgeryChemoRadiotherapy: Boolean,
+    val hasHadPreSurgerySystemicChemotherapy: Boolean,
+    val hasHadPostSurgerySystemicChemotherapy: Boolean,
+    val hasHadPreSurgerySystemicTargetedTherapy: Boolean,
+    val hasHadPostSurgerySystemicTargetedTherapy: Boolean,
+
+    val responseMeasure: ResponseMeasure? = null,
+    val pfsMeasures: List<PfsMeasure>,
+    val systemicTreatmentPlan: SystemicTreatmentPlan? = null,
+    val ageAtTreatmentPlanStart: Int? = null
+)
