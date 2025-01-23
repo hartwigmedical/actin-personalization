@@ -92,7 +92,7 @@ class SurvivalCalculationTest {
             val censoredPatients = listOf(1, 2, 3, 4, 5).map { i ->
                 val survivalDays = i * 365
                 patientWithSurvivalDays(
-                    osDays = if (type == SurvivalType.OS) survivalDays ?: 0 else 0,
+                    osDays = if (type == SurvivalType.OS) survivalDays else 0,
                     pfsDays = if (type == SurvivalType.PFS) survivalDays else null,
                     hadEvent = false
                 )
@@ -135,6 +135,7 @@ class SurvivalCalculationTest {
         )
         return DiagnosisEpisode(diagnosis, episode)
     }
+
     @Nested
     inner class TableElementTests {
         @Test
@@ -157,6 +158,7 @@ class SurvivalCalculationTest {
             ).isEqualTo(TableElement("100.0", ", IQR: 100.0\n(n=50)"))
         }
     }
+
     @Test
     fun `Should return empty measurement for empty population`() {
         val measurement = survivalCalculation.calculate(emptyList(), ELIGIBLE_SUB_POPULATION_SIZE)

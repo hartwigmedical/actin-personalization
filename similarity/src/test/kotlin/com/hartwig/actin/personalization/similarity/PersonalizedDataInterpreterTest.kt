@@ -14,18 +14,17 @@ class PersonalizedDataInterpreterTest {
 
     @Test
     fun `Should create interpreter with filtered and grouped patient records`() {
-
-        val fluourouracilEpisode = patientWithTreatment(treatment = Treatment.FLUOROURACIL).episode
+        val fluorouracilEpisode = patientWithTreatment(treatment = Treatment.FLUOROURACIL).episode
         val capecitabineEpisode = patientWithTreatment(treatment = Treatment.CAPECITABINE).episode
         val capoxEpisode = patientWithTreatment(treatment = Treatment.CAPOX).episode
 
         val patients = listOf(
-            recordWithEpisode(fluourouracilEpisode),
-            recordWithEpisode(fluourouracilEpisode.copy(distantMetastasesDetectionStatus = MetastasesDetectionStatus.AT_PROGRESSION)),
+            recordWithEpisode(fluorouracilEpisode),
+            recordWithEpisode(fluorouracilEpisode.copy(distantMetastasesDetectionStatus = MetastasesDetectionStatus.AT_PROGRESSION)),
             recordWithEpisode(patientWithTreatment(treatment = Treatment.OTHER).episode),
-            recordWithEpisode(fluourouracilEpisode.copy(systemicTreatmentPlan = null)),
-            recordWithEpisode(fluourouracilEpisode.copy(surgeries = listOf(Surgery(SurgeryType.NOS_OR_OTHER)))),
-            recordWithEpisode(fluourouracilEpisode.copy(hasHadPostSurgerySystemicChemotherapy = true)),
+            recordWithEpisode(fluorouracilEpisode.copy(systemicTreatmentPlan = null)),
+            recordWithEpisode(fluorouracilEpisode.copy(surgeries = listOf(Surgery(SurgeryType.NOS_OR_OTHER)))),
+            recordWithEpisode(fluorouracilEpisode.copy(hasHadPostSurgerySystemicChemotherapy = true)),
             recordWithEpisode(capecitabineEpisode),
             recordWithEpisode(capoxEpisode)
         )
@@ -34,13 +33,14 @@ class PersonalizedDataInterpreterTest {
 
         val expectedDiagnosisEpisodes = mapOf(
             TreatmentGroup.CAPECITABINE_OR_FLUOROURACIL to listOf(
-                DiagnosisEpisode(DIAGNOSIS, fluourouracilEpisode),
+                DiagnosisEpisode(DIAGNOSIS, fluorouracilEpisode),
                 DiagnosisEpisode(DIAGNOSIS, capecitabineEpisode)
             ),
             TreatmentGroup.CAPOX_OR_FOLFOX to listOf(
                 DiagnosisEpisode(DIAGNOSIS, capoxEpisode)
             )
         )
+
         assertThat(interpreter.patientsByTreatment).containsExactlyInAnyOrder(
             *expectedDiagnosisEpisodes.entries.map { it.toPair() }.toTypedArray()
         )

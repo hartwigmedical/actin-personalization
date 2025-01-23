@@ -21,8 +21,6 @@ class TestPersonalizationReportWriterApplication {
         )
             .analyzePatient(50, 1, false, emptySet())
 
-
-
         val measurementTables = listOf(
             MeasurementType.TREATMENT_DECISION, MeasurementType.PROGRESSION_FREE_SURVIVAL
         ).map { TableContent.createForMeasurementType(analysis, it) }
