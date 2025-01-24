@@ -2,13 +2,10 @@ package com.hartwig.actin.personalization.datamodel.v2
 
 import com.hartwig.actin.personalization.datamodel.AnorectalVergeDistanceCategory
 import com.hartwig.actin.personalization.datamodel.Location
-import com.hartwig.actin.personalization.datamodel.NumberOfCciCategories
-import com.hartwig.actin.personalization.datamodel.PriorTumor
 import com.hartwig.actin.personalization.datamodel.Sidedness
 import com.hartwig.actin.personalization.datamodel.TumorType
 
 data class Diagnosis(
-    val tumorIncidenceYear: Int,
     val ageAtDiagnosis: Int,
 
     val consolidatedTumorType: TumorType,
@@ -16,38 +13,10 @@ data class Diagnosis(
     val sidedness: Sidedness? = determineSidedness(tumorLocations),
     val isMetachronous: Boolean,
 
-    val hasHadPriorTumor: Boolean,
-    val priorTumors: List<PriorTumor>,
-
-    val cci: Int? = null,
-    val cciNumberOfCategories: NumberOfCciCategories? = null,
-    val cciHasAids: Boolean? = null,
-    val cciHasCongestiveHeartFailure: Boolean? = null,
-    val cciHasCollagenosis: Boolean? = null,
-    val cciHasCopd: Boolean? = null,
-    val cciHasCerebrovascularDisease: Boolean? = null,
-    val cciHasDementia: Boolean? = null,
-    val cciHasDiabetesMellitus: Boolean? = null,
-    val cciHasDiabetesMellitusWithEndOrganDamage: Boolean? = null,
-    val cciHasOtherMalignancy: Boolean? = null,
-    val cciHasOtherMetastaticSolidTumor: Boolean? = null,
-    val cciHasMyocardialInfarct: Boolean? = null,
-    val cciHasMildLiverDisease: Boolean? = null,
-    val cciHasHemiplegiaOrParaplegia: Boolean? = null,
-    val cciHasPeripheralVascularDisease: Boolean? = null,
-    val cciHasRenalDisease: Boolean? = null,
-    val cciHasLiverDisease: Boolean? = null,
-    val cciHasUlcerDisease: Boolean? = null,
 
     val presentedWithIleus: Boolean? = null,
     val presentedWithPerforation: Boolean? = null,
     val anorectalVergeDistanceCategory: AnorectalVergeDistanceCategory? = null,
-
-    val hasMsi: Boolean? = null,
-    val hasBrafMutation: Boolean? = null,
-    val hasBrafV600EMutation: Boolean? = null,
-    val hasRasMutation: Boolean? = null,
-    val hasKrasG12CMutation: Boolean? = null,
 )
 
 private fun determineSidedness(locations: Set<Location>): Sidedness? {

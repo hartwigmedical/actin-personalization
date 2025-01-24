@@ -1,37 +1,24 @@
 package com.hartwig.actin.personalization.datamodel.v2
 
-import com.hartwig.actin.personalization.datamodel.AsaClassification
-import com.hartwig.actin.personalization.datamodel.ExtraMuralInvasionCategory
-import com.hartwig.actin.personalization.datamodel.GastroenterologyResection
-import com.hartwig.actin.personalization.datamodel.LabMeasurement
+import com.hartwig.actin.personalization.datamodel.AnorectalVergeDistanceCategory
 import com.hartwig.actin.personalization.datamodel.Location
-import com.hartwig.actin.personalization.datamodel.LymphaticInvasionCategory
-import com.hartwig.actin.personalization.datamodel.MetastasesDetectionStatus
-import com.hartwig.actin.personalization.datamodel.MetastasesRadiotherapy
-import com.hartwig.actin.personalization.datamodel.MetastasesSurgery
-import com.hartwig.actin.personalization.datamodel.Metastasis
-import com.hartwig.actin.personalization.datamodel.NumberOfLiverMetastases
-import com.hartwig.actin.personalization.datamodel.PfsMeasure
-import com.hartwig.actin.personalization.datamodel.Radiotherapy
-import com.hartwig.actin.personalization.datamodel.ReasonRefrainmentFromTumorDirectedTreatment
-import com.hartwig.actin.personalization.datamodel.ResponseMeasure
-import com.hartwig.actin.personalization.datamodel.StageTnm
-import com.hartwig.actin.personalization.datamodel.Surgery
-import com.hartwig.actin.personalization.datamodel.SystemicTreatmentPlan
-import com.hartwig.actin.personalization.datamodel.TnmM
-import com.hartwig.actin.personalization.datamodel.TnmN
-import com.hartwig.actin.personalization.datamodel.TnmT
-import com.hartwig.actin.personalization.datamodel.TumorBasisOfDiagnosis
-import com.hartwig.actin.personalization.datamodel.TumorDifferentiationGrade
-import com.hartwig.actin.personalization.datamodel.TumorRegression
-import com.hartwig.actin.personalization.datamodel.VenousInvasionDescription
+import com.hartwig.actin.personalization.datamodel.Sidedness
+import com.hartwig.actin.personalization.datamodel.TumorType
 
-data class TreatmentHistory(
-    val id: Int,
-    val order: Int,
-    val whoStatusPreTreatmentStart: Int? = null,
-    val asaClassificationPreSurgeryOrEndoscopy: AsaClassification? = null,
+data class TumorEntry(
+    val diagnosisYear: Int,
+    val ageAtDiagnosis: Int,
+    val tumorType: TumorType,
+    val tumorLocations: Set<Location>,
+    val sidedness: Sidedness? = determineSidedness(tumorLocations),
+    val isMetachronous: Boolean,
 
+    val priorTumors: List<PriorTumor>,
+    val presentedWithIleus: Boolean? = null,
+    val presentedWithPerforation: Boolean? = null,
+    val anorectalVergeDistanceCategory: AnorectalVergeDistanceCategory? = null,
+
+    /* TODO KD: Check whether fields are per episode or baseline only.
     val tumorBasisOfDiagnosis: TumorBasisOfDiagnosis,
     val tumorLocation: Location,
     val tumorDifferentiationGrade: TumorDifferentiationGrade? = null,
@@ -46,7 +33,16 @@ data class TreatmentHistory(
     val stageTNM: StageTnm? = null,
     val investigatedLymphNodesNumber: Int? = null,
     val positiveLymphNodesNumber: Int? = null,
+     */
 
+    val daysBetweenDiagnosisAndLatestAliveStatusFollowup: Int,
+    val wasAliveAtLatestAliveStatusFollowup: Boolean,
+
+    val comorbiditiesAtDiagnosis : ComorbidityAssessment?,
+    val molecularResultAtDiagnosis : MolecularResult,
+    val treatments: List<TreatmentEntry>
+
+    /*
     val distantMetastasesDetectionStatus: MetastasesDetectionStatus,
     val metastases: List<Metastasis>,
     val numberOfLiverMetastases: NumberOfLiverMetastases? = null,
@@ -86,4 +82,21 @@ data class TreatmentHistory(
     val pfsMeasures: List<PfsMeasure>,
     val systemicTreatmentPlan: SystemicTreatmentPlan? = null,
     val ageAtTreatmentPlanStart: Int? = null
+     */
 )
+
+private fun determineSidedness(locations: Set<Location>): Sidedness? {
+    val LOCATIONS_INDICATING_LEFT_SIDEDNESS =
+        setOf(Location.FLEXURA_LIENALIS, Location.DESCENDING_COLON, Location.RECTOSIGMOID, Location.SIGMOID_COLON, Location.RECTUM)
+    val LOCATIONS_INDICATING_RIGHT_SIDEDNESS =
+        setOf(Location.APPENDIX, Location.COECUM, Location.ASCENDING_COLON, Location.FLEXURA_HEPATICA)
+
+    val containsLeft = locations.any { it in LOCATIONS_INDICATING_LEFT_SIDEDNESS }
+    val containsRight = locations.any { it in LOCATIONS_INDICATING_RIGHT_SIDEDNESS }
+
+    return when {
+        containsLeft && !containsRight -> Sidedness.LEFT
+        containsRight && !containsLeft -> Sidedness.RIGHT
+        else -> null
+    }
+}
