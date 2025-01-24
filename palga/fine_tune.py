@@ -74,7 +74,7 @@ def fine_tune(hf_token, training_data_json, output_dir):
         max_seq_length=MAX_TOKENS,
         dtype=None,  # None for auto detection. Float16 for Tesla T4, V100, Bfloat16 for Ampere+
         load_in_4bit=True,  # Use 4bit quantization to reduce memory usage. Can be False
-        token = hf_token # use one if using gated models like meta-llama/Llama-2-7b-hf
+        token=hf_token # use one if using gated models like meta-llama/Llama-2-7b-hf
     )
 
     # Do model patching and add fast LoRA weights

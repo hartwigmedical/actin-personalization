@@ -60,6 +60,16 @@ def _suggestion_for_input(palga_input):
                     "confidence": {"$ref": "#/$defs/confidence"}
                 },
                 "required": ["value", "explanation"]
+            },
+            "mutation": {
+                "type": "object",
+                "properties": {
+                    "gene": {"type": "string", "comment": "The gene in which the mutation was detected"},
+                    "position": {"type": "string", "comment": "The position of the mutation within the gene"},
+                    "substitution": {"type": "string", "comment": "The specific nucleotide substitution observed"},
+                    "relevantText": {"$ref": "#/$defs/relevantText"},
+                    "textInEnglish": {"$ref": "#/$defs/textInEnglish"},
+                },
             }
         },
         "type": "object",
@@ -96,6 +106,16 @@ def _suggestion_for_input(palga_input):
                            "False if the report indicates that the tumor is microsatellite-stable, or if MMR " +
                            "proteins MLH1, PMS2, MSH2, and MSH6 are detected." +
                            "In all other cases, this field should be null."
+            },
+            "otherMutations": {
+                "type": "array",
+                "items": {"$ref": "#/$defs/mutation"},
+                "comment": "List of mutations detected in other genes"
+            },
+            "testedGenes": {
+                "type": "array",
+                "items": {"type": "string"},
+                "comment": "List of genes covered by tests"
             },
             "tumorMutationalBurden": {
                 "type": "object",
