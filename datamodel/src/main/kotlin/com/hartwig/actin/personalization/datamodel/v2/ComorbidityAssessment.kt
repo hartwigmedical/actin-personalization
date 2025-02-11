@@ -3,6 +3,9 @@ package com.hartwig.actin.personalization.datamodel.v2
 data class ComorbidityAssessment(
     // TODO (KD) Can be calculated from other fields.
     val charlsonComorbidityIndex: Int,
+
+    val daysSinceDiagnosis: Int,
+
     val hasAids: Boolean,
     val hasCongestiveHeartFailure: Boolean,
     val hasCollagenosis: Boolean,

@@ -1,49 +1,35 @@
 package com.hartwig.actin.personalization.datamodel.v2
 
+import com.hartwig.actin.personalization.datamodel.PfsMeasure
+import com.hartwig.actin.personalization.datamodel.ReasonRefrainmentFromTumorDirectedTreatment
+import com.hartwig.actin.personalization.datamodel.ResponseMeasure
+
 data class TumorEntry(
     val diagnosisYear: Int,
     val ageAtDiagnosis: Int,
-
-    val daysBetweenDiagnosisAndLatestAliveStatusFollowup: Int,
-    val wasAliveAtLatestAliveStatusFollowup: Boolean,
+    val latestSurvivalStatus: LatestSurvivalStatus,
 
     val priorTumors: List<PriorTumor>,
 
-    val hasDoublePrimaryTumor: Boolean? = null,
     val primaryDiagnosis: PrimaryDiagnosis,
-    val comorbiditiesAtDiagnosis : ComorbidityAssessment?,
-    val molecularResultAtDiagnosis : MolecularResult,
-    val labMeasurements: List<LabMeasurement> = emptyList(),
-
     val metastasisDiagnosis: MetastasisDiagnosis,
 
+    val comorbidityAssessments : List<ComorbidityAssessment>,
+    val molecularResults : List<MolecularResult>,
+    val labMeasurements: List<LabMeasurement>,
 
-    val treatments: List<TreatmentEntry>
-
-    /*
     val hasReceivedTumorDirectedTreatment: Boolean,
     val reasonRefrainmentFromTumorDirectedTreatment: ReasonRefrainmentFromTumorDirectedTreatment? = null,
     val hasParticipatedInTrial: Boolean? = null,
 
     val gastroenterologyResections: List<GastroenterologyResection> = emptyList(),
-    val surgeries: List<Surgery> = emptyList(),
-    val metastasesSurgeries: List<MetastasesSurgery> = emptyList(),
-    val radiotherapies: List<Radiotherapy> = emptyList(),
-    val metastasesRadiotherapies: List<MetastasesRadiotherapy> = emptyList(),
-    val hasHadHipecTreatment: Boolean,
-    val intervalTumorIncidenceHipecTreatmentDays: Int? = null,
-    val hasHadPreSurgeryRadiotherapy: Boolean,
-    val hasHadPostSurgeryRadiotherapy: Boolean,
-    val hasHadPreSurgeryChemoRadiotherapy: Boolean,
-    val hasHadPostSurgeryChemoRadiotherapy: Boolean,
-    val hasHadPreSurgerySystemicChemotherapy: Boolean,
-    val hasHadPostSurgerySystemicChemotherapy: Boolean,
-    val hasHadPreSurgerySystemicTargetedTherapy: Boolean,
-    val hasHadPostSurgerySystemicTargetedTherapy: Boolean,
+    val primarySurgeries: List<PrimarySurgery> = emptyList(),
+    val metastaticSurgeries: List<MetastaticSurgery> = emptyList(),
+    val hipecTreatment: HipecTreatment,
+    val primaryRadiotherapies: List<PrimaryRadiotherapy> = emptyList(),
+    val metastaticRadiotherapies: List<MetastaticRadiotherapy> = emptyList(),
 
-    val responseMeasure: ResponseMeasure? = null,
-    val pfsMeasures: List<PfsMeasure>,
     val systemicTreatmentPlan: SystemicTreatmentPlan? = null,
-    val ageAtTreatmentPlanStart: Int? = null
-     */
+    val responseMeasure: ResponseMeasure? = null,
+    val pfsMeasures: List<PfsMeasure>
 )

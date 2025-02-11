@@ -6,7 +6,7 @@ import com.hartwig.actin.personalization.datamodel.Metastasis
 import com.hartwig.actin.personalization.datamodel.NumberOfLiverMetastases
 
 data class MetastasisDiagnosis(
-    val whoStatusPreTreatmentStart: Int? = null,
+    val whoStatus: Int? = null,
     val asaClassificationPreSurgeryOrEndoscopy: AsaClassification? = null,
 
     val investigatedLymphNodesCount: Int? = null,

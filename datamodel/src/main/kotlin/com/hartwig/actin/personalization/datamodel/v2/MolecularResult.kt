@@ -1,6 +1,7 @@
 package com.hartwig.actin.personalization.datamodel.v2
 
 data class MolecularResult(
+    val daysSinceDiagnosis: Int,
     val hasMsi: Boolean? = null,
     val hasBrafMutation: Boolean? = null,
     val hasBrafV600EMutation: Boolean? = null,

@@ -7,7 +7,8 @@ import com.hartwig.actin.personalization.datamodel.TumorLocationCategory
 import com.hartwig.actin.personalization.datamodel.TumorType
 
 data class PriorTumor (
-    val daysBetweenDiagnosisAndPriorTumor: Int?,
+    val daysBeforeDiagnosis: Int?,
+
     val primaryTumorType: TumorType,
     val primaryTumorLocation: Location,
     val primaryTumorLocationCategory: TumorLocationCategory,

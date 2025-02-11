@@ -18,6 +18,7 @@ import com.hartwig.actin.personalization.datamodel.VenousInvasionDescription
 
 data class PrimaryDiagnosis(
     val basisOfDiagnosis: TumorBasisOfDiagnosis,
+    val hasDoublePrimaryTumor: Boolean? = null,
     val primaryTumorType: TumorType,
     val primaryTumorLocation: Location,
     val differentiationGrade: TumorDifferentiationGrade? = null,
