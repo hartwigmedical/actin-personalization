@@ -12,7 +12,7 @@ data class TumorEntry(
     val priorTumors: List<PriorTumor>,
 
     val primaryDiagnosis: PrimaryDiagnosis,
-    val metastasisDiagnosis: MetastasisDiagnosis,
+    val metastaticDiagnosis: MetastaticDiagnosis,
 
     val comorbidityAssessments : List<ComorbidityAssessment>,
     val molecularResults : List<MolecularResult>,
