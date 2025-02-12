@@ -7,7 +7,7 @@ import kotlinx.serialization.Serializable
 data class TumorEntry(
     val diagnosisYear: Int,
     val ageAtDiagnosis: Int,
-    val latestSurvivalStatus: LatestSurvivalStatus,
+    val latestSurvivalStatus: SurvivalMeasure,
 
     val priorTumors: List<PriorTumor>,
 
