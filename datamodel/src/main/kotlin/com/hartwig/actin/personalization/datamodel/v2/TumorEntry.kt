@@ -33,5 +33,5 @@ data class TumorEntry(
     val systemicTreatments: List<SystemicTreatment> = emptyList(),
 
     val responseMeasures: List<ResponseMeasure>,
-    val pfsMeasures: List<PfsMeasure>
+    val progressionMeasures: List<ProgressionMeasure>
 )

@@ -5,7 +5,7 @@ import com.hartwig.actin.personalization.datamodel.PfsMeasureType
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class PfsMeasure (
+data class ProgressionMeasure (
     val daysSinceDiagnosis: Int?,
     val type: PfsMeasureType,
     val followUpEvent: PfsMeasureFollowUpEvent?
