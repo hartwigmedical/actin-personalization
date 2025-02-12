@@ -32,6 +32,6 @@ data class TumorEntry(
     val metastaticRadiotherapies: List<MetastaticRadiotherapy> = emptyList(),
     val systemicTreatments: List<SystemicTreatment> = emptyList(),
 
-    val responseMeasure: ResponseMeasure? = null,
+    val responseMeasures: List<ResponseMeasure>,
     val pfsMeasures: List<PfsMeasure>
 )
