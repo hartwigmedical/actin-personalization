@@ -6,10 +6,6 @@ import com.hartwig.actin.personalization.datamodel.ExtraMuralInvasionCategory
 import com.hartwig.actin.personalization.datamodel.Location
 import com.hartwig.actin.personalization.datamodel.LymphaticInvasionCategory
 import com.hartwig.actin.personalization.datamodel.Sidedness
-import com.hartwig.actin.personalization.datamodel.StageTnm
-import com.hartwig.actin.personalization.datamodel.TnmM
-import com.hartwig.actin.personalization.datamodel.TnmN
-import com.hartwig.actin.personalization.datamodel.TnmT
 import com.hartwig.actin.personalization.datamodel.TumorType
 import com.hartwig.actin.personalization.datamodel.TumorBasisOfDiagnosis
 import com.hartwig.actin.personalization.datamodel.TumorDifferentiationGrade
@@ -21,17 +17,19 @@ data class PrimaryDiagnosis(
     val hasDoublePrimaryTumor: Boolean? = null,
     val primaryTumorType: TumorType,
     val primaryTumorLocation: Location,
+    // TODO (KD): How does this differ from clinical/pathological tumor stage?
+    val primaryTumorStage: TumorStage? = null,
     val differentiationGrade: TumorDifferentiationGrade? = null,
 
-    // TODO (KD): Specific for CRC, should use interface
+    // KD: Specific for CRC, could be hidden behind interface eventually
     val sidedness: Sidedness? = determineSidedness(primaryTumorLocation),
     val presentedWithIleus: Boolean? = null,
     val presentedWithPerforation: Boolean? = null,
 
-    // TODO (KD): Only present in case location == RECTUM, should use interface
+    // KD: Only present in case location == RECTUM, could be hidden behind interface eventually.
     val anorectalVergeDistanceCategory: AnorectalVergeDistanceCategory? = null,
 
-    // TODO (KD): Only present in case location in (RECTUM, RECTOSIGMOID), should use interface
+    // KD: Only present in case location in (RECTUM, RECTOSIGMOID), could be hidden behind interface eventually
     val mesorectalFasciaIsClear: Boolean? = null,
     val distanceToMesorectalFasciaMm: Int? = null,
 
@@ -42,15 +40,10 @@ data class PrimaryDiagnosis(
     val tumorRegression: TumorRegression? = null,
 
     // TODO (KD): What do these values mean in the context of a metastasis diagnosis ("VERB")?
-    val tnmCT: TnmT? = null,
-    val tnmCN: TnmN? = null,
-    val tnmCM: TnmM? = null,
-    val tnmPT: TnmT? = null,
-    val tnmPN: TnmN? = null,
-    val tnmPM: TnmM? = null,
-    val stageCTNM: StageTnm? = null,
-    val stagePTNM: StageTnm? = null,
-    val stageTNM: StageTnm? = null,
+    val clinicalTnmClassification: TnmClassification? = null,
+    val pathologicalTnmClassification: TnmClassification? = null,
+    val clinicalTumorStage: TumorStage? = null,
+    val pathologicalTumorStage: TumorStage? = null,
     val investigatedLymphNodesCount: Int? = null,
     val positiveLymphNodesCount: Int? = null,
 

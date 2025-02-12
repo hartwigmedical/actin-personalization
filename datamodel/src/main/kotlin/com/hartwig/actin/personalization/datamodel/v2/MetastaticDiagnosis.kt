@@ -2,7 +2,6 @@ package com.hartwig.actin.personalization.datamodel.v2
 
 import com.hartwig.actin.personalization.datamodel.AsaClassification
 import com.hartwig.actin.personalization.datamodel.MetastasesDetectionStatus
-import com.hartwig.actin.personalization.datamodel.Metastasis
 import com.hartwig.actin.personalization.datamodel.NumberOfLiverMetastases
 
 data class MetastaticDiagnosis(
