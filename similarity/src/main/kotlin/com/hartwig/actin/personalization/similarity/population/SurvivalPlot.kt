@@ -1,6 +1,6 @@
 package com.hartwig.actin.personalization.similarity.population
 
-import com.hartwig.actin.personalization.datamodel.DiagnosisEpisode
+import com.hartwig.actin.personalization.datamodel.old.DiagnosisEpisode
 
 import org.jetbrains.kotlinx.kandy.dsl.plot
 import org.jetbrains.kotlinx.kandy.ir.Plot

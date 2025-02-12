@@ -1,4 +1,4 @@
-package com.hartwig.actin.personalization.datamodel
+package com.hartwig.actin.personalization.datamodel.old
 
 import com.hartwig.actin.personalization.datamodel.v2.assessment.AsaClassification
 import com.hartwig.actin.personalization.datamodel.v2.diagnosis.ExtraMuralInvasionCategory

@@ -5,9 +5,9 @@ import com.hartwig.actin.personalization.datamodel.Diagnosis
 import com.hartwig.actin.personalization.datamodel.Drug
 import com.hartwig.actin.personalization.datamodel.Location
 import com.hartwig.actin.personalization.datamodel.NumberOfCciCategories
-import com.hartwig.actin.personalization.datamodel.PriorTumor
 import com.hartwig.actin.personalization.datamodel.StageTnm
 import com.hartwig.actin.personalization.datamodel.TumorType
+import com.hartwig.actin.personalization.datamodel.old.PriorTumor
 import com.hartwig.actin.personalization.datamodel.v2.diagnosis.Sidedness
 import com.hartwig.actin.personalization.datamodel.v2.diagnosis.TumorLocationCategory
 import org.assertj.core.api.Assertions.assertThat

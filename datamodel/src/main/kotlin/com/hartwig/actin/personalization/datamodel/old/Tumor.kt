@@ -1,4 +1,4 @@
-package com.hartwig.actin.personalization.datamodel
+package com.hartwig.actin.personalization.datamodel.old
 
 interface Tumor {
     val consolidatedTumorType: TumorType

@@ -1,4 +1,4 @@
-package com.hartwig.actin.personalization.datamodel
+package com.hartwig.actin.personalization.datamodel.old
 
 import com.hartwig.actin.personalization.datamodel.v2.Drug
 import com.hartwig.actin.personalization.datamodel.v2.diagnosis.Location
@@ -17,4 +17,4 @@ data class PriorTumor(
     val tumorLocationCategory: TumorLocationCategory,
     val stageTNM: StageTnm?,
     val systemicTreatments: List<Drug>
-): Tumor
+) : Tumor

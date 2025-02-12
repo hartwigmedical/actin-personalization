@@ -1,8 +1,8 @@
 package com.hartwig.actin.personalization.similarity.population
 
-import com.hartwig.actin.personalization.datamodel.DiagnosisEpisode
 import com.hartwig.actin.personalization.datamodel.Episode
 import com.hartwig.actin.personalization.datamodel.LocationGroup
+import com.hartwig.actin.personalization.datamodel.old.DiagnosisEpisode
 
 const val ALL_PATIENTS_POPULATION_NAME = "All"
 

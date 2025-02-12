@@ -1,14 +1,11 @@
 package com.hartwig.actin.personalization.ncr.interpretation.extractor
 
 import com.hartwig.actin.personalization.datamodel.Episode
-import com.hartwig.actin.personalization.datamodel.LabMeasurement
-import com.hartwig.actin.personalization.datamodel.Location
-import com.hartwig.actin.personalization.datamodel.MetastasesDetectionStatus
-import com.hartwig.actin.personalization.datamodel.Metastasis
 import com.hartwig.actin.personalization.datamodel.PfsMeasure
-import com.hartwig.actin.personalization.datamodel.PfsMeasureType
-import com.hartwig.actin.personalization.datamodel.ResponseMeasure
 import com.hartwig.actin.personalization.datamodel.StageTnm
+import com.hartwig.actin.personalization.datamodel.old.LabMeasurement
+import com.hartwig.actin.personalization.datamodel.old.Metastasis
+import com.hartwig.actin.personalization.datamodel.old.ResponseMeasure
 import com.hartwig.actin.personalization.datamodel.v2.assessment.AsaClassification
 import com.hartwig.actin.personalization.datamodel.v2.assessment.LabMeasure
 import com.hartwig.actin.personalization.datamodel.v2.assessment.Unit
@@ -28,10 +25,20 @@ import com.hartwig.actin.personalization.datamodel.v2.treatment.ReasonRefrainmen
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
-
 class NcrEpisodeExtractorTest {
+
     private val treatmentRecord = NCR_RECORD.copy(
-        treatment = NCR_RECORD.treatment.copy(systemicTreatment = NCR_SYSTEMIC_TREATMENT.copy(systStartInt1 = 721, systStartInt2 = 722, systStartInt3 = 723, systStartInt4 = 724, systStartInt5 = 725, systStartInt6 = 726, systStartInt7 = 727))
+        treatment = NCR_RECORD.treatment.copy(
+            systemicTreatment = NCR_SYSTEMIC_TREATMENT.copy(
+                systStartInt1 = 721,
+                systStartInt2 = 722,
+                systStartInt3 = 723,
+                systStartInt4 = 724,
+                systStartInt5 = 725,
+                systStartInt6 = 726,
+                systStartInt7 = 727
+            )
+        )
     )
 
     @Test

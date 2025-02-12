@@ -3,8 +3,8 @@ package com.hartwig.actin.personalization.ncr.interpretation.extractor
 import com.hartwig.actin.personalization.datamodel.Diagnosis
 import com.hartwig.actin.personalization.datamodel.Episode
 import com.hartwig.actin.personalization.datamodel.MetastasesDetectionStatus
-import com.hartwig.actin.personalization.datamodel.PriorTumor
 import com.hartwig.actin.personalization.datamodel.TumorEntry
+import com.hartwig.actin.personalization.datamodel.old.PriorTumor
 import com.hartwig.actin.personalization.ncr.datamodel.NcrRecord
 import com.hartwig.actin.personalization.ncr.interpretation.DIAGNOSIS_EPISODE
 import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrAnorectalVergeDistanceCategoryMapper

@@ -1,4 +1,4 @@
-package com.hartwig.actin.personalization.datamodel
+package com.hartwig.actin.personalization.datamodel.old
 
 data class DiagnosisEpisode(
     val diagnosis: Diagnosis,

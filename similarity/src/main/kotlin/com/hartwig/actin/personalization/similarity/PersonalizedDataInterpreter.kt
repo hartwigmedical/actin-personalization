@@ -1,18 +1,17 @@
 package com.hartwig.actin.personalization.similarity
 
 import com.hartwig.actin.personalization.datamodel.Episode
-import com.hartwig.actin.personalization.datamodel.TreatmentGroup
-import com.hartwig.actin.personalization.datamodel.DiagnosisEpisode
 import com.hartwig.actin.personalization.datamodel.LocationGroup
-import com.hartwig.actin.personalization.datamodel.ReferencePatient
 import com.hartwig.actin.personalization.datamodel.MetastasesDetectionStatus
+import com.hartwig.actin.personalization.datamodel.ReferencePatient
 import com.hartwig.actin.personalization.datamodel.Treatment
+import com.hartwig.actin.personalization.datamodel.TreatmentGroup
+import com.hartwig.actin.personalization.datamodel.old.DiagnosisEpisode
 import com.hartwig.actin.personalization.datamodel.serialization.ReferencePatientJson
-
 import com.hartwig.actin.personalization.similarity.population.PatientPopulationBreakdown
 import com.hartwig.actin.personalization.similarity.population.PersonalizedDataAnalysis
-import io.github.oshai.kotlinlogging.KotlinLogging
 import com.hartwig.actin.personalization.similarity.population.PopulationDefinition
+import io.github.oshai.kotlinlogging.KotlinLogging
 
 private fun Episode.doesNotIncludeAdjuvantOrNeoadjuvantTreatment(): Boolean {
     return !hasHadPreSurgerySystemicChemotherapy &&

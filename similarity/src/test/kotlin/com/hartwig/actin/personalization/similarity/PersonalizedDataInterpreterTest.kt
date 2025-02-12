@@ -1,10 +1,10 @@
 package com.hartwig.actin.personalization.similarity
 
-import com.hartwig.actin.personalization.datamodel.DiagnosisEpisode
 import com.hartwig.actin.personalization.datamodel.MetastasesDetectionStatus
-import com.hartwig.actin.personalization.datamodel.Surgery
 import com.hartwig.actin.personalization.datamodel.Treatment
 import com.hartwig.actin.personalization.datamodel.TreatmentGroup
+import com.hartwig.actin.personalization.datamodel.old.DiagnosisEpisode
+import com.hartwig.actin.personalization.datamodel.old.Surgery
 import com.hartwig.actin.personalization.datamodel.v2.treatment.SurgeryType
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
