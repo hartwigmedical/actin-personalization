@@ -1,5 +1,6 @@
 package com.hartwig.actin.personalization.datamodel
 
+import com.hartwig.actin.personalization.datamodel.v2.treatment.MetastasesRadiotherapyType
 import kotlinx.serialization.Serializable
 
 @Serializable

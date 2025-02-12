@@ -6,12 +6,12 @@ import com.hartwig.actin.personalization.datamodel.Episode
 import com.hartwig.actin.personalization.datamodel.Location
 import com.hartwig.actin.personalization.datamodel.MetastasesDetectionStatus
 import com.hartwig.actin.personalization.datamodel.ReferencePatient
-import com.hartwig.actin.personalization.datamodel.Sex
 import com.hartwig.actin.personalization.datamodel.SystemicTreatmentPlan
 import com.hartwig.actin.personalization.datamodel.Treatment
-import com.hartwig.actin.personalization.datamodel.TumorBasisOfDiagnosis
 import com.hartwig.actin.personalization.datamodel.TumorEntry
 import com.hartwig.actin.personalization.datamodel.TumorType
+import com.hartwig.actin.personalization.datamodel.v2.Sex
+import com.hartwig.actin.personalization.datamodel.v2.diagnosis.TumorBasisOfDiagnosis
 
 val DIAGNOSIS = Diagnosis(
     consolidatedTumorType = TumorType.CRC_OTHER,

@@ -1,14 +1,14 @@
 package com.hartwig.actin.personalization.ncr.interpretation.mapper
 
-import com.hartwig.actin.personalization.datamodel.PfsMeasureFollowUpEvent
+import com.hartwig.actin.personalization.datamodel.v2.outcome.ProgressionMeasureFollowUpEvent
 
-object NcrPfsMeasureFollowUpEventMapper : NcrIntCodeMapper<PfsMeasureFollowUpEvent?> {
+object NcrPfsMeasureFollowUpEventMapper : NcrIntCodeMapper<ProgressionMeasureFollowUpEvent?> {
 
-    override fun resolve(code: Int): PfsMeasureFollowUpEvent? {
+    override fun resolve(code: Int): ProgressionMeasureFollowUpEvent? {
         return when (code) {
-            1 -> PfsMeasureFollowUpEvent.LOCAL_ONLY
-            2 -> PfsMeasureFollowUpEvent.REGIONAL
-            3 -> PfsMeasureFollowUpEvent.DISTANT_AND_POSSIBLY_REGIONAL_OR_LOCAL
+            1 -> ProgressionMeasureFollowUpEvent.LOCAL_ONLY
+            2 -> ProgressionMeasureFollowUpEvent.REGIONAL
+            3 -> ProgressionMeasureFollowUpEvent.DISTANT_AND_POSSIBLY_REGIONAL_OR_LOCAL
             9 -> null
             else -> throw IllegalArgumentException("Unknown PfsMeasureFollowUpEvent code: $code")
         }

@@ -1,6 +1,6 @@
 package com.hartwig.actin.personalization.ncr.interpretation.mapper
 
-import com.hartwig.actin.personalization.datamodel.TnmN
+import com.hartwig.actin.personalization.datamodel.v2.diagnosis.TnmN
 
 object NcrTnmNMapper : NcrStringCodeMapper<TnmN?> {
     override fun resolve(code: String): TnmN {

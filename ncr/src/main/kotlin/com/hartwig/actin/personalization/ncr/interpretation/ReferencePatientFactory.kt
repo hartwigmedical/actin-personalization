@@ -1,8 +1,8 @@
 package com.hartwig.actin.personalization.ncr.interpretation
 
 import com.hartwig.actin.personalization.datamodel.ReferencePatient
-import com.hartwig.actin.personalization.datamodel.Sex
 import com.hartwig.actin.personalization.datamodel.TumorEntry
+import com.hartwig.actin.personalization.datamodel.v2.Sex
 import com.hartwig.actin.personalization.ncr.datamodel.NcrRecord
 import com.hartwig.actin.personalization.ncr.interpretation.extractor.NcrEpisodeExtractor
 import com.hartwig.actin.personalization.ncr.interpretation.extractor.NcrSystemicTreatmentPlanExtractor

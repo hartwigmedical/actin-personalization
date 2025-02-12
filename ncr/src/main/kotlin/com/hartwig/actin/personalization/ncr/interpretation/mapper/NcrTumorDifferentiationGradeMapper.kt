@@ -1,6 +1,6 @@
 package com.hartwig.actin.personalization.ncr.interpretation.mapper
 
-import com.hartwig.actin.personalization.datamodel.TumorDifferentiationGrade
+import com.hartwig.actin.personalization.datamodel.v2.diagnosis.TumorDifferentiationGrade
 
 object NcrTumorDifferentiationGradeMapper : NcrIntCodeMapper<TumorDifferentiationGrade?> {
 

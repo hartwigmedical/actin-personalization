@@ -1,6 +1,6 @@
 package com.hartwig.actin.personalization.ncr.interpretation.mapper
 
-import com.hartwig.actin.personalization.datamodel.VenousInvasionDescription
+import com.hartwig.actin.personalization.datamodel.v2.diagnosis.VenousInvasionDescription
 
 object NcrVenousInvasionDescriptionMapper:  NcrIntCodeMapper<VenousInvasionDescription?> {
 

@@ -1,5 +1,7 @@
 package com.hartwig.actin.personalization.datamodel
 
+import com.hartwig.actin.personalization.datamodel.v2.Drug
+import com.hartwig.actin.personalization.datamodel.v2.treatment.TreatmentIntent
 import kotlinx.serialization.Serializable
 
 @Serializable

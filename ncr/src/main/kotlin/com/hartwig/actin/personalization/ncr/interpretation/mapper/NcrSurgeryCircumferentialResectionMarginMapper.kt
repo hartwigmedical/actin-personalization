@@ -1,6 +1,6 @@
 package com.hartwig.actin.personalization.ncr.interpretation.mapper
 
-import com.hartwig.actin.personalization.datamodel.SurgeryCircumferentialResectionMargin
+import com.hartwig.actin.personalization.datamodel.v2.treatment.SurgeryCircumferentialResectionMargin
 
 object NcrSurgeryCircumferentialResectionMarginMapper : NcrIntCodeMapper<SurgeryCircumferentialResectionMargin?> {
 

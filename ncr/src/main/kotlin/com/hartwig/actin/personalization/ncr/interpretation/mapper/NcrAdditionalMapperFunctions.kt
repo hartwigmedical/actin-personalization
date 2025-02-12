@@ -1,6 +1,6 @@
 package com.hartwig.actin.personalization.ncr.interpretation.mapper
 
-import com.hartwig.actin.personalization.datamodel.TreatmentIntent
+import com.hartwig.actin.personalization.datamodel.v2.treatment.TreatmentIntent
 
 fun resolvePreAndPostSurgery(code: Int?): Pair<Boolean, Boolean> {
     return when (code) {

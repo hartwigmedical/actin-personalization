@@ -1,6 +1,6 @@
 package com.hartwig.actin.personalization.ncr.interpretation.mapper
 
-import com.hartwig.actin.personalization.datamodel.ExtraMuralInvasionCategory
+import com.hartwig.actin.personalization.datamodel.v2.diagnosis.ExtraMuralInvasionCategory
 
 object NcrExtraMuralInvasionCategoryMapper : NcrIntCodeMapper<ExtraMuralInvasionCategory?> {
 

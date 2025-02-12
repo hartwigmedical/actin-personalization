@@ -1,5 +1,9 @@
 package com.hartwig.actin.personalization.datamodel
 
+import com.hartwig.actin.personalization.datamodel.v2.Drug
+import com.hartwig.actin.personalization.datamodel.v2.diagnosis.Location
+import com.hartwig.actin.personalization.datamodel.v2.diagnosis.TumorLocationCategory
+import com.hartwig.actin.personalization.datamodel.v2.diagnosis.TumorType
 import kotlinx.serialization.Serializable
 
 @Serializable

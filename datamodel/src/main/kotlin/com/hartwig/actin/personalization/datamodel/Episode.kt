@@ -1,5 +1,19 @@
 package com.hartwig.actin.personalization.datamodel
 
+import com.hartwig.actin.personalization.datamodel.v2.assessment.AsaClassification
+import com.hartwig.actin.personalization.datamodel.v2.diagnosis.ExtraMuralInvasionCategory
+import com.hartwig.actin.personalization.datamodel.v2.diagnosis.Location
+import com.hartwig.actin.personalization.datamodel.v2.diagnosis.LymphaticInvasionCategory
+import com.hartwig.actin.personalization.datamodel.v2.diagnosis.MetastasesDetectionStatus
+import com.hartwig.actin.personalization.datamodel.v2.diagnosis.NumberOfLiverMetastases
+import com.hartwig.actin.personalization.datamodel.v2.diagnosis.TnmM
+import com.hartwig.actin.personalization.datamodel.v2.diagnosis.TnmN
+import com.hartwig.actin.personalization.datamodel.v2.diagnosis.TnmT
+import com.hartwig.actin.personalization.datamodel.v2.diagnosis.TumorBasisOfDiagnosis
+import com.hartwig.actin.personalization.datamodel.v2.diagnosis.TumorDifferentiationGrade
+import com.hartwig.actin.personalization.datamodel.v2.diagnosis.TumorRegression
+import com.hartwig.actin.personalization.datamodel.v2.diagnosis.VenousInvasionDescription
+import com.hartwig.actin.personalization.datamodel.v2.treatment.ReasonRefrainmentFromTumorDirectedTreatment
 import kotlinx.serialization.Serializable
 
 @Serializable

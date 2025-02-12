@@ -2,7 +2,6 @@ package com.hartwig.actin.personalization.ncr.interpretation.extractor
 
 import com.hartwig.actin.personalization.datamodel.Episode
 import com.hartwig.actin.personalization.datamodel.GastroenterologyResection
-import com.hartwig.actin.personalization.datamodel.LabMeasure
 import com.hartwig.actin.personalization.datamodel.LabMeasurement
 import com.hartwig.actin.personalization.datamodel.MetastasesRadiotherapy
 import com.hartwig.actin.personalization.datamodel.MetastasesSurgery
@@ -10,8 +9,9 @@ import com.hartwig.actin.personalization.datamodel.Metastasis
 import com.hartwig.actin.personalization.datamodel.PfsMeasure
 import com.hartwig.actin.personalization.datamodel.Radiotherapy
 import com.hartwig.actin.personalization.datamodel.ResponseMeasure
-import com.hartwig.actin.personalization.datamodel.ResponseType
 import com.hartwig.actin.personalization.datamodel.Surgery
+import com.hartwig.actin.personalization.datamodel.v2.assessment.LabMeasure
+import com.hartwig.actin.personalization.datamodel.v2.outcome.ResponseType
 import com.hartwig.actin.personalization.ncr.datamodel.NcrGastroenterologyResection
 import com.hartwig.actin.personalization.ncr.datamodel.NcrLabValues
 import com.hartwig.actin.personalization.ncr.datamodel.NcrMetastaticDiagnosis
@@ -51,7 +51,6 @@ import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrTumorRegre
 import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrVenousInvasionDescriptionMapper
 import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrWhoStatusMapper
 import com.hartwig.actin.personalization.ncr.interpretation.mapper.resolvePreAndPostSurgery
-
 import kotlin.math.roundToInt
 
 class NcrEpisodeExtractor(private val systemicTreatmentPlanExtractor: NcrSystemicTreatmentPlanExtractor) {

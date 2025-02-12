@@ -1,0 +1,8 @@
+package com.hartwig.actin.personalization.datamodel.v2.treatment
+
+enum class ReasonRefrainmentFromTumorDirectedTreatment {
+    COMORBIDITY_AND_OR_PERFORMANCE_OR_FUNCTIONAL_STATUS_OR_PRESENCE_OTHER_TUMOR,
+    EXPECTED_FAST_PROGRESSION_OR_HIGH_TUMOR_LOAD,
+    LIMITED_TUMOR_LOAD_OR_FEW_COMPLAINTS,
+    WISH_OR_REFUSAL_FROM_PATIENT_OR_FAMILY,
+}

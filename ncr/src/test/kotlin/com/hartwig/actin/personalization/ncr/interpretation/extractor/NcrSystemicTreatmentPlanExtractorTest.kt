@@ -4,9 +4,9 @@ import com.hartwig.actin.personalization.datamodel.Drug
 import com.hartwig.actin.personalization.datamodel.PfsMeasure
 import com.hartwig.actin.personalization.datamodel.PfsMeasureType
 import com.hartwig.actin.personalization.datamodel.ResponseMeasure
-import com.hartwig.actin.personalization.datamodel.ResponseType
 import com.hartwig.actin.personalization.datamodel.SystemicTreatmentSchemeDrug
 import com.hartwig.actin.personalization.datamodel.Treatment
+import com.hartwig.actin.personalization.datamodel.v2.outcome.ResponseType
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
