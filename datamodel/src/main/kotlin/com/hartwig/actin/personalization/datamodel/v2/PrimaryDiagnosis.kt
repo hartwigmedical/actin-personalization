@@ -1,7 +1,6 @@
 package com.hartwig.actin.personalization.datamodel.v2
 
 import com.hartwig.actin.personalization.datamodel.AnorectalVergeDistanceCategory
-import com.hartwig.actin.personalization.datamodel.AsaClassification
 import com.hartwig.actin.personalization.datamodel.ExtraMuralInvasionCategory
 import com.hartwig.actin.personalization.datamodel.Location
 import com.hartwig.actin.personalization.datamodel.LymphaticInvasionCategory
@@ -17,9 +16,15 @@ data class PrimaryDiagnosis(
     val hasDoublePrimaryTumor: Boolean? = null,
     val primaryTumorType: TumorType,
     val primaryTumorLocation: Location,
-    // TODO (KD): How does this differ from clinical/pathological tumor stage?
-    val primaryTumorStage: TumorStage? = null,
     val differentiationGrade: TumorDifferentiationGrade? = null,
+
+    // TODO (KD): What do these values mean in the context of a metastasis diagnosis ("VERB")?
+    val clinicalTnmClassification: TnmClassification? = null,
+    val pathologicalTnmClassification: TnmClassification? = null,
+    val clinicalTumorStage: TumorStage? = null,
+    val pathologicalTumorStage: TumorStage? = null,
+    val investigatedLymphNodesCount: Int? = null,
+    val positiveLymphNodesCount: Int? = null,
 
     // KD: Specific for CRC, could be hidden behind interface eventually
     val sidedness: Sidedness? = determineSidedness(primaryTumorLocation),
@@ -38,17 +43,6 @@ data class PrimaryDiagnosis(
     val lymphaticInvasionCategory: LymphaticInvasionCategory? = null,
     val extraMuralInvasionCategory: ExtraMuralInvasionCategory? = null,
     val tumorRegression: TumorRegression? = null,
-
-    // TODO (KD): What do these values mean in the context of a metastasis diagnosis ("VERB")?
-    val clinicalTnmClassification: TnmClassification? = null,
-    val pathologicalTnmClassification: TnmClassification? = null,
-    val clinicalTumorStage: TumorStage? = null,
-    val pathologicalTumorStage: TumorStage? = null,
-    val investigatedLymphNodesCount: Int? = null,
-    val positiveLymphNodesCount: Int? = null,
-
-    val whoStatus: Int? = null,
-    val asaClassificationPreSurgeryOrEndoscopy: AsaClassification? = null,
 )
 
 val LOCATIONS_INDICATING_LEFT_SIDEDNESS =

@@ -1,18 +1,14 @@
 package com.hartwig.actin.personalization.datamodel.v2
 
-import com.hartwig.actin.personalization.datamodel.AsaClassification
 import com.hartwig.actin.personalization.datamodel.MetastasesDetectionStatus
 import com.hartwig.actin.personalization.datamodel.NumberOfLiverMetastases
 
 data class MetastaticDiagnosis(
-    val whoStatus: Int? = null,
-    val asaClassificationPreSurgeryOrEndoscopy: AsaClassification? = null,
-
-    val investigatedLymphNodesCount: Int? = null,
-    val positiveLymphNodesCount: Int? = null,
-
     val distantMetastasesDetectionStatus: MetastasesDetectionStatus,
     val metastases: List<Metastasis>,
     val numberOfLiverMetastases: NumberOfLiverMetastases? = null,
     val maximumSizeOfLiverMetastasisMm: Int? = null,
+
+    val investigatedLymphNodesCount: Int? = null,
+    val positiveLymphNodesCount: Int? = null
 )

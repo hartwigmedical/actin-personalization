@@ -14,6 +14,8 @@ data class TumorEntry(
     val primaryDiagnosis: PrimaryDiagnosis,
     val metastaticDiagnosis: MetastaticDiagnosis,
 
+    val whoAssessments: List<WhoAssessment>,
+    val asaAssessments: List<AsaAssessment>,
     val comorbidityAssessments : List<ComorbidityAssessment>,
     val molecularResults : List<MolecularResult>,
     val labMeasurements: List<LabMeasurement>,
