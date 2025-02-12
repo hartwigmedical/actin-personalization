@@ -1,5 +1,8 @@
 package com.hartwig.actin.personalization.datamodel.v2
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 data class ComorbidityAssessment(
     // TODO (KD) Can be calculated from other fields.
     val charlsonComorbidityIndex: Int,

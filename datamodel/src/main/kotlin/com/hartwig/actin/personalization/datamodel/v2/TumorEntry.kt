@@ -1,7 +1,9 @@
 package com.hartwig.actin.personalization.datamodel.v2
 
 import com.hartwig.actin.personalization.datamodel.ReasonRefrainmentFromTumorDirectedTreatment
+import kotlinx.serialization.Serializable
 
+@Serializable
 data class TumorEntry(
     val diagnosisYear: Int,
     val ageAtDiagnosis: Int,

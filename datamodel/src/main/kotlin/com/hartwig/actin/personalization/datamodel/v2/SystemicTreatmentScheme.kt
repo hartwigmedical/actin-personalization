@@ -1,5 +1,8 @@
 package com.hartwig.actin.personalization.datamodel.v2
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 data class SystemicTreatmentScheme (
     // TODO (KD) Can be derived from components?
     val minDaysBetweenDiagnosisAndStart: Int?,

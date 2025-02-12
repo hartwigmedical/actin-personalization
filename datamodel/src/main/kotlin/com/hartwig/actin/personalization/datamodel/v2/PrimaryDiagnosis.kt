@@ -10,7 +10,9 @@ import com.hartwig.actin.personalization.datamodel.TumorBasisOfDiagnosis
 import com.hartwig.actin.personalization.datamodel.TumorDifferentiationGrade
 import com.hartwig.actin.personalization.datamodel.TumorRegression
 import com.hartwig.actin.personalization.datamodel.VenousInvasionDescription
+import kotlinx.serialization.Serializable
 
+@Serializable
 data class PrimaryDiagnosis(
     val basisOfDiagnosis: TumorBasisOfDiagnosis,
     val hasDoublePrimaryTumor: Boolean? = null,
