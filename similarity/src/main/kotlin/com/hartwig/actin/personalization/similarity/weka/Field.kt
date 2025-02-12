@@ -1,6 +1,6 @@
 package com.hartwig.actin.personalization.similarity.weka
 
-import com.hartwig.actin.personalization.datamodel.TumorEntry
+import com.hartwig.actin.personalization.datamodel.old.TumorEntry
 import weka.core.Attribute
 
 interface Field {

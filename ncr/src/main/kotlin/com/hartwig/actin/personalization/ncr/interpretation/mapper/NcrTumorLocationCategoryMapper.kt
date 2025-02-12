@@ -1,6 +1,6 @@
 package com.hartwig.actin.personalization.ncr.interpretation.mapper
 
-import com.hartwig.actin.personalization.datamodel.v2.diagnosis.TumorLocationCategory
+import com.hartwig.actin.personalization.datamodel.diagnosis.TumorLocationCategory
 
 object NcrTumorLocationCategoryMapper : NcrIntCodeMapper<TumorLocationCategory> {
 

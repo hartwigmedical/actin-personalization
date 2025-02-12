@@ -1,6 +1,6 @@
 package com.hartwig.actin.personalization.ncr.interpretation.mapper
 
-import com.hartwig.actin.personalization.datamodel.Location
+import com.hartwig.actin.personalization.datamodel.diagnosis.Location
 
 object NcrLocationMapper {
     fun resolveLocation(code: String): Location {

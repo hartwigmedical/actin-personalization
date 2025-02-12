@@ -1,6 +1,6 @@
 package com.hartwig.actin.personalization.ncr.interpretation.mapper
 
-import com.hartwig.actin.personalization.datamodel.v2.treatment.MetastasesRadiotherapyType
+import com.hartwig.actin.personalization.datamodel.treatment.MetastasesRadiotherapyType
 
 object NcrMetastasesRadiotherapyTypeMapper : NcrStringCodeMapper<MetastasesRadiotherapyType> {
     override fun resolve(code: String): MetastasesRadiotherapyType {

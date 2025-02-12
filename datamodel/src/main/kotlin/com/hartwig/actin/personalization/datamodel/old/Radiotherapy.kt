@@ -1,6 +1,6 @@
 package com.hartwig.actin.personalization.datamodel.old
 
-import com.hartwig.actin.personalization.datamodel.v2.treatment.RadiotherapyType
+import com.hartwig.actin.personalization.datamodel.treatment.RadiotherapyType
 import kotlinx.serialization.Serializable
 
 @Serializable

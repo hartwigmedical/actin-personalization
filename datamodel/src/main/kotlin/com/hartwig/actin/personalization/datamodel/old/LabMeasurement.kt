@@ -1,7 +1,7 @@
 package com.hartwig.actin.personalization.datamodel.old
 
-import com.hartwig.actin.personalization.datamodel.v2.assessment.LabMeasure
-import com.hartwig.actin.personalization.datamodel.v2.assessment.Unit
+import com.hartwig.actin.personalization.datamodel.assessment.LabMeasure
+import com.hartwig.actin.personalization.datamodel.assessment.Unit
 import kotlinx.serialization.Serializable
 
 @Serializable

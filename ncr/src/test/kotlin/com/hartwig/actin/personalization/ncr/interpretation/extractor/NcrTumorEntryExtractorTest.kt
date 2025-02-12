@@ -1,15 +1,15 @@
 package com.hartwig.actin.personalization.ncr.interpretation.extractor
 
-import com.hartwig.actin.personalization.datamodel.AnorectalVergeDistanceCategory
-import com.hartwig.actin.personalization.datamodel.Diagnosis
-import com.hartwig.actin.personalization.datamodel.Drug
-import com.hartwig.actin.personalization.datamodel.Location
-import com.hartwig.actin.personalization.datamodel.NumberOfCciCategories
-import com.hartwig.actin.personalization.datamodel.StageTnm
-import com.hartwig.actin.personalization.datamodel.TumorType
+import com.hartwig.actin.personalization.datamodel.diagnosis.AnorectalVergeDistanceCategory
+import com.hartwig.actin.personalization.datamodel.diagnosis.Location
+import com.hartwig.actin.personalization.datamodel.diagnosis.Sidedness
+import com.hartwig.actin.personalization.datamodel.diagnosis.TumorLocationCategory
+import com.hartwig.actin.personalization.datamodel.diagnosis.TumorType
+import com.hartwig.actin.personalization.datamodel.old.Diagnosis
+import com.hartwig.actin.personalization.datamodel.old.NumberOfCciCategories
 import com.hartwig.actin.personalization.datamodel.old.PriorTumor
-import com.hartwig.actin.personalization.datamodel.v2.diagnosis.Sidedness
-import com.hartwig.actin.personalization.datamodel.v2.diagnosis.TumorLocationCategory
+import com.hartwig.actin.personalization.datamodel.old.StageTnm
+import com.hartwig.actin.personalization.datamodel.treatment.Drug
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 

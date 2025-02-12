@@ -1,6 +1,6 @@
 package com.hartwig.actin.personalization.ncr.interpretation.mapper
 
-import com.hartwig.actin.personalization.datamodel.Drug
+import com.hartwig.actin.personalization.datamodel.treatment.Drug
 
 object NcrTreatmentNameMapper : NcrStringCodeMapper<Drug> {
     override fun resolve(code: String): Drug {

@@ -1,11 +1,11 @@
 package com.hartwig.actin.personalization.datamodel.old
 
-import com.hartwig.actin.personalization.datamodel.v2.treatment.AnastomoticLeakageAfterSurgery
-import com.hartwig.actin.personalization.datamodel.v2.treatment.SurgeryCircumferentialResectionMargin
-import com.hartwig.actin.personalization.datamodel.v2.treatment.SurgeryRadicality
-import com.hartwig.actin.personalization.datamodel.v2.treatment.SurgeryTechnique
-import com.hartwig.actin.personalization.datamodel.v2.treatment.SurgeryType
-import com.hartwig.actin.personalization.datamodel.v2.treatment.SurgeryUrgency
+import com.hartwig.actin.personalization.datamodel.treatment.AnastomoticLeakageAfterSurgery
+import com.hartwig.actin.personalization.datamodel.treatment.SurgeryCircumferentialResectionMargin
+import com.hartwig.actin.personalization.datamodel.treatment.SurgeryRadicality
+import com.hartwig.actin.personalization.datamodel.treatment.SurgeryTechnique
+import com.hartwig.actin.personalization.datamodel.treatment.SurgeryType
+import com.hartwig.actin.personalization.datamodel.treatment.SurgeryUrgency
 import kotlinx.serialization.Serializable
 
 @Serializable

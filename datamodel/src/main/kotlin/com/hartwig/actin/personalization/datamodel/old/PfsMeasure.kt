@@ -1,7 +1,7 @@
 package com.hartwig.actin.personalization.datamodel.old
 
-import com.hartwig.actin.personalization.datamodel.v2.outcome.ProgressionMeasureFollowUpEvent
-import com.hartwig.actin.personalization.datamodel.v2.outcome.ProgressionMeasureType
+import com.hartwig.actin.personalization.datamodel.outcome.ProgressionMeasureFollowUpEvent
+import com.hartwig.actin.personalization.datamodel.outcome.ProgressionMeasureType
 import kotlinx.serialization.Serializable
 
 @Serializable

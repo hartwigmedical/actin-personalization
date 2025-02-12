@@ -1,6 +1,6 @@
 package com.hartwig.actin.personalization.datamodel.old
 
-import com.hartwig.actin.personalization.datamodel.v2.Sex
+import com.hartwig.actin.personalization.datamodel.Sex
 import kotlinx.serialization.Serializable
 
 @Serializable

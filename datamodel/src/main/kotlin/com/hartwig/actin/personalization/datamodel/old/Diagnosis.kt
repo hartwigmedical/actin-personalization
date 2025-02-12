@@ -1,9 +1,9 @@
 package com.hartwig.actin.personalization.datamodel.old
 
-import com.hartwig.actin.personalization.datamodel.v2.diagnosis.AnorectalVergeDistanceCategory
-import com.hartwig.actin.personalization.datamodel.v2.diagnosis.Location
-import com.hartwig.actin.personalization.datamodel.v2.diagnosis.Sidedness
-import com.hartwig.actin.personalization.datamodel.v2.diagnosis.TumorType
+import com.hartwig.actin.personalization.datamodel.diagnosis.AnorectalVergeDistanceCategory
+import com.hartwig.actin.personalization.datamodel.diagnosis.Location
+import com.hartwig.actin.personalization.datamodel.diagnosis.Sidedness
+import com.hartwig.actin.personalization.datamodel.diagnosis.TumorType
 import kotlinx.serialization.Serializable
 
 @Serializable

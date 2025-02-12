@@ -1,15 +1,15 @@
 package com.hartwig.actin.personalization.database
 
-import com.hartwig.actin.personalization.datamodel.Drug
-import com.hartwig.actin.personalization.datamodel.Episode
-import com.hartwig.actin.personalization.datamodel.Location
-import com.hartwig.actin.personalization.datamodel.ReferencePatient
-import com.hartwig.actin.personalization.datamodel.SystemicTreatmentScheme
-import com.hartwig.actin.personalization.datamodel.TumorEntry
+import com.hartwig.actin.personalization.datamodel.diagnosis.Location
+import com.hartwig.actin.personalization.datamodel.old.Episode
 import com.hartwig.actin.personalization.datamodel.old.GastroenterologyResection
 import com.hartwig.actin.personalization.datamodel.old.MetastasesRadiotherapy
 import com.hartwig.actin.personalization.datamodel.old.MetastasesSurgery
 import com.hartwig.actin.personalization.datamodel.old.Radiotherapy
+import com.hartwig.actin.personalization.datamodel.old.ReferencePatient
+import com.hartwig.actin.personalization.datamodel.old.SystemicTreatmentScheme
+import com.hartwig.actin.personalization.datamodel.old.TumorEntry
+import com.hartwig.actin.personalization.datamodel.treatment.Drug
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.jooq.DSLContext
 import org.jooq.JSON

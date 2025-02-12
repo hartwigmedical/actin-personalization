@@ -1,13 +1,13 @@
 package com.hartwig.actin.personalization.similarity
 
-import com.hartwig.actin.personalization.datamodel.Episode
-import com.hartwig.actin.personalization.datamodel.LocationGroup
-import com.hartwig.actin.personalization.datamodel.MetastasesDetectionStatus
-import com.hartwig.actin.personalization.datamodel.ReferencePatient
-import com.hartwig.actin.personalization.datamodel.Treatment
-import com.hartwig.actin.personalization.datamodel.TreatmentGroup
+import com.hartwig.actin.personalization.datamodel.diagnosis.LocationGroup
+import com.hartwig.actin.personalization.datamodel.diagnosis.MetastasesDetectionStatus
 import com.hartwig.actin.personalization.datamodel.old.DiagnosisEpisode
+import com.hartwig.actin.personalization.datamodel.old.Episode
+import com.hartwig.actin.personalization.datamodel.old.ReferencePatient
 import com.hartwig.actin.personalization.datamodel.serialization.ReferencePatientJson
+import com.hartwig.actin.personalization.datamodel.treatment.Treatment
+import com.hartwig.actin.personalization.datamodel.treatment.TreatmentGroup
 import com.hartwig.actin.personalization.similarity.population.PatientPopulationBreakdown
 import com.hartwig.actin.personalization.similarity.population.PersonalizedDataAnalysis
 import com.hartwig.actin.personalization.similarity.population.PopulationDefinition

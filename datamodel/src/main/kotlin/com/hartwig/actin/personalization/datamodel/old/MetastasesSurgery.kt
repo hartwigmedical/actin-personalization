@@ -1,7 +1,7 @@
 package com.hartwig.actin.personalization.datamodel.old
 
-import com.hartwig.actin.personalization.datamodel.v2.treatment.MetastasesSurgeryType
-import com.hartwig.actin.personalization.datamodel.v2.treatment.SurgeryRadicality
+import com.hartwig.actin.personalization.datamodel.treatment.MetastasesSurgeryType
+import com.hartwig.actin.personalization.datamodel.treatment.SurgeryRadicality
 import kotlinx.serialization.Serializable
 
 @Serializable

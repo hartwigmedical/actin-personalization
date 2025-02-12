@@ -1,6 +1,6 @@
 package com.hartwig.actin.personalization.ncr.interpretation.mapper
 
-import com.hartwig.actin.personalization.datamodel.v2.outcome.ProgressionMeasureFollowUpEvent
+import com.hartwig.actin.personalization.datamodel.outcome.ProgressionMeasureFollowUpEvent
 
 object NcrPfsMeasureFollowUpEventMapper : NcrIntCodeMapper<ProgressionMeasureFollowUpEvent?> {
 

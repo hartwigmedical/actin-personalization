@@ -1,6 +1,6 @@
 package com.hartwig.actin.personalization.similarity.weka
 
-import com.hartwig.actin.personalization.datamodel.TumorEntry
+import com.hartwig.actin.personalization.datamodel.old.TumorEntry
 
 data class IntField(
     override val name: String,

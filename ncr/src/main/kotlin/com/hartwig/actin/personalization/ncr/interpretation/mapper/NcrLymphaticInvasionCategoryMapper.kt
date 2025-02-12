@@ -1,6 +1,6 @@
 package com.hartwig.actin.personalization.ncr.interpretation.mapper
 
-import com.hartwig.actin.personalization.datamodel.v2.diagnosis.LymphaticInvasionCategory
+import com.hartwig.actin.personalization.datamodel.diagnosis.LymphaticInvasionCategory
 
 object NcrLymphaticInvasionCategoryMapper : NcrIntCodeMapper<LymphaticInvasionCategory?> {
 

@@ -1,6 +1,6 @@
 package com.hartwig.actin.personalization.ncr.interpretation.mapper
 
-import com.hartwig.actin.personalization.datamodel.NumberOfCciCategories
+import com.hartwig.actin.personalization.datamodel.old.NumberOfCciCategories
 
 object NcrCciNumberOfCategoriesMapper : NcrIntCodeMapper<NumberOfCciCategories> {
 

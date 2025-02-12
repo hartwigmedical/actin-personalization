@@ -1,7 +1,7 @@
 package com.hartwig.actin.personalization.ncr.interpretation.extractor
 
-import com.hartwig.actin.personalization.datamodel.PfsMeasure
-import com.hartwig.actin.personalization.datamodel.PfsMeasureType
+import com.hartwig.actin.personalization.datamodel.old.PfsMeasure
+import com.hartwig.actin.personalization.datamodel.outcome.ProgressionMeasureType
 
 object NcrPfsInterpreter {
 
@@ -41,8 +41,8 @@ object NcrPfsInterpreter {
     }
 
     private fun hasInvalidPfsMeasureCombination(pfsMeasures: List<PfsMeasure>) =
-        (pfsMeasures.size > 1 && pfsMeasures.any { it.type == PfsMeasureType.CENSOR }) ||
-                pfsMeasures.dropLast(1).any { it.type == PfsMeasureType.DEATH }
+        (pfsMeasures.size > 1 && pfsMeasures.any { it.type == ProgressionMeasureType.CENSOR }) ||
+                pfsMeasures.dropLast(1).any { it.type == ProgressionMeasureType.DEATH }
 
     private fun determineRelevantProgressionIntervalAndEvent(
         sortedPfsMeasuresAfterPlanStart: List<PfsMeasure>,
@@ -50,7 +50,8 @@ object NcrPfsInterpreter {
         daysUntilPlanEnd: Int?
     ): Pair<Int, Boolean>? {
         return if (sortedPfsMeasuresAfterPlanStart.size == 1) {
-            sortedPfsMeasuresAfterPlanStart.firstOrNull { it.type != PfsMeasureType.CENSOR }?.intervalTumorIncidencePfsMeasureDays?.let { it to true }
+            sortedPfsMeasuresAfterPlanStart.firstOrNull { it.type != ProgressionMeasureType.CENSOR }
+                ?.intervalTumorIncidencePfsMeasureDays?.let { it to true }
                 ?: sortedPfsMeasuresAfterPlanStart.last().intervalTumorIncidencePfsMeasureDays?.let { it to false }
         } else {
             daysUntilPlanEnd?.let {

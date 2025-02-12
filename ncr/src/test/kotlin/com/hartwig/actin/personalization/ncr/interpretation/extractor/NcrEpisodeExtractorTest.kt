@@ -1,27 +1,30 @@
 package com.hartwig.actin.personalization.ncr.interpretation.extractor
 
-import com.hartwig.actin.personalization.datamodel.Episode
-import com.hartwig.actin.personalization.datamodel.PfsMeasure
-import com.hartwig.actin.personalization.datamodel.StageTnm
+import com.hartwig.actin.personalization.datamodel.assessment.AsaClassification
+import com.hartwig.actin.personalization.datamodel.assessment.LabMeasure
+import com.hartwig.actin.personalization.datamodel.assessment.Unit
+import com.hartwig.actin.personalization.datamodel.diagnosis.ExtraMuralInvasionCategory
+import com.hartwig.actin.personalization.datamodel.diagnosis.Location
+import com.hartwig.actin.personalization.datamodel.diagnosis.LymphaticInvasionCategory
+import com.hartwig.actin.personalization.datamodel.diagnosis.MetastasesDetectionStatus
+import com.hartwig.actin.personalization.datamodel.diagnosis.NumberOfLiverMetastases
+import com.hartwig.actin.personalization.datamodel.diagnosis.TnmM
+import com.hartwig.actin.personalization.datamodel.diagnosis.TnmN
+import com.hartwig.actin.personalization.datamodel.diagnosis.TnmT
+import com.hartwig.actin.personalization.datamodel.diagnosis.TumorBasisOfDiagnosis
+import com.hartwig.actin.personalization.datamodel.diagnosis.TumorDifferentiationGrade
+import com.hartwig.actin.personalization.datamodel.diagnosis.TumorRegression
+import com.hartwig.actin.personalization.datamodel.diagnosis.VenousInvasionDescription
+import com.hartwig.actin.personalization.datamodel.old.Episode
 import com.hartwig.actin.personalization.datamodel.old.LabMeasurement
 import com.hartwig.actin.personalization.datamodel.old.Metastasis
+import com.hartwig.actin.personalization.datamodel.old.PfsMeasure
 import com.hartwig.actin.personalization.datamodel.old.ResponseMeasure
-import com.hartwig.actin.personalization.datamodel.v2.assessment.AsaClassification
-import com.hartwig.actin.personalization.datamodel.v2.assessment.LabMeasure
-import com.hartwig.actin.personalization.datamodel.v2.assessment.Unit
-import com.hartwig.actin.personalization.datamodel.v2.diagnosis.ExtraMuralInvasionCategory
-import com.hartwig.actin.personalization.datamodel.v2.diagnosis.LymphaticInvasionCategory
-import com.hartwig.actin.personalization.datamodel.v2.diagnosis.NumberOfLiverMetastases
-import com.hartwig.actin.personalization.datamodel.v2.diagnosis.TnmM
-import com.hartwig.actin.personalization.datamodel.v2.diagnosis.TnmN
-import com.hartwig.actin.personalization.datamodel.v2.diagnosis.TnmT
-import com.hartwig.actin.personalization.datamodel.v2.diagnosis.TumorBasisOfDiagnosis
-import com.hartwig.actin.personalization.datamodel.v2.diagnosis.TumorDifferentiationGrade
-import com.hartwig.actin.personalization.datamodel.v2.diagnosis.TumorRegression
-import com.hartwig.actin.personalization.datamodel.v2.diagnosis.VenousInvasionDescription
-import com.hartwig.actin.personalization.datamodel.v2.outcome.ProgressionMeasureFollowUpEvent
-import com.hartwig.actin.personalization.datamodel.v2.outcome.ResponseType
-import com.hartwig.actin.personalization.datamodel.v2.treatment.ReasonRefrainmentFromTumorDirectedTreatment
+import com.hartwig.actin.personalization.datamodel.old.StageTnm
+import com.hartwig.actin.personalization.datamodel.outcome.ProgressionMeasureFollowUpEvent
+import com.hartwig.actin.personalization.datamodel.outcome.ProgressionMeasureType
+import com.hartwig.actin.personalization.datamodel.outcome.ResponseType
+import com.hartwig.actin.personalization.datamodel.treatment.ReasonRefrainmentFromTumorDirectedTreatment
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
@@ -163,8 +166,8 @@ class NcrEpisodeExtractorTest {
             responseMeasure = ResponseMeasure(ResponseType.PD, 5),
             systemicTreatmentPlan = null,
             pfsMeasures = listOf(
-                PfsMeasure(PfsMeasureType.PROGRESSION, ProgressionMeasureFollowUpEvent.LOCAL_ONLY, 4),
-                PfsMeasure(PfsMeasureType.DEATH, ProgressionMeasureFollowUpEvent.REGIONAL, 80),
+                PfsMeasure(ProgressionMeasureType.PROGRESSION, ProgressionMeasureFollowUpEvent.LOCAL_ONLY, 4),
+                PfsMeasure(ProgressionMeasureType.DEATH, ProgressionMeasureFollowUpEvent.REGIONAL, 80),
             ),
             ageAtTreatmentPlanStart = 52
         )

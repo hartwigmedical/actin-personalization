@@ -1,6 +1,6 @@
 package com.hartwig.actin.personalization.datamodel.old
 
-import com.hartwig.actin.personalization.datamodel.v2.outcome.ResponseType
+import com.hartwig.actin.personalization.datamodel.outcome.ResponseType
 import kotlinx.serialization.Serializable
 
 @Serializable

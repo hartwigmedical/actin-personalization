@@ -1,6 +1,6 @@
 package com.hartwig.actin.personalization.ncr.interpretation.mapper
 
-import com.hartwig.actin.personalization.datamodel.v2.treatment.SurgeryTechnique
+import com.hartwig.actin.personalization.datamodel.treatment.SurgeryTechnique
 
 object NcrSurgeryTechniqueMapper : NcrIntCodeMapper<SurgeryTechnique?> {
 

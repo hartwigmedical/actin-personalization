@@ -1,6 +1,6 @@
 package com.hartwig.actin.personalization.ncr.interpretation.mapper
 
-import com.hartwig.actin.personalization.datamodel.v2.Sex
+import com.hartwig.actin.personalization.datamodel.Sex
 
 object NcrSexMapper : NcrIntCodeMapper<Sex> {
 

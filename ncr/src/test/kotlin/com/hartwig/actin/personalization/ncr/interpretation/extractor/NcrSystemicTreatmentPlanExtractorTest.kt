@@ -1,22 +1,23 @@
 package com.hartwig.actin.personalization.ncr.interpretation.extractor
 
-import com.hartwig.actin.personalization.datamodel.Drug
-import com.hartwig.actin.personalization.datamodel.PfsMeasure
-import com.hartwig.actin.personalization.datamodel.PfsMeasureType
-import com.hartwig.actin.personalization.datamodel.Treatment
+import com.hartwig.actin.personalization.datamodel.old.PfsMeasure
 import com.hartwig.actin.personalization.datamodel.old.ResponseMeasure
 import com.hartwig.actin.personalization.datamodel.old.SystemicTreatmentSchemeDrug
-import com.hartwig.actin.personalization.datamodel.v2.outcome.ResponseType
+import com.hartwig.actin.personalization.datamodel.outcome.ProgressionMeasureType
+import com.hartwig.actin.personalization.datamodel.outcome.ResponseType
+import com.hartwig.actin.personalization.datamodel.treatment.Drug
+import com.hartwig.actin.personalization.datamodel.treatment.Treatment
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
 class NcrSystemicTreatmentPlanExtractorTest {
+
     @Test
     fun `Should extract systemic treatment plan`() {
         val pfsMeasures = listOf(
-            PfsMeasure(PfsMeasureType.CENSOR, null, 1),
-            PfsMeasure(PfsMeasureType.PROGRESSION, null, 4),
-            PfsMeasure(PfsMeasureType.DEATH, null, 100),
+            PfsMeasure(ProgressionMeasureType.CENSOR, null, 1),
+            PfsMeasure(ProgressionMeasureType.PROGRESSION, null, 4),
+            PfsMeasure(ProgressionMeasureType.DEATH, null, 100),
         )
 
         val plan = NcrSystemicTreatmentPlanExtractor()

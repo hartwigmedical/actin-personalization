@@ -1,17 +1,17 @@
 package com.hartwig.actin.personalization.ncr.interpretation.extractor
 
-import com.hartwig.actin.personalization.datamodel.Episode
-import com.hartwig.actin.personalization.datamodel.PfsMeasure
+import com.hartwig.actin.personalization.datamodel.assessment.LabMeasure
+import com.hartwig.actin.personalization.datamodel.old.Episode
 import com.hartwig.actin.personalization.datamodel.old.GastroenterologyResection
 import com.hartwig.actin.personalization.datamodel.old.LabMeasurement
 import com.hartwig.actin.personalization.datamodel.old.MetastasesRadiotherapy
 import com.hartwig.actin.personalization.datamodel.old.MetastasesSurgery
 import com.hartwig.actin.personalization.datamodel.old.Metastasis
+import com.hartwig.actin.personalization.datamodel.old.PfsMeasure
 import com.hartwig.actin.personalization.datamodel.old.Radiotherapy
 import com.hartwig.actin.personalization.datamodel.old.ResponseMeasure
 import com.hartwig.actin.personalization.datamodel.old.Surgery
-import com.hartwig.actin.personalization.datamodel.v2.assessment.LabMeasure
-import com.hartwig.actin.personalization.datamodel.v2.outcome.ResponseType
+import com.hartwig.actin.personalization.datamodel.outcome.ResponseType
 import com.hartwig.actin.personalization.ncr.datamodel.NcrGastroenterologyResection
 import com.hartwig.actin.personalization.ncr.datamodel.NcrLabValues
 import com.hartwig.actin.personalization.ncr.datamodel.NcrMetastaticDiagnosis
