@@ -1,8 +1,6 @@
 package com.hartwig.actin.personalization.datamodel.v2
 
-import com.hartwig.actin.personalization.datamodel.PfsMeasure
 import com.hartwig.actin.personalization.datamodel.ReasonRefrainmentFromTumorDirectedTreatment
-import com.hartwig.actin.personalization.datamodel.ResponseMeasure
 
 data class TumorEntry(
     val diagnosisYear: Int,
@@ -30,8 +28,8 @@ data class TumorEntry(
     val hipecTreatment: HipecTreatment,
     val primaryRadiotherapies: List<PrimaryRadiotherapy> = emptyList(),
     val metastaticRadiotherapies: List<MetastaticRadiotherapy> = emptyList(),
+    val systemicTreatments: List<SystemicTreatment> = emptyList(),
 
-    val systemicTreatmentPlan: SystemicTreatmentPlan? = null,
     val responseMeasure: ResponseMeasure? = null,
     val pfsMeasures: List<PfsMeasure>
 )
