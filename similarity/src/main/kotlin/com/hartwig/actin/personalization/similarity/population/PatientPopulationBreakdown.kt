@@ -41,7 +41,6 @@ class PatientPopulationBreakdown(
                 val eligiblePopulationSize = populationsByName[name]!!.patientsByMeasurementType[measurementType]!!.size
                 name to measurementType.calculation.calculate(matchingPatients, eligiblePopulationSize)
             }
-
         }
         return TreatmentAnalysis(treatment, treatmentMeasurements)
     }
