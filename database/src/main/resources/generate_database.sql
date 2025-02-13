@@ -2,239 +2,315 @@ SET FOREIGN_KEY_CHECKS = 0;
 
 DROP TABLE IF EXISTS `patient`;
 CREATE TABLE `patient` (
-    `id` int NOT NULL,
-    `ncrId` int NOT NULL,
-    `sex` varchar(50) NOT NULL,
-    `isAlive` bool NOT NULL,
+    `id` INT NOT NULL,
+    `sex` VARCHAR(50) NOT NULL,
     PRIMARY KEY (`id`)
 );
 
-DROP TABLE IF EXISTS `diagnosis`;
-CREATE TABLE `diagnosis` (
-    `id` int NOT NULL,
-    `patientId` int NOT NULL,
-    `consolidatedTumorType` varchar(255) NOT NULL,
-    `tumorLocations` json NOT NULL,
-    `sidedness` varchar(255),
-    `ageAtDiagnosis` int NOT NULL,
-    `observedOsFromTumorIncidenceDays` int NOT NULL,
-    `hadSurvivalEvent` bool NOT NULL,
-    `hasHadPriorTumor` bool NOT NULL,
-    `orderOfFirstDistantMetastasesEpisode` int NOT NULL,
-    `isMetachronous` bool NOT NULL,
-    `cci` int,
-    `cciNumberOfCategories` varchar(50),
-    `cciHasAids` bool,
-    `cciHasCongestiveHeartFailure` bool,
-    `cciHasCollagenosis` bool,
-    `cciHasCopd` bool,
-    `cciHasCerebrovascularDisease` bool,
-    `cciHasDementia` bool,
-    `cciHasDiabetesMellitus` bool,
-    `cciHasDiabetesMellitusWithEndOrganDamage` bool,
-    `cciHasOtherMalignancy` bool,
-    `cciHasOtherMetastaticSolidTumor` bool,
-    `cciHasMyocardialInfarct` bool,
-    `cciHasMildLiverDisease` bool,
-    `cciHasHemiplegiaOrParaplegia` bool,
-    `cciHasPeripheralVascularDisease` bool,
-    `cciHasRenalDisease` bool,
-    `cciHasLiverDisease` bool,
-    `cciHasUlcerDisease` bool,
-
-    `presentedWithIleus` bool,
-    `presentedWithPerforation` bool,
-    `anorectalVergeDistanceCategory` varchar(50),
-
-    `hasMsi` bool,
-    `hasBrafMutation` bool,
-    `hasBrafV600EMutation` bool,
-    `hasRasMutation` bool,
-    `hasKrasG12CMutation` bool,
+DROP TABLE IF EXISTS `tumor`;
+CREATE TABLE `tumor` (
+    `id` INT NOT NULL,
+    `patientId` INT NOT NULL,
+    `diagnosisYear` INT NOT NULL,
+    `ageAtDiagnosis` INT NOT NULL,
+    `hasReceivedTumorDirectedTreatment` BOOL NOT NULL,
+    `reasonRefrainmentFromTumorDirectedTreatment` VARCHAR(255) NOT NULL,
+    `hasParticipatedInTrial` BOOL,
     FOREIGN KEY (`patientId`) REFERENCES `patient`(`id`),
-    PRIMARY KEY (`id`)
-);
+    PRIMARY KEY (`id`, `patientId`)
+)
 
-DROP TABLE IF EXISTS `episode`;
-CREATE TABLE `episode` (
-    `id` int NOT NULL,
-    `diagnosisId` int NOT NULL,
-    `order` int NOT NULL,
-    `whoStatusPreTreatmentStart` int,
-    `asaClassificationPreSurgeryOrEndoscopy` varchar(50),
-
-    `tumorIncidenceYear` int NOT NULL,
-    `tumorBasisOfDiagnosis` varchar(255) NOT NULL,
-    `tumorLocation` varchar(255) NOT NULL,
-    `tumorDifferentiationGrade` varchar(255),
-    `tnmCT` varchar(50),
-    `tnmCN` varchar(50),
-    `tnmCM` varchar(50),
-    `tnmPT` varchar(50),
-    `tnmPN` varchar(50),
-    `tnmPM` varchar(50),
-    `stageCTNM` varchar(50),
-    `stagePTNM` varchar(50),
-    `stageTNM` varchar(50),
-    `investigatedLymphNodesNumber` int,
-    `positiveLymphNodesNumber` int,
-
-    `distantMetastasesDetectionStatus` varchar(50) NOT NULL,
-    `numberOfLiverMetastases` varchar(50),
-    `maximumSizeOfLiverMetastasisMm` int,
-
-    `hasDoublePrimaryTumor` bool,
-    `mesorectalFasciaIsClear` bool,
-    `distanceToMesorectalFasciaMm` int,
-    `venousInvasionDescription` varchar(50),
-    `lymphaticInvasionCategory` varchar(50),
-    `extraMuralInvasionCategory` varchar(50),
-    `tumorRegression` varchar(50),
-
-    `hasReceivedTumorDirectedTreatment` bool NOT NULL,
-    `reasonRefrainmentFromTumorDirectedTreatment` varchar(255),
-    `hasParticipatedInTrial` bool,
-
-    `gastroenterologyResections` json NOT NULL,
-    `metastasesSurgeries` json NOT NULL,
-    `radiotherapies` json NOT NULL,
-    `metastasesRadiotherapies` json NOT NULL,
-    `hasHadHipecTreatment` bool NOT NULL,
-    `intervalTumorIncidenceHipecTreatmentDays` int,
-    `hasHadPreSurgeryRadiotherapy` bool NOT NULL,
-    `hasHadPostSurgeryRadiotherapy` bool NOT NULL,
-    `hasHadPreSurgeryChemoRadiotherapy` bool NOT NULL,
-    `hasHadPostSurgeryChemoRadiotherapy` bool NOT NULL,
-    `hasHadPreSurgerySystemicChemotherapy` bool NOT NULL,
-    `hasHadPostSurgerySystemicChemotherapy` bool NOT NULL,
-    `hasHadPreSurgerySystemicTargetedTherapy` bool NOT NULL,
-    `hasHadPostSurgerySystemicTargetedTherapy` bool NOT NULL,
-
-    `response` varchar(50),
-    `intervalTumorIncidenceResponseDays` int,
-    `systemicTreatmentPlan` varchar(50),
-    `intervalTumorIncidenceTreatmentPlanStartDays` int,
-    `intervalTumorIncidenceTreatmentPlanStopDays` int,
-    `intervalTreatmentPlanStartResponseDays` int,
-    `observedPfsDays` int,
-    `hadProgressionEvent` bool,
-    `observedOsFromTreatmentStartDays` int,
-    `ageAtTreatmentPlanStart` int,
-    FOREIGN KEY (`diagnosisId`) REFERENCES `diagnosis`(`id`),
+DROP TABLE IF EXISTS `survivalMeasure`;
+CREATE TABLE `survivalMeasure` (
+    `id` INT NOT NULL AUTO_INCREMENT,
+    `tumorId` INT UNIQUE NOT NULL,
+    `daysSinceDiagnosis` INT NOT NULL,
+    `isAlive` BOOL NOT NULL,
+    FOREIGN KEY (`tumorId`) REFERENCES `tumor`(`id`),
     PRIMARY KEY (`id`)
 );
 
 DROP TABLE IF EXISTS `priorTumor`;
 CREATE TABLE `priorTumor` (
-    `id` int NOT NULL AUTO_INCREMENT,
-    `diagnosisId` int NOT NULL,
-    `consolidatedTumorType` varchar(255) NOT NULL,
-    `tumorLocations` json NOT NULL,
-    `hasHadTumorDirectedSystemicTherapy` bool NOT NULL,
-    `intervalTumorIncidencePriorTumorDays` int,
-    `tumorPriorId` int NOT NULL,
-    `tumorLocationCategory` varchar(50) NOT NULL,
-    `stageTNM` varchar(50),
-    `systemicTreatments` json NOT NULL,
-    FOREIGN KEY (`diagnosisId`) REFERENCES `diagnosis`(`id`),
+    `id` INT NOT NULL AUTO_INCREMENT,
+    `tumorId` INT NOT NULL,
+    `daysBeforeDiagnosis` INT,
+    `primaryTumorType` VARCHAR(255) NOT NULL,
+    `primaryTumorLocation` VARCHAR(255) NOT NULL,
+    `primaryTumorLocationCategory` VARCHAR(50) NOT NULL,
+    `primaryTumorStage` VARCHAR(10) NOT NULL,
+    `systemicDrugsReceived` json NOT NULL,
+    FOREIGN KEY (`tumorId`) REFERENCES `tumor`(`id`),
+    PRIMARY KEY (`id`)
+);
+
+
+DROP TABLE IF EXISTS `tnmClassification`;
+CREATE TABLE `tnmClassification` (
+    `id` INT NOT NULL AUTO_INCREMENT,
+    `tumor` VARCHAR(10),
+    `lymphNodes` VARCHAR(10),
+    `metastasis` VARCHAR(10)
+)
+
+DROP TABLE IF EXISTS `primaryDiagnosis`;
+CREATE TABLE `primaryDiagnosis` (
+    `id` INT NOT NULL AUTO_INCREMENT,
+    `tumorId` INT NOT NULL,
+    `basisOfDiagnosis` VARCHAR(255) NOT NULL,
+    `hasDoublePrimaryTumor` BOOL,
+    `primaryTumorType` VARCHAR(255) NOT NULL,
+    `primaryTumorLocation` VARCHAR(255) NOT NULL,
+    `differentiationGrade` VARCHAR(255),
+    `clinicalTnmClassification` INT UNIQUE NOT NULL,
+    `pathologicalTnmClassification` INT UNIQUE NOT NULL,
+    `clinicalTumorStage` VARCHAR(50),
+    `pathologicalTumorStage` VARCHAR(50),
+    `investigatedLymphNodesCount` INT,
+    `positiveLymphNodesCount` INT,
+    `presentedWithIleus` BOOL,
+    `presentedWithPerforation` BOOL,
+    `anorectalVergeDistanceCategory` VARCHAR(50),
+    `mesorectalFasciaIsClear` BOOL,
+    `distanceToMesorectalFasciaMm` INT,
+    `venousInvasionDescription` VARCHAR(50),
+    `lymphaticInvasionCategory` VARCHAR(50),
+    `extraMuralInvasionCategory` VARCHAR(50),
+    `tumorRegression` VARCHAR(50),
+    FOREIGN KEY (`clinicalTnmClassification`) REFERENCES `tnmClassification`(`id`),
+    FOREIGN KEY (`pathologicalTnmClassification`) REFERENCES `tnmClassification`(`id`),
+    FOREIGN KEY (`tumorId`) REFERENCES `tumor`(`id`),
+    PRIMARY KEY (`id`)
+);
+
+DROP TABLE IF EXISTS `metastaticDiagnosis`;
+CREATE TABLE `metastaticDiagnosis` (
+    `id` INT NOT NULL AUTO_INCREMENT,
+    `tumorId` INT NOT NULL,
+    `distantMetastasesDetectionStatus` VARCHAR(50) NOT NULL,
+    `numberOfLiverMetastases` VARCHAR(50),
+    `maximumSizeOfLiverMetastasisMm` INT,
+    `investigatedLymphNodesCount` INT,
+    `positiveLymphNodesCount` INT,
+    FOREIGN KEY (`tumorId`) REFERENCES `tumor`(`id`),
     PRIMARY KEY (`id`)
 );
 
 DROP TABLE IF EXISTS `metastasis`;
 CREATE TABLE `metastasis` (
-    `id` int NOT NULL AUTO_INCREMENT,
-    `episodeId` int NOT NULL,
-    `location` varchar(255) NOT NULL,
-    `locationGroup` varchar(50) NOT NULL,
-    `intervalTumorIncidenceMetastasisDetectionDays` int,
-    `isLinkedToProgression` bool,
-    FOREIGN KEY (`episodeId`) REFERENCES `episode`(`id`),
+    `id` INT NOT NULL AUTO_INCREMENT,
+    `metastaticDiagnosisId` INT NOT NULL,
+    `daysSinceDiagnosis` INT,
+    `location` VARCHAR(255) NOT NULL,
+    `isLinkedToProgression` BOOL,
+    FOREIGN KEY (`metastaticDiagnosisId`) REFERENCES `metastaticDiagnosis`(`id`),
+    PRIMARY KEY (`id`)
+);
+
+DROP TABLE IF EXISTS `whoAssessment`;
+CREATE TABLE `whoAssessment` (
+    `id` INT NOT NULL AUTO_INCREMENT,
+    `tumorId` INT NOT NULL,
+    `daysSinceDiagnosis` INT NOT NULL,
+    `whoStatus` INT NOT NULL,
+    FOREIGN KEY (`tumorId`) REFERENCES `tumor`(`id`),
+    PRIMARY KEY (`id`)
+);
+
+DROP TABLE IF EXISTS `asaAssessment`;
+CREATE TABLE `asaAssessment` (
+    `id` INT NOT NULL AUTO_INCREMENT,
+    `tumorId` INT NOT NULL,
+    `daysSinceDiagnosis` INT NOT NULL,
+    `asaClassification` VARCHAR(10) NOT NULL,
+    FOREIGN KEY (`tumorId`) REFERENCES `tumor`(`id`),
+    PRIMARY KEY (`id`)
+);
+
+DROP TABLE IF EXISTS `comorbidityAssessment`;
+CREATE TABLE `comorbidityAssessment` (
+    `id` INT NOT NULL AUTO_INCREMENT,
+    `tumorId` INT NOT NULL,
+    `charlsonComorbidityIndex` INT NOT NULL,
+    `daysSinceDiagnosis` INT NOT NULL,
+    `hasAids` BOOL NOT NULL,
+    `hasCongestiveHeartFailure` BOOL NOT NULL,
+    `hasCollagenosis` BOOL NOT NULL,
+    `hasCopd` BOOL NOT NULL,
+    `hasCerebrovascularDisease` BOOL NOT NULL,
+    `hasDementia` BOOL NOT NULL,
+    `hasDiabetesMellitus` BOOL NOT NULL,
+    `hasDiabetesMellitusWithEndOrganDamage` BOOL NOT NULL,
+    `hasOtherMalignancy` BOOL NOT NULL,
+    `hasOtherMetastaticSolidTumor` BOOL NOT NULL,
+    `hasMyocardialInfarct` BOOL NOT NULL,
+    `hasMildLiverDisease` BOOL NOT NULL,
+    `hasHemiplegiaOrParaplegia` BOOL NOT NULL,
+    `hasPeripheralVascularDisease` BOOL NOT NULL,
+    `hasRenalDisease` BOOL NOT NULL,
+    `hasLiverDisease` BOOL NOT NULL,
+    `hasUlcerDisease` BOOL NOT NULL,
+    FOREIGN KEY (`tumorId`) REFERENCES `tumor`(`id`),
+    PRIMARY KEY (`id`)
+);
+
+
+DROP TABLE IF EXISTS `molecularResult`;
+CREATE TABLE `molecularResult` (
+    `id` INT NOT NULL AUTO_INCREMENT,
+    `tumorId` INT NOT NULL,
+    `daysSinceDiagnosis` INT NOT NULL,
+    `hasMsi` BOOL,
+    `hasBrafMutation` BOOL,
+    `hasBrafV600EMutation` BOOL,
+    `hasRasMutation` BOOL,
+    `hasKrasG12CMutation` BOOL,
+    FOREIGN KEY (`tumorId`) REFERENCES `tumor`(`id`),
     PRIMARY KEY (`id`)
 );
 
 DROP TABLE IF EXISTS `labMeasurement`;
 CREATE TABLE `labMeasurement` (
-    `id` int NOT NULL AUTO_INCREMENT,
-    `episodeId` int NOT NULL,
-    `name` varchar(50) NOT NULL,
-    `value` double NOT NULL,
-    `unit` varchar(50) NOT NULL,
-    `intervalTumorIncidenceLabMeasureDays` int,
-    `isPreSurgical` bool,
-    `isPostSurgical` bool,
-    FOREIGN KEY (`episodeId`) REFERENCES `episode`(`id`),
+    `id` INT NOT NULL AUTO_INCREMENT,
+    `tumorId` INT NOT NULL,
+    `daysSinceDiagnosis` INT,
+    `name` VARCHAR(50) NOT NULL,
+    `value` DOUBLE NOT NULL,
+    `unit` VARCHAR(50) NOT NULL,
+    `isPreSurgical` BOOL,
+    `isPostSurgical` BOOL,
+    FOREIGN KEY (`tumorId`) REFERENCES `tumor`(`id`),
     PRIMARY KEY (`id`)
 );
 
-DROP TABLE IF EXISTS `surgery`;
-CREATE TABLE `surgery` (
-    `id` int NOT NULL AUTO_INCREMENT,
-    `episodeId` int NOT NULL,
+DROP TABLE IF EXISTS `gastroenterologyResection`;
+CREATE TABLE `gastroenterologyResection` (
+    `id` INT NOT NULL AUTO_INCREMENT,
+    `tumorId` INT NOT NULL,
+    `daysSinceDiagnosis` INT,
+    `resectionType` VARCHAR(50) NOT NULL,
+    FOREIGN KEY (`tumorId`) REFERENCES `tumor`(`id`),
+    PRIMARY KEY (`id`)
+);
+
+DROP TABLE IF EXISTS `primarySurgery`;
+CREATE TABLE `primarySurgery` (
+    `id` INT NOT NULL AUTO_INCREMENT,
+    `tumorId` INT NOT NULL,
+    `daysSinceDiagnosis` INT,
     `type` varchar(50) NOT NULL,
     `technique` varchar(50),
     `urgency` varchar(255),
     `radicality` varchar(50),
     `circumferentialResectionMargin` varchar(50),
     `anastomoticLeakageAfterSurgery` varchar(50),
-    `intervalTumorIncidenceSurgeryDays` int,
     `hospitalizationDurationDays` int,
-    FOREIGN KEY (`episodeId`) REFERENCES `episode`(`id`),
+    FOREIGN KEY (`tumorId`) REFERENCES `tumor`(`id`),
+    PRIMARY KEY (`id`)
+);
+
+DROP TABLE IF EXISTS `metastaticSurgery`;
+CREATE TABLE `metastaticSurgery` (
+    `id` INT NOT NULL AUTO_INCREMENT,
+    `tumorId` INT NOT NULL,
+    `daysSinceDiagnosis` INT,
+    `type` varchar(50) NOT NULL,
+    `radicality` varchar(50),
+    FOREIGN KEY (`tumorId`) REFERENCES `tumor`(`id`),
+    PRIMARY KEY (`id`)
+);
+
+DROP TABLE IF EXISTS `hipecTreatment`;
+CREATE TABLE `hipecTreatment` (
+    `id` INT NOT NULL AUTO_INCREMENT,
+    `tumorId` INT UNIQUE NOT NULL,
+    `daysSinceDiagnosis` INT,
+    `hasHadHipecTreatment` BOOL NOT NULL,
+    PRIMARY KEY (`id`),
+    FOREIGN KEY (`tumorId`) REFERENCES `tumor`(`id`)
+);
+
+DROP TABLE IF EXISTS `primaryRadiotherapy`;
+CREATE TABLE `primaryRadiotherapy` (
+    `id` INT NOT NULL AUTO_INCREMENT,
+    `tumorId` INT NOT NULL,
+    `daysBetweenDiagnosisAndStart` INT,
+    `daysBetweenDiagnosisAndStop` INT,
+    `type` VARCHAR(50) NOT NULL,
+    `totalDosage` DOUBLE,
+    FOREIGN KEY (`tumorId`) REFERENCES `tumor`(`id`),
+    PRIMARY KEY (`id`)
+);
+
+DROP TABLE IF EXISTS `metastaticRadiotherapy`;
+CREATE TABLE `metastaticRadiotherapy` (
+    `id` INT NOT NULL AUTO_INCREMENT,
+    `tumorId` INT NOT NULL,
+    `daysBetweenDiagnosisAndStart` INT,
+    `daysBetweenDiagnosisAndStop` INT,
+    `type` VARCHAR(100) NOT NULL,
+    FOREIGN KEY (`tumorId`) REFERENCES `tumor`(`id`),
+    PRIMARY KEY (`id`)
+);
+
+DROP TABLE IF EXISTS `systemicTreatment`;
+CREATE TABLE `systemicTreatment` (
+    `id` INT NOT NULL,
+    `tumorId` INT NOT NULL,
+    `daysBetweenDiagnosisAndStart` INT,
+    `daysBetweenDiagnosisAndStop` INT,
+    `treatment` VARCHAR(50) NOT NULL,
+    FOREIGN KEY (`tumorId`) REFERENCES `tumor`(`id`),
     PRIMARY KEY (`id`)
 );
 
 DROP TABLE IF EXISTS `systemicTreatmentScheme`;
 CREATE TABLE `systemicTreatmentScheme` (
-    `id` int NOT NULL,
-    `episodeId` int NOT NULL,
-    `intervalTumorIncidenceTreatmentLineStartMinDays` int,
-    `intervalTumorIncidenceTreatmentLineStartMaxDays` int,
-    `intervalTumorIncidenceTreatmentLineStopMinDays` int,
-    `intervalTumorIncidenceTreatmentLineStopMaxDays` int,
-    FOREIGN KEY (`episodeId`) REFERENCES `episode`(`id`),
+    `id` INT NOT NULL,
+    `systemicTreatmentId` INT NOT NULL,
+    `minDaysBetweenDiagnosisAndStart` INT,
+    `maxDaysBetweenDiagnosisAndStart` INT,
+    `minDaysBetweenDiagnosisAndStop` INT,
+    `maxDaysBetweenDiagnosisAndStop` INT,
+    FOREIGN KEY (`systemicTreatmentId`) REFERENCES `systemicTreatment`(`id`),
     PRIMARY KEY (`id`)
 );
 
-DROP TABLE IF EXISTS `systemicTreatmentSchemeDrug`;
-CREATE TABLE `systemicTreatmentSchemeDrug` (
-    `id` int NOT NULL AUTO_INCREMENT,
-    `systemicTreatmentSchemeId` int NOT NULL,
-    `drug` varchar(50) NOT NULL,
-    `schemeNumber` int,
-    `numberOfCycles` int,
-    `intent` varchar(50),
-    `drugTreatmentIsOngoing` bool,
-    `intervalTumorIncidenceTreatmentStartDays` int,
-    `intervalTumorIncidenceTreatmentStopDays` int,
-    `isAdministeredPreSurgery` bool,
-    `isAdministeredPostSurgery` bool,
+
+DROP TABLE IF EXISTS `systemicTreatmentDrug`;
+CREATE TABLE `systemicTreatmentDrug` (
+    `id` INT NOT NULL AUTO_INCREMENT,
+    `systemicTreatmentSchemeId` INT NOT NULL,
+    `daysBetweenDiagnosisAndStart` INT,
+    `daysBetweenDiagnosisAndStop` INT,
+    `drug` VARCHAR(50) NOT NULL,
+    `numberOfCycles` INT,
+    `intent` VARCHAR(50),
+    `drugTreatmentIsOngoing` BOOL,
+    `isAdministeredPreSurgery` BOOL,
+    `isAdministeredPostSurgery` BOOL,
     FOREIGN KEY (`systemicTreatmentSchemeId`) REFERENCES `systemicTreatmentScheme`(`id`),
     PRIMARY KEY (`id`)
 );
 
-DROP TABLE IF EXISTS `pfsMeasure`;
-CREATE TABLE `pfsMeasure` (
-    `id` int NOT NULL AUTO_INCREMENT,
-    `episodeId` int NOT NULL,
-    `type` varchar(50) NOT NULL,
-    `followUpEvent` varchar(50),
-    `intervalTumorIncidencePfsMeasureDays` int,
-    FOREIGN KEY (`episodeId`) REFERENCES `episode`(`id`),
+DROP TABLE IF EXISTS `responseMeasure`;
+CREATE TABLE `responseMeasure` (
+    `id` INT NOT NULL AUTO_INCREMENT,
+    `tumorId` INT NOT NULL,
+    `daysSinceDiagnosis` INT,
+    `response` VARCHAR(10) NOT NULL,
+    FOREIGN KEY (`tumorId`) REFERENCES `tumor`(`id`),
     PRIMARY KEY (`id`)
 );
 
-DROP TABLE IF EXISTS `drug`;
-CREATE TABLE `drug` (
-    `id` int NOT NULL AUTO_INCREMENT,
-    `name` varchar(255) NOT NULL,
-    `treatmentCategory` varchar(50) NOT NULL,
-    PRIMARY KEY (`id`)
-);
-
-DROP TABLE IF EXISTS `location`;
-CREATE TABLE `location` (
-    `id` int NOT NULL AUTO_INCREMENT,
-    `name` varchar(255) NOT NULL,
-    `group` varchar(255) NOT NULL,
+DROP TABLE IF EXISTS `progressionMeasure`;
+CREATE TABLE `progressionMeasure` (
+    `id` INT NOT NULL AUTO_INCREMENT,
+    `tumorId` INT NOT NULL,
+    `daysSinceDiagnosis` INT,
+    `type` VARCHAR(50) NOT NULL,
+    `followUpEvent` VARCHAR(50) NOT NULL,
+    FOREIGN KEY (`tumorId`) REFERENCES `tumor`(`id`),
     PRIMARY KEY (`id`)
 );
 

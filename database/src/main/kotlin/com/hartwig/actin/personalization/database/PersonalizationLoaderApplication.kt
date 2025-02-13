@@ -1,8 +1,6 @@
 package com.hartwig.actin.personalization.database
 
 import com.hartwig.actin.personalization.datamodel.serialization.ReferencePatientJson
-import com.hartwig.actin.personalization.ncr.interpretation.ReferencePatientFactory
-import com.hartwig.actin.personalization.ncr.serialization.NcrDataReader
 import io.github.oshai.kotlinlogging.KotlinLogging
 import picocli.CommandLine
 import java.util.concurrent.Callable
@@ -30,7 +28,7 @@ class PersonalizationLoaderApplication : Callable<Int> {
 
         val writer = DatabaseWriter.fromCredentials(dbUser, dbPass, dbUrl)
         LOGGER.info { "Writing ${patients.size} patient records to database" }
-//        writer.writeAllToDb(patients)
+        writer.writeAllToDb(patients)
 
         LOGGER.info { "Done!" }
         return 0
