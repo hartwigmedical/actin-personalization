@@ -10,14 +10,14 @@ import java.util.concurrent.Callable
 
 class NCRInspectionApplication : Callable<Int> {
 
-    @CommandLine.Option(names = ["-ncr_dataset_csv"], required = true, description = ["File containing the NCR dataset"])
-    lateinit var ncrDatasetPath: String
+    @CommandLine.Option(names = ["-ncr_file"], required = true)
+    lateinit var ncrFile: String
 
     override fun call(): Int {
         LOGGER.info { "Running NCR inspection application" }
 
-        LOGGER.info { "Reading NCR dataset from $ncrDatasetPath" }
-        val ncrRecords = NcrDataReader.read(ncrDatasetPath)
+        LOGGER.info { "Reading NCR dataset from $ncrFile" }
+        val ncrRecords = NcrDataReader.read(ncrFile)
         LOGGER.info { " Read ${ncrRecords.size} NCR records" }
 
         LOGGER.info { "Printing overview of NCR records" }

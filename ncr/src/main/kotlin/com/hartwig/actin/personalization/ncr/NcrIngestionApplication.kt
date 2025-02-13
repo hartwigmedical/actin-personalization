@@ -38,7 +38,7 @@ class NcrIngestionApplication : Callable<Int> {
     companion object {
         val LOGGER = KotlinLogging.logger {}
         const val APPLICATION = "NCR inspection application"
-        val VERSION = NcrIngestionApplication::class.java.getPackage().implementationVersion
+        val VERSION: String = NcrIngestionApplication::class.java.getPackage().implementationVersion
     }
 }
 
