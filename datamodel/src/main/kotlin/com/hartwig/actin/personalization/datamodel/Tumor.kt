@@ -50,6 +50,6 @@ data class Tumor(
     val metastaticRadiotherapies: List<MetastaticRadiotherapy> = emptyList(),
     val systemicTreatments: List<SystemicTreatment> = emptyList(),
 
-    val responseMeasures: List<ResponseMeasure>,
-    val progressionMeasures: List<ProgressionMeasure>
+    val responseMeasures: List<ResponseMeasure> = emptyList(),
+    val progressionMeasures: List<ProgressionMeasure> = emptyList()
 )

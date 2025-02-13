@@ -36,7 +36,7 @@ import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrPfsMeasure
 import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrPfsMeasureTypeMapper
 import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrRadiotherapyTypeMapper
 import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrReasonRefrainmentFromTumorDirectedTherapyMapper
-import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrStageTnmMapper
+import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrTumorStageMapper
 import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrSurgeryCircumferentialResectionMarginMapper
 import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrSurgeryRadicalityMapper
 import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrSurgeryTechniqueMapper
@@ -97,9 +97,9 @@ class NcrEpisodeExtractor(private val systemicTreatmentPlanExtractor: NcrSystemi
                 tnmPT = NcrTnmTMapper.resolveNullable(primaryDiagnosis.pt),
                 tnmPN = NcrTnmNMapper.resolveNullable(primaryDiagnosis.pn),
                 tnmPM = NcrTnmMMapper.resolveNullable(primaryDiagnosis.pm),
-                stageCTNM = NcrStageTnmMapper.resolveNullable(primaryDiagnosis.cstadium),
-                stagePTNM = NcrStageTnmMapper.resolveNullable(primaryDiagnosis.pstadium),
-                stageTNM = NcrStageTnmMapper.resolveNullable(primaryDiagnosis.stadium),
+//                stageCTNM = NcrTumorStageMapper.resolveNullable(primaryDiagnosis.cstadium),
+//                stagePTNM = NcrTumorStageMapper.resolveNullable(primaryDiagnosis.pstadium),
+//                stageTNM = NcrTumorStageMapper.resolveNullable(primaryDiagnosis.stadium),
                 investigatedLymphNodesNumber = primaryDiagnosis.ondLymf,
                 positiveLymphNodesNumber = primaryDiagnosis.posLymf,
                 distantMetastasesDetectionStatus = NcrDistantMetastasesStatusMapper.resolve(identification.metaEpis),

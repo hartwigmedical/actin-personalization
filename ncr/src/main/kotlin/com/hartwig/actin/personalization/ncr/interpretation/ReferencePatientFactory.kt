@@ -1,18 +1,18 @@
 package com.hartwig.actin.personalization.ncr.interpretation
 
+import com.hartwig.actin.personalization.datamodel.ReferencePatient
 import com.hartwig.actin.personalization.datamodel.Sex
-import com.hartwig.actin.personalization.datamodel.old.ReferencePatient
-import com.hartwig.actin.personalization.datamodel.old.TumorEntry
+import com.hartwig.actin.personalization.datamodel.Tumor
 import com.hartwig.actin.personalization.ncr.datamodel.NcrRecord
 import com.hartwig.actin.personalization.ncr.interpretation.extractor.NcrEpisodeExtractor
 import com.hartwig.actin.personalization.ncr.interpretation.extractor.NcrSystemicTreatmentPlanExtractor
-import com.hartwig.actin.personalization.ncr.interpretation.extractor.NcrTumorEntryExtractor
+import com.hartwig.actin.personalization.ncr.interpretation.extractor.NcrTumorExtractor
 import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrSexMapper
 import java.util.stream.Collectors
 
 const val DIAGNOSIS_EPISODE = "DIA"
 
-class ReferencePatientFactory(private val tumorEntryExtractor: NcrTumorEntryExtractor) {
+class ReferencePatientFactory(private val tumorExtractor: NcrTumorExtractor) {
 
     fun create(ncrRecords: List<NcrRecord>): List<ReferencePatient> {
         return ncrRecords.groupBy { it.identification.keyNkr }.values.parallelStream()
@@ -22,35 +22,18 @@ class ReferencePatientFactory(private val tumorEntryExtractor: NcrTumorEntryExtr
 
     private fun createReferencePatient(ncrRecords: List<NcrRecord>): ReferencePatient {
         return ReferencePatient(
-            ncrId = extractNcrId(ncrRecords),
             sex = extractSex(ncrRecords),
-            isAlive = determineIsAlive(ncrRecords),
-            tumorEntries = determineEpisodesPerTumorOfInterest(ncrRecords)
+            tumors = extractTumors(ncrRecords)
         )
-    }
-
-    private fun extractNcrId(ncrRecords: List<NcrRecord>): Int {
-        return ncrRecords.map { it.identification.keyNkr }.distinct().single()
     }
 
     private fun extractSex(ncrRecords: List<NcrRecord>): Sex {
         return NcrSexMapper.resolve(ncrRecords.map { it.patientCharacteristics.gesl }.distinct().single())
     }
 
-    private fun determineIsAlive(ncrRecords: List<NcrRecord>): Boolean {
-        // Vital status is only collect on diagnosis episodes.
-        val vitalStatus = diagnosisEpisodes(ncrRecords).map { it.patientCharacteristics.vitStat }.distinct().single()
-       
-        return when (vitalStatus) {
-            0 -> true
-            1 -> false
-            else -> throw IllegalStateException("Cannot convert vital status: $vitalStatus")
-        }
-    }
-
-    private fun determineEpisodesPerTumorOfInterest(ncrRecords: List<NcrRecord>): List<TumorEntry> {
+    private fun extractTumors(ncrRecords: List<NcrRecord>): List<Tumor> {
         return ncrRecords.groupBy { it.identification.keyZid }.entries
-            .map { (_, records) -> tumorEntryExtractor.extractTumorEntry(records) }
+            .map { (_, records) -> tumorExtractor.extractTumorEntry(records) }
     }
 
     private fun diagnosisEpisodes(ncrRecords: List<NcrRecord>): List<NcrRecord> {
@@ -59,7 +42,7 @@ class ReferencePatientFactory(private val tumorEntryExtractor: NcrTumorEntryExtr
 
     companion object {
         fun default(): ReferencePatientFactory {
-            return ReferencePatientFactory(NcrTumorEntryExtractor(NcrEpisodeExtractor(NcrSystemicTreatmentPlanExtractor())))
+            return ReferencePatientFactory(NcrTumorExtractor(NcrEpisodeExtractor(NcrSystemicTreatmentPlanExtractor())))
         }
     }
 }

@@ -1,5 +1,6 @@
 package com.hartwig.actin.personalization.ncr
 
+import com.hartwig.actin.personalization.datamodel.serialization.ReferencePatientJson
 import com.hartwig.actin.personalization.ncr.interpretation.ReferencePatientFactory
 import com.hartwig.actin.personalization.ncr.serialization.NcrDataReader
 import io.github.oshai.kotlinlogging.KotlinLogging
@@ -24,7 +25,7 @@ class NcrIngestionApplication : Callable<Int> {
             LOGGER.info { " Created ${patientRecords.size} patient records from ${ncrRecords.size} NCR records" }
 
             LOGGER.info { "Writing serialized records to $outputFile" }
-//            ReferencePatientJson.write(patientRecords, outputFile)
+            ReferencePatientJson.write(patientRecords, outputFile)
 
             LOGGER.info { "Done!" }
             return 0

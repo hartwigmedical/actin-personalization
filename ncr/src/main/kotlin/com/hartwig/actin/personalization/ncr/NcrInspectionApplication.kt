@@ -1,6 +1,6 @@
 package com.hartwig.actin.personalization.ncr
 
-import com.hartwig.actin.personalization.datamodel.old.ReferencePatient
+import com.hartwig.actin.personalization.datamodel.ReferencePatient
 import com.hartwig.actin.personalization.ncr.datamodel.NcrRecord
 import com.hartwig.actin.personalization.ncr.interpretation.ReferencePatientFactory
 import com.hartwig.actin.personalization.ncr.serialization.NcrDataReader
