@@ -27,16 +27,16 @@ data class Tumor(
     val ageAtDiagnosis: Int,
     val latestSurvivalStatus: SurvivalMeasure,
 
-    val priorTumors: List<PriorTumor>,
+    val priorTumors: List<PriorTumor> = emptyList(),
 
     val primaryDiagnosis: PrimaryDiagnosis,
     val metastaticDiagnosis: MetastaticDiagnosis,
 
-    val whoAssessments: List<WhoAssessment>,
-    val asaAssessments: List<AsaAssessment>,
-    val comorbidityAssessments: List<ComorbidityAssessment>,
-    val molecularResults: List<MolecularResult>,
-    val labMeasurements: List<LabMeasurement>,
+    val whoAssessments: List<WhoAssessment> = emptyList(),
+    val asaAssessments: List<AsaAssessment> = emptyList(),
+    val comorbidityAssessments: List<ComorbidityAssessment> = emptyList(),
+    val molecularResults: List<MolecularResult> = emptyList(),
+    val labMeasurements: List<LabMeasurement> = emptyList(),
 
     val hasReceivedTumorDirectedTreatment: Boolean,
     val reasonRefrainmentFromTumorDirectedTreatment: ReasonRefrainmentFromTumorDirectedTreatment? = null,

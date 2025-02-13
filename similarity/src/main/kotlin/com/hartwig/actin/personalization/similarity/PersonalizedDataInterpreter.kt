@@ -39,7 +39,8 @@ class PersonalizedDataInterpreter(val patientsByTreatment: List<Pair<TreatmentGr
             val patients = ReferencePatientJson.read(path)
 
             LOGGER.info { " Loaded ${patients.size} reference patients" }
-            return createFromReferencePatients(patients)
+            // TODO (KD) Fix
+            return createFromReferencePatients(emptyList())
         }
 
         fun createFromReferencePatients(patients: List<ReferencePatient>): PersonalizedDataInterpreter {

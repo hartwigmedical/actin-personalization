@@ -1,6 +1,6 @@
 package com.hartwig.actin.personalization.datamodel.serialization
 
-import com.hartwig.actin.personalization.datamodel.old.ReferencePatient
+import com.hartwig.actin.personalization.datamodel.ReferencePatient
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import java.io.File
