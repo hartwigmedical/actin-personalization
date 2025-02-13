@@ -314,4 +314,20 @@ CREATE TABLE `progressionMeasure` (
     PRIMARY KEY (`id`)
 );
 
+DROP TABLE IF EXISTS `drug`;
+CREATE TABLE `drug` (
+    `id` int NOT NULL AUTO_INCREMENT,
+    `name` varchar(255) NOT NULL,
+    `treatmentCategory` varchar(50) NOT NULL,
+    PRIMARY KEY (`id`)
+);
+
+DROP TABLE IF EXISTS `location`;
+CREATE TABLE `location` (
+    `id` int NOT NULL AUTO_INCREMENT,
+    `name` varchar(255) NOT NULL,
+    `group` varchar(255) NOT NULL,
+    PRIMARY KEY (`id`)
+);
+
 SET FOREIGN_KEY_CHECKS = 1;
