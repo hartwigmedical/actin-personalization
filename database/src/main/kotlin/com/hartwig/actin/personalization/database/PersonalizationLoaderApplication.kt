@@ -1,5 +1,6 @@
 package com.hartwig.actin.personalization.database
 
+import com.hartwig.actin.personalization.datamodel.serialization.ReferencePatientJson
 import com.hartwig.actin.personalization.ncr.interpretation.ReferencePatientFactory
 import com.hartwig.actin.personalization.ncr.serialization.NcrDataReader
 import io.github.oshai.kotlinlogging.KotlinLogging
@@ -8,8 +9,8 @@ import java.util.concurrent.Callable
 
 class PersonalizationLoaderApplication : Callable<Int> {
 
-    @CommandLine.Option(names = ["-ncr_file"], required = true)
-    lateinit var ncrFile: String
+    @CommandLine.Option(names = ["-reference_patients_json"], required = true)
+    lateinit var referencePatientsJson: String
 
     @CommandLine.Option(names = ["-db_user"], required = true)
     lateinit var dbUser: String
@@ -23,16 +24,11 @@ class PersonalizationLoaderApplication : Callable<Int> {
     override fun call(): Int {
         LOGGER.info { "Running $APPLICATION v$VERSION" }
 
-        LOGGER.info { "Loading NCR records from file $ncrFile" }
-        val records = NcrDataReader.read(ncrFile)
-        LOGGER.info { " Loaded ${records.size} NCR records" }
-
-        LOGGER.info { "Creating patient records" }
-        val patients = ReferencePatientFactory.default().create(records)
+        LOGGER.info { "Loading Reference Patients from file $referencePatientsJson" }
+        val patients = ReferencePatientJson.read(referencePatientsJson)
         LOGGER.info { " Created ${patients.size} patient records" }
 
         val writer = DatabaseWriter.fromCredentials(dbUser, dbPass, dbUrl)
-
         LOGGER.info { "Writing ${patients.size} patient records to database" }
 //        writer.writeAllToDb(patients)
 

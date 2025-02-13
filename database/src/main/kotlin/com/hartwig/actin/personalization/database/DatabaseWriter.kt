@@ -6,7 +6,7 @@ import com.hartwig.actin.personalization.datamodel.old.GastroenterologyResection
 import com.hartwig.actin.personalization.datamodel.old.MetastasesRadiotherapy
 import com.hartwig.actin.personalization.datamodel.old.MetastasesSurgery
 import com.hartwig.actin.personalization.datamodel.old.Radiotherapy
-import com.hartwig.actin.personalization.datamodel.old.ReferencePatient
+import com.hartwig.actin.personalization.datamodel.ReferencePatient
 import com.hartwig.actin.personalization.datamodel.old.SystemicTreatmentScheme
 import com.hartwig.actin.personalization.datamodel.old.TumorEntry
 import com.hartwig.actin.personalization.datamodel.treatment.Drug
@@ -28,22 +28,23 @@ class DatabaseWriter(private val context: DSLContext, private val connection: ja
         connection.setAutoCommit(false)
         clearAll()
 
-        val indexedRecords = writeReferencePatients(patientRecords)
-        val tumorEntries = writeRecordsAndReturnIndexedList("diagnosis", indexedRecords, Tables.DIAGNOSIS, ::diagnosesFromPatient)
-        val episodes = writeRecordsAndReturnIndexedList("episode", tumorEntries, Tables.EPISODE, ::episodesFromTumorEntry)
-        writeRecords("prior tumor", tumorEntries, ::priorTumorRecordsFromTumorEntry)
-        writeRecords("metastasis", episodes, ::metastasisRecordsFromEpisode)
-        writeRecords("lab measurement", episodes, ::labMeasurementRecordsFromEpisode)
-        writeRecords("surgery", episodes, ::surgeryRecordsFromEpisode)
-        
-        val systemicTreatmentSchemes = writeRecordsAndReturnIndexedList(
-            "systemic treatment scheme", episodes, Tables.SYSTEMICTREATMENTSCHEME, ::systemicTreatmentSchemesFromEpisode
-        )
-        writeRecords("systemic treatment component", systemicTreatmentSchemes, ::systemicTreatmentComponentRecordsFromScheme)
-        writeRecords("PFS measure", episodes, ::pfsMeasureRecordsFromEpisode)
-        
-        writeDrugs()
-        writeLocations()
+        // [AE] TODO update once sql is complete
+//        val indexedRecords = writeReferencePatients(patientRecords)
+//        val tumorEntries = writeRecordsAndReturnIndexedList("diagnosis", indexedRecords, Tables.DIAGNOSIS, ::diagnosesFromPatient)
+//        val episodes = writeRecordsAndReturnIndexedList("episode", tumorEntries, Tables.EPISODE, ::episodesFromTumorEntry)
+//        writeRecords("prior tumor", tumorEntries, ::priorTumorRecordsFromTumorEntry)
+//        writeRecords("metastasis", episodes, ::metastasisRecordsFromEpisode)
+//        writeRecords("lab measurement", episodes, ::labMeasurementRecordsFromEpisode)
+//        writeRecords("surgery", episodes, ::surgeryRecordsFromEpisode)
+//
+//        val systemicTreatmentSchemes = writeRecordsAndReturnIndexedList(
+//            "systemic treatment scheme", episodes, Tables.SYSTEMICTREATMENTSCHEME, ::systemicTreatmentSchemesFromEpisode
+//        )
+//        writeRecords("systemic treatment component", systemicTreatmentSchemes, ::systemicTreatmentComponentRecordsFromScheme)
+//        writeRecords("PFS measure", episodes, ::pfsMeasureRecordsFromEpisode)
+//
+//        writeDrugs()
+//        writeLocations()
         
         connection.setAutoCommit(true)
         context.execute("SET FOREIGN_KEY_CHECKS = 1;")
@@ -97,14 +98,14 @@ class DatabaseWriter(private val context: DSLContext, private val connection: ja
         LOGGER.info { "  Inserted ${rows.size} $name records" }
     }
 
-    private fun diagnosesFromPatient(patientId: Int, patient: ReferencePatient) =
-        patient.tumorEntries.map { tumorEntry ->
-            val dbRecord = context.newRecord(Tables.DIAGNOSIS)
-            dbRecord.from(tumorEntry.diagnosis)
-            dbRecord.set(Tables.DIAGNOSIS.PATIENTID, patientId)
-            dbRecord.set(Tables.DIAGNOSIS.TUMORLOCATIONS, jsonList(tumorEntry.diagnosis.tumorLocations))
-            tumorEntry to dbRecord
-        }
+//    private fun diagnosesFromPatient(patientId: Int, patient: ReferencePatient) =
+//        patient.tumorEntries.map { tumorEntry ->
+//            val dbRecord = context.newRecord(Tables.DIAGNOSIS)
+//            dbRecord.from(tumorEntry.diagnosis)
+//            dbRecord.set(Tables.DIAGNOSIS.PATIENTID, patientId)
+//            dbRecord.set(Tables.DIAGNOSIS.TUMORLOCATIONS, jsonList(tumorEntry.diagnosis.tumorLocations))
+//            tumorEntry to dbRecord
+//        }
 
     
     private fun episodesFromTumorEntry(diagnosisId: Int, tumorEntry: TumorEntry) =
