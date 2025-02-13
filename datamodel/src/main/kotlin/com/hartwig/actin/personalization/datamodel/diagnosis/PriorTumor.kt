@@ -7,7 +7,7 @@ import kotlinx.serialization.Serializable
 data class PriorTumor (
     val daysBeforeDiagnosis: Int?,
     val primaryTumorType: TumorType,
-    val primaryTumorLocation: Location,
+    val primaryTumorLocation: TumorLocation,
     val primaryTumorLocationCategory: TumorLocationCategory,
     val primaryTumorStage: TumorStage?,
     val systemicDrugsReceived: List<Drug>

@@ -1,6 +1,6 @@
 package com.hartwig.actin.personalization.datamodel.old
 
-import com.hartwig.actin.personalization.datamodel.diagnosis.Location
+import com.hartwig.actin.personalization.datamodel.diagnosis.TumorLocation
 import com.hartwig.actin.personalization.datamodel.diagnosis.TumorLocationCategory
 import com.hartwig.actin.personalization.datamodel.diagnosis.TumorType
 import com.hartwig.actin.personalization.datamodel.treatment.Drug
@@ -9,7 +9,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class PriorTumor(
     override val consolidatedTumorType: TumorType,
-    override val tumorLocations: Set<Location>,
+    override val tumorLocations: Set<TumorLocation>,
     override val hasHadTumorDirectedSystemicTherapy: Boolean,
 
     val intervalTumorIncidencePriorTumorDays: Int?,

@@ -27,7 +27,7 @@ import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrBooleanMap
 import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrDistantMetastasesStatusMapper
 import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrExtraMuralInvasionCategoryMapper
 import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrGastroenterologyResectionTypeMapper
-import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrLocationMapper
+import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrTumorLocationMapper
 import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrLymphaticInvasionCategoryMapper
 import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrMetastasesRadiotherapyTypeMapper
 import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrMetastasesSurgeryTypeMapper
@@ -36,7 +36,6 @@ import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrPfsMeasure
 import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrPfsMeasureTypeMapper
 import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrRadiotherapyTypeMapper
 import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrReasonRefrainmentFromTumorDirectedTherapyMapper
-import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrTumorStageMapper
 import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrSurgeryCircumferentialResectionMarginMapper
 import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrSurgeryRadicalityMapper
 import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrSurgeryTechniqueMapper
@@ -89,7 +88,7 @@ class NcrEpisodeExtractor(private val systemicTreatmentPlanExtractor: NcrSystemi
                 NcrAsaClassificationPreSurgeryOrEndoscopyMapper.resolve(patientCharacteristics.asa),
                 tumorIncidenceYear = primaryDiagnosis.incjr,
                 tumorBasisOfDiagnosis = NcrTumorBasisOfDiagnosisMapper.resolve(primaryDiagnosis.diagBasis),
-                tumorLocation = NcrLocationMapper.resolveLocation(primaryDiagnosis.topoSublok),
+                tumorLocation = NcrTumorLocationMapper.resolveTumorLocation(primaryDiagnosis.topoSublok),
                 tumorDifferentiationGrade = NcrTumorDifferentiationGradeMapper.resolve(primaryDiagnosis.diffgrad.toInt()),
                 tnmCT = NcrTnmTMapper.resolveNullable(primaryDiagnosis.ct),
                 tnmCN = NcrTnmNMapper.resolveNullable(primaryDiagnosis.cn),
@@ -342,7 +341,7 @@ class NcrEpisodeExtractor(private val systemicTreatmentPlanExtractor: NcrSystemi
             )
             locations.mapIndexed { i, location ->
                 Metastasis(
-                    NcrLocationMapper.resolveLocation(location),
+                    NcrTumorLocationMapper.resolveTumorLocation(location),
                     intervalDays[i],
                     NcrBooleanMapper.resolve(progression[i])
                 )

@@ -4,7 +4,7 @@ import com.hartwig.actin.personalization.datamodel.assessment.AsaClassification
 import com.hartwig.actin.personalization.datamodel.assessment.LabMeasure
 import com.hartwig.actin.personalization.datamodel.assessment.Unit
 import com.hartwig.actin.personalization.datamodel.diagnosis.ExtraMuralInvasionCategory
-import com.hartwig.actin.personalization.datamodel.diagnosis.Location
+import com.hartwig.actin.personalization.datamodel.diagnosis.TumorLocation
 import com.hartwig.actin.personalization.datamodel.diagnosis.LymphaticInvasionCategory
 import com.hartwig.actin.personalization.datamodel.diagnosis.MetastasesDetectionStatus
 import com.hartwig.actin.personalization.datamodel.diagnosis.NumberOfLiverMetastases
@@ -20,7 +20,6 @@ import com.hartwig.actin.personalization.datamodel.old.LabMeasurement
 import com.hartwig.actin.personalization.datamodel.old.Metastasis
 import com.hartwig.actin.personalization.datamodel.old.PfsMeasure
 import com.hartwig.actin.personalization.datamodel.old.ResponseMeasure
-import com.hartwig.actin.personalization.datamodel.old.StageTnm
 import com.hartwig.actin.personalization.datamodel.outcome.ProgressionMeasureFollowUpEvent
 import com.hartwig.actin.personalization.datamodel.outcome.ProgressionMeasureType
 import com.hartwig.actin.personalization.datamodel.outcome.ResponseType
@@ -110,7 +109,7 @@ class NcrEpisodeExtractorTest {
             whoStatusPreTreatmentStart = WHO_STATUS,
             asaClassificationPreSurgeryOrEndoscopy = AsaClassification.V,
             tumorIncidenceYear = INCIDENCE_YEAR,
-            tumorLocation = Location.ASCENDING_COLON,
+            tumorLocation = TumorLocation.ASCENDING_COLON,
             tumorBasisOfDiagnosis = TumorBasisOfDiagnosis.SPEC_BIOCHEMICAL_IMMUNOLOGICAL_LAB_INVESTIGATION,
             tumorDifferentiationGrade = TumorDifferentiationGrade.GRADE_2_OR_MODERATELY_DIFFERENTIATED,
             tnmCT = TnmT.T0,
@@ -125,7 +124,7 @@ class NcrEpisodeExtractorTest {
             investigatedLymphNodesNumber = INVESTIGATED_LYMPH_NODES,
             positiveLymphNodesNumber = POSITIVE_LYMPH_NODES,
             distantMetastasesDetectionStatus = MetastasesDetectionStatus.AT_PROGRESSION,
-            metastases = listOf(Metastasis(Location.ADRENAL_CORTEX, 20, true)),
+            metastases = listOf(Metastasis(TumorLocation.ADRENAL_CORTEX, 20, true)),
             numberOfLiverMetastases = NumberOfLiverMetastases.FIVE_OR_MORE,
             maximumSizeOfLiverMetastasisMm = 15,
             hasDoublePrimaryTumor = false,

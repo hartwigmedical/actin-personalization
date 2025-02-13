@@ -3,7 +3,7 @@ package com.hartwig.actin.personalization.datamodel.diagnosis
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
-class LocationGroupTest {
+class TumorLocationGroupTest {
 
     @Test
     fun `Should resolve top-level group as self for all top-level groups`() {

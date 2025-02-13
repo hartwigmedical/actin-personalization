@@ -1,16 +1,5 @@
 package com.hartwig.actin.personalization.ncr.interpretation.extractor
 
-import com.hartwig.actin.personalization.datamodel.diagnosis.AnorectalVergeDistanceCategory
-import com.hartwig.actin.personalization.datamodel.diagnosis.Location
-import com.hartwig.actin.personalization.datamodel.diagnosis.Sidedness
-import com.hartwig.actin.personalization.datamodel.diagnosis.TumorLocationCategory
-import com.hartwig.actin.personalization.datamodel.diagnosis.TumorType
-import com.hartwig.actin.personalization.datamodel.old.Diagnosis
-import com.hartwig.actin.personalization.datamodel.old.NumberOfCciCategories
-import com.hartwig.actin.personalization.datamodel.old.PriorTumor
-import com.hartwig.actin.personalization.datamodel.old.StageTnm
-import com.hartwig.actin.personalization.datamodel.treatment.Drug
-import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
 class NcrTumorExtractorTest {
@@ -19,7 +8,7 @@ class NcrTumorExtractorTest {
     fun `Should extract diagnosis and episodes from NCR records`() {
         val diagnosisRecord = NCR_RECORD.copy(identification = NCR_IDENTIFICATION.copy(keyEid = 101, teller = 1, epis = "DIA", metaEpis = 0))
         val records = listOf(diagnosisRecord, NCR_RECORD)
-        val tumor = NcrTumorExtractor(NcrEpisodeExtractor(NcrSystemicTreatmentPlanExtractor())).extractTumorEntry(records)
+        val tumor = NcrTumorExtractor(NcrEpisodeExtractor(NcrSystemicTreatmentPlanExtractor())).extractTumor(records)
 //        assertThat(diagnosis).isEqualTo(
 //            Diagnosis(
 //                consolidatedTumorType = TumorType.CRC_ADENOCARCINOMA,

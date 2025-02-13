@@ -7,7 +7,7 @@ data class PrimaryDiagnosis(
     val basisOfDiagnosis: TumorBasisOfDiagnosis,
     val hasDoublePrimaryTumor: Boolean? = null,
     val primaryTumorType: TumorType,
-    val primaryTumorLocation: Location,
+    val primaryTumorLocation: TumorLocation,
     val differentiationGrade: TumorDifferentiationGrade? = null,
 
     // TODO (KD): What do these values mean in the context of a metastasis diagnosis ("VERB")?
@@ -38,10 +38,10 @@ data class PrimaryDiagnosis(
 )
 
 val LOCATIONS_INDICATING_LEFT_SIDEDNESS =
-    setOf(Location.FLEXURA_LIENALIS, Location.DESCENDING_COLON, Location.RECTOSIGMOID, Location.SIGMOID_COLON, Location.RECTUM)
-val LOCATIONS_INDICATING_RIGHT_SIDEDNESS = setOf(Location.APPENDIX, Location.COECUM, Location.ASCENDING_COLON, Location.FLEXURA_HEPATICA)
+    setOf(TumorLocation.FLEXURA_LIENALIS, TumorLocation.DESCENDING_COLON, TumorLocation.RECTOSIGMOID, TumorLocation.SIGMOID_COLON, TumorLocation.RECTUM)
+val LOCATIONS_INDICATING_RIGHT_SIDEDNESS = setOf(TumorLocation.APPENDIX, TumorLocation.COECUM, TumorLocation.ASCENDING_COLON, TumorLocation.FLEXURA_HEPATICA)
 
-private fun determineSidedness(location: Location): Sidedness? {
+private fun determineSidedness(location: TumorLocation): Sidedness? {
     val containsLeft = location in LOCATIONS_INDICATING_LEFT_SIDEDNESS
     val containsRight = location in LOCATIONS_INDICATING_RIGHT_SIDEDNESS
 

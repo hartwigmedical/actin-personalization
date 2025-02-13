@@ -33,11 +33,7 @@ class ReferencePatientFactory(private val tumorExtractor: NcrTumorExtractor) {
 
     private fun extractTumors(ncrRecords: List<NcrRecord>): List<Tumor> {
         return ncrRecords.groupBy { it.identification.keyZid }.entries
-            .map { (_, records) -> tumorExtractor.extractTumorEntry(records) }
-    }
-
-    private fun diagnosisEpisodes(ncrRecords: List<NcrRecord>): List<NcrRecord> {
-        return ncrRecords.filter { it.identification.epis == DIAGNOSIS_EPISODE }
+            .map { (_, records) -> tumorExtractor.extractTumor(records) }
     }
 
     companion object {

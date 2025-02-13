@@ -8,7 +8,7 @@ import com.hartwig.actin.personalization.datamodel.old.SystemicTreatmentSchemeDr
 import com.hartwig.actin.personalization.datamodel.treatment.Drug
 import com.hartwig.actin.personalization.datamodel.treatment.Treatment
 import com.hartwig.actin.personalization.ncr.datamodel.NcrSystemicTreatment
-import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrTreatmentNameMapper.resolve
+import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrDrugMapper.resolve
 import com.hartwig.actin.personalization.ncr.interpretation.mapper.resolveCyclesAndDetails
 import com.hartwig.actin.personalization.ncr.interpretation.mapper.resolvePreAndPostSurgery
 import kotlin.math.max

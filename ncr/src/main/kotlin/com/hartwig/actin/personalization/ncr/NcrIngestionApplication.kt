@@ -21,16 +21,16 @@ class NcrIngestionApplication : Callable<Int> {
 
             LOGGER.info { "Reading NCR dataset from $ncrFile" }
             val ncrRecords = NcrDataReader.read(ncrFile)
-            val patientRecords = ReferencePatientFactory.default().create(ncrRecords)
-            LOGGER.info { " Created ${patientRecords.size} patient records from ${ncrRecords.size} NCR records" }
+            val referencePatients = ReferencePatientFactory.default().create(ncrRecords)
+            LOGGER.info { " Created ${referencePatients.size} patient records from ${ncrRecords.size} NCR records" }
 
-            LOGGER.info { "Writing serialized records to $outputFile" }
-            ReferencePatientJson.write(patientRecords, outputFile)
+            LOGGER.info { "Writing serialized reference patients to $outputFile" }
+            ReferencePatientJson.write(referencePatients, outputFile)
 
             LOGGER.info { "Done!" }
             return 0
-        } catch (e: Exception) {
-            LOGGER.error(e) { "Failed to ingest NCR dataset: $e" }
+        } catch (exception: Exception) {
+            LOGGER.error(exception) { "Failed to ingest NCR dataset: $exception" }
             return 1
         }
     }

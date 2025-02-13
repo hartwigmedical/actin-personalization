@@ -1,6 +1,6 @@
 package com.hartwig.actin.personalization.database
 
-import com.hartwig.actin.personalization.datamodel.diagnosis.Location
+import com.hartwig.actin.personalization.datamodel.diagnosis.TumorLocation
 import com.hartwig.actin.personalization.datamodel.old.Episode
 import com.hartwig.actin.personalization.datamodel.old.GastroenterologyResection
 import com.hartwig.actin.personalization.datamodel.old.MetastasesRadiotherapy
@@ -208,7 +208,7 @@ class DatabaseWriter(private val context: DSLContext, private val connection: ja
 
     private fun writeLocations() {
         LOGGER.info { " Writing location records" }
-        val rows = Location.entries.map { location ->
+        val rows = TumorLocation.entries.map { location ->
             val dbRecord = context.newRecord(Tables.LOCATION)
             dbRecord.set(Tables.LOCATION.NAME, location.toString())
             dbRecord.set(Tables.LOCATION.GROUP, location.locationGroup.toString())

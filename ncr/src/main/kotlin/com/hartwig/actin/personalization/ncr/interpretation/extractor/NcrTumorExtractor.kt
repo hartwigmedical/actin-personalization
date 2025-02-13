@@ -1,29 +1,51 @@
 package com.hartwig.actin.personalization.ncr.interpretation.extractor
 
 import com.hartwig.actin.personalization.datamodel.Tumor
-import com.hartwig.actin.personalization.datamodel.diagnosis.Location
 import com.hartwig.actin.personalization.datamodel.diagnosis.MetastasesDetectionStatus
 import com.hartwig.actin.personalization.datamodel.diagnosis.MetastaticDiagnosis
 import com.hartwig.actin.personalization.datamodel.diagnosis.PrimaryDiagnosis
 import com.hartwig.actin.personalization.datamodel.diagnosis.PriorTumor
 import com.hartwig.actin.personalization.datamodel.diagnosis.TumorBasisOfDiagnosis
+import com.hartwig.actin.personalization.datamodel.diagnosis.TumorLocation
 import com.hartwig.actin.personalization.datamodel.diagnosis.TumorType
 import com.hartwig.actin.personalization.datamodel.outcome.SurvivalMeasure
 import com.hartwig.actin.personalization.datamodel.treatment.HipecTreatment
 import com.hartwig.actin.personalization.ncr.datamodel.NcrRecord
 import com.hartwig.actin.personalization.ncr.interpretation.DIAGNOSIS_EPISODE
-import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrLocationMapper
-import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrTumorStageMapper
-import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrTreatmentNameMapper
+import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrDrugMapper
 import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrTumorLocationCategoryMapper
+import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrTumorLocationMapper
+import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrTumorStageMapper
 import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrTumorTypeMapper
 import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrVitalStatusMapper
 
 class NcrTumorExtractor(private val episodeExtractor: NcrEpisodeExtractor) {
 
-    fun extractTumorEntry(records: List<NcrRecord>): Tumor {
+    fun extractTumor(records: List<NcrRecord>): Tumor {
         val diagnosisRecord = records.single { it.identification.epis == DIAGNOSIS_EPISODE }
-        val intervalTumorIncidenceLatestAliveStatus = diagnosisRecord.patientCharacteristics.vitStatInt!!
+
+        return Tumor(
+            diagnosisYear = diagnosisRecord.primaryDiagnosis.incjr,
+            ageAtDiagnosis = diagnosisRecord.patientCharacteristics.leeft,
+            latestSurvivalStatus = SurvivalMeasure(
+                daysSinceDiagnosis = diagnosisRecord.patientCharacteristics.vitStatInt!!,
+                isAlive = NcrVitalStatusMapper.resolve(diagnosisRecord.patientCharacteristics.vitStat!!)
+            ),
+            priorTumors = extractPriorTumors(diagnosisRecord),
+            primaryDiagnosis = PrimaryDiagnosis(
+                basisOfDiagnosis = TumorBasisOfDiagnosis.HISTOLOGICAL_CONFIRMATION,
+                primaryTumorType = TumorType.ADENOCARCINOMA_DIFFUSE_TYPE,
+                primaryTumorLocation = TumorLocation.DESCENDING_COLON
+            ),
+            metastaticDiagnosis = MetastaticDiagnosis(
+                distantMetastasesDetectionStatus = MetastasesDetectionStatus.AT_START,
+                metastases = listOf()
+            ),
+            hasReceivedTumorDirectedTreatment = false,
+            hipecTreatment = HipecTreatment(daysSinceDiagnosis = null, hasHadHipecTreatment = false)
+        )
+
+
 //        val episodes = records.map { record ->
 //            episodeExtractor.extractEpisode(record, intervalTumorIncidenceLatestAliveStatus)
 //        }.sortedBy(Episode::order)
@@ -95,36 +117,16 @@ class NcrTumorExtractor(private val episodeExtractor: NcrEpisodeExtractor) {
 //                hasKrasG12CMutation = hasKrasG12CMutation
 //            )
 //        }
-        return Tumor(
-            diagnosisYear = diagnosisRecord.primaryDiagnosis.incjr,
-            ageAtDiagnosis = diagnosisRecord.patientCharacteristics.leeft,
-            latestSurvivalStatus = SurvivalMeasure(
-                daysSinceDiagnosis = diagnosisRecord.patientCharacteristics.vitStatInt,
-                isAlive = NcrVitalStatusMapper.resolve(diagnosisRecord.patientCharacteristics.vitStat!!)
-            ),
-            primaryDiagnosis = PrimaryDiagnosis(
-                basisOfDiagnosis = TumorBasisOfDiagnosis.HISTOLOGICAL_CONFIRMATION,
-                primaryTumorType = TumorType.ADENOCARCINOMA_DIFFUSE_TYPE,
-                primaryTumorLocation = Location.DESCENDING_COLON
-            ),
-            metastaticDiagnosis = MetastaticDiagnosis(
-                distantMetastasesDetectionStatus = MetastasesDetectionStatus.AT_START,
-                metastases = listOf()
-            ),
-            hasReceivedTumorDirectedTreatment = false,
-            hipecTreatment = HipecTreatment(daysSinceDiagnosis = null, hasHadHipecTreatment = false)
-        )
     }
 
     private fun extractPriorTumors(record: NcrRecord): List<PriorTumor> {
         return with(record.priorMalignancies) {
             listOfNotNull(
                 extractPriorTumor(
+                    1,
+                    mal1Int,
                     mal1Morf,
                     mal1TopoSublok,
-                    mal1Syst,
-                    mal1Int,
-                    1,
                     mal1Tumsoort,
                     mal1Stadium,
                     listOfNotNull(
@@ -140,53 +142,50 @@ class NcrTumorExtractor(private val episodeExtractor: NcrEpisodeExtractor) {
                     )
                 ),
                 extractPriorTumor(
+                    2,
+                    mal2Int,
                     mal2Morf,
                     mal2TopoSublok,
-                    mal2Syst,
-                    mal2Int,
-                    2,
                     mal2Tumsoort,
                     mal2Stadium,
                     listOfNotNull(mal2SystCode1, mal2SystCode2, mal2SystCode3, mal2SystCode4, mal2SystCode5)
                 ),
                 extractPriorTumor(
+                    3,
+                    mal3Int,
                     mal3Morf,
                     mal3TopoSublok,
-                    mal3Syst,
-                    mal3Int,
-                    3,
                     mal3Tumsoort,
                     mal3Stadium,
                     listOfNotNull(mal3SystCode1, mal3SystCode2, mal3SystCode3, mal3SystCode4)
                 ),
                 extractPriorTumor(
-                    mal4Morf, mal4TopoSublok, mal4Syst, mal4Int, 4, mal4Tumsoort, mal4Stadium, emptyList()
+                    4, mal4Int, mal4Morf, mal4TopoSublok, mal4Tumsoort, mal4Stadium, emptyList()
                 )
             )
         }
     }
 
     private fun extractPriorTumor(
-        type: Int?,
-        location: String?,
-        hadSystemic: Int?,
-        interval: Int?,
         id: Int,
-        category: Int?,
-        stage: String?,
-        treatments: List<String>
+        daysSinceDiagnosis: Int?,
+        primaryTumorTypeCode: Int?,
+        primaryTumorLocationCode: String?,
+        primaryTumorLocationCategoryCode: Int?,
+        primaryTumorStageCode: String?,
+        drugs: List<String>
     ): PriorTumor? {
-        return type?.let {
-            if (location == null || category == null) {
+        return primaryTumorTypeCode?.let {
+            if (primaryTumorLocationCode == null || primaryTumorLocationCategoryCode == null) {
                 throw IllegalStateException("Missing location information for prior tumor with ID $id")
             }
             PriorTumor(
-                daysBeforeDiagnosis = interval?.let { -1 * interval } ,
-                primaryTumorType = NcrTumorTypeMapper.resolve(type),
-                primaryTumorLocation = NcrLocationMapper.resolveLocation(location),
-                primaryTumorLocationCategory = NcrTumorLocationCategoryMapper.resolve(category),
-                primaryTumorStage = NcrTumorStageMapper.resolveNullable(stage),
-                systemicDrugsReceived = treatments.map(NcrTreatmentNameMapper::resolve)
+                daysBeforeDiagnosis = daysSinceDiagnosis?.let { -1 * daysSinceDiagnosis },
+                primaryTumorType = NcrTumorTypeMapper.resolve(primaryTumorTypeCode),
+                primaryTumorLocation = NcrTumorLocationMapper.resolveTumorLocation(primaryTumorLocationCode),
+                primaryTumorLocationCategory = NcrTumorLocationCategoryMapper.resolve(primaryTumorLocationCategoryCode),
+                primaryTumorStage = NcrTumorStageMapper.resolveNullable(primaryTumorStageCode),
+                systemicDrugsReceived = drugs.map(NcrDrugMapper::resolve)
             )
         }
     }

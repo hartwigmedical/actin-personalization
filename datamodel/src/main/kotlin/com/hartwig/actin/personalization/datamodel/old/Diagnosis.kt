@@ -1,7 +1,7 @@
 package com.hartwig.actin.personalization.datamodel.old
 
 import com.hartwig.actin.personalization.datamodel.diagnosis.AnorectalVergeDistanceCategory
-import com.hartwig.actin.personalization.datamodel.diagnosis.Location
+import com.hartwig.actin.personalization.datamodel.diagnosis.TumorLocation
 import com.hartwig.actin.personalization.datamodel.diagnosis.Sidedness
 import com.hartwig.actin.personalization.datamodel.diagnosis.TumorType
 import kotlinx.serialization.Serializable
@@ -9,7 +9,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class Diagnosis(
     override val consolidatedTumorType: TumorType,
-    override val tumorLocations: Set<Location>,
+    override val tumorLocations: Set<TumorLocation>,
     val sidedness: Sidedness? = determineSidedness(tumorLocations),
     override val hasHadTumorDirectedSystemicTherapy: Boolean,
 
@@ -52,11 +52,11 @@ data class Diagnosis(
     val hasKrasG12CMutation: Boolean? = null,
 ) : Tumor
 
-private fun determineSidedness(locations: Set<Location>): Sidedness? {
+private fun determineSidedness(locations: Set<TumorLocation>): Sidedness? {
     val LOCATIONS_INDICATING_LEFT_SIDEDNESS =
-        setOf(Location.FLEXURA_LIENALIS, Location.DESCENDING_COLON, Location.RECTOSIGMOID, Location.SIGMOID_COLON, Location.RECTUM)
+        setOf(TumorLocation.FLEXURA_LIENALIS, TumorLocation.DESCENDING_COLON, TumorLocation.RECTOSIGMOID, TumorLocation.SIGMOID_COLON, TumorLocation.RECTUM)
     val LOCATIONS_INDICATING_RIGHT_SIDEDNESS =
-        setOf(Location.APPENDIX, Location.COECUM, Location.ASCENDING_COLON, Location.FLEXURA_HEPATICA)
+        setOf(TumorLocation.APPENDIX, TumorLocation.COECUM, TumorLocation.ASCENDING_COLON, TumorLocation.FLEXURA_HEPATICA)
 
     val containsLeft = locations.any { it in LOCATIONS_INDICATING_LEFT_SIDEDNESS }
     val containsRight = locations.any { it in LOCATIONS_INDICATING_RIGHT_SIDEDNESS }

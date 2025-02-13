@@ -2,7 +2,7 @@ package com.hartwig.actin.personalization.datamodel.old
 
 import com.hartwig.actin.personalization.datamodel.assessment.AsaClassification
 import com.hartwig.actin.personalization.datamodel.diagnosis.ExtraMuralInvasionCategory
-import com.hartwig.actin.personalization.datamodel.diagnosis.Location
+import com.hartwig.actin.personalization.datamodel.diagnosis.TumorLocation
 import com.hartwig.actin.personalization.datamodel.diagnosis.LymphaticInvasionCategory
 import com.hartwig.actin.personalization.datamodel.diagnosis.MetastasesDetectionStatus
 import com.hartwig.actin.personalization.datamodel.diagnosis.NumberOfLiverMetastases
@@ -25,7 +25,7 @@ data class Episode(
 
     val tumorIncidenceYear: Int,
     val tumorBasisOfDiagnosis: TumorBasisOfDiagnosis,
-    val tumorLocation: Location,
+    val tumorLocation: TumorLocation,
     val tumorDifferentiationGrade: TumorDifferentiationGrade? = null,
     val tnmCT: TnmT? = null,
     val tnmCN: TnmN? = null,

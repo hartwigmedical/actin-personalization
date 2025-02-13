@@ -2,7 +2,8 @@ package com.hartwig.actin.personalization.ncr.interpretation.mapper
 
 import com.hartwig.actin.personalization.datamodel.treatment.Drug
 
-object NcrTreatmentNameMapper : NcrStringCodeMapper<Drug> {
+object NcrDrugMapper : NcrStringCodeMapper<Drug> {
+
     override fun resolve(code: String): Drug {
         return when (code) {
             "214000" -> Drug.EXTERNAL_RADIOTHERAPY_WITH_SENSITIZER
@@ -101,7 +102,7 @@ object NcrTreatmentNameMapper : NcrStringCodeMapper<Drug> {
             "L01XG01" -> Drug.BORTEZOMIB
             "L04AX02" -> Drug.THALIDOMIDE
             "L04AX04" -> Drug.LENALIDOMIDE
-            else -> throw IllegalArgumentException("Unknown treatment code: $code")
+            else -> throw IllegalArgumentException("Unknown drug code: $code")
         }
     }
 }

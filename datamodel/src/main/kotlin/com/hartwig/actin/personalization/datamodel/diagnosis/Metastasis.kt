@@ -5,6 +5,6 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class Metastasis(
     val daysSinceDiagnosis: Int?,
-    val location: Location,
+    val location: TumorLocation,
     val isLinkedToProgression: Boolean?
 )

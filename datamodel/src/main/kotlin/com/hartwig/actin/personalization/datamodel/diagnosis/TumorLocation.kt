@@ -1,6 +1,6 @@
 package com.hartwig.actin.personalization.datamodel.diagnosis
 
-enum class Location(val locationGroup: LocationGroup) {
+enum class TumorLocation(val locationGroup: LocationGroup) {
     ABDOMEN_NOS(LocationGroup.OTHER_AND_ILL_DEFINED_LOCALIZATIONS),
     ADRENAL_CORTEX(LocationGroup.ADRENAL),
     ADRENAL_GLAND_NOS(LocationGroup.ADRENAL),
