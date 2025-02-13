@@ -10,8 +10,6 @@ import com.hartwig.actin.personalization.ncr.interpretation.extractor.NcrTumorEx
 import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrSexMapper
 import java.util.stream.Collectors
 
-const val DIAGNOSIS_EPISODE = "DIA"
-
 class ReferencePatientFactory(private val tumorExtractor: NcrTumorExtractor) {
 
     fun create(ncrRecords: List<NcrRecord>): List<ReferencePatient> {
