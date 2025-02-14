@@ -261,7 +261,7 @@ CREATE TABLE `systemicTreatment` (
     `daysBetweenDiagnosisAndStop` INT,
     `treatment` VARCHAR(50) NOT NULL,
     FOREIGN KEY (`tumorId`) REFERENCES `tumor`(`id`),
-    PRIMARY KEY (`id`)
+    PRIMARY KEY (`id`, `tumorId`)
 );
 
 DROP TABLE IF EXISTS `systemicTreatmentScheme`;
@@ -273,7 +273,7 @@ CREATE TABLE `systemicTreatmentScheme` (
     `minDaysBetweenDiagnosisAndStop` INT,
     `maxDaysBetweenDiagnosisAndStop` INT,
     FOREIGN KEY (`systemicTreatmentId`) REFERENCES `systemicTreatment`(`id`),
-    PRIMARY KEY (`id`)
+    PRIMARY KEY (`id`, `systemicTreatmentId`)
 );
 
 

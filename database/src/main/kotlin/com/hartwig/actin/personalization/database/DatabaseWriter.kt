@@ -5,6 +5,8 @@ import com.hartwig.actin.personalization.datamodel.Tumor
 import com.hartwig.actin.personalization.datamodel.diagnosis.MetastaticDiagnosis
 import com.hartwig.actin.personalization.datamodel.diagnosis.TumorLocation
 import com.hartwig.actin.personalization.datamodel.treatment.Drug
+import com.hartwig.actin.personalization.datamodel.treatment.SystemicTreatment
+import com.hartwig.actin.personalization.datamodel.treatment.SystemicTreatmentScheme
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.jooq.DSLContext
 import org.jooq.JSON
@@ -41,14 +43,23 @@ class DatabaseWriter(private val context: DSLContext, private val connection: ja
         writeRecords("molecularResults", indexedTumors, ::molecularResultsFromTumor)
         writeRecords("molecularResults", indexedTumors, ::labMeasurementsFromTumor)
         writeRecords("gastroenterologyResections", indexedTumors, ::gastroenterologyResectionsFromTumor)
-        // TODO primarySurgeries
-        // TODO metastaticSurgeries
+        writeRecords("primarySurgeries", indexedTumors, ::primarySurgeriesFromTumor)
+        writeRecords("metastaticSurgeries", indexedTumors, ::metastaticSurgeriesFromTumor)
+
         // TODO hipecTreatment
-        // TODO primaryRadiotherapies
-        // TODO metastaticRadiotherapies
-        // TODO systemicTreatments
-        // TODO responseMeasures
-        // TODO progressionMeasures
+        writeRecords("primaryRadiotherapies", indexedTumors, ::primaryRadiotherapiesFromTumor)
+        writeRecords("metastaticRadiotherapies", indexedTumors, ::metastaticRadiotherapiesFromTumor)
+        val systemicTreatmentsRecords =
+            writeRecordsAndReturnIndexedList("systemicTreatments", indexedTumors, Tables.SYSTEMICTREATMENT, ::systemicTreatmentsFromTumor)
+        val systemicTreatmentSchemesRecords = writeRecordsAndReturnIndexedList(
+            "systemicTreatmentSchemes",
+            systemicTreatmentsRecords,
+            Tables.SYSTEMICTREATMENTSCHEME,
+            ::systemicTreatmentSchemesFromSystemicTreatments
+        )
+        writeRecords("systemicTreatmentDrugs", systemicTreatmentSchemesRecords, ::systemicTreatmentDrugFromSystemicTreatmentScheme)
+        writeRecords("responseMeasures", indexedTumors, ::responseMeasuresFromTumor)
+        writeRecords("progressionMeasures", indexedTumors, ::progressionMeasuresFromTumor)
 
         writeDrugs()
         writeLocations()
@@ -181,44 +192,7 @@ class DatabaseWriter(private val context: DSLContext, private val connection: ja
 //            dbRecord.set(Tables.PRIORTUMOR.SYSTEMICTREATMENTS, jsonList(priorTumor.systemicTreatments))
 //            dbRecord
 //        }
-//
-//    private fun metastasisRecordsFromEpisode(episodeId: Int, episode: Episode) =
-//        episode.metastases.map { metastasis ->
-//            val locationGroup = metastasis.location.locationGroup.topLevelGroup().toString()
-//            val dbRecord = context.newRecord(Tables.METASTASIS)
-//            dbRecord.from(metastasis)
-//            dbRecord.set(Tables.METASTASIS.EPISODEID, episodeId)
-//            dbRecord.set(Tables.METASTASIS.LOCATIONGROUP, locationGroup)
-//            dbRecord
-//        }
-//
-//    private fun labMeasurementRecordsFromEpisode(episodeId: Int, episode: Episode) =
-//        episode.labMeasurements.map { extractSimpleRecord(Tables.LABMEASUREMENT, it, "episodeId", episodeId) }
-//
-//    private fun surgeryRecordsFromEpisode(episodeId: Int, episode: Episode) =
-//        episode.surgeries.map { extractSimpleRecord(Tables.SURGERY, it, "episodeId", episodeId) }
-//
-//    private fun systemicTreatmentSchemesFromEpisode(episodeId: Int, episode: Episode) =
-//        episode.systemicTreatmentPlan?.systemicTreatmentSchemes?.map { scheme ->
-//            val dbRecord = context.newRecord(Tables.SYSTEMICTREATMENTSCHEME)
-//            dbRecord.from(scheme)
-//            dbRecord.set(Tables.SYSTEMICTREATMENTSCHEME.EPISODEID, episodeId)
-//            scheme to dbRecord
-//        } ?: emptyList()
-//
-//    private fun pfsMeasureRecordsFromEpisode(episodeId: Int, episode: Episode) =
-//        episode.pfsMeasures.map { extractSimpleRecord(Tables.PFSMEASURE, it, "episodeId", episodeId) }
-//
-//    private fun systemicTreatmentComponentRecordsFromScheme(schemeId: Int, scheme: SystemicTreatmentScheme) =
-//        scheme.treatmentComponents.map {
-//            extractSimpleRecord(
-//                Tables.SYSTEMICTREATMENTSCHEMEDRUG,
-//                it,
-//                "systemicTreatmentSchemeId",
-//                schemeId
-//            )
-//        }
-//
+
 
     private fun latestSurvivalStatusFromTumor(tumorId: Int, tumor: Tumor) =
         tumor.priorTumors.map {
@@ -282,6 +256,72 @@ class DatabaseWriter(private val context: DSLContext, private val connection: ja
             dbRecord
         }
 
+    private fun primarySurgeriesFromTumor(tumorId: Int, tumor: Tumor) =
+        tumor.primarySurgeries.map { data ->
+            val dbRecord = context.newRecord(Tables.PRIMARYSURGERY)
+            dbRecord.from(data)
+            dbRecord.set(Tables.PRIMARYSURGERY.TUMORID, tumorId)
+            dbRecord.set(Tables.PRIMARYSURGERY.TECHNIQUE, data.technique?.name)
+            dbRecord.set(Tables.PRIMARYSURGERY.URGENCY, data.urgency?.name)
+            dbRecord.set(Tables.PRIMARYSURGERY.RADICALITY, data.radicality?.name)
+            dbRecord.set(Tables.PRIMARYSURGERY.CIRCUMFERENTIALRESECTIONMARGIN, data.circumferentialResectionMargin?.name)
+            dbRecord.set(Tables.PRIMARYSURGERY.ANASTOMOTICLEAKAGEAFTERSURGERY, data.anastomoticLeakageAfterSurgery?.name)
+            dbRecord
+        }
+
+    private fun metastaticSurgeriesFromTumor(tumorId: Int, tumor: Tumor) =
+        tumor.metastaticSurgeries.map { data ->
+            val dbRecord = context.newRecord(Tables.METASTATICSURGERY)
+            dbRecord.from(data)
+            dbRecord.set(Tables.METASTATICSURGERY.TUMORID, tumorId)
+            dbRecord.set(Tables.METASTATICSURGERY.TYPE, data.type.name)
+            dbRecord.set(Tables.METASTATICSURGERY.RADICALITY, data.radicality?.name)
+            dbRecord
+        }
+
+    private fun primaryRadiotherapiesFromTumor(tumorId: Int, tumor: Tumor) =
+        tumor.primaryRadiotherapies.map { data ->
+            val dbRecord = context.newRecord(Tables.PRIMARYRADIOTHERAPY)
+            dbRecord.from(data)
+            dbRecord.set(Tables.PRIMARYRADIOTHERAPY.TUMORID, tumorId)
+            dbRecord.set(Tables.PRIMARYRADIOTHERAPY.TYPE, data.type.name)
+            dbRecord
+        }
+
+    private fun metastaticRadiotherapiesFromTumor(tumorId: Int, tumor: Tumor) =
+        tumor.metastaticRadiotherapies.map { data ->
+            val dbRecord = context.newRecord(Tables.METASTATICRADIOTHERAPY)
+            dbRecord.from(data)
+            dbRecord.set(Tables.METASTATICRADIOTHERAPY.TUMORID, tumorId)
+            dbRecord.set(Tables.METASTATICRADIOTHERAPY.TYPE, data.type.name)
+            dbRecord
+        }
+
+    // TODO systemicTreatments
+
+    private fun responseMeasuresFromTumor(tumorId: Int, tumor: Tumor) =
+        tumor.responseMeasures.map { data ->
+            val dbRecord = context.newRecord(Tables.RESPONSEMEASURE)
+            dbRecord.from(data)
+            dbRecord.set(Tables.RESPONSEMEASURE.TUMORID, tumorId)
+            dbRecord.set(Tables.RESPONSEMEASURE.RESPONSE, data.response.name)
+            dbRecord
+        }
+
+    private fun progressionMeasuresFromTumor(tumorId: Int, tumor: Tumor) =
+        tumor.progressionMeasures.map { data ->
+            val dbRecord = context.newRecord(Tables.PROGRESSIONMEASURE)
+            dbRecord.from(data)
+            dbRecord.set(Tables.PROGRESSIONMEASURE.TUMORID, tumorId)
+            dbRecord.set(Tables.PROGRESSIONMEASURE.TYPE, data.type.name)
+            dbRecord.set(Tables.PROGRESSIONMEASURE.FOLLOWUPEVENT, data.followUpEvent?.name)
+            dbRecord
+        }
+
+
+    //extractSimpleRecord(Tables.PRIMARYRADIOTHERAPY, it, "tumorId", tumorId)
+
+
     private fun writePrimaryDiagnosisRecords(tumors: IndexedList<Tumor>) {
         tumors.map { (tumorId, tumor) ->
             // TODO clinicalTnmClassification: TnmClassification
@@ -328,6 +368,30 @@ class DatabaseWriter(private val context: DSLContext, private val connection: ja
             listOf(tumor.metastaticDiagnosis to dbRecord)
         }
 
+    private fun systemicTreatmentsFromTumor(tumorId: Int, tumor: Tumor) =
+        tumor.systemicTreatments.map { data ->
+            val dbRecord = context.newRecord(Tables.SYSTEMICTREATMENT)
+            dbRecord.from(data)
+            dbRecord.set(Tables.SYSTEMICTREATMENT.TUMORID, tumorId)
+            dbRecord.set(Tables.SYSTEMICTREATMENT.TREATMENT, data.treatment.name)
+            data to dbRecord
+        }
+
+    private fun systemicTreatmentSchemesFromSystemicTreatments(systemicTreatmentId: Int, systemicTreatment: SystemicTreatment) =
+        systemicTreatment.systemicTreatmentSchemes.map { data ->
+            val dbRecord = context.newRecord(Tables.SYSTEMICTREATMENTSCHEME)
+            dbRecord.from(data)
+            dbRecord.set(Tables.SYSTEMICTREATMENTSCHEME.SYSTEMICTREATMENTID, systemicTreatmentId)
+            data to dbRecord
+        }
+
+    private fun systemicTreatmentDrugFromSystemicTreatmentScheme(
+        systemicTreatmentSchemeId: Int,
+        systemicTreatmentScheme: SystemicTreatmentScheme
+    ) =
+        systemicTreatmentScheme.components.map {
+            extractSimpleRecord(Tables.SYSTEMICTREATMENTDRUG, it, "systemicTreatmentSchemeId", systemicTreatmentSchemeId)
+        }
 
     private fun <T> extractSimpleRecord(table: Table<*>, item: T, foreignKeyColumnName: String, foreignKeyId: Int) =
         context.newRecord(table).let { dbRecord ->
