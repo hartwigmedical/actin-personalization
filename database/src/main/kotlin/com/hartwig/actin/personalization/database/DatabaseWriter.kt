@@ -25,7 +25,7 @@ class DatabaseWriter(private val context: DSLContext, private val connection: ja
 
     fun writeAllToDb(patientRecords: List<ReferencePatient>) {
         context.execute("SET FOREIGN_KEY_CHECKS = 0;")
-        connection.setAutoCommit(false)
+        connection.autoCommit = false
         clearAll()
 
         val indexedReferencePatients = writeReferencePatients(patientRecords)
@@ -66,13 +66,13 @@ class DatabaseWriter(private val context: DSLContext, private val connection: ja
         writeDrugs()
         writeLocations()
 
-        connection.setAutoCommit(true)
+        connection.autoCommit = true
         context.execute("SET FOREIGN_KEY_CHECKS = 1;")
     }
 
     private fun clearAll() {
         LOGGER.info { " Clearing all patient data" }
-        DefaultSchema.DEFAULT_SCHEMA.getTables().forEach { context.truncate(it).execute() }
+        DefaultSchema.DEFAULT_SCHEMA.tables.forEach { context.truncate(it).execute() }
         connection.commit()
     }
 
