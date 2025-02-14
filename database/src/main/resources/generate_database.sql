@@ -39,19 +39,10 @@ CREATE TABLE `priorTumor` (
     `primaryTumorLocation` VARCHAR(255) NOT NULL,
     `primaryTumorLocationCategory` VARCHAR(50) NOT NULL,
     `primaryTumorStage` VARCHAR(10) NOT NULL,
-    `systemicDrugsReceived` json NOT NULL,
+    `systemicDrugsReceived` JSON NOT NULL,
     FOREIGN KEY (`tumorId`) REFERENCES `tumor`(`id`),
     PRIMARY KEY (`id`)
 );
-
-
-DROP TABLE IF EXISTS `tnmClassification`;
-CREATE TABLE `tnmClassification` (
-    `id` INT NOT NULL AUTO_INCREMENT,
-    `tumor` VARCHAR(10),
-    `lymphNodes` VARCHAR(10),
-    `metastasis` VARCHAR(10)
-)
 
 DROP TABLE IF EXISTS `primaryDiagnosis`;
 CREATE TABLE `primaryDiagnosis` (
@@ -62,8 +53,8 @@ CREATE TABLE `primaryDiagnosis` (
     `primaryTumorType` VARCHAR(255) NOT NULL,
     `primaryTumorLocation` VARCHAR(255) NOT NULL,
     `differentiationGrade` VARCHAR(255),
-    `clinicalTnmClassification` INT UNIQUE NOT NULL,
-    `pathologicalTnmClassification` INT UNIQUE NOT NULL,
+    `clinicalTnmClassification` JSON,
+    `pathologicalTnmClassification` JSON,
     `clinicalTumorStage` VARCHAR(50),
     `pathologicalTumorStage` VARCHAR(50),
     `investigatedLymphNodesCount` INT,
@@ -77,8 +68,6 @@ CREATE TABLE `primaryDiagnosis` (
     `lymphaticInvasionCategory` VARCHAR(50),
     `extraMuralInvasionCategory` VARCHAR(50),
     `tumorRegression` VARCHAR(50),
-    FOREIGN KEY (`clinicalTnmClassification`) REFERENCES `tnmClassification`(`id`),
-    FOREIGN KEY (`pathologicalTnmClassification`) REFERENCES `tnmClassification`(`id`),
     FOREIGN KEY (`tumorId`) REFERENCES `tumor`(`id`),
     PRIMARY KEY (`id`)
 );

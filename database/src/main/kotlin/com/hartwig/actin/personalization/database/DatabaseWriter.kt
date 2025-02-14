@@ -3,11 +3,14 @@ package com.hartwig.actin.personalization.database
 import com.hartwig.actin.personalization.datamodel.ReferencePatient
 import com.hartwig.actin.personalization.datamodel.Tumor
 import com.hartwig.actin.personalization.datamodel.diagnosis.MetastaticDiagnosis
+import com.hartwig.actin.personalization.datamodel.diagnosis.TnmClassification
 import com.hartwig.actin.personalization.datamodel.diagnosis.TumorLocation
 import com.hartwig.actin.personalization.datamodel.treatment.Drug
 import com.hartwig.actin.personalization.datamodel.treatment.SystemicTreatment
 import com.hartwig.actin.personalization.datamodel.treatment.SystemicTreatmentScheme
 import io.github.oshai.kotlinlogging.KotlinLogging
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.serializer
 import org.jooq.DSLContext
 import org.jooq.JSON
 import org.jooq.SQLDialect
@@ -27,7 +30,7 @@ class DatabaseWriter(private val context: DSLContext, private val connection: ja
 
         val indexedReferencePatients = writeReferencePatients(patientRecords)
         val indexedTumors = writeTumors(indexedReferencePatients)
-        writeRecords("latestSurvivalStatus", indexedTumors, ::latestSurvivalStatusFromTumor)
+        writeRecords("latestSurvivalStatus", indexedTumors, ::survivalStatusFromTumor)
         writeRecords("priorTumor", indexedTumors, ::priorTumorFromTumor)
         writePrimaryDiagnosisRecords(indexedTumors)
         val metastaticDiagnosisRecords = writeRecordsAndReturnIndexedList(
@@ -45,8 +48,7 @@ class DatabaseWriter(private val context: DSLContext, private val connection: ja
         writeRecords("gastroenterologyResections", indexedTumors, ::gastroenterologyResectionsFromTumor)
         writeRecords("primarySurgeries", indexedTumors, ::primarySurgeriesFromTumor)
         writeRecords("metastaticSurgeries", indexedTumors, ::metastaticSurgeriesFromTumor)
-
-        // TODO hipecTreatment
+        writeRecords("hipecTreatment", indexedTumors, ::hipecTreatmentFromTumor)
         writeRecords("primaryRadiotherapies", indexedTumors, ::primaryRadiotherapiesFromTumor)
         writeRecords("metastaticRadiotherapies", indexedTumors, ::metastaticRadiotherapiesFromTumor)
         val systemicTreatmentsRecords =
@@ -139,65 +141,11 @@ class DatabaseWriter(private val context: DSLContext, private val connection: ja
         LOGGER.info { "  Inserted ${rows.size} $name records" }
     }
 
+    private fun survivalStatusFromTumor(tumorId: Int, tumor: Tumor) =
+        listOf(extractSimpleRecord(Tables.SURVIVALMEASURE, tumor.latestSurvivalStatus, "tumorId", tumorId))
 
-//    private fun diagnosesFromPatient(patientId: Int, patient: ReferencePatient) =
-//        patient.tumorEntries.map { tumorEntry ->
-//            val dbRecord = context.newRecord(Tables.DIAGNOSIS)
-//            dbRecord.from(tumorEntry.diagnosis)
-//            dbRecord.set(Tables.DIAGNOSIS.PATIENTID, patientId)
-//            dbRecord.set(Tables.DIAGNOSIS.TUMORLOCATIONS, jsonList(tumorEntry.diagnosis.tumorLocations))
-//            tumorEntry to dbRecord
-//        }
-//
-//    private fun episodesFromTumorEntry(diagnosisId: Int, tumorEntry: TumorEntry) =
-//        tumorEntry.episodes.map { episode ->
-//            val table = Tables.EPISODE
-//            val dbRecord = context.newRecord(table)
-//            dbRecord.from(episode)
-//            dbRecord.set(table.DIAGNOSISID, diagnosisId)
-//            dbRecord.set(
-//                table.GASTROENTEROLOGYRESECTIONS,
-//                jsonList(episode.gastroenterologyResections.map(GastroenterologyResection::gastroenterologyResectionType))
-//            )
-//            dbRecord.set(
-//                table.METASTASESSURGERIES,
-//                jsonList(episode.metastasesSurgeries.map(MetastasesSurgery::metastasesSurgeryType))
-//            )
-//            dbRecord.set(table.RADIOTHERAPIES, jsonList(episode.radiotherapies.map(Radiotherapy::radiotherapyType)))
-//            dbRecord.set(
-//                table.METASTASESRADIOTHERAPIES,
-//                jsonList(episode.metastasesRadiotherapies.map(MetastasesRadiotherapy::metastasesRadiotherapyType))
-//            )
-//            dbRecord.set(table.RESPONSE, episode.responseMeasure?.responseType?.name)
-//            dbRecord.set(table.INTERVALTUMORINCIDENCERESPONSEDAYS, episode.responseMeasure?.intervalTumorIncidenceResponseDays)
-//
-//            episode.systemicTreatmentPlan?.let { plan ->
-//                dbRecord.set(table.SYSTEMICTREATMENTPLAN, plan.treatment.name)
-//                dbRecord.set(table.INTERVALTUMORINCIDENCETREATMENTPLANSTARTDAYS, plan.intervalTumorIncidenceTreatmentPlanStartDays)
-//                dbRecord.set(table.INTERVALTUMORINCIDENCETREATMENTPLANSTOPDAYS, plan.intervalTumorIncidenceTreatmentPlanStopDays)
-//                dbRecord.set(table.INTERVALTREATMENTPLANSTARTRESPONSEDAYS, plan.intervalTreatmentPlanStartResponseDays)
-//                dbRecord.set(table.OBSERVEDPFSDAYS, plan.observedPfsDays)
-//                dbRecord.set(table.HADPROGRESSIONEVENT, plan.hadProgressionEvent)
-//                dbRecord.set(table.OBSERVEDOSFROMTREATMENTSTARTDAYS, plan.observedOsFromTreatmentStartDays)
-//            }
-//            episode to dbRecord
-//        }
-//
-//    private fun priorTumorRecordsFromTumorEntry(diagnosisId: Int, tumorEntry: TumorEntry) =
-//        tumorEntry.diagnosis.priorTumors.map { priorTumor ->
-//            val dbRecord = context.newRecord(Tables.PRIORTUMOR)
-//            dbRecord.from(priorTumor)
-//            dbRecord.set(Tables.PRIORTUMOR.DIAGNOSISID, diagnosisId)
-//            dbRecord.set(Tables.PRIORTUMOR.TUMORLOCATIONS, jsonList(priorTumor.tumorLocations))
-//            dbRecord.set(Tables.PRIORTUMOR.SYSTEMICTREATMENTS, jsonList(priorTumor.systemicTreatments))
-//            dbRecord
-//        }
-
-
-    private fun latestSurvivalStatusFromTumor(tumorId: Int, tumor: Tumor) =
-        tumor.priorTumors.map {
-            extractSimpleRecord(Tables.SURVIVALMEASURE, it, "tumorId", tumorId)
-        }
+    private fun hipecTreatmentFromTumor(tumorId: Int, tumor: Tumor) =
+        listOf(extractSimpleRecord(Tables.HIPECTREATMENT, tumor.hipecTreatment, "tumorId", tumorId))
 
     private fun priorTumorFromTumor(tumorId: Int, tumor: Tumor) =
         tumor.priorTumors.map { priorTumor ->
@@ -226,11 +174,8 @@ class DatabaseWriter(private val context: DSLContext, private val connection: ja
         }
 
     private fun comorbidityAssessmentsFromTumor(tumorId: Int, tumor: Tumor) =
-        tumor.asaAssessments.map { data ->
-            val dbRecord = context.newRecord(Tables.COMORBIDITYASSESSMENT)
-            dbRecord.from(data)
-            dbRecord.set(Tables.COMORBIDITYASSESSMENT.TUMORID, tumorId)
-            dbRecord
+        tumor.comorbidityAssessments.map {
+            extractSimpleRecord(Tables.COMORBIDITYASSESSMENT, it, "tumorId", tumorId)
         }
 
     private fun molecularResultsFromTumor(tumorId: Int, tumor: Tumor) =
@@ -297,8 +242,6 @@ class DatabaseWriter(private val context: DSLContext, private val connection: ja
             dbRecord
         }
 
-    // TODO systemicTreatments
-
     private fun responseMeasuresFromTumor(tumorId: Int, tumor: Tumor) =
         tumor.responseMeasures.map { data ->
             val dbRecord = context.newRecord(Tables.RESPONSEMEASURE)
@@ -318,14 +261,8 @@ class DatabaseWriter(private val context: DSLContext, private val connection: ja
             dbRecord
         }
 
-
-    //extractSimpleRecord(Tables.PRIMARYRADIOTHERAPY, it, "tumorId", tumorId)
-
-
     private fun writePrimaryDiagnosisRecords(tumors: IndexedList<Tumor>) {
         tumors.map { (tumorId, tumor) ->
-            // TODO clinicalTnmClassification: TnmClassification
-            // TODO pathologicalTnmClassification: TnmClassification
             val dbRecord = context.newRecord(Tables.PRIMARYDIAGNOSIS)
             with(tumor.primaryDiagnosis) {
                 dbRecord.from(this)
@@ -334,6 +271,11 @@ class DatabaseWriter(private val context: DSLContext, private val connection: ja
                 dbRecord.set(Tables.PRIMARYDIAGNOSIS.PRIMARYTUMORTYPE, this.primaryTumorType.name)
                 dbRecord.set(Tables.PRIMARYDIAGNOSIS.PRIMARYTUMORLOCATION, this.primaryTumorLocation.name)
                 dbRecord.set(Tables.PRIMARYDIAGNOSIS.DIFFERENTIATIONGRADE, this.differentiationGrade?.name)
+                dbRecord.set(Tables.PRIMARYDIAGNOSIS.CLINICALTNMCLASSIFICATION, tnmClassificationToJson(this.clinicalTnmClassification))
+                dbRecord.set(
+                    Tables.PRIMARYDIAGNOSIS.PATHOLOGICALTNMCLASSIFICATION,
+                    tnmClassificationToJson(this.pathologicalTnmClassification)
+                )
                 dbRecord.set(Tables.PRIMARYDIAGNOSIS.CLINICALTUMORSTAGE, this.clinicalTumorStage?.name)
                 dbRecord.set(Tables.PRIMARYDIAGNOSIS.PATHOLOGICALTUMORSTAGE, this.pathologicalTumorStage?.name)
                 dbRecord.set(Tables.PRIMARYDIAGNOSIS.ANORECTALVERGEDISTANCECATEGORY, this.anorectalVergeDistanceCategory?.name)
@@ -364,8 +306,8 @@ class DatabaseWriter(private val context: DSLContext, private val connection: ja
                 dbRecord.set(Tables.METASTATICDIAGNOSIS.TUMORID, tumorId)
                 dbRecord.set(Tables.METASTATICDIAGNOSIS.DISTANTMETASTASESDETECTIONSTATUS, this.distantMetastasesDetectionStatus.name)
                 dbRecord.set(Tables.METASTATICDIAGNOSIS.NUMBEROFLIVERMETASTASES, this.numberOfLiverMetastases?.name)
+                listOf(this to dbRecord)
             }
-            listOf(tumor.metastaticDiagnosis to dbRecord)
         }
 
     private fun systemicTreatmentsFromTumor(tumorId: Int, tumor: Tumor) =
@@ -425,6 +367,9 @@ class DatabaseWriter(private val context: DSLContext, private val connection: ja
     private fun jsonList(items: Iterable<Any>): JSON {
         return JSON.json(items.joinToString(",", prefix = "[", postfix = "]") { "\"$it\"" })
     }
+
+    private fun tnmClassificationToJson(classification: TnmClassification?): JSON? =
+        classification?.let { JSON.json(Json.encodeToString(serializer<TnmClassification>(), it)) }
 
     companion object {
         private val LOGGER = KotlinLogging.logger {}
