@@ -27,13 +27,22 @@ val PATIENT_RECORDS_NO_TUMOR = listOf(
     )
 )
 
-private val GIST_PRIOR_TUMOR = PriorTumor(
+private val PRIOR_TUMOR_MINIMUM = PriorTumor(
+    daysBeforeDiagnosis = null,
+    primaryTumorType = TumorType.GASTROINTESTINAL_STROMAL_TUMOR,
+    primaryTumorLocation = TumorLocation.ABDOMEN_NOS,
+    primaryTumorLocationCategory = TumorLocationCategory.DIGESTIVE_TRACT,
+    primaryTumorStage = null,
+    systemicDrugsReceived = emptyList()
+)
+
+private val PRIOR_TUMOR = PriorTumor(
     daysBeforeDiagnosis = 732,
     primaryTumorType = TumorType.GASTROINTESTINAL_STROMAL_TUMOR,
     primaryTumorLocation = TumorLocation.ABDOMEN_NOS,
     primaryTumorLocationCategory = TumorLocationCategory.DIGESTIVE_TRACT,
     primaryTumorStage = TumorStage.II,
-    systemicDrugsReceived = listOf(Drug.IMATINIB)
+    systemicDrugsReceived = listOf(Drug.IMATINIB, Drug.TEGAFUR)
 )
 
 private val PRIMARY_DIAGNOSIS = PrimaryDiagnosis(
@@ -48,26 +57,52 @@ private val METASTATIC_DIAGNOSIS = MetastaticDiagnosis(
     metastases = emptyList()
 )
 
-private val TUMOR = Tumor(
+private val TUMOR_MINIMUM = Tumor(
     diagnosisYear = 1961,
     ageAtDiagnosis = 73,
     latestSurvivalStatus = SurvivalMeasure(daysSinceDiagnosis = 151, isAlive = true),
+    priorTumors = listOf(PRIOR_TUMOR_MINIMUM, PRIOR_TUMOR),
+    primaryDiagnosis = PRIMARY_DIAGNOSIS,
+    metastaticDiagnosis = METASTATIC_DIAGNOSIS,
+    hasReceivedTumorDirectedTreatment = false,
+    hipecTreatment = HipecTreatment(daysSinceDiagnosis = null, hasHadHipecTreatment = false),
+)
 
-    priorTumors = listOf(GIST_PRIOR_TUMOR),
+private val TUMOR_COMPLETE = Tumor(
+    diagnosisYear = 1961,
+    ageAtDiagnosis = 83,
+    latestSurvivalStatus = SurvivalMeasure(daysSinceDiagnosis = 90, isAlive = true),
+
+    priorTumors = listOf(PRIOR_TUMOR_MINIMUM, PRIOR_TUMOR),
 
     primaryDiagnosis = PRIMARY_DIAGNOSIS,
     metastaticDiagnosis = METASTATIC_DIAGNOSIS,
 
-    hasReceivedTumorDirectedTreatment = false,
-    hipecTreatment = HipecTreatment(daysSinceDiagnosis = null, hasHadHipecTreatment = false),
+    whoAssessments = emptyList(), // TODO ADD
+    asaAssessments = emptyList(), // TODO ADD
+    comorbidityAssessments = emptyList(), // TODO ADD
+    molecularResults = emptyList(), // TODO ADD
+    labMeasurements = emptyList(), // TODO ADD
 
-    responseMeasures = emptyList(),
-    progressionMeasures = emptyList()
+    hasReceivedTumorDirectedTreatment = false,
+    reasonRefrainmentFromTumorDirectedTreatment = null, // TODO ADD
+    hasParticipatedInTrial = null, // TODO add
+
+    gastroenterologyResections = emptyList(), // TODO ADD
+    primarySurgeries = emptyList(), // TODO ADD
+    metastaticSurgeries = emptyList(), // TODO ADD
+    hipecTreatment = HipecTreatment(daysSinceDiagnosis = null, hasHadHipecTreatment = false),
+    primaryRadiotherapies = emptyList(), // TODO ADD
+    metastaticRadiotherapies = emptyList(), // TODO ADD
+    systemicTreatments = emptyList(), // TODO ADD
+
+    responseMeasures = emptyList(), // TODO ADD
+    progressionMeasures = emptyList() // TODO ADD
 )
 
 val PATIENT_RECORDS_COMPLETE = listOf(
     ReferencePatient(
         sex = Sex.MALE,
-        tumors = listOf(TUMOR),
+        tumors = listOf(TUMOR_MINIMUM),
     )
 )

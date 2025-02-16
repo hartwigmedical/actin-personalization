@@ -14,7 +14,7 @@ CREATE TABLE `tumor` (
     `diagnosisYear` INT NOT NULL,
     `ageAtDiagnosis` INT NOT NULL,
     `hasReceivedTumorDirectedTreatment` BOOL NOT NULL,
-    `reasonRefrainmentFromTumorDirectedTreatment` VARCHAR(255) NOT NULL,
+    `reasonRefrainmentFromTumorDirectedTreatment` VARCHAR(255),
     `hasParticipatedInTrial` BOOL,
     FOREIGN KEY (`patientId`) REFERENCES `patient`(`id`),
     PRIMARY KEY (`id`, `patientId`)
@@ -38,7 +38,7 @@ CREATE TABLE `priorTumor` (
     `primaryTumorType` VARCHAR(255) NOT NULL,
     `primaryTumorLocation` VARCHAR(255) NOT NULL,
     `primaryTumorLocationCategory` VARCHAR(50) NOT NULL,
-    `primaryTumorStage` VARCHAR(10) NOT NULL,
+    `primaryTumorStage` VARCHAR(10),
     `systemicDrugsReceived` JSON NOT NULL,
     FOREIGN KEY (`tumorId`) REFERENCES `tumor`(`id`),
     PRIMARY KEY (`id`)
