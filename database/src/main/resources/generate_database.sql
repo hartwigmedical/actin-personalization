@@ -18,7 +18,7 @@ CREATE TABLE `tumor` (
     `hasParticipatedInTrial` BOOL,
     FOREIGN KEY (`patientId`) REFERENCES `patient`(`id`),
     PRIMARY KEY (`id`, `patientId`)
-)
+);
 
 DROP TABLE IF EXISTS `survivalMeasure`;
 CREATE TABLE `survivalMeasure` (
