@@ -21,10 +21,7 @@ class NcrTumorExtractor(private val episodeExtractor: NcrEpisodeExtractor) {
         return Tumor(
             diagnosisYear = diagnosisRecord.primaryDiagnosis.incjr,
             ageAtDiagnosis = diagnosisRecord.patientCharacteristics.leeft,
-            latestSurvivalStatus = SurvivalMeasure(
-                daysSinceDiagnosis = diagnosisRecord.patientCharacteristics.vitStatInt!!,
-                isAlive = NcrVitalStatusMapper.resolve(diagnosisRecord.patientCharacteristics.vitStat!!)
-            ),
+            latestSurvivalStatus = extractLatestSurvivalMeasure(diagnosisRecord),
             priorTumors = NcrPriorTumorExtractor.extract(records),
             primaryDiagnosis = PrimaryDiagnosis(
                 basisOfDiagnosis = TumorBasisOfDiagnosis.HISTOLOGICAL_CONFIRMATION,
@@ -111,5 +108,12 @@ class NcrTumorExtractor(private val episodeExtractor: NcrEpisodeExtractor) {
 //                hasKrasG12CMutation = hasKrasG12CMutation
 //            )
 //        }
+    }
+
+    private fun extractLatestSurvivalMeasure(diagnosisRecord: NcrRecord): SurvivalMeasure {
+        return SurvivalMeasure(
+            daysSinceDiagnosis = diagnosisRecord.patientCharacteristics.vitStatInt!!,
+            isAlive = NcrVitalStatusMapper.resolve(diagnosisRecord.patientCharacteristics.vitStat!!)
+        )
     }
 }

@@ -4,7 +4,6 @@ import com.hartwig.actin.personalization.datamodel.assessment.AsaClassification
 import com.hartwig.actin.personalization.datamodel.assessment.LabMeasure
 import com.hartwig.actin.personalization.datamodel.assessment.Unit
 import com.hartwig.actin.personalization.datamodel.diagnosis.ExtraMuralInvasionCategory
-import com.hartwig.actin.personalization.datamodel.diagnosis.TumorLocation
 import com.hartwig.actin.personalization.datamodel.diagnosis.LymphaticInvasionCategory
 import com.hartwig.actin.personalization.datamodel.diagnosis.MetastasesDetectionStatus
 import com.hartwig.actin.personalization.datamodel.diagnosis.NumberOfLiverMetastases
@@ -13,6 +12,7 @@ import com.hartwig.actin.personalization.datamodel.diagnosis.TnmN
 import com.hartwig.actin.personalization.datamodel.diagnosis.TnmT
 import com.hartwig.actin.personalization.datamodel.diagnosis.TumorBasisOfDiagnosis
 import com.hartwig.actin.personalization.datamodel.diagnosis.TumorDifferentiationGrade
+import com.hartwig.actin.personalization.datamodel.diagnosis.TumorLocation
 import com.hartwig.actin.personalization.datamodel.diagnosis.TumorRegression
 import com.hartwig.actin.personalization.datamodel.diagnosis.VenousInvasionDescription
 import com.hartwig.actin.personalization.datamodel.old.Episode
@@ -24,14 +24,16 @@ import com.hartwig.actin.personalization.datamodel.outcome.ProgressionMeasureFol
 import com.hartwig.actin.personalization.datamodel.outcome.ProgressionMeasureType
 import com.hartwig.actin.personalization.datamodel.outcome.ResponseType
 import com.hartwig.actin.personalization.datamodel.treatment.ReasonRefrainmentFromTumorDirectedTreatment
+import com.hartwig.actin.personalization.ncr.datamodel.TestNcrRecordFactory
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
 class NcrEpisodeExtractorTest {
 
-    private val treatmentRecord = NCR_RECORD.copy(
-        treatment = NCR_RECORD.treatment.copy(
-            systemicTreatment = NCR_SYSTEMIC_TREATMENT.copy(
+    private val baseRecord = TestNcrRecordFactory.properDiagnosisRecord()
+    private val treatmentRecord = baseRecord.copy(
+        treatment = baseRecord.treatment.copy(
+            systemicTreatment = baseRecord.treatment.systemicTreatment.copy(
                 systStartInt1 = 721,
                 systStartInt2 = 722,
                 systStartInt3 = 723,
@@ -53,7 +55,7 @@ class NcrEpisodeExtractorTest {
     @Test
     fun `Should filter out invalid lab measurements (9999, null, or out of extreme ranges)`() {
         val modifiedNcrRecord = treatmentRecord.copy(
-            labValues = NCR_LAB_VALUES.copy(
+            labValues = treatmentRecord.labValues.copy(
                 ldh1 = null,
                 ldh2 = 9999,
                 ldh3 = 5000,
@@ -87,7 +89,7 @@ class NcrEpisodeExtractorTest {
     @Test
     fun `Should set maximumSizeOfLiverMetastasisMm to null when value is 999`() {
         val modifiedNcrRecord = treatmentRecord.copy(
-            metastaticDiagnosis = NCR_METASTATIC_DIAGNOSIS.copy(
+            metastaticDiagnosis = treatmentRecord.metastaticDiagnosis.copy(
                 metaLeverAfm = 999
             )
         )
@@ -104,11 +106,11 @@ class NcrEpisodeExtractorTest {
 
     companion object {
         private val expectedEpisode = Episode(
-            id = EPISODE_ID,
-            order = EPISODE_ORDER,
-            whoStatusPreTreatmentStart = WHO_STATUS,
+            id = 123,
+            order = 2,
+            whoStatusPreTreatmentStart = 1,
             asaClassificationPreSurgeryOrEndoscopy = AsaClassification.V,
-            tumorIncidenceYear = INCIDENCE_YEAR,
+            tumorIncidenceYear = 2020,
             tumorLocation = TumorLocation.ASCENDING_COLON,
             tumorBasisOfDiagnosis = TumorBasisOfDiagnosis.SPEC_BIOCHEMICAL_IMMUNOLOGICAL_LAB_INVESTIGATION,
             tumorDifferentiationGrade = TumorDifferentiationGrade.GRADE_2_OR_MODERATELY_DIFFERENTIATED,
@@ -121,8 +123,8 @@ class NcrEpisodeExtractorTest {
 //            stageCTNM = StageTnm.NA,
 //            stagePTNM = StageTnm.M,
 //            stageTNM = StageTnm.IIC,
-            investigatedLymphNodesNumber = INVESTIGATED_LYMPH_NODES,
-            positiveLymphNodesNumber = POSITIVE_LYMPH_NODES,
+            investigatedLymphNodesNumber = 3,
+            positiveLymphNodesNumber = 1,
             distantMetastasesDetectionStatus = MetastasesDetectionStatus.AT_PROGRESSION,
             metastases = listOf(Metastasis(TumorLocation.ADRENAL_CORTEX, 20, true)),
             numberOfLiverMetastases = NumberOfLiverMetastases.FIVE_OR_MORE,

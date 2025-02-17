@@ -1,13 +1,17 @@
 package com.hartwig.actin.personalization.ncr.interpretation.extractor
 
+import com.hartwig.actin.personalization.ncr.datamodel.TestNcrRecordFactory
 import org.junit.jupiter.api.Test
 
 class NcrTumorExtractorTest {
 
+    private val baseRecord = TestNcrRecordFactory.properDiagnosisRecord()
+
     @Test
     fun `Should extract diagnosis and episodes from NCR records`() {
-        val diagnosisRecord = NCR_RECORD.copy(identification = NCR_IDENTIFICATION.copy(keyEid = 101, teller = 1, epis = "DIA", metaEpis = 0))
-        val records = listOf(diagnosisRecord, NCR_RECORD)
+        val diagnosisRecord =
+            baseRecord.copy(identification = baseRecord.identification.copy(keyEid = 101, teller = 1, epis = "DIA", metaEpis = 0))
+        val records = listOf(diagnosisRecord)
         val tumor = NcrTumorExtractor(NcrEpisodeExtractor(NcrSystemicTreatmentPlanExtractor())).extractTumor(records)
 //        assertThat(diagnosis).isEqualTo(
 //            Diagnosis(

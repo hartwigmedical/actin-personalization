@@ -12,4 +12,11 @@ class ReferencePatientFactoryTest {
 
         assertThat(patients).hasSize(1)
     }
+
+    @Test
+    fun `Should create record for proper NCR input`() {
+        val patients = ReferencePatientFactory.default().create(listOf(TestNcrRecordFactory.properDiagnosisRecord()))
+
+        assertThat(patients).hasSize(1)
+    }
 }

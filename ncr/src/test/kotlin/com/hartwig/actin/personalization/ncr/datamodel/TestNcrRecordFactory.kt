@@ -2,6 +2,13 @@ package com.hartwig.actin.personalization.ncr.datamodel
 
 object TestNcrRecordFactory {
 
+    const val EPISODE_ID = 123
+    const val EPISODE_ORDER = 2
+    const val WHO_STATUS = 1
+    const val INCIDENCE_YEAR = 2020
+    const val INVESTIGATED_LYMPH_NODES = 3
+    const val POSITIVE_LYMPH_NODES = 1
+
     fun minimalFollowupRecord(): NcrRecord {
         return minimalRecord()
             .copy(identification = minimalIdentification().copy(epis = "VERB"))
@@ -11,6 +18,11 @@ object TestNcrRecordFactory {
         return minimalRecord()
             .copy(identification = minimalIdentification().copy(epis = "DIA"))
             .copy(patientCharacteristics = minimalPatientCharacteristics().copy(vitStat = 0, vitStatInt = 200))
+    }
+
+    fun properDiagnosisRecord(): NcrRecord {
+        return properRecord()
+            .copy(identification = properIdentification().copy(epis = "DIA"))
     }
 
     private fun minimalRecord(): NcrRecord {
@@ -29,6 +41,22 @@ object TestNcrRecordFactory {
         )
     }
 
+    private fun properRecord(): NcrRecord {
+        return NcrRecord(
+            identification = properIdentification(),
+            patientCharacteristics = properPatientCharacteristics(),
+            clinicalCharacteristics = properClinicalCharacteristics(),
+            molecularCharacteristics = properMolecularCharacteristics(),
+            priorMalignancies = properPriorMalignancies(),
+            primaryDiagnosis = properPrimaryDiagnosis(),
+            metastaticDiagnosis = properMetastaticDiagnosis(),
+            comorbidities = properComorbidities(),
+            labValues = properLabValues(),
+            treatment = properTreatment(),
+            treatmentResponse = properTreatmentResponse()
+        )
+    }
+
     private fun minimalIdentification(): NcrIdentification {
         return NcrIdentification(
             keyNkr = 1,
@@ -40,6 +68,17 @@ object TestNcrRecordFactory {
         )
     }
 
+    private fun properIdentification(): NcrIdentification {
+        return minimalIdentification().copy(
+            keyNkr = 5,
+            keyZid = 6,
+            keyEid = EPISODE_ID,
+            teller = EPISODE_ORDER,
+            epis = "",
+            metaEpis = 2
+        )
+    }
+
     private fun minimalPatientCharacteristics(): NcrPatientCharacteristics {
         return NcrPatientCharacteristics(
             gesl = 2,
@@ -48,6 +87,17 @@ object TestNcrRecordFactory {
             vitStatInt = null,
             perfStat = null,
             asa = null
+        )
+    }
+
+    private fun properPatientCharacteristics(): NcrPatientCharacteristics {
+        return minimalPatientCharacteristics().copy(
+            gesl = 1,
+            leeft = 50,
+            vitStat = 0,
+            vitStatInt = 80,
+            perfStat = WHO_STATUS,
+            asa = 5
         )
     }
 
@@ -65,11 +115,33 @@ object TestNcrRecordFactory {
         )
     }
 
+    private fun properClinicalCharacteristics(): NcrClinicalCharacteristics {
+        return minimalClinicalCharacteristics().copy(
+            dubbeltum = 0,
+            ileus = 0,
+            perforatie = 1,
+            anusAfst = 2,
+            mrfAfst = 111,
+            veneusInvas = 5,
+            lymfInvas = 8,
+            emi = 1,
+            tumregres = 4
+        )
+    }
+
     private fun minimalMolecularCharacteristics(): NcrMolecularCharacteristics {
         return NcrMolecularCharacteristics(
             msiStat = null,
             brafMut = null,
             rasMut = null
+        )
+    }
+
+    private fun properMolecularCharacteristics(): NcrMolecularCharacteristics {
+        return minimalMolecularCharacteristics().copy(
+            msiStat = 1,
+            brafMut = 1,
+            rasMut = 3
         )
     }
 
@@ -120,6 +192,18 @@ object TestNcrRecordFactory {
         )
     }
 
+    private fun properPriorMalignancies(): NcrPriorMalignancies {
+        return minimalPriorMalignancies().copy(
+            mal1Morf = 8720,
+            mal1TopoSublok = "C446",
+            mal1Syst = 1,
+            mal1Int = 20,
+            mal1Tumsoort = 400000,
+            mal1Stadium = "2C",
+            mal1SystCode1 = "214000"
+        )
+    }
+
     private fun minimalPrimaryDiagnosis(): NcrPrimaryDiagnosis {
         return NcrPrimaryDiagnosis(
             incjr = 2021,
@@ -138,6 +222,27 @@ object TestNcrRecordFactory {
             stadium = null,
             ondLymf = null,
             posLymf = null
+        )
+    }
+
+    private fun properPrimaryDiagnosis(): NcrPrimaryDiagnosis {
+        return minimalPrimaryDiagnosis().copy(
+            incjr = INCIDENCE_YEAR,
+            topoSublok = "C182",
+            morfCat = 1,
+            diagBasis = 4,
+            diffgrad = "2",
+            ct = "0",
+            cn = "1A",
+            cm = "-",
+            pt = "4A",
+            pn = "X",
+            pm = null,
+            cstadium = "NVT",
+            pstadium = "M",
+            stadium = "2C",
+            ondLymf = INVESTIGATED_LYMPH_NODES,
+            posLymf = POSITIVE_LYMPH_NODES
         )
     }
 
@@ -178,6 +283,16 @@ object TestNcrRecordFactory {
         )
     }
 
+    private fun properMetastaticDiagnosis(): NcrMetastaticDiagnosis {
+        return minimalMetastaticDiagnosis().copy(
+            metaTopoSublok1 = "C740",
+            metaInt1 = 20,
+            metaProg1 = 1,
+            metaLeverAantal = 5,
+            metaLeverAfm = 15,
+        )
+    }
+
     private fun minimalComorbidities(): NcrCharlsonComorbidities {
         return NcrCharlsonComorbidities(
             cci = null,
@@ -199,6 +314,15 @@ object TestNcrRecordFactory {
             cciRenal = null,
             cciSevereLiver = null,
             cciUlcer = null
+        )
+    }
+
+    private fun properComorbidities(): NcrCharlsonComorbidities {
+        return minimalComorbidities().copy(
+            cci = 1,
+            cciCat = 1,
+            cciChf = 1,
+            cciCopd = 0
         )
     }
 
@@ -246,6 +370,23 @@ object TestNcrRecordFactory {
             leukoInt2 = null,
             leukoInt3 = null,
             leukoInt4 = null,
+        )
+    }
+
+    private fun properLabValues(): NcrLabValues {
+        return minimalLabValues().copy(
+            prechirCea = 0.1,
+            postchirCea = 0.2,
+            ldh1 = 10,
+            ldhInt1 = 1,
+            af1 = 20,
+            afInt1 = 2,
+            neutro1 = 30.5,
+            neutroInt1 = 3,
+            albumine1 = 40.5,
+            albumineInt1 = 4,
+            leuko1 = 50.5,
+            leukoInt1 = 5
         )
     }
 
@@ -412,6 +553,61 @@ object TestNcrRecordFactory {
         )
     }
 
+    private fun properTreatment(): NcrTreatment {
+        return minimalTreatment().copy(
+            deelnameStudie = 1,
+            tumgerichtTher = 0,
+            geenTherReden = 12,
+            primaryRadiotherapy = NcrPrimaryRadiotherapy(rt = 4),
+            systemicTreatment = NcrSystemicTreatment(
+                chemo = 1,
+                target = 2,
+                systCode1 = "L01XA03",
+                systCode2 = "L01FG01",
+                systCode3 = "L01CE02",
+                systCode4 = "L01BC02",
+                systCode5 = "L01BC06",
+                systCode6 = "L01CE02",
+                systCode7 = "L01BC53",
+                systPrepost1 = 1,
+                systPrepost2 = 2,
+                systPrepost3 = 3,
+                systPrepost4 = 4,
+                systPrepost5 = 0,
+                systPrepost6 = null,
+                systPrepost7 = 0,
+                systSchemanum1 = 1,
+                systSchemanum2 = 1,
+                systSchemanum3 = 1,
+                systSchemanum4 = 1,
+                systSchemanum5 = 2,
+                systSchemanum6 = 2,
+                systSchemanum7 = 3,
+                systKuren1 = 1,
+                systKuren2 = 2,
+                systKuren3 = 3,
+                systKuren4 = 4,
+                systKuren5 = 5,
+                systKuren6 = 6,
+                systKuren7 = 7,
+                systStartInt1 = 1,
+                systStartInt2 = 2,
+                systStartInt3 = 3,
+                systStartInt4 = 4,
+                systStartInt5 = 5,
+                systStartInt6 = 6,
+                systStartInt7 = 7,
+                systStopInt1 = 1,
+                systStopInt2 = 2,
+                systStopInt3 = 3,
+                systStopInt4 = 4,
+                systStopInt5 = 5,
+                systStopInt6 = 6,
+                systStopInt7 = 7,
+            )
+        )
+    }
+
     private fun minimalTreatmentResponse(): NcrTreatmentResponse {
         return NcrTreatmentResponse(
             responsUitslag = null,
@@ -428,6 +624,19 @@ object TestNcrRecordFactory {
             pfsInt2 = null,
             pfsInt3 = null,
             pfsInt4 = null
+        )
+    }
+
+    private fun properTreatmentResponse(): NcrTreatmentResponse {
+        return minimalTreatmentResponse().copy(
+            responsUitslag = "PD",
+            responsInt = 5,
+            pfsEvent1 = 1,
+            pfsEvent2 = 2,
+            fupEventType1 = 1,
+            fupEventType2 = 2,
+            pfsInt1 = 4,
+            pfsInt2 = 80,
         )
     }
 }

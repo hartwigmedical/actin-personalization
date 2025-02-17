@@ -7,10 +7,13 @@ import com.hartwig.actin.personalization.datamodel.outcome.ProgressionMeasureTyp
 import com.hartwig.actin.personalization.datamodel.outcome.ResponseType
 import com.hartwig.actin.personalization.datamodel.treatment.Drug
 import com.hartwig.actin.personalization.datamodel.treatment.Treatment
+import com.hartwig.actin.personalization.ncr.datamodel.TestNcrRecordFactory
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
 class NcrSystemicTreatmentPlanExtractorTest {
+
+    private val baseRecord = TestNcrRecordFactory.properDiagnosisRecord()
 
     @Test
     fun `Should extract systemic treatment plan`() {
@@ -21,7 +24,7 @@ class NcrSystemicTreatmentPlanExtractorTest {
         )
 
         val plan = NcrSystemicTreatmentPlanExtractor()
-            .extractSystemicTreatmentPlan(NCR_SYSTEMIC_TREATMENT, pfsMeasures, ResponseMeasure(ResponseType.PD, 3), 80)
+            .extractSystemicTreatmentPlan(baseRecord.treatment.systemicTreatment, pfsMeasures, ResponseMeasure(ResponseType.PD, 3), 80)
         assertThat(plan!!.treatment).isEqualTo(Treatment.FOLFOXIRI_B)
 
         val expectedDrugs = mapOf(
@@ -41,7 +44,7 @@ class NcrSystemicTreatmentPlanExtractorTest {
 
     @Test
     fun `Should resolve treatment to OTHER when a different component is used in a later scheme`() {
-        val ncrSystemicTreatment = NCR_SYSTEMIC_TREATMENT.copy(systCode7 = "L01FE02") // Add Panitumumab to last scheme
+        val ncrSystemicTreatment = baseRecord.treatment.systemicTreatment.copy(systCode7 = "L01FE02") // Add Panitumumab to last scheme
         val plan = NcrSystemicTreatmentPlanExtractor()
             .extractSystemicTreatmentPlan(ncrSystemicTreatment, emptyList(), ResponseMeasure(ResponseType.PD, 3), 80)
         assertThat(plan!!.treatment).isEqualTo(Treatment.OTHER)
