@@ -32,7 +32,7 @@ CREATE TABLE `survivalMeasure` (
 
 DROP TABLE IF EXISTS `priorTumor`;
 CREATE TABLE `priorTumor` (
-    `id` INT NOT NULL AUTO_INCREMENT,
+    `id` INT NOT NULL,
     `tumorId` INT NOT NULL,
     `daysBeforeDiagnosis` INT,
     `primaryTumorType` VARCHAR(255) NOT NULL,
@@ -41,7 +41,7 @@ CREATE TABLE `priorTumor` (
     `primaryTumorStage` VARCHAR(10),
     `systemicDrugsReceived` JSON NOT NULL,
     FOREIGN KEY (`tumorId`) REFERENCES `tumor`(`id`),
-    PRIMARY KEY (`id`)
+    PRIMARY KEY (`id`, `tumorId`)
 );
 
 DROP TABLE IF EXISTS `primaryDiagnosis`;
@@ -59,6 +59,7 @@ CREATE TABLE `primaryDiagnosis` (
     `pathologicalTumorStage` VARCHAR(50),
     `investigatedLymphNodesCount` INT,
     `positiveLymphNodesCount` INT,
+    `sidedness` VARCHAR(50),
     `presentedWithIleus` BOOL,
     `presentedWithPerforation` BOOL,
     `anorectalVergeDistanceCategory` VARCHAR(50),
@@ -203,7 +204,7 @@ CREATE TABLE `metastaticSurgery` (
     `id` INT NOT NULL AUTO_INCREMENT,
     `tumorId` INT NOT NULL,
     `daysSinceDiagnosis` INT,
-    `type` varchar(50) NOT NULL,
+    `type` varchar(100) NOT NULL,
     `radicality` varchar(50),
     FOREIGN KEY (`tumorId`) REFERENCES `tumor`(`id`),
     PRIMARY KEY (`id`)
@@ -298,7 +299,7 @@ CREATE TABLE `progressionMeasure` (
     `tumorId` INT NOT NULL,
     `daysSinceDiagnosis` INT,
     `type` VARCHAR(50) NOT NULL,
-    `followUpEvent` VARCHAR(50) NOT NULL,
+    `followUpEvent` VARCHAR(50),
     FOREIGN KEY (`tumorId`) REFERENCES `tumor`(`id`),
     PRIMARY KEY (`id`)
 );

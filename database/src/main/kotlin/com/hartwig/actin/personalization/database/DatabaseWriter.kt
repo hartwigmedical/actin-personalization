@@ -148,9 +148,10 @@ class DatabaseWriter(private val context: DSLContext, private val connection: ja
         listOf(extractSimpleRecord(Tables.HIPECTREATMENT, tumor.hipecTreatment, "tumorId", tumorId))
 
     private fun priorTumorFromTumor(tumorId: Int, tumor: Tumor) =
-        tumor.priorTumors.map { priorTumor ->
+        tumor.priorTumors.mapIndexed { index, priorTumor ->
             val dbRecord = context.newRecord(Tables.PRIORTUMOR)
             dbRecord.from(priorTumor)
+            dbRecord.set(Tables.PRIORTUMOR.ID, index + 1)
             dbRecord.set(Tables.PRIORTUMOR.TUMORID, tumorId)
             dbRecord.set(Tables.PRIORTUMOR.SYSTEMICDRUGSRECEIVED, jsonList(priorTumor.systemicDrugsReceived))
             dbRecord
@@ -262,7 +263,7 @@ class DatabaseWriter(private val context: DSLContext, private val connection: ja
         }
 
     private fun writePrimaryDiagnosisRecords(tumors: IndexedList<Tumor>) {
-        tumors.map { (tumorId, tumor) ->
+        val rows = tumors.map { (tumorId, tumor) ->
             val dbRecord = context.newRecord(Tables.PRIMARYDIAGNOSIS)
             with(tumor.primaryDiagnosis) {
                 dbRecord.from(this)
@@ -284,8 +285,10 @@ class DatabaseWriter(private val context: DSLContext, private val connection: ja
                 dbRecord.set(Tables.PRIMARYDIAGNOSIS.EXTRAMURALINVASIONCATEGORY, this.extraMuralInvasionCategory?.name)
                 dbRecord.set(Tables.PRIMARYDIAGNOSIS.TUMORREGRESSION, this.tumorRegression?.name)
             }
+            dbRecord
         }
 
+        insertRows(rows, "primaryDiagnosis")
     }
 
     private fun metastasesFromMetastaticDiagnosis(metastaticDiagnosisId: Int, metastaticDiagnosis: MetastaticDiagnosis) =
