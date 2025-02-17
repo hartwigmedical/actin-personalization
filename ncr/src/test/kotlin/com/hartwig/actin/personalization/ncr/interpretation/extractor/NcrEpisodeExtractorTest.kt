@@ -23,7 +23,6 @@ import com.hartwig.actin.personalization.datamodel.old.ResponseMeasure
 import com.hartwig.actin.personalization.datamodel.outcome.ProgressionMeasureFollowUpEvent
 import com.hartwig.actin.personalization.datamodel.outcome.ProgressionMeasureType
 import com.hartwig.actin.personalization.datamodel.outcome.ResponseType
-import com.hartwig.actin.personalization.datamodel.treatment.ReasonRefrainmentFromTumorDirectedTreatment
 import com.hartwig.actin.personalization.ncr.datamodel.TestNcrRecordFactory
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -106,13 +105,13 @@ class NcrEpisodeExtractorTest {
 
     companion object {
         private val expectedEpisode = Episode(
-            id = 123,
-            order = 2,
+            id = 1,
+            order = 1,
             whoStatusPreTreatmentStart = 1,
             asaClassificationPreSurgeryOrEndoscopy = AsaClassification.V,
             tumorIncidenceYear = 2020,
             tumorLocation = TumorLocation.ASCENDING_COLON,
-            tumorBasisOfDiagnosis = TumorBasisOfDiagnosis.SPEC_BIOCHEMICAL_IMMUNOLOGICAL_LAB_INVESTIGATION,
+            tumorBasisOfDiagnosis = TumorBasisOfDiagnosis.CLINICAL_ONLY_INVESTIGATION,
             tumorDifferentiationGrade = TumorDifferentiationGrade.GRADE_2_OR_MODERATELY_DIFFERENTIATED,
             tnmCT = TnmT.T0,
             tnmCN = TnmN.N1A,
@@ -125,7 +124,7 @@ class NcrEpisodeExtractorTest {
 //            stageTNM = StageTnm.IIC,
             investigatedLymphNodesNumber = 3,
             positiveLymphNodesNumber = 1,
-            distantMetastasesDetectionStatus = MetastasesDetectionStatus.AT_PROGRESSION,
+            distantMetastasesDetectionStatus = MetastasesDetectionStatus.AT_START,
             metastases = listOf(Metastasis(TumorLocation.ADRENAL_CORTEX, 20, true)),
             numberOfLiverMetastases = NumberOfLiverMetastases.FIVE_OR_MORE,
             maximumSizeOfLiverMetastasisMm = 15,
@@ -145,10 +144,9 @@ class NcrEpisodeExtractorTest {
                 LabMeasurement(LabMeasure.CARCINOEMBRYONIC_ANTIGEN, 0.1, Unit.MICROGRAM_PER_LITER, null, true, false),
                 LabMeasurement(LabMeasure.CARCINOEMBRYONIC_ANTIGEN, 0.2, Unit.MICROGRAM_PER_LITER, null, false, true)
             ),
-            hasReceivedTumorDirectedTreatment = false,
-            reasonRefrainmentFromTumorDirectedTreatment =
-            ReasonRefrainmentFromTumorDirectedTreatment.EXPECTED_FAST_PROGRESSION_OR_HIGH_TUMOR_LOAD,
-            hasParticipatedInTrial = true,
+            hasReceivedTumorDirectedTreatment = true,
+            reasonRefrainmentFromTumorDirectedTreatment = null,
+            hasParticipatedInTrial = false,
             gastroenterologyResections = emptyList(),
             surgeries = emptyList(),
             metastasesSurgeries = emptyList(),
@@ -170,7 +168,7 @@ class NcrEpisodeExtractorTest {
                 PfsMeasure(ProgressionMeasureType.PROGRESSION, ProgressionMeasureFollowUpEvent.LOCAL_ONLY, 4),
                 PfsMeasure(ProgressionMeasureType.DEATH, ProgressionMeasureFollowUpEvent.REGIONAL, 80),
             ),
-            ageAtTreatmentPlanStart = 52
+            ageAtTreatmentPlanStart = 77
         )
     }
 

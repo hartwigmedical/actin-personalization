@@ -2,13 +2,6 @@ package com.hartwig.actin.personalization.ncr.datamodel
 
 object TestNcrRecordFactory {
 
-    const val EPISODE_ID = 123
-    const val EPISODE_ORDER = 2
-    const val WHO_STATUS = 1
-    const val INCIDENCE_YEAR = 2020
-    const val INVESTIGATED_LYMPH_NODES = 3
-    const val POSITIVE_LYMPH_NODES = 1
-
     fun minimalFollowupRecord(): NcrRecord {
         return minimalRecord()
             .copy(identification = minimalIdentification().copy(epis = "VERB"))
@@ -70,12 +63,8 @@ object TestNcrRecordFactory {
 
     private fun properIdentification(): NcrIdentification {
         return minimalIdentification().copy(
-            keyNkr = 5,
-            keyZid = 6,
-            keyEid = EPISODE_ID,
-            teller = EPISODE_ORDER,
-            epis = "",
-            metaEpis = 2
+            metaEpis = 1,
+            teller = 1
         )
     }
 
@@ -92,11 +81,9 @@ object TestNcrRecordFactory {
 
     private fun properPatientCharacteristics(): NcrPatientCharacteristics {
         return minimalPatientCharacteristics().copy(
-            gesl = 1,
-            leeft = 50,
             vitStat = 0,
             vitStatInt = 80,
-            perfStat = WHO_STATUS,
+            perfStat = 1,
             asa = 5
         )
     }
@@ -194,20 +181,20 @@ object TestNcrRecordFactory {
 
     private fun properPriorMalignancies(): NcrPriorMalignancies {
         return minimalPriorMalignancies().copy(
-            mal1Morf = 8720,
-            mal1TopoSublok = "C446",
-            mal1Syst = 1,
             mal1Int = 20,
+            mal1TopoSublok = "C446",
+            mal1Morf = 8720,
             mal1Tumsoort = 400000,
             mal1Stadium = "2C",
+            mal1Syst = 1,
             mal1SystCode1 = "214000"
         )
     }
 
     private fun minimalPrimaryDiagnosis(): NcrPrimaryDiagnosis {
         return NcrPrimaryDiagnosis(
-            incjr = 2021,
-            topoSublok = "C189",
+            incjr = 2020,
+            topoSublok = "C182",
             morfCat = null,
             diagBasis = 1,
             diffgrad = "2",
@@ -227,11 +214,7 @@ object TestNcrRecordFactory {
 
     private fun properPrimaryDiagnosis(): NcrPrimaryDiagnosis {
         return minimalPrimaryDiagnosis().copy(
-            incjr = INCIDENCE_YEAR,
-            topoSublok = "C182",
             morfCat = 1,
-            diagBasis = 4,
-            diffgrad = "2",
             ct = "0",
             cn = "1A",
             cm = "-",
@@ -241,8 +224,8 @@ object TestNcrRecordFactory {
             cstadium = "NVT",
             pstadium = "M",
             stadium = "2C",
-            ondLymf = INVESTIGATED_LYMPH_NODES,
-            posLymf = POSITIVE_LYMPH_NODES
+            ondLymf = 3,
+            posLymf = 1
         )
     }
 
@@ -555,9 +538,8 @@ object TestNcrRecordFactory {
 
     private fun properTreatment(): NcrTreatment {
         return minimalTreatment().copy(
-            deelnameStudie = 1,
-            tumgerichtTher = 0,
-            geenTherReden = 12,
+            deelnameStudie = 0,
+            tumgerichtTher = 1,
             primaryRadiotherapy = NcrPrimaryRadiotherapy(rt = 4),
             systemicTreatment = NcrSystemicTreatment(
                 chemo = 1,
