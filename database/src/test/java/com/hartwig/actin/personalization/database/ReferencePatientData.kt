@@ -110,16 +110,16 @@ private val PRIMARY_DIAGNOSIS_COMPLETE = PrimaryDiagnosis(
     pathologicalTumorStage = TumorStage.I,
     investigatedLymphNodesCount = 10,
     positiveLymphNodesCount = 10,
+    venousInvasionDescription = VenousInvasionDescription.EXTRAMURAL,
+    lymphaticInvasionCategory = LymphaticInvasionCategory.PRESENT,
+    extraMuralInvasionCategory = ExtraMuralInvasionCategory.LESS_THAN_FIVE_MM,
+    tumorRegression = TumorRegression.NO_SIGNS_OF_REGRESSION,
     sidedness = Sidedness.LEFT,
     presentedWithIleus = false,
     presentedWithPerforation = false,
     anorectalVergeDistanceCategory = AnorectalVergeDistanceCategory.TEN_TO_FIFTEEN_CM,
     mesorectalFasciaIsClear = false,
-    distanceToMesorectalFasciaMm = 2,
-    venousInvasionDescription = VenousInvasionDescription.EXTRAMURAL,
-    lymphaticInvasionCategory = LymphaticInvasionCategory.PRESENT,
-    extraMuralInvasionCategory = ExtraMuralInvasionCategory.LESS_THAN_FIVE_MM,
-    tumorRegression = TumorRegression.NO_SIGNS_OF_REGRESSION
+    distanceToMesorectalFasciaMm = 2
 )
 
 private val METASTATIC_DIAGNOSIS_MINIMUM = MetastaticDiagnosis(
