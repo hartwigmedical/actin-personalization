@@ -16,7 +16,7 @@ class NcrTumorExtractorTest {
 //        assertThat(diagnosis).isEqualTo(
 //            Diagnosis(
 //                consolidatedTumorType = TumorType.CRC_ADENOCARCINOMA,
-//                tumorLocations = setOf(Location.ASCENDING_COLON),
+//                tumorLocatilons = setOf(Location.ASCENDING_COLON),
 //                hasHadTumorDirectedSystemicTherapy = false,
 //                sidedness = Sidedness.RIGHT,
 //                ageAtDiagnosis = 50,
