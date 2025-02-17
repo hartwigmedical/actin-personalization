@@ -10,13 +10,17 @@ data class PrimaryDiagnosis(
     val primaryTumorLocation: TumorLocation,
     val differentiationGrade: TumorDifferentiationGrade? = null,
 
-    // TODO (KD): What do these values mean in the context of a metastasis diagnosis ("VERB")?
     val clinicalTnmClassification: TnmClassification? = null,
     val pathologicalTnmClassification: TnmClassification? = null,
     val clinicalTumorStage: TumorStage? = null,
     val pathologicalTumorStage: TumorStage? = null,
     val investigatedLymphNodesCount: Int? = null,
     val positiveLymphNodesCount: Int? = null,
+
+    val venousInvasionDescription: VenousInvasionDescription? = null,
+    val lymphaticInvasionCategory: LymphaticInvasionCategory? = null,
+    val extraMuralInvasionCategory: ExtraMuralInvasionCategory? = null,
+    val tumorRegression: TumorRegression? = null,
 
     // KD: Specific for CRC, could be hidden behind interface eventually
     val sidedness: Sidedness? = determineSidedness(primaryTumorLocation),
@@ -29,12 +33,6 @@ data class PrimaryDiagnosis(
     // KD: Only present in case location in (RECTUM, RECTOSIGMOID), could be hidden behind interface eventually
     val mesorectalFasciaIsClear: Boolean? = null,
     val distanceToMesorectalFasciaMm: Int? = null,
-
-    // TODO (KD): What do these values mean in the context of a metastasis diagnosis ("VERB")?
-    val venousInvasionDescription: VenousInvasionDescription? = null,
-    val lymphaticInvasionCategory: LymphaticInvasionCategory? = null,
-    val extraMuralInvasionCategory: ExtraMuralInvasionCategory? = null,
-    val tumorRegression: TumorRegression? = null,
 )
 
 val LOCATIONS_INDICATING_LEFT_SIDEDNESS =
