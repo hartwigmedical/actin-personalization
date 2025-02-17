@@ -2,20 +2,29 @@ package com.hartwig.actin.personalization.ncr.datamodel
 
 object TestNcrRecordFactory {
 
-    fun minimalFollowupRecord(): NcrRecord {
-        return minimalRecord()
-            .copy(identification = minimalIdentification().copy(epis = "VERB"))
-    }
+    private const val DIAGNOSIS_EPIS = "DIA"
+    private const val FOLLOWUP_EPIS = "VERB"
 
     fun minimalDiagnosisRecord(): NcrRecord {
-        return minimalRecord()
-            .copy(identification = minimalIdentification().copy(epis = "DIA"))
-            .copy(patientCharacteristics = minimalPatientCharacteristics().copy(vitStat = 0, vitStatInt = 200))
+        val baseRecord =  minimalRecord()
+        return baseRecord
+            .copy(identification = baseRecord.identification.copy(epis = DIAGNOSIS_EPIS))
+            .copy(patientCharacteristics = baseRecord.patientCharacteristics.copy(vitStat = 0, vitStatInt = 200))
+    }
+
+    fun minimalFollowupRecord(): NcrRecord {
+        val baseRecord =  minimalRecord()
+        return baseRecord.copy(identification = baseRecord.identification.copy(epis = FOLLOWUP_EPIS))
     }
 
     fun properDiagnosisRecord(): NcrRecord {
-        return properRecord()
-            .copy(identification = properIdentification().copy(epis = "DIA"))
+        val baseRecord = properRecord()
+        return baseRecord.copy(identification = baseRecord.identification.copy(epis = DIAGNOSIS_EPIS))
+    }
+
+    fun properFollowupRecord(): NcrRecord {
+        val baseRecord = properRecord()
+        return baseRecord.copy(identification = baseRecord.identification.copy(epis = FOLLOWUP_EPIS))
     }
 
     private fun minimalRecord(): NcrRecord {

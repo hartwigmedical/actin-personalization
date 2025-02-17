@@ -13,7 +13,7 @@ import com.hartwig.actin.personalization.ncr.datamodel.NcrRecord
 import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrVitalStatusMapper
 import com.hartwig.actin.personalization.ncr.util.NcrFunctions
 
-class NcrTumorExtractor(private val episodeExtractor: NcrEpisodeExtractor) {
+object NcrTumorExtractor {
 
     fun extractTumor(records: List<NcrRecord>): Tumor {
         val diagnosisRecord = NcrFunctions.diagnosisRecord(records)

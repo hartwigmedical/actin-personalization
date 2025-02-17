@@ -1,6 +1,5 @@
 package com.hartwig.actin.personalization.ncr
 
-import com.hartwig.actin.personalization.datamodel.ReferencePatient
 import com.hartwig.actin.personalization.ncr.datamodel.NcrRecord
 import com.hartwig.actin.personalization.ncr.interpretation.ReferencePatientFactory
 import com.hartwig.actin.personalization.ncr.serialization.NcrDataReader
@@ -35,7 +34,7 @@ class NCRInspectionApplication : Callable<Int> {
         printTreatmentResponseOverview(ncrRecords)
 
         LOGGER.info { "Creating patient records from NCR records" }
-        val patientRecords: List<ReferencePatient> = ReferencePatientFactory.default().create(ncrRecords)
+        val patientRecords = ReferencePatientFactory.create(ncrRecords)
         LOGGER.info { " Created ${patientRecords.size} patient records from ${ncrRecords.size} NCR records" }
 
         LOGGER.info { "Done!" }
@@ -43,9 +42,9 @@ class NCRInspectionApplication : Callable<Int> {
     }
 
     private fun printIdentificationOverview(ncrRecords: List<NcrRecord>) {
-        val patientCount: Int = ncrRecords.map { it.identification.keyNkr }.distinct().count()
-        val tumorCount: Int = ncrRecords.map { it.identification.keyZid }.distinct().count()
-        val episodeCount: Int = ncrRecords.map { it.identification.keyEid }.distinct().count()
+        val patientCount = ncrRecords.map { it.identification.keyNkr }.distinct().count()
+        val tumorCount = ncrRecords.map { it.identification.keyZid }.distinct().count()
+        val episodeCount = ncrRecords.map { it.identification.keyEid }.distinct().count()
 
         LOGGER.info { " $patientCount unique patients found, with $tumorCount tumors and $episodeCount episodes" }
     }

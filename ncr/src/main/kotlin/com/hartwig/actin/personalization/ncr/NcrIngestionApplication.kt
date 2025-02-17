@@ -21,8 +21,8 @@ class NcrIngestionApplication : Callable<Int> {
 
             LOGGER.info { "Reading NCR dataset from $ncrFile" }
             val ncrRecords = NcrDataReader.read(ncrFile)
-            val referencePatients = ReferencePatientFactory.default().create(ncrRecords)
-            LOGGER.info { " Created ${referencePatients.size} patient records from ${ncrRecords.size} NCR records" }
+            val referencePatients = ReferencePatientFactory.create(ncrRecords)
+            LOGGER.info { " Created ${referencePatients.size} reference patient records from ${ncrRecords.size} NCR records" }
 
             LOGGER.info { "Writing serialized reference patients to $outputFile" }
             ReferencePatientJson.write(referencePatients, outputFile)
@@ -37,8 +37,8 @@ class NcrIngestionApplication : Callable<Int> {
 
     companion object {
         val LOGGER = KotlinLogging.logger {}
-        const val APPLICATION = "NCR inspection application"
-        val VERSION: String = NcrIngestionApplication::class.java.getPackage().implementationVersion
+        const val APPLICATION = "NCR ingestion application"
+        val VERSION = NcrIngestionApplication::class.java.getPackage().implementationVersion ?: "UNKNOWN VERSION"
     }
 }
 

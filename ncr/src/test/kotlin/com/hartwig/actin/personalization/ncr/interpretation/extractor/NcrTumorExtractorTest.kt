@@ -1,18 +1,18 @@
 package com.hartwig.actin.personalization.ncr.interpretation.extractor
 
 import com.hartwig.actin.personalization.ncr.datamodel.TestNcrRecordFactory
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
 class NcrTumorExtractorTest {
 
-    private val baseRecord = TestNcrRecordFactory.properDiagnosisRecord()
-
     @Test
-    fun `Should extract diagnosis and episodes from NCR records`() {
-        val diagnosisRecord =
-            baseRecord.copy(identification = baseRecord.identification.copy(keyEid = 101, teller = 1, epis = "DIA", metaEpis = 0))
-        val records = listOf(diagnosisRecord)
-        val tumor = NcrTumorExtractor(NcrEpisodeExtractor(NcrSystemicTreatmentPlanExtractor())).extractTumor(records)
+    fun `Should extract tumor from diagnosis and followup NCR records`() {
+        val diagnosisRecord = TestNcrRecordFactory.properDiagnosisRecord()
+        val followupRecord = TestNcrRecordFactory.properFollowupRecord()
+
+        val tumor = NcrTumorExtractor.extractTumor(listOf(diagnosisRecord, followupRecord))
+        assertThat(tumor).isNotNull()
 //        assertThat(diagnosis).isEqualTo(
 //            Diagnosis(
 //                consolidatedTumorType = TumorType.CRC_ADENOCARCINOMA,
