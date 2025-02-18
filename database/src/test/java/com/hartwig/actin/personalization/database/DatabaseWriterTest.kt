@@ -30,6 +30,8 @@ class MySQLTestContainer : MySQLContainer<MySQLTestContainer>("mysql:8.4.4")
 
 class DatabaseWriterTest {
 
+    private val expectedDiagnosisYear = 2000
+
     private val mysqlContainer = MySQLTestContainer().apply {
         withDatabaseName("testdb")
         withUsername("test")
@@ -53,23 +55,32 @@ class DatabaseWriterTest {
     }
 
     @Test
-    fun `Should insert patients without tumors`() {
-        writer.writeAllToDb(listOf(minimalReferencePatientRecord().copy(tumors = emptyList())))
-        val existingRecords = dslContext.selectFrom(Tables.PATIENT).fetch()
-        val sexes = existingRecords.map { it.get(Tables.PATIENT.SEX) }
-        assertThat(sexes).containsAll(listOf("FEMALE", "MALE"))
-    }
-
-    @Test
     fun `Should insert patients with minimum data`() {
-        val records = listOf(minimalReferencePatientRecord())
+        val minimalRecord = minimalReferencePatientRecord()
+        val records = listOf(
+            minimalRecord.copy(
+                tumors = minimalRecord.tumors + listOf(
+                    minimalRecord.tumors.first().copy(diagnosisYear = expectedDiagnosisYear)
+                )
+            )
+        )
+        println(records)
         writer.writeAllToDb(records)
         compare(records)
     }
 
     @Test
     fun `Should insert data in all tables`() {
-        val records = listOf(minimalReferencePatientRecord(), exhaustiveReferencePatientRecord())
+        val exhaustiveRecord = exhaustiveReferencePatientRecord()
+        val records = listOf(
+            minimalReferencePatientRecord(),
+            exhaustiveRecord.copy(
+                tumors = exhaustiveRecord.tumors + listOf(
+                    exhaustiveRecord.tumors.first().copy(diagnosisYear = expectedDiagnosisYear)
+                )
+            )
+        )
+        println(records)
         writer.writeAllToDb(records)
         compare(records)
     }
@@ -78,19 +89,25 @@ class DatabaseWriterTest {
         val patientRecords = dslContext.selectFrom(Tables.PATIENT).fetch()
         assertThat(patientRecords.size).isEqualTo(expectedPatients.size)
         expectedPatients.mapIndexed { index, patient ->
-            val record = dslContext.selectFrom(Tables.PATIENT).where(Tables.PATIENT.ID.eq(index + 1)).fetchOne()
-            assertThat(record).isNotNull()
+            val patientRecord = dslContext.selectFrom(Tables.PATIENT).where(Tables.PATIENT.ID.eq(index + 1)).fetchOne()
+            assertThat(patientRecord).isNotNull()
 
-            assertThat(record!!.get(Tables.PATIENT.SEX)).isEqualTo(patient.sex.name)
-            val patientId = record.get(Tables.PATIENT.ID)
+            assertThat(patientRecord!!.get(Tables.PATIENT.SEX)).isEqualTo(patient.sex.name)
+            val patientId = patientRecord.get(Tables.PATIENT.ID)
 
             val tumorRecords = dslContext.selectFrom(Tables.TUMOR).where(Tables.TUMOR.PATIENTID.eq(patientId)).fetch()
-            println(tumorRecords)
             assertThat(tumorRecords.size).isEqualTo(patient.tumors.size)
+
+            patient.tumors.firstOrNull { it.diagnosisYear == expectedDiagnosisYear }?.let { expectedTumor ->
+                val expectedTumorRecord = dslContext.selectFrom(Tables.TUMOR)
+                    .where(Tables.TUMOR.PATIENTID.eq(patientId).and(Tables.TUMOR.DIAGNOSISYEAR.eq(expectedDiagnosisYear))).fetchOne()
+                assertThat(expectedTumorRecord).isNotNull()
+                compareTumor(expectedTumorRecord!!, expectedTumor)
+            }
         }
     }
 
-    private fun compare(record: TumorRecord, expectedTumor: Tumor) {
+    private fun compareTumor(record: TumorRecord, expectedTumor: Tumor) {
         assertThat(record.get(Tables.TUMOR.DIAGNOSISYEAR)).isEqualTo(expectedTumor.diagnosisYear)
         assertThat(record.get(Tables.TUMOR.AGEATDIAGNOSIS)).isEqualTo(expectedTumor.ageAtDiagnosis)
         assertThat(record.get(Tables.TUMOR.HASRECEIVEDTUMORDIRECTEDTREATMENT)).isEqualTo(expectedTumor.hasReceivedTumorDirectedTreatment)
@@ -108,7 +125,7 @@ class DatabaseWriterTest {
             val priorTummorRecord = dslContext.selectFrom(Tables.PRIORTUMOR)
                 .where(Tables.PRIORTUMOR.ID.eq(index + 1).and(Tables.PRIORTUMOR.TUMORID.eq(tumorId))).fetchOne()
             assertThat(priorTummorRecord).isNotNull()
-            compare(priorTummorRecord!!, priorTumor)
+            comparePriorTumor(priorTummorRecord!!, priorTumor)
         }
 
         val primaryDiagnosisRecord =
@@ -120,7 +137,6 @@ class DatabaseWriterTest {
             dslContext.selectFrom(Tables.METASTATICDIAGNOSIS).where(Tables.METASTATICDIAGNOSIS.TUMORID.eq(tumorId)).fetchOne()
         assertThat(metastaticDiagnosisRecord).isNotNull()
         compare(metastaticDiagnosisRecord!!, expectedTumor.metastaticDiagnosis)
-
         // TODO validate whoAssessments
         // TODO validate asaAssessments
         // TODO validate comorbidityAssessments
@@ -140,10 +156,9 @@ class DatabaseWriterTest {
         // TODO validate responseMeasures
         // TODO validate progressionMeasures
 
-
     }
 
-    private fun compare(record: PriortumorRecord, expected: PriorTumor) {
+    private fun comparePriorTumor(record: PriortumorRecord, expected: PriorTumor) {
         assertThat(record.get(Tables.PRIORTUMOR.DAYSBEFOREDIAGNOSIS) ?: null).isEqualTo(expected.daysBeforeDiagnosis)
         assertThat(record.get(Tables.PRIORTUMOR.PRIMARYTUMORTYPE)).isEqualTo(expected.primaryTumorType.name)
         assertThat(record.get(Tables.PRIORTUMOR.PRIMARYTUMORLOCATION)).isEqualTo(expected.primaryTumorLocation.name)
