@@ -51,15 +51,11 @@ class DatabaseWriter(private val context: DSLContext, private val connection: ja
         writeRecords("hipecTreatment", indexedTumors, ::hipecTreatmentFromTumor)
         writeRecords("primaryRadiotherapies", indexedTumors, ::primaryRadiotherapiesFromTumor)
         writeRecords("metastaticRadiotherapies", indexedTumors, ::metastaticRadiotherapiesFromTumor)
-        val systemicTreatmentsRecords =
-            writeRecordsAndReturnIndexedList("systemicTreatments", indexedTumors, Tables.SYSTEMICTREATMENT, ::systemicTreatmentsFromTumor)
-        val systemicTreatmentSchemesRecords = writeRecordsAndReturnIndexedList(
-            "systemicTreatmentSchemes",
-            systemicTreatmentsRecords,
-            Tables.SYSTEMICTREATMENTSCHEME,
-            ::systemicTreatmentSchemesFromSystemicTreatments
-        )
+
+        val systemicTreatmentsRecords = writeSystemicTreatments(indexedTumors)
+        val systemicTreatmentSchemesRecords = writeSystemicTreatmentSchemes(systemicTreatmentsRecords)
         writeRecords("systemicTreatmentDrugs", systemicTreatmentSchemesRecords, ::systemicTreatmentDrugFromSystemicTreatmentScheme)
+
         writeRecords("responseMeasures", indexedTumors, ::responseMeasuresFromTumor)
         writeRecords("progressionMeasures", indexedTumors, ::progressionMeasuresFromTumor)
 
@@ -92,22 +88,25 @@ class DatabaseWriter(private val context: DSLContext, private val connection: ja
     }
 
     private fun writeTumors(patientRecords: IndexedList<ReferencePatient>): IndexedList<Tumor> {
-        LOGGER.info { " Writing tumor records" }
+        LOGGER.info { "Writing tumor records" }
 
-        val (indexedRecords, rows) = patientRecords.flatMap { (patientId, referencePatient) ->
-            referencePatient.tumors.mapIndexed { index, tumor ->
+        val (indexedRecords, rows) = patientRecords
+            .flatMap { (patientId, referencePatient) ->
+                referencePatient.tumors.map { tumor -> patientId to tumor }
+            }
+            .withIndex()
+            .map { (index, pair) ->
+                val (patientId, tumor) = pair
                 val tumorId = index + 1
                 val dbRecord = context.newRecord(Tables.TUMOR)
                 dbRecord.from(tumor)
                 dbRecord.set(Tables.TUMOR.ID, tumorId)
                 dbRecord.set(Tables.TUMOR.PATIENTID, patientId)
                 dbRecord.set(
-                    Tables.TUMOR.REASONREFRAINMENTFROMTUMORDIRECTEDTREATMENT,
-                    tumor.reasonRefrainmentFromTumorDirectedTreatment?.name
+                    Tables.TUMOR.REASONREFRAINMENTFROMTUMORDIRECTEDTREATMENT, tumor.reasonRefrainmentFromTumorDirectedTreatment?.name
                 )
                 Pair(tumorId, tumor) to dbRecord
-            }
-        }.unzip()
+            }.unzip()
 
         insertRows(rows, "tumor")
         return indexedRecords
@@ -313,22 +312,50 @@ class DatabaseWriter(private val context: DSLContext, private val connection: ja
             }
         }
 
-    private fun systemicTreatmentsFromTumor(tumorId: Int, tumor: Tumor) =
-        tumor.systemicTreatments.map { data ->
-            val dbRecord = context.newRecord(Tables.SYSTEMICTREATMENT)
-            dbRecord.from(data)
-            dbRecord.set(Tables.SYSTEMICTREATMENT.TUMORID, tumorId)
-            dbRecord.set(Tables.SYSTEMICTREATMENT.TREATMENT, data.treatment.name)
-            data to dbRecord
-        }
+    private fun writeSystemicTreatments(tumorRecords: IndexedList<Tumor>): IndexedList<SystemicTreatment> {
+        LOGGER.info { "Writing SystemicTreatment records" }
 
-    private fun systemicTreatmentSchemesFromSystemicTreatments(systemicTreatmentId: Int, systemicTreatment: SystemicTreatment) =
-        systemicTreatment.systemicTreatmentSchemes.map { data ->
-            val dbRecord = context.newRecord(Tables.SYSTEMICTREATMENTSCHEME)
-            dbRecord.from(data)
-            dbRecord.set(Tables.SYSTEMICTREATMENTSCHEME.SYSTEMICTREATMENTID, systemicTreatmentId)
-            data to dbRecord
-        }
+        val (indexedRecords, rows) = tumorRecords
+            .flatMap { (tumorId, tumor) ->
+                tumor.systemicTreatments.map { treatment -> tumorId to treatment }
+            }
+            .withIndex()
+            .map { (index, pair) ->
+                val (tumorId, treatment) = pair
+                val treatmentId = index + 1
+                val dbRecord = context.newRecord(Tables.SYSTEMICTREATMENT)
+                dbRecord.from(treatment)
+                dbRecord.set(Tables.SYSTEMICTREATMENT.ID, treatmentId)
+                dbRecord.set(Tables.SYSTEMICTREATMENT.TUMORID, tumorId)
+                dbRecord.set(Tables.SYSTEMICTREATMENT.TREATMENT, treatment.treatment.name)
+                Pair(treatmentId, treatment) to dbRecord
+            }.unzip()
+
+        insertRows(rows, "systemicTreatment")
+        return indexedRecords
+    }
+
+    private fun writeSystemicTreatmentSchemes(systemicTreatmentRecords: IndexedList<SystemicTreatment>): IndexedList<SystemicTreatmentScheme> {
+        LOGGER.info { "Writing SystemicTreatmentScheme records" }
+
+        val (indexedRecords, rows) = systemicTreatmentRecords
+            .flatMap { (treatmentId, treatment) ->
+                treatment.systemicTreatmentSchemes.map { scheme -> treatmentId to scheme }
+            }
+            .withIndex()
+            .map { (index, pair) ->
+                val (treatmentId, scheme) = pair
+                val schemeId = index + 1
+                val dbRecord = context.newRecord(Tables.SYSTEMICTREATMENTSCHEME)
+                dbRecord.from(scheme)
+                dbRecord.set(Tables.SYSTEMICTREATMENTSCHEME.ID, schemeId)
+                dbRecord.set(Tables.SYSTEMICTREATMENTSCHEME.SYSTEMICTREATMENTID, treatmentId)
+                Pair(schemeId, scheme) to dbRecord
+            }.unzip()
+
+        insertRows(rows, "SystemicTreatmentScheme")
+        return indexedRecords
+    }
 
     private fun systemicTreatmentDrugFromSystemicTreatmentScheme(
         systemicTreatmentSchemeId: Int,

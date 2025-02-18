@@ -17,17 +17,16 @@ CREATE TABLE `tumor` (
     `reasonRefrainmentFromTumorDirectedTreatment` VARCHAR(255),
     `hasParticipatedInTrial` BOOL,
     FOREIGN KEY (`patientId`) REFERENCES `patient`(`id`),
-    PRIMARY KEY (`id`, `patientId`)
+    PRIMARY KEY (`id`)
 );
 
 DROP TABLE IF EXISTS `survivalMeasure`;
 CREATE TABLE `survivalMeasure` (
-    `id` INT NOT NULL AUTO_INCREMENT,
-    `tumorId` INT UNIQUE NOT NULL,
+    `tumorId` INT NOT NULL,
     `daysSinceDiagnosis` INT NOT NULL,
     `isAlive` BOOL NOT NULL,
     FOREIGN KEY (`tumorId`) REFERENCES `tumor`(`id`),
-    PRIMARY KEY (`id`)
+    PRIMARY KEY (`tumorId`)
 );
 
 DROP TABLE IF EXISTS `priorTumor`;
@@ -251,7 +250,7 @@ CREATE TABLE `systemicTreatment` (
     `daysBetweenDiagnosisAndStop` INT,
     `treatment` VARCHAR(50) NOT NULL,
     FOREIGN KEY (`tumorId`) REFERENCES `tumor`(`id`),
-    PRIMARY KEY (`id`, `tumorId`)
+    PRIMARY KEY (`id`)
 );
 
 DROP TABLE IF EXISTS `systemicTreatmentScheme`;
@@ -263,7 +262,7 @@ CREATE TABLE `systemicTreatmentScheme` (
     `minDaysBetweenDiagnosisAndStop` INT,
     `maxDaysBetweenDiagnosisAndStop` INT,
     FOREIGN KEY (`systemicTreatmentId`) REFERENCES `systemicTreatment`(`id`),
-    PRIMARY KEY (`id`, `systemicTreatmentId`)
+    PRIMARY KEY (`id`)
 );
 
 
