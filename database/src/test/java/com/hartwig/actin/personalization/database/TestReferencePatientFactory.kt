@@ -350,5 +350,4 @@ object TestReferencePatientFactory {
     fun exhaustiveReferencePatientRecord() = ReferencePatient(
         sex = Sex.MALE, tumors = listOf(exhaustiveTumor(), minimalTumor())
     )
-
 }
