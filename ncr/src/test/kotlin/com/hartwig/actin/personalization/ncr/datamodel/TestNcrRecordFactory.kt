@@ -17,6 +17,10 @@ object TestNcrRecordFactory {
         return baseRecord.copy(identification = baseRecord.identification.copy(epis = FOLLOWUP_EPIS))
     }
 
+    fun properTumorRecords(): List<NcrRecord> {
+        return listOf(properDiagnosisRecord(), properFollowupRecord1(), properFollowupRecord2())
+    }
+
     fun properDiagnosisRecord(): NcrRecord {
         val baseRecord = properRecord()
         return baseRecord
@@ -223,13 +227,14 @@ object TestNcrRecordFactory {
 
     private fun properPriorMalignancies(): NcrPriorMalignancies {
         return minimalPriorMalignancies().copy(
-            mal1Int = 20,
+            mal1Int = -206,
             mal1TopoSublok = "C446",
             mal1Morf = 8720,
             mal1Tumsoort = 400000,
             mal1Stadium = "2C",
             mal1Syst = 1,
-            mal1SystCode1 = "214000"
+            mal1SystCode1 = "420000",
+            mal1SystCode2 = "699005"
         )
     }
 

@@ -69,12 +69,12 @@ object NcrPriorTumorExtractor {
         primaryTumorStageCode: String?,
         drugs: List<String>
     ): PriorTumor? {
-        return primaryTumorTypeCode?.let {
-            if (primaryTumorLocationCode == null || primaryTumorLocationCategoryCode == null) {
+        return daysSinceDiagnosis?.let {
+            if (primaryTumorTypeCode == null || primaryTumorLocationCode == null || primaryTumorLocationCategoryCode == null) {
                 throw IllegalStateException("Missing location information for prior tumor with ID $id")
             }
             PriorTumor(
-                daysBeforeDiagnosis = daysSinceDiagnosis?.let { -1 * daysSinceDiagnosis },
+                daysBeforeDiagnosis = -1 * daysSinceDiagnosis,
                 primaryTumorType = NcrTumorTypeMapper.resolve(primaryTumorTypeCode),
                 primaryTumorLocation = NcrTumorLocationMapper.resolveTumorLocation(primaryTumorLocationCode),
                 primaryTumorLocationCategory = NcrTumorLocationCategoryMapper.resolve(primaryTumorLocationCategoryCode),

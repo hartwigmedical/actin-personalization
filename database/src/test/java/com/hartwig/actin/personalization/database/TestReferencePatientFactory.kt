@@ -66,7 +66,7 @@ import com.hartwig.actin.personalization.datamodel.treatment.TreatmentIntent
 object TestReferencePatientFactory {
 
     private fun minimalPriorTumor() = PriorTumor(
-        daysBeforeDiagnosis = null,
+        daysBeforeDiagnosis = 120,
         primaryTumorType = TumorType.GASTROINTESTINAL_STROMAL_TUMOR,
         primaryTumorLocation = TumorLocation.ABDOMEN_NOS,
         primaryTumorLocationCategory = TumorLocationCategory.DIGESTIVE_TRACT,
