@@ -33,7 +33,7 @@ DROP TABLE IF EXISTS `priorTumor`;
 CREATE TABLE `priorTumor` (
     `id` INT NOT NULL,
     `tumorId` INT NOT NULL,
-    `daysBeforeDiagnosis` INT,
+    `daysBeforeDiagnosis` INT NOT NULL,
     `primaryTumorType` VARCHAR(255) NOT NULL,
     `primaryTumorLocation` VARCHAR(255) NOT NULL,
     `primaryTumorLocationCategory` VARCHAR(50) NOT NULL,
