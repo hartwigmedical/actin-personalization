@@ -247,7 +247,7 @@ object TestNcrRecordFactory {
             topoSublok = "C182",
             morfCat = 1,
             diagBasis = 1,
-            diffgrad = "2",
+            diffgrad = 2,
             ct = null,
             cn = null,
             cm = null,

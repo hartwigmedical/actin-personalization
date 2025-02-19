@@ -1,11 +1,13 @@
 package com.hartwig.actin.personalization.ncr.interpretation.extractor
 
 import com.hartwig.actin.personalization.datamodel.diagnosis.PrimaryDiagnosis
-import com.hartwig.actin.personalization.datamodel.diagnosis.TumorBasisOfDiagnosis
-import com.hartwig.actin.personalization.datamodel.diagnosis.TumorLocation
+import com.hartwig.actin.personalization.datamodel.diagnosis.TnmClassification
 import com.hartwig.actin.personalization.ncr.datamodel.NcrRecord
 import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrAnorectalVergeDistanceCategoryMapper
 import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrBooleanMapper
+import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrTumorBasisOfDiagnosisMapper
+import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrTumorDifferentiationGradeMapper
+import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrTumorLocationMapper
 import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrTumorTypeMapper
 import com.hartwig.actin.personalization.ncr.util.NcrFunctions
 
@@ -15,14 +17,21 @@ object NcrPrimaryDiagnosisExtractor {
         val diagnosis = NcrFunctions.diagnosisRecord(records)
 
         return PrimaryDiagnosis(
-            basisOfDiagnosis = TumorBasisOfDiagnosis.HISTOLOGICAL_CONFIRMATION,
-            hasDoublePrimaryTumor = null,
+            basisOfDiagnosis = NcrTumorBasisOfDiagnosisMapper.resolve(diagnosis.primaryDiagnosis.diagBasis),
+            hasDoublePrimaryTumor = NcrBooleanMapper.resolve(diagnosis.clinicalCharacteristics.dubbeltum)!!,
             primaryTumorType = NcrTumorTypeMapper.resolve(diagnosis.primaryDiagnosis.morfCat!!),
-            primaryTumorLocation = TumorLocation.DESCENDING_COLON,
-            differentiationGrade = null,
+            primaryTumorLocation = NcrTumorLocationMapper.resolveTumorLocation(diagnosis.primaryDiagnosis.topoSublok),
+            differentiationGrade = NcrTumorDifferentiationGradeMapper.resolve(diagnosis.primaryDiagnosis.diffgrad),
 
-            clinicalTnmClassification = null,
-            pathologicalTnmClassification = null,
+//            tnmCT = NcrTnmTMapper.resolveNullable(primaryDiagnosis.ct),
+//            tnmCN = NcrTnmNMapper.resolveNullable(primaryDiagnosis.cn),
+//            tnmCM = NcrTnmMMapper.resolveNullable(primaryDiagnosis.cm),
+//            tnmPT = NcrTnmTMapper.resolveNullable(primaryDiagnosis.pt),
+//            tnmPN = NcrTnmNMapper.resolveNullable(primaryDiagnosis.pn),
+//            tnmPM = NcrTnmMMapper.resolveNullable(primaryDiagnosis.pm),
+
+            clinicalTnmClassification = TnmClassification(null, null, null),
+            pathologicalTnmClassification = TnmClassification(null, null, null),
             clinicalTumorStage = null,
             pathologicalTumorStage = null,
             investigatedLymphNodesCount = null,
@@ -41,22 +50,14 @@ object NcrPrimaryDiagnosisExtractor {
             mesorectalFasciaIsClear = null,
             distanceToMesorectalFasciaMm = null
         )
-
-        //        val episodes = records.map { record ->
-//            episodeExtractor.extractEpisode(record, intervalTumorIncidenceLatestAliveStatus)
-//        }.sortedBy(Episode::order)
-//
-//        val orderOfFirstDistantMetastasesEpisode = episodes.firstOrNull { episode ->
-//            episode.distantMetastasesDetectionStatus in setOf(
-//                MetastasesDetectionStatus.AT_START,
-//                MetastasesDetectionStatus.AT_PROGRESSION
-//            )
-//        }?.order ?: throw IllegalStateException("orderOfFirstDistantMetastasesEpisode is not allowed to be null")
-//        val locations = episodes.map(Episode::tumorLocation).toSet()
-//
-//            Diagnosis(
-//                tumorLocations = locations,
-    //            )
-//        }
     }
+
+//    fun extractTnmClassification(record : NcrRecord) :  {
+//        return TnmClassification(
+//            NcrTnmTMapper . resolveNullable (primaryDiagnosis.ct),
+//        tnmCN = NcrTnmNMapper.resolveNullable(primaryDiagnosis.cn),
+//        tnmCM = NcrTnmMMapper.resolveNullable(primaryDiagnosis.cm),
+//
+//        )
+//    }
 }

@@ -5,13 +5,13 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class PrimaryDiagnosis(
     val basisOfDiagnosis: TumorBasisOfDiagnosis,
-    val hasDoublePrimaryTumor: Boolean? = null,
+    val hasDoublePrimaryTumor: Boolean,
     val primaryTumorType: TumorType,
     val primaryTumorLocation: TumorLocation,
-    val differentiationGrade: TumorDifferentiationGrade? = null,
+    val differentiationGrade: TumorDifferentiationGrade?,
 
-    val clinicalTnmClassification: TnmClassification? = null,
-    val pathologicalTnmClassification: TnmClassification? = null,
+    val clinicalTnmClassification: TnmClassification,
+    val pathologicalTnmClassification: TnmClassification,
     val clinicalTumorStage: TumorStage? = null,
     val pathologicalTumorStage: TumorStage? = null,
     val investigatedLymphNodesCount: Int? = null,

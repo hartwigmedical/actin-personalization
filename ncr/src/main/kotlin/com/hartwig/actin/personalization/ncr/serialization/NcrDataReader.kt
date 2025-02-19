@@ -151,7 +151,7 @@ object NcrDataReader {
             topoSublok = extractor.mandatoryString("topo_sublok"),
             morfCat = extractor.optionalInt("morf_cat"),
             diagBasis = extractor.mandatoryInt("diag_basis"),
-            diffgrad = extractor.mandatoryString("diffgrad"),
+            diffgrad = extractor.mandatoryInt("diffgrad"),
             ct = extractor.optionalString("ct"),
             cn = extractor.optionalString("cn"),
             cm = extractor.optionalString("cm"),
