@@ -3,10 +3,6 @@ package com.hartwig.actin.personalization.ncr.interpretation.extractor
 import com.hartwig.actin.personalization.datamodel.Tumor
 import com.hartwig.actin.personalization.datamodel.diagnosis.MetastasesDetectionStatus
 import com.hartwig.actin.personalization.datamodel.diagnosis.MetastaticDiagnosis
-import com.hartwig.actin.personalization.datamodel.diagnosis.PrimaryDiagnosis
-import com.hartwig.actin.personalization.datamodel.diagnosis.TumorBasisOfDiagnosis
-import com.hartwig.actin.personalization.datamodel.diagnosis.TumorLocation
-import com.hartwig.actin.personalization.datamodel.diagnosis.TumorType
 import com.hartwig.actin.personalization.datamodel.outcome.SurvivalMeasure
 import com.hartwig.actin.personalization.datamodel.treatment.HipecTreatment
 import com.hartwig.actin.personalization.ncr.datamodel.NcrRecord
@@ -16,18 +12,14 @@ import com.hartwig.actin.personalization.ncr.util.NcrFunctions
 object NcrTumorExtractor {
 
     fun extractTumor(records: List<NcrRecord>): Tumor {
-        val diagnosisRecord = NcrFunctions.diagnosisRecord(records)
+        val diagnosis = NcrFunctions.diagnosisRecord(records)
 
         return Tumor(
-            diagnosisYear = diagnosisRecord.primaryDiagnosis.incjr,
-            ageAtDiagnosis = diagnosisRecord.patientCharacteristics.leeft,
-            latestSurvivalStatus = extractLatestSurvivalMeasure(diagnosisRecord),
+            diagnosisYear = diagnosis.primaryDiagnosis.incjr,
+            ageAtDiagnosis = diagnosis.patientCharacteristics.leeft,
+            latestSurvivalStatus = extractLatestSurvivalMeasure(diagnosis),
             priorTumors = NcrPriorTumorExtractor.extract(records),
-            primaryDiagnosis = PrimaryDiagnosis(
-                basisOfDiagnosis = TumorBasisOfDiagnosis.HISTOLOGICAL_CONFIRMATION,
-                primaryTumorType = TumorType.ADENOCARCINOMA_DIFFUSE_TYPE,
-                primaryTumorLocation = TumorLocation.DESCENDING_COLON
-            ),
+            primaryDiagnosis = NcrPrimaryDiagnosisExtractor.extract(records),
             metastaticDiagnosis = MetastaticDiagnosis(
                 distantMetastasesDetectionStatus = MetastasesDetectionStatus.AT_START,
                 metastases = listOf()
@@ -48,7 +40,6 @@ object NcrTumorExtractor {
 //            )
 //        }?.order ?: throw IllegalStateException("orderOfFirstDistantMetastasesEpisode is not allowed to be null")
 //        val locations = episodes.map(Episode::tumorLocation).toSet()
-//        val priorTumors = extractPriorTumors(diagnosisRecord)
 //
 //        val diagnosis = with(diagnosisRecord) {
 //            val (hasBrafMutation, hasBrafV600EMutation) = when (molecularCharacteristics.brafMut) {
@@ -72,11 +63,6 @@ object NcrTumorExtractor {
 //                consolidatedTumorType = NcrTumorTypeMapper.resolve(diagnosisRecord.primaryDiagnosis.morfCat!!),
 //                tumorLocations = locations,
 //                hasHadTumorDirectedSystemicTherapy = episodes.any(Episode::hasReceivedTumorDirectedTreatment),
-//                ageAtDiagnosis = patientCharacteristics.leeft,
-//                observedOsFromTumorIncidenceDays = intervalTumorIncidenceLatestAliveStatus,
-//                hadSurvivalEvent = patientCharacteristics.vitStat!! == 1,
-//                hasHadPriorTumor = priorTumors.isNotEmpty(),
-//                priorTumors = priorTumors,
 //                orderOfFirstDistantMetastasesEpisode = orderOfFirstDistantMetastasesEpisode,
 //                isMetachronous = orderOfFirstDistantMetastasesEpisode > 1,
 //                cci = comorbidities.cci,

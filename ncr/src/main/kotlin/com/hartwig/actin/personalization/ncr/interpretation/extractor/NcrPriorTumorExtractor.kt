@@ -12,9 +12,9 @@ import com.hartwig.actin.personalization.ncr.util.NcrFunctions
 object NcrPriorTumorExtractor {
 
     fun extract(records: List<NcrRecord>): List<PriorTumor> {
-        val diagnosisRecord = NcrFunctions.diagnosisRecord(records)
+        val diagnosis = NcrFunctions.diagnosisRecord(records)
 
-        return with(diagnosisRecord.priorMalignancies) {
+        return with(diagnosis.priorMalignancies) {
             listOfNotNull(
                 extractPriorTumor(
                     1,
