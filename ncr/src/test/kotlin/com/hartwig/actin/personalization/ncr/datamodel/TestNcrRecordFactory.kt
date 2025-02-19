@@ -6,25 +6,58 @@ object TestNcrRecordFactory {
     private const val FOLLOWUP_EPIS = "VERB"
 
     fun minimalDiagnosisRecord(): NcrRecord {
-        val baseRecord =  minimalRecord()
+        val baseRecord = minimalRecord()
         return baseRecord
             .copy(identification = baseRecord.identification.copy(epis = DIAGNOSIS_EPIS))
-            .copy(patientCharacteristics = baseRecord.patientCharacteristics.copy(vitStat = 0, vitStatInt = 200))
+            .copy(patientCharacteristics = baseRecord.patientCharacteristics.copy(vitStat = 0, vitStatInt = 563))
     }
 
     fun minimalFollowupRecord(): NcrRecord {
-        val baseRecord =  minimalRecord()
+        val baseRecord = minimalRecord()
         return baseRecord.copy(identification = baseRecord.identification.copy(epis = FOLLOWUP_EPIS))
     }
 
     fun properDiagnosisRecord(): NcrRecord {
         val baseRecord = properRecord()
-        return baseRecord.copy(identification = baseRecord.identification.copy(epis = DIAGNOSIS_EPIS))
+        return baseRecord
+            .copy(identification = baseRecord.identification.copy(epis = DIAGNOSIS_EPIS, metaEpis = 0, teller = 1))
+            .copy(metastaticDiagnosis = minimalMetastaticDiagnosis())
     }
 
-    fun properFollowupRecord(): NcrRecord {
+    fun properFollowupRecord1(): NcrRecord {
         val baseRecord = properRecord()
-        return baseRecord.copy(identification = baseRecord.identification.copy(epis = FOLLOWUP_EPIS))
+        return baseRecord
+            .copy(identification = baseRecord.identification.copy(epis = FOLLOWUP_EPIS, metaEpis = 0, teller = 2))
+            .copy(
+                patientCharacteristics = baseRecord.patientCharacteristics.copy(
+                    vitStat = null,
+                    vitStatInt = null,
+                    perfStat = null,
+                    asa = null
+                )
+            )
+            .copy(clinicalCharacteristics = minimalClinicalCharacteristics())
+            .copy(molecularCharacteristics = minimalMolecularCharacteristics())
+            .copy(metastaticDiagnosis = minimalMetastaticDiagnosis())
+            .copy(comorbidities = minimalComorbidities())
+
+    }
+
+    fun properFollowupRecord2(): NcrRecord {
+        val baseRecord = properRecord()
+        return baseRecord
+            .copy(identification = baseRecord.identification.copy(epis = FOLLOWUP_EPIS, metaEpis = 1, teller = 3))
+            .copy(
+                patientCharacteristics = baseRecord.patientCharacteristics.copy(
+                    vitStat = null,
+                    vitStatInt = null,
+                    perfStat = null,
+                    asa = null
+                )
+            )
+            .copy(clinicalCharacteristics = minimalClinicalCharacteristics())
+            .copy(molecularCharacteristics = minimalMolecularCharacteristics())
+            .copy(comorbidities = minimalComorbidities())
     }
 
     private fun minimalRecord(): NcrRecord {
@@ -91,7 +124,7 @@ object TestNcrRecordFactory {
     private fun properPatientCharacteristics(): NcrPatientCharacteristics {
         return minimalPatientCharacteristics().copy(
             vitStat = 0,
-            vitStatInt = 80,
+            vitStatInt = 563,
             perfStat = 1,
             asa = 5
         )

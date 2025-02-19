@@ -7,64 +7,26 @@ import org.junit.jupiter.api.Test
 class NcrTumorExtractorTest {
 
     @Test
-    fun `Should extract tumor from diagnosis and followup NCR records`() {
-        val diagnosisRecord = TestNcrRecordFactory.properDiagnosisRecord()
-        val followupRecord = TestNcrRecordFactory.properFollowupRecord()
+    fun `Should extract tumor from minimal diagnosis NCR record`() {
+        val tumor = NcrTumorExtractor.extractTumor(listOf(TestNcrRecordFactory.minimalDiagnosisRecord()))
+        assertThat(tumor.diagnosisYear).isEqualTo(2020)
+        assertThat(tumor.ageAtDiagnosis).isEqualTo(75)
+        assertThat(tumor.latestSurvivalStatus.daysSinceDiagnosis).isEqualTo(563)
+        assertThat(tumor.latestSurvivalStatus.isAlive).isTrue()
+    }
 
-        val tumor = NcrTumorExtractor.extractTumor(listOf(diagnosisRecord, followupRecord))
-        assertThat(tumor).isNotNull()
-//        assertThat(diagnosis).isEqualTo(
-//            Diagnosis(
-//                consolidatedTumorType = TumorType.CRC_ADENOCARCINOMA,
-//                tumorLocatilons = setOf(Location.ASCENDING_COLON),
-//                hasHadTumorDirectedSystemicTherapy = false,
-//                sidedness = Sidedness.RIGHT,
-//                ageAtDiagnosis = 50,
-//                observedOsFromTumorIncidenceDays = 80,
-//                hadSurvivalEvent = false,
-//                hasHadPriorTumor = true,
-//                priorTumors = listOf(
-//                    PriorTumor(
-//                        consolidatedTumorType = TumorType.MELANOMA,
-//                        tumorLocations = setOf(Location.SKIN_SHOULDER_ARM_HAND),
-//                        hasHadTumorDirectedSystemicTherapy = true,
-//                        intervalTumorIncidencePriorTumorDays = 20,
-//                        tumorPriorId = 1,
-//                        tumorLocationCategory = TumorLocationCategory.SKIN,
-//                        stageTNM = StageTnm.IIC,
-//                        systemicTreatments = listOf(Drug.EXTERNAL_RADIOTHERAPY_WITH_SENSITIZER)
-//                    )
-//                ),
-//                orderOfFirstDistantMetastasesEpisode = 2,
-//                isMetachronous = true,
-//                cci = 1,
-//                cciNumberOfCategories = NumberOfCciCategories.ONE_CATEGORY,
-//                cciHasAids = null,
-//                cciHasCongestiveHeartFailure = true,
-//                cciHasCollagenosis = null,
-//                cciHasCopd = false,
-//                cciHasCerebrovascularDisease = null,
-//                cciHasDementia = null,
-//                cciHasDiabetesMellitus = null,
-//                cciHasDiabetesMellitusWithEndOrganDamage = null,
-//                cciHasOtherMalignancy = null,
-//                cciHasOtherMetastaticSolidTumor = null,
-//                cciHasMyocardialInfarct = null,
-//                cciHasMildLiverDisease = null,
-//                cciHasHemiplegiaOrParaplegia = null,
-//                cciHasPeripheralVascularDisease = null,
-//                cciHasRenalDisease = null,
-//                cciHasLiverDisease = null,
-//                cciHasUlcerDisease = null,
-//                presentedWithIleus = false,
-//                presentedWithPerforation = true,
-//                anorectalVergeDistanceCategory = AnorectalVergeDistanceCategory.FIVE_TO_TEN_CM,
-//                hasMsi = true,
-//                hasBrafMutation = true,
-//                hasBrafV600EMutation = null,
-//                hasRasMutation = true,
-//                hasKrasG12CMutation = true
-//            )
-//        )
+    @Test
+    fun `Should extract tumor from proper diagnosis and followup NCR records`() {
+        val records = listOf(
+            TestNcrRecordFactory.properDiagnosisRecord(),
+            TestNcrRecordFactory.properFollowupRecord1(),
+            TestNcrRecordFactory.properFollowupRecord2()
+        )
+
+        val tumor = NcrTumorExtractor.extractTumor(records)
+        assertThat(tumor.diagnosisYear).isEqualTo(2020)
+        assertThat(tumor.ageAtDiagnosis).isEqualTo(75)
+        assertThat(tumor.latestSurvivalStatus.daysSinceDiagnosis).isEqualTo(563)
+        assertThat(tumor.latestSurvivalStatus.isAlive).isTrue()
     }
 }
