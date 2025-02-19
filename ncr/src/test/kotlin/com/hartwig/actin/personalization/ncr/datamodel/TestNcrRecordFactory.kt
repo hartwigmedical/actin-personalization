@@ -9,12 +9,14 @@ object TestNcrRecordFactory {
         val baseRecord = minimalRecord()
         return baseRecord
             .copy(identification = baseRecord.identification.copy(epis = DIAGNOSIS_EPIS))
-            .copy(patientCharacteristics = baseRecord.patientCharacteristics.copy(vitStat = 0, vitStatInt = 563))
     }
 
     fun minimalFollowupRecord(): NcrRecord {
         val baseRecord = minimalRecord()
-        return baseRecord.copy(identification = baseRecord.identification.copy(epis = FOLLOWUP_EPIS))
+        return baseRecord
+            .copy(identification = baseRecord.identification.copy(epis = FOLLOWUP_EPIS))
+            .copy(patientCharacteristics = baseRecord.patientCharacteristics.copy(vitStat = null, vitStatInt = null))
+            .copy(primaryDiagnosis = baseRecord.primaryDiagnosis.copy(morfCat = null))
     }
 
     fun properTumorRecords(): List<NcrRecord> {
@@ -42,9 +44,10 @@ object TestNcrRecordFactory {
             )
             .copy(clinicalCharacteristics = minimalClinicalCharacteristics())
             .copy(molecularCharacteristics = minimalMolecularCharacteristics())
+            .copy(priorMalignancies = minimalPriorMalignancies())
+            .copy(primaryDiagnosis = baseRecord.primaryDiagnosis.copy(morfCat = null))
             .copy(metastaticDiagnosis = minimalMetastaticDiagnosis())
             .copy(comorbidities = minimalComorbidities())
-
     }
 
     fun properFollowupRecord2(): NcrRecord {
@@ -61,6 +64,8 @@ object TestNcrRecordFactory {
             )
             .copy(clinicalCharacteristics = minimalClinicalCharacteristics())
             .copy(molecularCharacteristics = minimalMolecularCharacteristics())
+            .copy(priorMalignancies = minimalPriorMalignancies())
+            .copy(primaryDiagnosis = baseRecord.primaryDiagnosis.copy(morfCat = null))
             .copy(comorbidities = minimalComorbidities())
     }
 
@@ -118,8 +123,8 @@ object TestNcrRecordFactory {
         return NcrPatientCharacteristics(
             gesl = 2,
             leeft = 75,
-            vitStat = null,
-            vitStatInt = null,
+            vitStat = 0,
+            vitStatInt = 563,
             perfStat = null,
             asa = null
         )
@@ -127,8 +132,6 @@ object TestNcrRecordFactory {
 
     private fun properPatientCharacteristics(): NcrPatientCharacteristics {
         return minimalPatientCharacteristics().copy(
-            vitStat = 0,
-            vitStatInt = 563,
             perfStat = 1,
             asa = 5
         )
@@ -242,7 +245,7 @@ object TestNcrRecordFactory {
         return NcrPrimaryDiagnosis(
             incjr = 2020,
             topoSublok = "C182",
-            morfCat = null,
+            morfCat = 1,
             diagBasis = 1,
             diffgrad = "2",
             ct = null,
@@ -261,7 +264,6 @@ object TestNcrRecordFactory {
 
     private fun properPrimaryDiagnosis(): NcrPrimaryDiagnosis {
         return minimalPrimaryDiagnosis().copy(
-            morfCat = 1,
             ct = "0",
             cn = "1A",
             cm = "-",
