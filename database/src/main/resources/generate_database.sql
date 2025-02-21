@@ -51,7 +51,7 @@ CREATE TABLE `primaryDiagnosis` (
     `hasDoublePrimaryTumor` BOOL NOT NULL,
     `primaryTumorType` VARCHAR(255) NOT NULL,
     `primaryTumorLocation` VARCHAR(255) NOT NULL,
-    `differentiationGrade` VARCHAR(255) NOT NULL,
+    `differentiationGrade` VARCHAR(255),
     `clinicalTnmClassification` JSON NOT NULL,
     `pathologicalTnmClassification` JSON NOT NULL,
     `clinicalTumorStage` VARCHAR(50),

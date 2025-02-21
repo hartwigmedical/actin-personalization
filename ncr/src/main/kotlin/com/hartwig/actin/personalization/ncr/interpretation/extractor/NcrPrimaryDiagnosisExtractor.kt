@@ -5,6 +5,9 @@ import com.hartwig.actin.personalization.datamodel.diagnosis.TnmClassification
 import com.hartwig.actin.personalization.ncr.datamodel.NcrRecord
 import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrAnorectalVergeDistanceCategoryMapper
 import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrBooleanMapper
+import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrTnmMMapper
+import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrTnmNMapper
+import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrTnmTMapper
 import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrTumorBasisOfDiagnosisMapper
 import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrTumorDifferentiationGradeMapper
 import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrTumorLocationMapper
@@ -23,15 +26,8 @@ object NcrPrimaryDiagnosisExtractor {
             primaryTumorLocation = NcrTumorLocationMapper.resolveTumorLocation(diagnosis.primaryDiagnosis.topoSublok),
             differentiationGrade = NcrTumorDifferentiationGradeMapper.resolve(diagnosis.primaryDiagnosis.diffgrad),
 
-//            tnmCT = NcrTnmTMapper.resolveNullable(primaryDiagnosis.ct),
-//            tnmCN = NcrTnmNMapper.resolveNullable(primaryDiagnosis.cn),
-//            tnmCM = NcrTnmMMapper.resolveNullable(primaryDiagnosis.cm),
-//            tnmPT = NcrTnmTMapper.resolveNullable(primaryDiagnosis.pt),
-//            tnmPN = NcrTnmNMapper.resolveNullable(primaryDiagnosis.pn),
-//            tnmPM = NcrTnmMMapper.resolveNullable(primaryDiagnosis.pm),
-
-            clinicalTnmClassification = TnmClassification(null, null, null),
-            pathologicalTnmClassification = TnmClassification(null, null, null),
+            clinicalTnmClassification = extractClinicalTnmClassification(diagnosis),
+            pathologicalTnmClassification = extractPathologicalTnmClassification(diagnosis),
             clinicalTumorStage = null,
             pathologicalTumorStage = null,
             investigatedLymphNodesCount = null,
@@ -52,12 +48,19 @@ object NcrPrimaryDiagnosisExtractor {
         )
     }
 
-//    fun extractTnmClassification(record : NcrRecord) :  {
-//        return TnmClassification(
-//            NcrTnmTMapper . resolveNullable (primaryDiagnosis.ct),
-//        tnmCN = NcrTnmNMapper.resolveNullable(primaryDiagnosis.cn),
-//        tnmCM = NcrTnmMMapper.resolveNullable(primaryDiagnosis.cm),
-//
-//        )
-//    }
+    private fun extractClinicalTnmClassification(record: NcrRecord): TnmClassification {
+        return extractTnmClassification(record.primaryDiagnosis.ct, record.primaryDiagnosis.cn, record.primaryDiagnosis.cm)
+    }
+
+    private fun extractPathologicalTnmClassification(record: NcrRecord): TnmClassification {
+        return extractTnmClassification(record.primaryDiagnosis.pt, record.primaryDiagnosis.pn, record.primaryDiagnosis.pm)
+    }
+
+    private fun extractTnmClassification(tCode: String?, nCode: String?, mCode: String?): TnmClassification {
+        return TnmClassification(
+            tumor = NcrTnmTMapper.resolveNullable(tCode),
+            lymphNodes = NcrTnmNMapper.resolveNullable(nCode),
+            metastasis = NcrTnmMMapper.resolveNullable(mCode)
+        )
+    }
 }

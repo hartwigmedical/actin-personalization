@@ -85,8 +85,12 @@ object TestReferencePatientFactory {
 
     private fun minimalPrimaryDiagnosis() = PrimaryDiagnosis(
         basisOfDiagnosis = TumorBasisOfDiagnosis.HISTOLOGICAL_CONFIRMATION,
+        hasDoublePrimaryTumor = false,
         primaryTumorType = TumorType.CRC_OTHER,
-        primaryTumorLocation = TumorLocation.DESCENDING_COLON
+        primaryTumorLocation = TumorLocation.DESCENDING_COLON,
+        differentiationGrade = null,
+        clinicalTnmClassification = TnmClassification(tumor = TnmT.T2, lymphNodes = TnmN.N1, metastasis = null),
+        pathologicalTnmClassification = TnmClassification(tumor = TnmT.T3, lymphNodes = null, metastasis = TnmM.M1)
     )
 
     private fun exhaustivePrimaryDiagnosis() = PrimaryDiagnosis(

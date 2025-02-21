@@ -139,7 +139,7 @@ object TestNcrRecordFactory {
 
     private fun minimalClinicalCharacteristics(): NcrClinicalCharacteristics {
         return NcrClinicalCharacteristics(
-            dubbeltum = null,
+            dubbeltum = 0,
             ileus = null,
             perforatie = null,
             anusAfst = null,
@@ -153,7 +153,6 @@ object TestNcrRecordFactory {
 
     private fun properClinicalCharacteristics(): NcrClinicalCharacteristics {
         return minimalClinicalCharacteristics().copy(
-            dubbeltum = 0,
             ileus = 0,
             perforatie = 1,
             anusAfst = 2,
