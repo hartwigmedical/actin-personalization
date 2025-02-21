@@ -3,12 +3,12 @@ package com.hartwig.actin.personalization.datamodel.serialization
 import com.hartwig.actin.personalization.datamodel.ReferencePatient
 import com.hartwig.actin.personalization.datamodel.Sex
 import com.hartwig.actin.personalization.datamodel.Tumor
+import com.hartwig.actin.personalization.datamodel.diagnosis.BasisOfDiagnosis
 import com.hartwig.actin.personalization.datamodel.diagnosis.MetastasesDetectionStatus
 import com.hartwig.actin.personalization.datamodel.diagnosis.MetastaticDiagnosis
 import com.hartwig.actin.personalization.datamodel.diagnosis.PrimaryDiagnosis
 import com.hartwig.actin.personalization.datamodel.diagnosis.PriorTumor
 import com.hartwig.actin.personalization.datamodel.diagnosis.TnmClassification
-import com.hartwig.actin.personalization.datamodel.diagnosis.TumorBasisOfDiagnosis
 import com.hartwig.actin.personalization.datamodel.diagnosis.TumorLocation
 import com.hartwig.actin.personalization.datamodel.diagnosis.TumorLocationCategory
 import com.hartwig.actin.personalization.datamodel.diagnosis.TumorStage
@@ -31,7 +31,7 @@ private val GIST_PRIOR_TUMOR = PriorTumor(
 )
 
 private val PRIMARY_DIAGNOSIS = PrimaryDiagnosis(
-    basisOfDiagnosis = TumorBasisOfDiagnosis.HISTOLOGICAL_CONFIRMATION,
+    basisOfDiagnosis = BasisOfDiagnosis.HISTOLOGICAL_CONFIRMATION,
     hasDoublePrimaryTumor = false,
     primaryTumorType = TumorType.CRC_OTHER,
     primaryTumorLocation = TumorLocation.DESCENDING_COLON,

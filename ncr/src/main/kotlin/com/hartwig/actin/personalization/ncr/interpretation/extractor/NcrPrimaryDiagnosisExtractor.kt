@@ -4,12 +4,12 @@ import com.hartwig.actin.personalization.datamodel.diagnosis.PrimaryDiagnosis
 import com.hartwig.actin.personalization.datamodel.diagnosis.TnmClassification
 import com.hartwig.actin.personalization.ncr.datamodel.NcrRecord
 import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrAnorectalVergeDistanceCategoryMapper
+import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrBasisOfDiagnosisMapper
 import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrBooleanMapper
+import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrDifferentiationGradeMapper
 import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrTnmMMapper
 import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrTnmNMapper
 import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrTnmTMapper
-import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrTumorBasisOfDiagnosisMapper
-import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrTumorDifferentiationGradeMapper
 import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrTumorLocationMapper
 import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrTumorTypeMapper
 import com.hartwig.actin.personalization.ncr.util.NcrFunctions
@@ -20,11 +20,11 @@ object NcrPrimaryDiagnosisExtractor {
         val diagnosis = NcrFunctions.diagnosisRecord(records)
 
         return PrimaryDiagnosis(
-            basisOfDiagnosis = NcrTumorBasisOfDiagnosisMapper.resolve(diagnosis.primaryDiagnosis.diagBasis),
+            basisOfDiagnosis = NcrBasisOfDiagnosisMapper.resolve(diagnosis.primaryDiagnosis.diagBasis),
             hasDoublePrimaryTumor = NcrBooleanMapper.resolve(diagnosis.clinicalCharacteristics.dubbeltum)!!,
             primaryTumorType = NcrTumorTypeMapper.resolve(diagnosis.primaryDiagnosis.morfCat!!),
             primaryTumorLocation = NcrTumorLocationMapper.resolveTumorLocation(diagnosis.primaryDiagnosis.topoSublok),
-            differentiationGrade = NcrTumorDifferentiationGradeMapper.resolve(diagnosis.primaryDiagnosis.diffgrad),
+            differentiationGrade = NcrDifferentiationGradeMapper.resolve(diagnosis.primaryDiagnosis.diffgrad),
 
             clinicalTnmClassification = extractClinicalTnmClassification(diagnosis),
             pathologicalTnmClassification = extractPathologicalTnmClassification(diagnosis),

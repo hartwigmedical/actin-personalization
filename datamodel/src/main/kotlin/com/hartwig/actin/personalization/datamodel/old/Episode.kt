@@ -1,16 +1,16 @@
 package com.hartwig.actin.personalization.datamodel.old
 
 import com.hartwig.actin.personalization.datamodel.assessment.AsaClassification
+import com.hartwig.actin.personalization.datamodel.diagnosis.BasisOfDiagnosis
+import com.hartwig.actin.personalization.datamodel.diagnosis.DifferentiationGrade
 import com.hartwig.actin.personalization.datamodel.diagnosis.ExtraMuralInvasionCategory
-import com.hartwig.actin.personalization.datamodel.diagnosis.TumorLocation
 import com.hartwig.actin.personalization.datamodel.diagnosis.LymphaticInvasionCategory
 import com.hartwig.actin.personalization.datamodel.diagnosis.MetastasesDetectionStatus
 import com.hartwig.actin.personalization.datamodel.diagnosis.NumberOfLiverMetastases
 import com.hartwig.actin.personalization.datamodel.diagnosis.TnmM
 import com.hartwig.actin.personalization.datamodel.diagnosis.TnmN
 import com.hartwig.actin.personalization.datamodel.diagnosis.TnmT
-import com.hartwig.actin.personalization.datamodel.diagnosis.TumorBasisOfDiagnosis
-import com.hartwig.actin.personalization.datamodel.diagnosis.TumorDifferentiationGrade
+import com.hartwig.actin.personalization.datamodel.diagnosis.TumorLocation
 import com.hartwig.actin.personalization.datamodel.diagnosis.TumorRegression
 import com.hartwig.actin.personalization.datamodel.diagnosis.VenousInvasionDescription
 import com.hartwig.actin.personalization.datamodel.treatment.ReasonRefrainmentFromTumorDirectedTreatment
@@ -24,9 +24,9 @@ data class Episode(
     val asaClassificationPreSurgeryOrEndoscopy: AsaClassification? = null,
 
     val tumorIncidenceYear: Int,
-    val tumorBasisOfDiagnosis: TumorBasisOfDiagnosis,
+    val tumorBasisOfDiagnosis: BasisOfDiagnosis,
     val tumorLocation: TumorLocation,
-    val tumorDifferentiationGrade: TumorDifferentiationGrade? = null,
+    val tumorDifferentiationGrade: DifferentiationGrade? = null,
     val tnmCT: TnmT? = null,
     val tnmCN: TnmN? = null,
     val tnmCM: TnmM? = null,

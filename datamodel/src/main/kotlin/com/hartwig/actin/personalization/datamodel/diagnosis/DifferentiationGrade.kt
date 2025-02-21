@@ -1,6 +1,6 @@
 package com.hartwig.actin.personalization.datamodel.diagnosis
 
-enum class TumorDifferentiationGrade {
+enum class DifferentiationGrade {
     GRADE_1_OR_WELL_DIFFERENTIATED,
     GRADE_2_OR_MODERATELY_DIFFERENTIATED,
     GRADE_3_OR_POORLY_DIFFERENTIATED,

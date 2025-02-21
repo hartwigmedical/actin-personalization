@@ -263,11 +263,11 @@ object TestNcrRecordFactory {
 
     private fun properPrimaryDiagnosis(): NcrPrimaryDiagnosis {
         return minimalPrimaryDiagnosis().copy(
-            ct = "0",
-            cn = "1A",
-            cm = "-",
-            pt = "4A",
-            pn = "X",
+            ct = "2",
+            cn = "1",
+            cm = "0",
+            pt = "3",
+            pn = "2",
             pm = null,
             cstadium = "NVT",
             pstadium = "M",

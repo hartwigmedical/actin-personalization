@@ -1,6 +1,6 @@
 package com.hartwig.actin.personalization.datamodel.diagnosis
 
-enum class TumorBasisOfDiagnosis {
+enum class BasisOfDiagnosis {
     CLINICAL_AND_DIAGNOSTIC_INVESTIGATION,
     CLINICAL_ONLY_INVESTIGATION,
     CYTOLOGICAL_CONFIRMATION,

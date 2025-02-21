@@ -1,9 +1,9 @@
 package com.hartwig.actin.personalization.similarity
 
 import com.hartwig.actin.personalization.datamodel.Sex
-import com.hartwig.actin.personalization.datamodel.diagnosis.TumorLocation
+import com.hartwig.actin.personalization.datamodel.diagnosis.BasisOfDiagnosis
 import com.hartwig.actin.personalization.datamodel.diagnosis.MetastasesDetectionStatus
-import com.hartwig.actin.personalization.datamodel.diagnosis.TumorBasisOfDiagnosis
+import com.hartwig.actin.personalization.datamodel.diagnosis.TumorLocation
 import com.hartwig.actin.personalization.datamodel.diagnosis.TumorType
 import com.hartwig.actin.personalization.datamodel.old.Diagnosis
 import com.hartwig.actin.personalization.datamodel.old.DiagnosisEpisode
@@ -29,7 +29,7 @@ val EPISODE = Episode(
     id = 123,
     order = 1,
     tumorIncidenceYear = 2020,
-    tumorBasisOfDiagnosis = TumorBasisOfDiagnosis.CLINICAL_AND_DIAGNOSTIC_INVESTIGATION,
+    tumorBasisOfDiagnosis = BasisOfDiagnosis.CLINICAL_AND_DIAGNOSTIC_INVESTIGATION,
     tumorLocation = TumorLocation.COLON_NOS,
     distantMetastasesDetectionStatus = MetastasesDetectionStatus.AT_START,
     metastases = emptyList(),

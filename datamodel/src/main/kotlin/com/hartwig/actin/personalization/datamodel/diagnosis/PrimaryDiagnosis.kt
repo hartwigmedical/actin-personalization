@@ -4,11 +4,11 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class PrimaryDiagnosis(
-    val basisOfDiagnosis: TumorBasisOfDiagnosis,
+    val basisOfDiagnosis: BasisOfDiagnosis,
     val hasDoublePrimaryTumor: Boolean,
     val primaryTumorType: TumorType,
     val primaryTumorLocation: TumorLocation,
-    val differentiationGrade: TumorDifferentiationGrade?,
+    val differentiationGrade: DifferentiationGrade?,
 
     val clinicalTnmClassification: TnmClassification,
     val pathologicalTnmClassification: TnmClassification,

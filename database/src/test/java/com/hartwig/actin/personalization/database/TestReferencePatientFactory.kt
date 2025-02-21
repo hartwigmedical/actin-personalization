@@ -12,6 +12,8 @@ import com.hartwig.actin.personalization.datamodel.assessment.MolecularResult
 import com.hartwig.actin.personalization.datamodel.assessment.Unit
 import com.hartwig.actin.personalization.datamodel.assessment.WhoAssessment
 import com.hartwig.actin.personalization.datamodel.diagnosis.AnorectalVergeDistanceCategory
+import com.hartwig.actin.personalization.datamodel.diagnosis.BasisOfDiagnosis
+import com.hartwig.actin.personalization.datamodel.diagnosis.DifferentiationGrade
 import com.hartwig.actin.personalization.datamodel.diagnosis.ExtraMuralInvasionCategory
 import com.hartwig.actin.personalization.datamodel.diagnosis.LymphaticInvasionCategory
 import com.hartwig.actin.personalization.datamodel.diagnosis.MetastasesDetectionStatus
@@ -25,8 +27,6 @@ import com.hartwig.actin.personalization.datamodel.diagnosis.TnmClassification
 import com.hartwig.actin.personalization.datamodel.diagnosis.TnmM
 import com.hartwig.actin.personalization.datamodel.diagnosis.TnmN
 import com.hartwig.actin.personalization.datamodel.diagnosis.TnmT
-import com.hartwig.actin.personalization.datamodel.diagnosis.TumorBasisOfDiagnosis
-import com.hartwig.actin.personalization.datamodel.diagnosis.TumorDifferentiationGrade
 import com.hartwig.actin.personalization.datamodel.diagnosis.TumorLocation
 import com.hartwig.actin.personalization.datamodel.diagnosis.TumorLocationCategory
 import com.hartwig.actin.personalization.datamodel.diagnosis.TumorRegression
@@ -84,7 +84,7 @@ object TestReferencePatientFactory {
     )
 
     private fun minimalPrimaryDiagnosis() = PrimaryDiagnosis(
-        basisOfDiagnosis = TumorBasisOfDiagnosis.HISTOLOGICAL_CONFIRMATION,
+        basisOfDiagnosis = BasisOfDiagnosis.HISTOLOGICAL_CONFIRMATION,
         hasDoublePrimaryTumor = false,
         primaryTumorType = TumorType.CRC_OTHER,
         primaryTumorLocation = TumorLocation.DESCENDING_COLON,
@@ -94,11 +94,11 @@ object TestReferencePatientFactory {
     )
 
     private fun exhaustivePrimaryDiagnosis() = PrimaryDiagnosis(
-        basisOfDiagnosis = TumorBasisOfDiagnosis.HISTOLOGICAL_CONFIRMATION,
+        basisOfDiagnosis = BasisOfDiagnosis.HISTOLOGICAL_CONFIRMATION,
         hasDoublePrimaryTumor = true,
         primaryTumorType = TumorType.CRC_OTHER,
         primaryTumorLocation = TumorLocation.DESCENDING_COLON,
-        differentiationGrade = TumorDifferentiationGrade.GRADE_4_OR_UNDIFFERENTIATED_OR_ANAPLASTIC_OR_GGG4,
+        differentiationGrade = DifferentiationGrade.GRADE_4_OR_UNDIFFERENTIATED_OR_ANAPLASTIC_OR_GGG4,
         clinicalTnmClassification = TnmClassification(tumor = null, lymphNodes = TnmN.N1A, metastasis = TnmM.M_MINUS),
         pathologicalTnmClassification = TnmClassification(tumor = TnmT.T_IS, lymphNodes = TnmN.X, metastasis = TnmM.M0),
         clinicalTumorStage = TumorStage.I,

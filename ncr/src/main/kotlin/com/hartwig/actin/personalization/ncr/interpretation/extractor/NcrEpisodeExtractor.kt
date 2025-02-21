@@ -23,11 +23,12 @@ import com.hartwig.actin.personalization.ncr.datamodel.NcrRecord
 import com.hartwig.actin.personalization.ncr.datamodel.NcrTreatmentResponse
 import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrAnastomoticLeakageAfterSurgeryMapper
 import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrAsaClassificationPreSurgeryOrEndoscopyMapper
+import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrBasisOfDiagnosisMapper
 import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrBooleanMapper
+import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrDifferentiationGradeMapper
 import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrDistantMetastasesStatusMapper
 import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrExtraMuralInvasionCategoryMapper
 import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrGastroenterologyResectionTypeMapper
-import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrTumorLocationMapper
 import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrLymphaticInvasionCategoryMapper
 import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrMetastasesRadiotherapyTypeMapper
 import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrMetastasesSurgeryTypeMapper
@@ -44,8 +45,7 @@ import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrSurgeryUrg
 import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrTnmMMapper
 import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrTnmNMapper
 import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrTnmTMapper
-import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrTumorBasisOfDiagnosisMapper
-import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrTumorDifferentiationGradeMapper
+import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrTumorLocationMapper
 import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrTumorRegressionMapper
 import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrVenousInvasionDescriptionMapper
 import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrWhoStatusMapper
@@ -87,9 +87,9 @@ class NcrEpisodeExtractor(private val systemicTreatmentPlanExtractor: NcrSystemi
                 asaClassificationPreSurgeryOrEndoscopy =
                 NcrAsaClassificationPreSurgeryOrEndoscopyMapper.resolve(patientCharacteristics.asa),
                 tumorIncidenceYear = primaryDiagnosis.incjr,
-                tumorBasisOfDiagnosis = NcrTumorBasisOfDiagnosisMapper.resolve(primaryDiagnosis.diagBasis),
+                tumorBasisOfDiagnosis = NcrBasisOfDiagnosisMapper.resolve(primaryDiagnosis.diagBasis),
                 tumorLocation = NcrTumorLocationMapper.resolveTumorLocation(primaryDiagnosis.topoSublok),
-                tumorDifferentiationGrade = NcrTumorDifferentiationGradeMapper.resolve(primaryDiagnosis.diffgrad.toInt()),
+                tumorDifferentiationGrade = NcrDifferentiationGradeMapper.resolve(primaryDiagnosis.diffgrad),
                 tnmCT = NcrTnmTMapper.resolveNullable(primaryDiagnosis.ct),
                 tnmCN = NcrTnmNMapper.resolveNullable(primaryDiagnosis.cn),
                 tnmCM = NcrTnmMMapper.resolveNullable(primaryDiagnosis.cm),
