@@ -90,7 +90,9 @@ object TestReferencePatientFactory {
         primaryTumorLocation = TumorLocation.DESCENDING_COLON,
         differentiationGrade = null,
         clinicalTnmClassification = TnmClassification(tumor = TnmT.T2, lymphNodes = TnmN.N1, metastasis = null),
-        pathologicalTnmClassification = TnmClassification(tumor = TnmT.T3, lymphNodes = null, metastasis = TnmM.M1)
+        pathologicalTnmClassification = TnmClassification(tumor = TnmT.T3, lymphNodes = null, metastasis = TnmM.M1),
+        clinicalTumorStage = TumorStage.II,
+        pathologicalTumorStage = TumorStage.IV
     )
 
     private fun exhaustivePrimaryDiagnosis() = PrimaryDiagnosis(

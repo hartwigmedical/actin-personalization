@@ -12,8 +12,8 @@ data class PrimaryDiagnosis(
 
     val clinicalTnmClassification: TnmClassification,
     val pathologicalTnmClassification: TnmClassification,
-    val clinicalTumorStage: TumorStage? = null,
-    val pathologicalTumorStage: TumorStage? = null,
+    val clinicalTumorStage: TumorStage,
+    val pathologicalTumorStage: TumorStage,
     val investigatedLymphNodesCount: Int? = null,
     val positiveLymphNodesCount: Int? = null,
 

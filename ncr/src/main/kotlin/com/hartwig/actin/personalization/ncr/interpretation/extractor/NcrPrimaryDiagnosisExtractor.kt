@@ -11,6 +11,7 @@ import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrTnmMMapper
 import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrTnmNMapper
 import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrTnmTMapper
 import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrTumorLocationMapper
+import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrTumorStageMapper
 import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrTumorTypeMapper
 import com.hartwig.actin.personalization.ncr.util.NcrFunctions
 
@@ -28,8 +29,8 @@ object NcrPrimaryDiagnosisExtractor {
 
             clinicalTnmClassification = extractClinicalTnmClassification(diagnosis),
             pathologicalTnmClassification = extractPathologicalTnmClassification(diagnosis),
-            clinicalTumorStage = null,
-            pathologicalTumorStage = null,
+            clinicalTumorStage = NcrTumorStageMapper.resolve(diagnosis.primaryDiagnosis.cstadium!!),
+            pathologicalTumorStage = NcrTumorStageMapper.resolve(diagnosis.primaryDiagnosis.pstadium!!),
             investigatedLymphNodesCount = null,
             positiveLymphNodesCount = null,
 

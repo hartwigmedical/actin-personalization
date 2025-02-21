@@ -253,8 +253,8 @@ object TestNcrRecordFactory {
             pt = null,
             pn = null,
             pm = null,
-            cstadium = null,
-            pstadium = null,
+            cstadium = "2",
+            pstadium = "3",
             stadium = null,
             ondLymf = null,
             posLymf = null
@@ -269,9 +269,7 @@ object TestNcrRecordFactory {
             pt = "3",
             pn = "2",
             pm = null,
-            cstadium = "NVT",
-            pstadium = "M",
-            stadium = "2C",
+            stadium = "III",
             ondLymf = 3,
             posLymf = 1
         )

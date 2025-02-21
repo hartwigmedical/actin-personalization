@@ -7,6 +7,7 @@ import com.hartwig.actin.personalization.datamodel.diagnosis.TnmM
 import com.hartwig.actin.personalization.datamodel.diagnosis.TnmN
 import com.hartwig.actin.personalization.datamodel.diagnosis.TnmT
 import com.hartwig.actin.personalization.datamodel.diagnosis.TumorLocation
+import com.hartwig.actin.personalization.datamodel.diagnosis.TumorStage
 import com.hartwig.actin.personalization.datamodel.diagnosis.TumorType
 import com.hartwig.actin.personalization.ncr.datamodel.TestNcrRecordFactory
 import org.assertj.core.api.Assertions.assertThat
@@ -44,5 +45,7 @@ class NcrPrimaryDiagnosisExtractorTest {
                 metastasis = null
             )
         )
+        assertThat(primaryDiagnosis.clinicalTumorStage).isEqualTo(TumorStage.II)
+        assertThat(primaryDiagnosis.pathologicalTumorStage).isEqualTo(TumorStage.III)
     }
 }
