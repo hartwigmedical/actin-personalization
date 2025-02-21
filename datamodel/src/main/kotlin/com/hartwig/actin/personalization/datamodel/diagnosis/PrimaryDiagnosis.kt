@@ -14,38 +14,24 @@ data class PrimaryDiagnosis(
     val pathologicalTnmClassification: TnmClassification,
     val clinicalTumorStage: TumorStage,
     val pathologicalTumorStage: TumorStage,
-    val investigatedLymphNodesCount: Int? = null,
-    val positiveLymphNodesCount: Int? = null,
+    val investigatedLymphNodesCount: Int?,
+    val positiveLymphNodesCount: Int?,
 
-    val venousInvasionDescription: VenousInvasionDescription? = null,
-    val lymphaticInvasionCategory: LymphaticInvasionCategory? = null,
-    val extraMuralInvasionCategory: ExtraMuralInvasionCategory? = null,
-    val tumorRegression: TumorRegression? = null,
+    val venousInvasionDescription: VenousInvasionDescription?,
+    val lymphaticInvasionCategory: LymphaticInvasionCategory?,
+    val extraMuralInvasionCategory: ExtraMuralInvasionCategory?,
+    val tumorRegression: TumorRegression?,
 
     // KD: Specific for CRC, could be hidden behind interface eventually
-    val sidedness: Sidedness? = determineSidedness(primaryTumorLocation),
-    val presentedWithIleus: Boolean? = null,
-    val presentedWithPerforation: Boolean? = null,
+    val sidedness: Sidedness?,
+    val presentedWithIleus: Boolean?,
+    val presentedWithPerforation: Boolean?,
 
     // KD: Only present in case location == RECTUM, could be hidden behind interface eventually.
-    val anorectalVergeDistanceCategory: AnorectalVergeDistanceCategory? = null,
+    val anorectalVergeDistanceCategory: AnorectalVergeDistanceCategory?,
 
     // KD: Only present in case location in (RECTUM, RECTOSIGMOID), could be hidden behind interface eventually
-    val mesorectalFasciaIsClear: Boolean? = null,
-    val distanceToMesorectalFasciaMm: Int? = null,
+    val mesorectalFasciaIsClear: Boolean?,
+    val distanceToMesorectalFasciaMm: Int?,
 )
 
-val LOCATIONS_INDICATING_LEFT_SIDEDNESS =
-    setOf(TumorLocation.FLEXURA_LIENALIS, TumorLocation.DESCENDING_COLON, TumorLocation.RECTOSIGMOID, TumorLocation.SIGMOID_COLON, TumorLocation.RECTUM)
-val LOCATIONS_INDICATING_RIGHT_SIDEDNESS = setOf(TumorLocation.APPENDIX, TumorLocation.COECUM, TumorLocation.ASCENDING_COLON, TumorLocation.FLEXURA_HEPATICA)
-
-private fun determineSidedness(location: TumorLocation): Sidedness? {
-    val containsLeft = location in LOCATIONS_INDICATING_LEFT_SIDEDNESS
-    val containsRight = location in LOCATIONS_INDICATING_RIGHT_SIDEDNESS
-
-    return when {
-        containsLeft && !containsRight -> Sidedness.LEFT
-        containsRight && !containsLeft -> Sidedness.RIGHT
-        else -> null
-    }
-}

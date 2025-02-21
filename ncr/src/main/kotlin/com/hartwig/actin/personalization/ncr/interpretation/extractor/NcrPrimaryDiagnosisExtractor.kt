@@ -1,7 +1,9 @@
 package com.hartwig.actin.personalization.ncr.interpretation.extractor
 
 import com.hartwig.actin.personalization.datamodel.diagnosis.PrimaryDiagnosis
+import com.hartwig.actin.personalization.datamodel.diagnosis.Sidedness
 import com.hartwig.actin.personalization.datamodel.diagnosis.TnmClassification
+import com.hartwig.actin.personalization.datamodel.diagnosis.TumorLocation
 import com.hartwig.actin.personalization.ncr.datamodel.NcrRecord
 import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrAnorectalVergeDistanceCategoryMapper
 import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrBasisOfDiagnosisMapper
@@ -20,11 +22,13 @@ object NcrPrimaryDiagnosisExtractor {
     fun extract(records: List<NcrRecord>): PrimaryDiagnosis {
         val diagnosis = NcrFunctions.diagnosisRecord(records)
 
+        val primaryTumorLocation = NcrTumorLocationMapper.resolveTumorLocation(diagnosis.primaryDiagnosis.topoSublok)
+
         return PrimaryDiagnosis(
             basisOfDiagnosis = NcrBasisOfDiagnosisMapper.resolve(diagnosis.primaryDiagnosis.diagBasis),
             hasDoublePrimaryTumor = NcrBooleanMapper.resolve(diagnosis.clinicalCharacteristics.dubbeltum)!!,
             primaryTumorType = NcrTumorTypeMapper.resolve(diagnosis.primaryDiagnosis.morfCat!!),
-            primaryTumorLocation = NcrTumorLocationMapper.resolveTumorLocation(diagnosis.primaryDiagnosis.topoSublok),
+            primaryTumorLocation = primaryTumorLocation,
             differentiationGrade = NcrDifferentiationGradeMapper.resolve(diagnosis.primaryDiagnosis.diffgrad),
 
             clinicalTnmClassification = extractClinicalTnmClassification(diagnosis),
@@ -39,7 +43,7 @@ object NcrPrimaryDiagnosisExtractor {
             extraMuralInvasionCategory = null,
             tumorRegression = null,
 
-            sidedness = null,
+            sidedness = determineSidedness(primaryTumorLocation),
             presentedWithIleus = NcrBooleanMapper.resolve(diagnosis.clinicalCharacteristics.ileus),
             presentedWithPerforation = NcrBooleanMapper.resolve(diagnosis.clinicalCharacteristics.perforatie),
 
@@ -63,5 +67,27 @@ object NcrPrimaryDiagnosisExtractor {
             lymphNodes = NcrTnmNMapper.resolveNullable(nCode),
             metastasis = NcrTnmMMapper.resolveNullable(mCode)
         )
+    }
+
+    private val LOCATIONS_INDICATING_LEFT_SIDEDNESS =
+        setOf(
+            TumorLocation.FLEXURA_LIENALIS,
+            TumorLocation.DESCENDING_COLON,
+            TumorLocation.RECTOSIGMOID,
+            TumorLocation.SIGMOID_COLON,
+            TumorLocation.RECTUM
+        )
+    private val LOCATIONS_INDICATING_RIGHT_SIDEDNESS =
+        setOf(TumorLocation.APPENDIX, TumorLocation.COECUM, TumorLocation.ASCENDING_COLON, TumorLocation.FLEXURA_HEPATICA)
+
+    private fun determineSidedness(location: TumorLocation): Sidedness? {
+        val containsLeft = location in LOCATIONS_INDICATING_LEFT_SIDEDNESS
+        val containsRight = location in LOCATIONS_INDICATING_RIGHT_SIDEDNESS
+
+        return when {
+            containsLeft && !containsRight -> Sidedness.LEFT
+            containsRight && !containsLeft -> Sidedness.RIGHT
+            else -> null
+        }
     }
 }

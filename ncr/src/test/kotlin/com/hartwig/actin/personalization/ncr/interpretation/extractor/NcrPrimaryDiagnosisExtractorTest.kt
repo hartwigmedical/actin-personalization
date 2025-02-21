@@ -2,6 +2,7 @@ package com.hartwig.actin.personalization.ncr.interpretation.extractor
 
 import com.hartwig.actin.personalization.datamodel.diagnosis.BasisOfDiagnosis
 import com.hartwig.actin.personalization.datamodel.diagnosis.DifferentiationGrade
+import com.hartwig.actin.personalization.datamodel.diagnosis.Sidedness
 import com.hartwig.actin.personalization.datamodel.diagnosis.TnmClassification
 import com.hartwig.actin.personalization.datamodel.diagnosis.TnmM
 import com.hartwig.actin.personalization.datamodel.diagnosis.TnmN
@@ -47,5 +48,6 @@ class NcrPrimaryDiagnosisExtractorTest {
         )
         assertThat(primaryDiagnosis.clinicalTumorStage).isEqualTo(TumorStage.II)
         assertThat(primaryDiagnosis.pathologicalTumorStage).isEqualTo(TumorStage.III)
+        assertThat(primaryDiagnosis.sidedness).isEqualTo(Sidedness.RIGHT)
     }
 }
