@@ -4,7 +4,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class TnmClassification(
-    val tumor: TnmT?,
-    val lymphNodes: TnmN?,
-    val metastasis: TnmM?
+    val tnmT: TnmT?,
+    val tnmN: TnmN?,
+    val tnmM: TnmM?
 )

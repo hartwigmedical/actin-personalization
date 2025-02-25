@@ -44,6 +44,7 @@ class DatabaseWriter(private val context: DSLContext, private val connection: ja
         writeRecords("asaAssessment", indexedTumors, ::asaAssessmentsFromTumor)
         writeRecords("comorbidityAssessment", indexedTumors, ::comorbidityAssessmentsFromTumor)
         writeRecords("molecularResults", indexedTumors, ::molecularResultsFromTumor)
+        // TODO (AE): Below looks like a bug?
         writeRecords("molecularResults", indexedTumors, ::labMeasurementsFromTumor)
         writeRecords("gastroenterologyResections", indexedTumors, ::gastroenterologyResectionsFromTumor)
         writeRecords("primarySurgeries", indexedTumors, ::primarySurgeriesFromTumor)
@@ -270,15 +271,14 @@ class DatabaseWriter(private val context: DSLContext, private val connection: ja
                 dbRecord.set(Tables.PRIMARYDIAGNOSIS.BASISOFDIAGNOSIS, this.basisOfDiagnosis.name)
                 dbRecord.set(Tables.PRIMARYDIAGNOSIS.PRIMARYTUMORTYPE, this.primaryTumorType.name)
                 dbRecord.set(Tables.PRIMARYDIAGNOSIS.PRIMARYTUMORLOCATION, this.primaryTumorLocation.name)
+                dbRecord.set(Tables.PRIMARYDIAGNOSIS.ANORECTALVERGEDISTANCECATEGORY, this.anorectalVergeDistanceCategory?.name)
                 dbRecord.set(Tables.PRIMARYDIAGNOSIS.DIFFERENTIATIONGRADE, this.differentiationGrade?.name)
                 dbRecord.set(Tables.PRIMARYDIAGNOSIS.CLINICALTNMCLASSIFICATION, tnmClassificationToJson(this.clinicalTnmClassification))
                 dbRecord.set(
-                    Tables.PRIMARYDIAGNOSIS.PATHOLOGICALTNMCLASSIFICATION,
-                    tnmClassificationToJson(this.pathologicalTnmClassification)
+                    Tables.PRIMARYDIAGNOSIS.PATHOLOGICALTNMCLASSIFICATION, tnmClassificationToJson(this.pathologicalTnmClassification)
                 )
-                dbRecord.set(Tables.PRIMARYDIAGNOSIS.CLINICALTUMORSTAGE, this.clinicalTumorStage?.name)
-                dbRecord.set(Tables.PRIMARYDIAGNOSIS.PATHOLOGICALTUMORSTAGE, this.pathologicalTumorStage?.name)
-                dbRecord.set(Tables.PRIMARYDIAGNOSIS.ANORECTALVERGEDISTANCECATEGORY, this.anorectalVergeDistanceCategory?.name)
+                dbRecord.set(Tables.PRIMARYDIAGNOSIS.CLINICALTUMORSTAGE, this.clinicalTumorStage.name)
+                dbRecord.set(Tables.PRIMARYDIAGNOSIS.PATHOLOGICALTUMORSTAGE, this.pathologicalTumorStage.name)
                 dbRecord.set(Tables.PRIMARYDIAGNOSIS.VENOUSINVASIONDESCRIPTION, this.venousInvasionDescription?.name)
                 dbRecord.set(Tables.PRIMARYDIAGNOSIS.LYMPHATICINVASIONCATEGORY, this.lymphaticInvasionCategory?.name)
                 dbRecord.set(Tables.PRIMARYDIAGNOSIS.EXTRAMURALINVASIONCATEGORY, this.extraMuralInvasionCategory?.name)

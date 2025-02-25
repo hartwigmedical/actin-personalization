@@ -9,12 +9,16 @@ import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrAnorectalV
 import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrBasisOfDiagnosisMapper
 import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrBooleanMapper
 import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrDifferentiationGradeMapper
+import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrExtraMuralInvasionCategoryMapper
+import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrLymphaticInvasionCategoryMapper
 import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrTnmMMapper
 import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrTnmNMapper
 import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrTnmTMapper
 import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrTumorLocationMapper
+import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrTumorRegressionMapper
 import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrTumorStageMapper
 import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrTumorTypeMapper
+import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrVenousInvasionDescriptionMapper
 import com.hartwig.actin.personalization.ncr.util.NcrFunctions
 
 object NcrPrimaryDiagnosisExtractor {
@@ -23,33 +27,34 @@ object NcrPrimaryDiagnosisExtractor {
         val diagnosis = NcrFunctions.diagnosisRecord(records)
 
         val primaryTumorLocation = NcrTumorLocationMapper.resolveTumorLocation(diagnosis.primaryDiagnosis.topoSublok)
+        val (distanceToMesorectalFasciaMm, mesorectalFasciaIsClear) =
+            extractDistanceToMesorectalFascia(diagnosis.clinicalCharacteristics.mrfAfst)
 
         return PrimaryDiagnosis(
             basisOfDiagnosis = NcrBasisOfDiagnosisMapper.resolve(diagnosis.primaryDiagnosis.diagBasis),
             hasDoublePrimaryTumor = NcrBooleanMapper.resolve(diagnosis.clinicalCharacteristics.dubbeltum)!!,
+
             primaryTumorType = NcrTumorTypeMapper.resolve(diagnosis.primaryDiagnosis.morfCat!!),
             primaryTumorLocation = primaryTumorLocation,
-            differentiationGrade = NcrDifferentiationGradeMapper.resolve(diagnosis.primaryDiagnosis.diffgrad),
+            sidedness = determineSidedness(primaryTumorLocation),
+            anorectalVergeDistanceCategory = NcrAnorectalVergeDistanceCategoryMapper.resolve(diagnosis.clinicalCharacteristics.anusAfst),
+            mesorectalFasciaIsClear = mesorectalFasciaIsClear,
+            distanceToMesorectalFasciaMm = distanceToMesorectalFasciaMm,
 
+            differentiationGrade = NcrDifferentiationGradeMapper.resolve(diagnosis.primaryDiagnosis.diffgrad),
             clinicalTnmClassification = extractClinicalTnmClassification(diagnosis),
             pathologicalTnmClassification = extractPathologicalTnmClassification(diagnosis),
             clinicalTumorStage = NcrTumorStageMapper.resolve(diagnosis.primaryDiagnosis.cstadium!!),
             pathologicalTumorStage = NcrTumorStageMapper.resolve(diagnosis.primaryDiagnosis.pstadium!!),
-            investigatedLymphNodesCount = null,
-            positiveLymphNodesCount = null,
+            investigatedLymphNodesCount = diagnosis.primaryDiagnosis.ondLymf,
+            positiveLymphNodesCount = diagnosis.primaryDiagnosis.posLymf,
 
-            venousInvasionDescription = null,
-            lymphaticInvasionCategory = null,
-            extraMuralInvasionCategory = null,
-            tumorRegression = null,
-
-            sidedness = determineSidedness(primaryTumorLocation),
             presentedWithIleus = NcrBooleanMapper.resolve(diagnosis.clinicalCharacteristics.ileus),
             presentedWithPerforation = NcrBooleanMapper.resolve(diagnosis.clinicalCharacteristics.perforatie),
-
-            anorectalVergeDistanceCategory = NcrAnorectalVergeDistanceCategoryMapper.resolve(diagnosis.clinicalCharacteristics.anusAfst),
-            mesorectalFasciaIsClear = null,
-            distanceToMesorectalFasciaMm = null
+            venousInvasionDescription = NcrVenousInvasionDescriptionMapper.resolve(diagnosis.clinicalCharacteristics.veneusInvas),
+            lymphaticInvasionCategory = NcrLymphaticInvasionCategoryMapper.resolve(diagnosis.clinicalCharacteristics.lymfInvas),
+            extraMuralInvasionCategory = NcrExtraMuralInvasionCategoryMapper.resolve(diagnosis.clinicalCharacteristics.emi),
+            tumorRegression = NcrTumorRegressionMapper.resolve(diagnosis.clinicalCharacteristics.tumregres)
         )
     }
 
@@ -63,9 +68,9 @@ object NcrPrimaryDiagnosisExtractor {
 
     private fun extractTnmClassification(tCode: String?, nCode: String?, mCode: String?): TnmClassification {
         return TnmClassification(
-            tumor = NcrTnmTMapper.resolveNullable(tCode),
-            lymphNodes = NcrTnmNMapper.resolveNullable(nCode),
-            metastasis = NcrTnmMMapper.resolveNullable(mCode)
+            tnmT = NcrTnmTMapper.resolveNullable(tCode),
+            tnmN = NcrTnmNMapper.resolveNullable(nCode),
+            tnmM = NcrTnmMMapper.resolveNullable(mCode)
         )
     }
 
@@ -77,6 +82,7 @@ object NcrPrimaryDiagnosisExtractor {
             TumorLocation.SIGMOID_COLON,
             TumorLocation.RECTUM
         )
+
     private val LOCATIONS_INDICATING_RIGHT_SIDEDNESS =
         setOf(TumorLocation.APPENDIX, TumorLocation.COECUM, TumorLocation.ASCENDING_COLON, TumorLocation.FLEXURA_HEPATICA)
 
@@ -88,6 +94,16 @@ object NcrPrimaryDiagnosisExtractor {
             containsLeft && !containsRight -> Sidedness.LEFT
             containsRight && !containsLeft -> Sidedness.RIGHT
             else -> null
+        }
+    }
+
+    private fun extractDistanceToMesorectalFascia(mrfAfst: Int?): Pair<Int?, Boolean?> {
+        return when (mrfAfst) {
+            null, 888, 999 -> null to null
+            111 -> null to true
+            222 -> null to false
+            in 0..20 -> mrfAfst to null
+            else -> throw IllegalStateException("Unexpected value for distance to mesorectal fascia: $mrfAfst")
         }
     }
 }

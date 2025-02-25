@@ -60,8 +60,6 @@ object NcrTumorExtractor {
 //            }
 //
 //            Diagnosis(
-//                consolidatedTumorType = NcrTumorTypeMapper.resolve(diagnosisRecord.primaryDiagnosis.morfCat!!),
-//                tumorLocations = locations,
 //                hasHadTumorDirectedSystemicTherapy = episodes.any(Episode::hasReceivedTumorDirectedTreatment),
 //                orderOfFirstDistantMetastasesEpisode = orderOfFirstDistantMetastasesEpisode,
 //                isMetachronous = orderOfFirstDistantMetastasesEpisode > 1,
@@ -84,9 +82,6 @@ object NcrTumorExtractor {
 //                cciHasRenalDisease = NcrBooleanMapper.resolve(comorbidities.cciRenal),
 //                cciHasLiverDisease = NcrBooleanMapper.resolve(comorbidities.cciSevereLiver),
 //                cciHasUlcerDisease = NcrBooleanMapper.resolve(comorbidities.cciUlcer),
-//                presentedWithIleus = NcrBooleanMapper.resolve(clinicalCharacteristics.ileus),
-//                presentedWithPerforation = NcrBooleanMapper.resolve(clinicalCharacteristics.perforatie),
-//                anorectalVergeDistanceCategory = NcrAnorectalVergeDistanceCategoryMapper.resolve(clinicalCharacteristics.anusAfst),
 //                hasMsi = NcrBooleanMapper.resolve(molecularCharacteristics.msiStat),
 //                hasBrafMutation = hasBrafMutation,
 //                hasBrafV600EMutation = hasBrafV600EMutation,
