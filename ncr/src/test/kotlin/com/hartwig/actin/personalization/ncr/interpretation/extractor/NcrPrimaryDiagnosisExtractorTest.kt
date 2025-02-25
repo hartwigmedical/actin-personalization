@@ -23,13 +23,13 @@ class NcrPrimaryDiagnosisExtractorTest {
 
     @Test
     fun `Should extract primary diagnosis for minimal NCR record`() {
-        val primaryDiagnosis = NcrPrimaryDiagnosisExtractor.extract(listOf(TestNcrRecordFactory.minimalDiagnosisRecord()))
+        val primaryDiagnosis = NcrPrimaryDiagnosisExtractor.extract(TestNcrRecordFactory.minimalTumorRecords())
 
         assertThat(primaryDiagnosis).isNotNull()
     }
 
     @Test
-    fun `Should extract primary diagnosis for proper set of NCR tumor records`() {
+    fun `Should extract primary diagnosis for proper set of NCR records`() {
         val primaryDiagnosis = NcrPrimaryDiagnosisExtractor.extract(TestNcrRecordFactory.properTumorRecords())
 
         with(primaryDiagnosis) {

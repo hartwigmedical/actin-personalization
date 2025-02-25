@@ -1,8 +1,6 @@
 package com.hartwig.actin.personalization.ncr.interpretation.extractor
 
 import com.hartwig.actin.personalization.datamodel.Tumor
-import com.hartwig.actin.personalization.datamodel.diagnosis.MetastasesDetectionStatus
-import com.hartwig.actin.personalization.datamodel.diagnosis.MetastaticDiagnosis
 import com.hartwig.actin.personalization.datamodel.outcome.SurvivalMeasure
 import com.hartwig.actin.personalization.datamodel.treatment.HipecTreatment
 import com.hartwig.actin.personalization.ncr.datamodel.NcrRecord
@@ -20,10 +18,7 @@ object NcrTumorExtractor {
             latestSurvivalStatus = extractLatestSurvivalMeasure(diagnosis),
             priorTumors = NcrPriorTumorExtractor.extract(records),
             primaryDiagnosis = NcrPrimaryDiagnosisExtractor.extract(records),
-            metastaticDiagnosis = MetastaticDiagnosis(
-                distantMetastasesDetectionStatus = MetastasesDetectionStatus.AT_START,
-                metastases = listOf()
-            ),
+            metastaticDiagnosis = NcrMetastaticDiagnosisExtractor.extract(records),
             hasReceivedTumorDirectedTreatment = false,
             hipecTreatment = HipecTreatment(daysSinceDiagnosis = null, hasHadHipecTreatment = false)
         )

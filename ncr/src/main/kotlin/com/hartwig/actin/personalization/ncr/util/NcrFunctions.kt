@@ -6,7 +6,11 @@ const val DIAGNOSIS_EPISODE = "DIA"
 
 object NcrFunctions {
 
-    fun diagnosisRecord(records: List<NcrRecord>) : NcrRecord {
+    fun diagnosisRecord(records: List<NcrRecord>): NcrRecord {
         return records.single { it.identification.epis == DIAGNOSIS_EPISODE }
+    }
+
+    fun metastaticRecord(records: List<NcrRecord>): NcrRecord {
+        return records.single { it.identification.metaEpis == 1 || it.identification.metaEpis == 2 }
     }
 }

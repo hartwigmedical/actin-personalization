@@ -8,7 +8,7 @@ class NcrTumorExtractorTest {
 
     @Test
     fun `Should extract tumor from minimal diagnosis NCR record`() {
-        val tumor = NcrTumorExtractor.extractTumor(listOf(TestNcrRecordFactory.minimalDiagnosisRecord()))
+        val tumor = NcrTumorExtractor.extractTumor(TestNcrRecordFactory.minimalTumorRecords())
 
         assertThat(tumor.diagnosisYear).isEqualTo(2020)
         assertThat(tumor.ageAtDiagnosis).isEqualTo(75)

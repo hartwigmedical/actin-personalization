@@ -6,7 +6,7 @@ object NcrDistantMetastasesStatusMapper : NcrIntCodeMapper<MetastasesDetectionSt
 
     override fun resolve(code: Int): MetastasesDetectionStatus {
         return when (code) {
-            0 -> MetastasesDetectionStatus.ABSENT
+            0 -> throw IllegalArgumentException("It is not expected to extract DistantMetastasesStatus code: 0")
             1 -> MetastasesDetectionStatus.AT_START
             2 -> MetastasesDetectionStatus.AT_PROGRESSION
             else -> throw IllegalArgumentException("Unknown DistantMetastasesStatus code: $code")

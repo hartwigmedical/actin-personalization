@@ -5,6 +5,15 @@ object TestNcrRecordFactory {
     private const val DIAGNOSIS_EPIS = "DIA"
     private const val FOLLOWUP_EPIS = "VERB"
 
+    fun minimalTumorRecords(): List<NcrRecord> {
+        val baseRecord = minimalDiagnosisRecord()
+        return listOf(baseRecord.copy(identification = baseRecord.identification.copy(metaEpis = 1)))
+    }
+
+    fun properTumorRecords(): List<NcrRecord> {
+        return listOf(properDiagnosisRecord(), properFollowupRecord1(), properFollowupRecord2())
+    }
+
     fun minimalDiagnosisRecord(): NcrRecord {
         val baseRecord = minimalRecord()
         return baseRecord
@@ -14,13 +23,9 @@ object TestNcrRecordFactory {
     fun minimalFollowupRecord(): NcrRecord {
         val baseRecord = minimalRecord()
         return baseRecord
-            .copy(identification = baseRecord.identification.copy(epis = FOLLOWUP_EPIS))
+            .copy(identification = baseRecord.identification.copy(epis = FOLLOWUP_EPIS, metaEpis = 1))
             .copy(patientCharacteristics = baseRecord.patientCharacteristics.copy(vitStat = null, vitStatInt = null))
             .copy(primaryDiagnosis = baseRecord.primaryDiagnosis.copy(morfCat = null))
-    }
-
-    fun properTumorRecords(): List<NcrRecord> {
-        return listOf(properDiagnosisRecord(), properFollowupRecord1(), properFollowupRecord2())
     }
 
     fun properDiagnosisRecord(): NcrRecord {
@@ -315,8 +320,9 @@ object TestNcrRecordFactory {
     private fun properMetastaticDiagnosis(): NcrMetastaticDiagnosis {
         return minimalMetastaticDiagnosis().copy(
             metaTopoSublok1 = "C740",
-            metaInt1 = 20,
-            metaProg1 = 1,
+            metaInt1 = 200,
+            metaProg1 = 0,
+            metaTopoSublok2 = "C719",
             metaLeverAantal = 5,
             metaLeverAfm = 15,
         )
