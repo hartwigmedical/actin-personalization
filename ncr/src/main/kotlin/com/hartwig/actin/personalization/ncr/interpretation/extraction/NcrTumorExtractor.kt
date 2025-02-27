@@ -93,28 +93,16 @@ object NcrTumorExtractor {
 
     private fun extractWhoAssessments(records: List<NcrRecord>): List<WhoAssessment> {
         return NcrFunctions.recordsWithDaysSinceDiagnosis(records).mapNotNull {
-            val whoStatus = NcrWhoStatusMapper.resolve(it.key.patientCharacteristics.perfStat)
-            if (whoStatus != null) {
-                WhoAssessment(
-                    daysSinceDiagnosis = it.value,
-                    whoStatus = whoStatus
-                )
-            } else {
-                null
+            NcrWhoStatusMapper.resolve(it.key.patientCharacteristics.perfStat)?.let { whoStatus ->
+                WhoAssessment(daysSinceDiagnosis = it.value, whoStatus = whoStatus)
             }
         }
     }
 
     private fun extractAsaAssessments(records: List<NcrRecord>): List<AsaAssessment> {
         return NcrFunctions.recordsWithDaysSinceDiagnosis(records).mapNotNull {
-            val asaClassification = NcrAsaClassificationMapper.resolve(it.key.patientCharacteristics.asa)
-            if (asaClassification != null) {
-                AsaAssessment(
-                    daysSinceDiagnosis = it.value,
-                    classification = asaClassification
-                )
-            } else {
-                null
+            NcrAsaClassificationMapper.resolve(it.key.patientCharacteristics.asa)?.let { classification ->
+                AsaAssessment(daysSinceDiagnosis = it.value, classification = classification)
             }
         }
     }
