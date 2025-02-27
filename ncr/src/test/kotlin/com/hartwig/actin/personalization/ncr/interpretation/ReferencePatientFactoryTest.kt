@@ -2,7 +2,6 @@ package com.hartwig.actin.personalization.ncr.interpretation
 
 import com.hartwig.actin.personalization.datamodel.Sex
 import com.hartwig.actin.personalization.ncr.datamodel.TestNcrRecordFactory
-import com.hartwig.actin.personalization.ncr.util.NcrFunctions
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 

@@ -299,6 +299,8 @@ object TestReferencePatientFactory {
         priorTumors = listOf(minimalPriorTumor()),
         primaryDiagnosis = minimalPrimaryDiagnosis(),
         metastaticDiagnosis = minimalMetastaticDiagnosis(),
+        whoAssessments = emptyList(),
+        asaAssessments = emptyList(),
         hasReceivedTumorDirectedTreatment = false,
         hipecTreatment = HipecTreatment(hasHadHipecTreatment = false),
     )

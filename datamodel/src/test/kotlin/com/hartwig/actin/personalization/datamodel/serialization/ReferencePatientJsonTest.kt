@@ -81,6 +81,8 @@ private val TUMOR = Tumor(
 
     primaryDiagnosis = PRIMARY_DIAGNOSIS,
     metastaticDiagnosis = METASTATIC_DIAGNOSIS,
+    whoAssessments = emptyList(),
+    asaAssessments = emptyList(),
 
     hasReceivedTumorDirectedTreatment = false,
     hipecTreatment = HipecTreatment(daysSinceDiagnosis = null, hasHadHipecTreatment = false),

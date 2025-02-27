@@ -32,8 +32,8 @@ data class Tumor(
     val primaryDiagnosis: PrimaryDiagnosis,
     val metastaticDiagnosis: MetastaticDiagnosis,
 
-    val whoAssessments: List<WhoAssessment> = emptyList(),
-    val asaAssessments: List<AsaAssessment> = emptyList(),
+    val whoAssessments: List<WhoAssessment>,
+    val asaAssessments: List<AsaAssessment>,
     val comorbidityAssessments: List<ComorbidityAssessment> = emptyList(),
     val molecularResults: List<MolecularResult> = emptyList(),
     val labMeasurements: List<LabMeasurement> = emptyList(),

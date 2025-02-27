@@ -4,8 +4,8 @@ import com.hartwig.actin.personalization.datamodel.ReferencePatient
 import com.hartwig.actin.personalization.datamodel.Sex
 import com.hartwig.actin.personalization.datamodel.Tumor
 import com.hartwig.actin.personalization.ncr.datamodel.NcrRecord
-import com.hartwig.actin.personalization.ncr.interpretation.extractor.NcrTumorExtractor
-import com.hartwig.actin.personalization.ncr.interpretation.mapper.NcrSexMapper
+import com.hartwig.actin.personalization.ncr.interpretation.extraction.NcrTumorExtractor
+import com.hartwig.actin.personalization.ncr.interpretation.mapping.NcrSexMapper
 import java.util.stream.Collectors
 
 object ReferencePatientFactory {
