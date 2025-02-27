@@ -135,22 +135,9 @@ class DataPreprocessor:
         return df
     
     def group_treatments(self, df: pd.DataFrame, treatment_col: str = 'systemicTreatmentPlan') -> pd.DataFrame:
-        treatment_groups = {
-            "MONO": ["CAPECITABINE", "IRINOTECAN", "FLUOROURACIL", "CAPECITABINE_BEVACIZUMAB", "FLUOROURACIL_BEVACIZUMAB"],
-            "DOUBLET": ["FOLFOX", "FOLFOX_B", "FOLFOX_P", "CAPOX", "CAPOX_B", "FOLFIRI", "FOLFIRI_B", "FOLFIRI_P"],
-            "TRIPLET": ["FOLFOXIRI", "FOLFOXIRI_B"],
-            "IMMUNOTHERAPY": ["PEMBROLIZUMAB", "NIVOLUMAB"],
-        }
-
-        group_lookup = {treatment: group for group, treatments in treatment_groups.items() for treatment in treatments}
-
-        df[f"{treatment_col}_Group"] = df[treatment_col].map(group_lookup).fillna("OTHER")
-
-        df["Bevacizumab"] = df[treatment_col].str.contains("_B", case=False, na=False).astype(int)
-        df["Panitumumab"] = df[treatment_col].str.contains("_P", case=False, na=False).astype(int)
-        
-        df = df.drop(columns = ['systemicTreatmentPlan'])
-
+        df['treatment'] = df[treatment_col].apply(
+            lambda x: 1 if pd.notnull(x) and str(x).strip() != '' else 0
+        )
         return df
 
     def encode_categorical(self, df: pd.DataFrame) -> pd.DataFrame:

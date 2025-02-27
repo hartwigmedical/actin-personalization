@@ -6,9 +6,16 @@ from typing import List, Dict, Tuple, Union, Any, Optional
 from sksurv.metrics import concordance_index_censored, integrated_brier_score, brier_score, cumulative_dynamic_auc
 from sklearn.calibration import calibration_curve
 
-def calculate_c_index(event_times: np.ndarray, predicted_scores: np.ndarray, event_observed: np.ndarray) -> float:
-    c_index = concordance_index_censored(event_observed, event_times, predicted_scores)[0]
-    return c_index
+from pycox.evaluation import EvalSurv
+
+def calculate_time_dependent_c_index(survival_predictions: np.ndarray, event_times: np.ndarray, event_observed: np.ndarray, times: np.ndarray) -> float:
+
+    survival_predictions = pd.DataFrame(survival_predictions.T, index=times)
+    
+    ev = EvalSurv(survival_predictions, event_times, event_observed, censor_surv=None)
+
+    time_dependent_c_index = ev.concordance_td()
+    return time_dependent_c_index
 
 def calculate_time_dependent_auc(y_train: np.ndarray, y_test: np.ndarray, risk_scores: np.ndarray, times: np.ndarray) -> Tuple[np.ndarray, float]:
     auc_times, mean_auc = cumulative_dynamic_auc(y_train, y_test, risk_scores, times)

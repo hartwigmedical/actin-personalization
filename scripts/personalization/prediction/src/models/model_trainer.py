@@ -13,7 +13,7 @@ import os
 
 from typing import List, Dict, Tuple, Any, Optional, Callable
 
-from ..utils.metrics import calculate_c_index, calculate_brier_score, calibration_assessment, calculate_time_dependent_auc
+from ..utils.metrics import calculate_time_dependent_c_index, calculate_brier_score, calibration_assessment, calculate_time_dependent_auc
 from .survival_models import BaseSurvivalModel, NNSurvivalModel
 
 class ModelTrainer:
@@ -141,9 +141,7 @@ class ModelTrainer:
             model, model_name, surv_funcs, risk_scores, X_val, y_val_structured
         )
 
-        results['c_index'] = calculate_c_index(
-            y_val_structured['duration'], risk_scores, y_val_structured['event']
-        )
+        results['c_index'] = calculate_time_dependent_c_index(predictions, y_val_structured['duration'], y_val_structured['event'], times)
         results['ibs'] = calculate_brier_score(y_train_structured, y_val_structured, predictions, times)
         results['ce'] = calibration_assessment(predictions, y_val_structured, times)
 
