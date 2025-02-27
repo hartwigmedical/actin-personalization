@@ -5,5 +5,5 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class AsaAssessment(
     val daysSinceDiagnosis: Int,
-    val asaClassification: AsaClassification
+    val classification: AsaClassification
 )

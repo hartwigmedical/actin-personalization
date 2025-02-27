@@ -16,12 +16,12 @@ object NcrFunctions {
         return records.single { it.identification.metaEpis == 1 || it.identification.metaEpis == 2 }
     }
 
-    fun daysBetweenRecords(records: List<NcrRecord>): Map<NcrRecord, Int> {
+    fun recordsWithDaysSinceDiagnosis(records: List<NcrRecord>): Map<NcrRecord, Int> {
         val diagnosis = diagnosisRecord(records)
-        return records.associateWith { calculateDaysBetween(diagnosis, it) }
+        return records.associateWith { calculateDaysSinceDiagnosis(diagnosis, it) }
     }
 
-    private fun calculateDaysBetween(diagnosis: NcrRecord, record: NcrRecord): Int {
+    private fun calculateDaysSinceDiagnosis(diagnosis: NcrRecord, record: NcrRecord): Int {
         if (diagnosis == record) {
             return 0
         }

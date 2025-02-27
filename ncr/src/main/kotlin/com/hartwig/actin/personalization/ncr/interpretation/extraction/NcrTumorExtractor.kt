@@ -1,11 +1,15 @@
 package com.hartwig.actin.personalization.ncr.interpretation.extraction
 
 import com.hartwig.actin.personalization.datamodel.Tumor
+import com.hartwig.actin.personalization.datamodel.assessment.AsaAssessment
+import com.hartwig.actin.personalization.datamodel.assessment.WhoAssessment
 import com.hartwig.actin.personalization.datamodel.outcome.SurvivalMeasure
 import com.hartwig.actin.personalization.datamodel.treatment.HipecTreatment
 import com.hartwig.actin.personalization.ncr.datamodel.NcrRecord
 import com.hartwig.actin.personalization.ncr.interpretation.NcrFunctions
+import com.hartwig.actin.personalization.ncr.interpretation.mapping.NcrAsaClassificationMapper
 import com.hartwig.actin.personalization.ncr.interpretation.mapping.NcrVitalStatusMapper
+import com.hartwig.actin.personalization.ncr.interpretation.mapping.NcrWhoStatusMapper
 
 object NcrTumorExtractor {
 
@@ -21,10 +25,9 @@ object NcrTumorExtractor {
             metastaticDiagnosis = NcrMetastaticDiagnosisExtractor.extract(records),
             hasReceivedTumorDirectedTreatment = false,
             hipecTreatment = HipecTreatment(daysSinceDiagnosis = null, hasHadHipecTreatment = false),
-            whoAssessments = listOf(),
-            asaAssessments = listOf()
+            whoAssessments = extractWhoAssessments(records),
+            asaAssessments = extractAsaAssessments(records)
         )
-
 
 //        val episodes = records.map { record ->
 //            episodeExtractor.extractEpisode(record, intervalTumorIncidenceLatestAliveStatus)
@@ -86,6 +89,34 @@ object NcrTumorExtractor {
 //                hasKrasG12CMutation = hasKrasG12CMutation
 //            )
 //        }
+    }
+
+    private fun extractWhoAssessments(records: List<NcrRecord>): List<WhoAssessment> {
+        return NcrFunctions.recordsWithDaysSinceDiagnosis(records).mapNotNull {
+            val whoStatus = NcrWhoStatusMapper.resolve(it.key.patientCharacteristics.perfStat)
+            if (whoStatus != null) {
+                WhoAssessment(
+                    daysSinceDiagnosis = it.value,
+                    whoStatus = whoStatus
+                )
+            } else {
+                null
+            }
+        }
+    }
+
+    private fun extractAsaAssessments(records: List<NcrRecord>): List<AsaAssessment> {
+        return NcrFunctions.recordsWithDaysSinceDiagnosis(records).mapNotNull {
+            val asaClassification = NcrAsaClassificationMapper.resolve(it.key.patientCharacteristics.asa)
+            if (asaClassification != null) {
+                AsaAssessment(
+                    daysSinceDiagnosis = it.value,
+                    classification = asaClassification
+                )
+            } else {
+                null
+            }
+        }
     }
 
     private fun extractLatestSurvivalMeasure(diagnosisRecord: NcrRecord): SurvivalMeasure {

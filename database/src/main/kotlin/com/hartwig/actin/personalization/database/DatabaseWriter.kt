@@ -170,7 +170,7 @@ class DatabaseWriter(private val context: DSLContext, private val connection: ja
             val dbRecord = context.newRecord(Tables.ASAASSESSMENT)
             dbRecord.from(data)
             dbRecord.set(Tables.ASAASSESSMENT.TUMORID, tumorId)
-            dbRecord.set(Tables.ASAASSESSMENT.ASACLASSIFICATION, data.asaClassification.name)
+            dbRecord.set(Tables.ASAASSESSMENT.ASACLASSIFICATION, data.classification.name)
             dbRecord
         }
 

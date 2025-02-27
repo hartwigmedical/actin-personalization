@@ -318,7 +318,7 @@ object TestReferencePatientFactory {
         whoAssessments = listOf(
             WhoAssessment(daysSinceDiagnosis = 1, whoStatus = 2), WhoAssessment(daysSinceDiagnosis = 10, whoStatus = 2)
         ),
-        asaAssessments = listOf(AsaAssessment(daysSinceDiagnosis = 1, asaClassification = AsaClassification.II)),
+        asaAssessments = listOf(AsaAssessment(daysSinceDiagnosis = 1, classification = AsaClassification.II)),
 
         comorbidityAssessments = listOf(exhaustiveComorbidityAssessment()),
         molecularResults = listOf(MolecularResult(daysSinceDiagnosis = 10), exhaustiveMolecularResult()),

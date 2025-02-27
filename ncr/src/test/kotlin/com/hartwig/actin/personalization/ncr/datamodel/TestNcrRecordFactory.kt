@@ -33,6 +33,7 @@ object TestNcrRecordFactory {
         return baseRecord
             .copy(identification = baseRecord.identification.copy(epis = DIAGNOSIS_EPIS, metaEpis = 0, teller = 1))
             .copy(metastaticDiagnosis = minimalMetastaticDiagnosis())
+            .copy(treatment = baseRecord.treatment.copy(systemicTreatment = minimalTreatment().systemicTreatment))
     }
 
     fun properFollowupRecord1(): NcrRecord {
@@ -42,9 +43,7 @@ object TestNcrRecordFactory {
             .copy(
                 patientCharacteristics = baseRecord.patientCharacteristics.copy(
                     vitStat = null,
-                    vitStatInt = null,
-                    perfStat = null,
-                    asa = null
+                    vitStatInt = null
                 )
             )
             .copy(clinicalCharacteristics = minimalClinicalCharacteristics())
@@ -53,6 +52,7 @@ object TestNcrRecordFactory {
             .copy(primaryDiagnosis = baseRecord.primaryDiagnosis.copy(morfCat = null))
             .copy(metastaticDiagnosis = minimalMetastaticDiagnosis())
             .copy(comorbidities = minimalComorbidities())
+            .copy(treatment = properFollowup1Treatment())
     }
 
     fun properFollowupRecord2(): NcrRecord {
@@ -63,8 +63,8 @@ object TestNcrRecordFactory {
                 patientCharacteristics = baseRecord.patientCharacteristics.copy(
                     vitStat = null,
                     vitStatInt = null,
-                    perfStat = null,
-                    asa = null
+                    perfStat = 2,
+                    asa = 6
                 )
             )
             .copy(clinicalCharacteristics = minimalClinicalCharacteristics())
@@ -72,6 +72,7 @@ object TestNcrRecordFactory {
             .copy(priorMalignancies = minimalPriorMalignancies())
             .copy(primaryDiagnosis = baseRecord.primaryDiagnosis.copy(morfCat = null))
             .copy(comorbidities = minimalComorbidities())
+            .copy(treatment = properFollowup2Treatment())
     }
 
     private fun minimalRecord(): NcrRecord {
@@ -101,7 +102,7 @@ object TestNcrRecordFactory {
             metastaticDiagnosis = properMetastaticDiagnosis(),
             comorbidities = properComorbidities(),
             labValues = properLabValues(),
-            treatment = properTreatment(),
+            treatment = properDiagnosisTreatment(),
             treatmentResponse = properTreatmentResponse()
         )
     }
@@ -588,11 +589,33 @@ object TestNcrRecordFactory {
         )
     }
 
-    private fun properTreatment(): NcrTreatment {
+    private fun properDiagnosisTreatment(): NcrTreatment {
         return minimalTreatment().copy(
             deelnameStudie = 0,
             tumgerichtTher = 1,
-            primaryRadiotherapy = NcrPrimaryRadiotherapy(rt = 4),
+            primarySurgery = NcrPrimarySurgery(
+                chir = 1,
+                chirInt1 = 20
+            )
+        )
+    }
+
+    private fun properFollowup1Treatment(): NcrTreatment {
+        return minimalTreatment().copy(
+            deelnameStudie = 0,
+            tumgerichtTher = 1,
+            primaryRadiotherapy = NcrPrimaryRadiotherapy(
+                rt = 4,
+                rtStartInt1 = 50,
+                rtStopInt1 = 80
+            )
+        )
+    }
+
+    private fun properFollowup2Treatment(): NcrTreatment {
+        return minimalTreatment().copy(
+            deelnameStudie = 0,
+            tumgerichtTher = 1,
             systemicTreatment = NcrSystemicTreatment(
                 chemo = 1,
                 target = 2,
@@ -624,20 +647,20 @@ object TestNcrRecordFactory {
                 systKuren5 = 5,
                 systKuren6 = 6,
                 systKuren7 = 7,
-                systStartInt1 = 1,
-                systStartInt2 = 2,
-                systStartInt3 = 3,
-                systStartInt4 = 4,
-                systStartInt5 = 5,
-                systStartInt6 = 6,
-                systStartInt7 = 7,
-                systStopInt1 = 1,
-                systStopInt2 = 2,
-                systStopInt3 = 3,
-                systStopInt4 = 4,
-                systStopInt5 = 5,
-                systStopInt6 = 6,
-                systStopInt7 = 7,
+                systStartInt1 = 100,
+                systStartInt2 = 200,
+                systStartInt3 = 300,
+                systStartInt4 = 400,
+                systStartInt5 = 500,
+                systStartInt6 = 600,
+                systStartInt7 = 700,
+                systStopInt1 = 180,
+                systStopInt2 = 280,
+                systStopInt3 = 380,
+                systStopInt4 = 480,
+                systStopInt5 = 580,
+                systStopInt6 = 680,
+                systStopInt7 = 780,
             )
         )
     }
@@ -669,8 +692,8 @@ object TestNcrRecordFactory {
             pfsEvent2 = 2,
             fupEventType1 = 1,
             fupEventType2 = 2,
-            pfsInt1 = 4,
-            pfsInt2 = 80,
+            pfsInt1 = 400,
+            pfsInt2 = 850,
         )
     }
 }

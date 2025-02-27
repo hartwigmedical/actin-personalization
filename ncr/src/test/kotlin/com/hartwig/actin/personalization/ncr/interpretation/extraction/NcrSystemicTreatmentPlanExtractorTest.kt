@@ -13,7 +13,7 @@ import org.junit.jupiter.api.Test
 
 class NcrSystemicTreatmentPlanExtractorTest {
 
-    private val baseRecord = TestNcrRecordFactory.properDiagnosisRecord()
+    private val baseRecord = TestNcrRecordFactory.properFollowupRecord2()
 
     @Test
     fun `Should extract systemic treatment plan`() {
@@ -36,10 +36,11 @@ class NcrSystemicTreatmentPlanExtractorTest {
             plan.systemicTreatmentSchemes.associate { it.schemeNumber to it.treatmentComponents.map(SystemicTreatmentSchemeDrug::drug) }
         assertThat(drugsByScheme).isEqualTo(expectedDrugs)
 
-        assertThat(plan.intervalTumorIncidenceTreatmentPlanStartDays).isEqualTo(1)
-        assertThat(plan.intervalTumorIncidenceTreatmentPlanStopDays).isEqualTo(7)
-        assertThat(plan.intervalTreatmentPlanStartResponseDays).isEqualTo(2)
-        assertThat(plan.observedOsFromTreatmentStartDays).isEqualTo(79)
+        assertThat(plan.intervalTumorIncidenceTreatmentPlanStartDays).isEqualTo(100)
+        assertThat(plan.intervalTumorIncidenceTreatmentPlanStopDays).isEqualTo(780)
+        // TODO (KD) Review
+        assertThat(plan.intervalTreatmentPlanStartResponseDays).isEqualTo(-97)
+        assertThat(plan.observedOsFromTreatmentStartDays).isNull()
     }
 
     @Test

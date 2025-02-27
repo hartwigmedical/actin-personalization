@@ -22,7 +22,7 @@ import com.hartwig.actin.personalization.ncr.datamodel.NcrPrimarySurgery
 import com.hartwig.actin.personalization.ncr.datamodel.NcrRecord
 import com.hartwig.actin.personalization.ncr.datamodel.NcrTreatmentResponse
 import com.hartwig.actin.personalization.ncr.interpretation.mapping.NcrAnastomoticLeakageAfterSurgeryMapper
-import com.hartwig.actin.personalization.ncr.interpretation.mapping.NcrAsaClassificationPreSurgeryOrEndoscopyMapper
+import com.hartwig.actin.personalization.ncr.interpretation.mapping.NcrAsaClassificationMapper
 import com.hartwig.actin.personalization.ncr.interpretation.mapping.NcrBasisOfDiagnosisMapper
 import com.hartwig.actin.personalization.ncr.interpretation.mapping.NcrBooleanMapper
 import com.hartwig.actin.personalization.ncr.interpretation.mapping.NcrDifferentiationGradeMapper
@@ -85,7 +85,7 @@ class NcrEpisodeExtractor(private val systemicTreatmentPlanExtractor: NcrSystemi
                 order = identification.teller,
                 whoStatusPreTreatmentStart = NcrWhoStatusMapper.resolve(patientCharacteristics.perfStat),
                 asaClassificationPreSurgeryOrEndoscopy =
-                NcrAsaClassificationPreSurgeryOrEndoscopyMapper.resolve(patientCharacteristics.asa),
+                NcrAsaClassificationMapper.resolve(patientCharacteristics.asa),
                 tumorIncidenceYear = primaryDiagnosis.incjr,
                 tumorBasisOfDiagnosis = NcrBasisOfDiagnosisMapper.resolve(primaryDiagnosis.diagBasis),
                 tumorLocation = NcrTumorLocationMapper.resolveTumorLocation(primaryDiagnosis.topoSublok),
