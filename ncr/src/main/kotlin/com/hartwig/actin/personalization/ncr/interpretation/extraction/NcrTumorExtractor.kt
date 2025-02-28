@@ -37,6 +37,14 @@ object NcrTumorExtractor {
 
             hasReceivedTumorDirectedTreatment = false,
             hipecTreatment = HipecTreatment(daysSinceDiagnosis = null, hasHadHipecTreatment = false)
+
+            /*
+                            hasReceivedTumorDirectedTreatment = NcrBooleanMapper.resolve(treatment.tumgerichtTher) == true,
+                reasonRefrainmentFromTumorDirectedTreatment =
+                NcrReasonRefrainmentFromTumorDirectedTherapyMapper.resolve(treatment.geenTherReden),
+                hasParticipatedInTrial = NcrBooleanMapper.resolve(treatment.deelnameStudie),
+
+             */
         )
     }
 

@@ -28,6 +28,7 @@ object NcrFunctions {
 
         val intervals = listOfNotNull(
             record.treatment.gastroenterologyResection.mdlResInt1,
+            record.treatment.hipec.hipecInt1,
             record.treatment.primarySurgery.chirInt1,
             record.treatment.metastaticSurgery.metaChirInt1,
             record.treatment.primaryRadiotherapy.rtStartInt1,
