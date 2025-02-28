@@ -180,7 +180,7 @@ object TestNcrRecordFactory {
 
     private fun properMolecularCharacteristics(): NcrMolecularCharacteristics {
         return minimalMolecularCharacteristics().copy(
-            msiStat = 1,
+            msiStat = 0,
             brafMut = 1,
             rasMut = 3
         )

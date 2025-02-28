@@ -298,6 +298,7 @@ object TestReferencePatientFactory {
         whoAssessments = emptyList(),
         asaAssessments = emptyList(),
         comorbidityAssessments = emptyList(),
+        molecularResults = emptyList(),
         hasReceivedTumorDirectedTreatment = false,
         hipecTreatment = HipecTreatment(hasHadHipecTreatment = false),
     )

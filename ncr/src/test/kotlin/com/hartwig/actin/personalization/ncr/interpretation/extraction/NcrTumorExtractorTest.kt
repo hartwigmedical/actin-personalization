@@ -2,6 +2,8 @@ package com.hartwig.actin.personalization.ncr.interpretation.extraction
 
 import com.hartwig.actin.personalization.datamodel.assessment.AsaAssessment
 import com.hartwig.actin.personalization.datamodel.assessment.AsaClassification
+import com.hartwig.actin.personalization.datamodel.assessment.ComorbidityAssessment
+import com.hartwig.actin.personalization.datamodel.assessment.MolecularResult
 import com.hartwig.actin.personalization.datamodel.assessment.WhoAssessment
 import com.hartwig.actin.personalization.ncr.datamodel.TestNcrRecordFactory
 import org.assertj.core.api.Assertions.assertThat
@@ -23,6 +25,7 @@ class NcrTumorExtractorTest {
             assertThat(whoAssessments).isEmpty()
             assertThat(asaAssessments).isEmpty()
             assertThat(comorbidityAssessments).isEmpty()
+            assertThat(molecularResults).isEmpty()
         }
     }
 
@@ -48,10 +51,43 @@ class NcrTumorExtractorTest {
                 AsaAssessment(daysSinceDiagnosis = 100, classification = AsaClassification.VI)
             )
 
-            assertThat(comorbidityAssessments).hasSize(1)
-            assertThat(comorbidityAssessments[0].charlsonComorbidityIndex).isEqualTo(2)
-            assertThat(comorbidityAssessments[0].hasCongestiveHeartFailure).isEqualTo(true)
-            assertThat(comorbidityAssessments[0].hasDementia).isEqualTo(true)
+            assertThat(comorbidityAssessments).containsExactly(expectedComorbidityAssessment())
+            assertThat(molecularResults).containsExactly(expectedMolecularResult())
         }
+    }
+
+    private fun expectedComorbidityAssessment(): ComorbidityAssessment {
+        return ComorbidityAssessment(
+            daysSinceDiagnosis = 0,
+            charlsonComorbidityIndex = 2,
+            hasAids = false,
+            hasCongestiveHeartFailure = true,
+            hasCollagenosis = false,
+            hasCopd = false,
+            hasCerebrovascularDisease = false,
+            hasDementia = true,
+            hasDiabetesMellitus = false,
+            hasDiabetesMellitusWithEndOrganDamage = false,
+            hasOtherMalignancy = false,
+            hasOtherMetastaticSolidTumor = false,
+            hasMyocardialInfarct = false,
+            hasMildLiverDisease = false,
+            hasHemiplegiaOrParaplegia = false,
+            hasPeripheralVascularDisease = false,
+            hasRenalDisease = false,
+            hasLiverDisease = false,
+            hasUlcerDisease = false
+        )
+    }
+
+    private fun expectedMolecularResult(): MolecularResult {
+        return MolecularResult(
+            daysSinceDiagnosis = 0,
+            hasMsi = false,
+            hasBrafMutation = true,
+            hasBrafV600EMutation = null,
+            hasRasMutation = true,
+            hasKrasG12CMutation = true
+        )
     }
 }
