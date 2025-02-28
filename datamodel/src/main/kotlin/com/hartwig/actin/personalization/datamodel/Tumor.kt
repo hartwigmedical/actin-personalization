@@ -34,7 +34,7 @@ data class Tumor(
 
     val whoAssessments: List<WhoAssessment>,
     val asaAssessments: List<AsaAssessment>,
-    val comorbidityAssessments: List<ComorbidityAssessment> = emptyList(),
+    val comorbidityAssessments: List<ComorbidityAssessment>,
     val molecularResults: List<MolecularResult> = emptyList(),
     val labMeasurements: List<LabMeasurement> = emptyList(),
 

@@ -355,10 +355,25 @@ object TestNcrRecordFactory {
 
     private fun properComorbidities(): NcrCharlsonComorbidities {
         return minimalComorbidities().copy(
-            cci = 1,
-            cciCat = 1,
+            cci = 2,
+            cciAids = 0,
+            cciCat = 0,
             cciChf = 1,
-            cciCopd = 0
+            cciCollagenosis = 0,
+            cciCopd = 0,
+            cciCvd = 0,
+            cciDementia = 1,
+            cciDm = 0,
+            cciEodDm = 0,
+            cciMalignancy = 0,
+            cciMetastatic = 0,
+            cciMi = 0,
+            cciMildLiver = 0,
+            cciPlegia = 0,
+            cciPvd = 0,
+            cciRenal = 0,
+            cciSevereLiver = 0,
+            cciUlcer = 0
         )
     }
 

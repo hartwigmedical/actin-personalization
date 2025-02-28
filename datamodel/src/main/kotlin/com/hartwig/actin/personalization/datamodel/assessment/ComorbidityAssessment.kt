@@ -4,10 +4,9 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class ComorbidityAssessment(
-    // TODO (KD) Can be calculated from other fields.
-    val charlsonComorbidityIndex: Int,
-
     val daysSinceDiagnosis: Int,
+
+    val charlsonComorbidityIndex: Int,
 
     val hasAids: Boolean,
     val hasCongestiveHeartFailure: Boolean,

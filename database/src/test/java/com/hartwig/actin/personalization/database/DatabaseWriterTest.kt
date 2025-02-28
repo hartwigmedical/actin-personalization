@@ -1,14 +1,14 @@
 package com.hartwig.actin.personalization.database
 
 
-import com.hartwig.actin.personalization.database.TestReferencePatientFactory.exhaustiveReferencePatientRecord
-import com.hartwig.actin.personalization.database.TestReferencePatientFactory.minimalReferencePatientRecord
 import com.hartwig.actin.personalization.database.tables.records.MetastaticdiagnosisRecord
 import com.hartwig.actin.personalization.database.tables.records.PrimarydiagnosisRecord
 import com.hartwig.actin.personalization.database.tables.records.PriortumorRecord
 import com.hartwig.actin.personalization.database.tables.records.SurvivalmeasureRecord
 import com.hartwig.actin.personalization.database.tables.records.TumorRecord
 import com.hartwig.actin.personalization.datamodel.ReferencePatient
+import com.hartwig.actin.personalization.datamodel.TestReferencePatientFactory.exhaustiveReferencePatientRecord
+import com.hartwig.actin.personalization.datamodel.TestReferencePatientFactory.minimalReferencePatientRecord
 import com.hartwig.actin.personalization.datamodel.Tumor
 import com.hartwig.actin.personalization.datamodel.diagnosis.MetastaticDiagnosis
 import com.hartwig.actin.personalization.datamodel.diagnosis.PrimaryDiagnosis
@@ -177,8 +177,8 @@ class DatabaseWriterTest {
 
         compare(record.get(table.CLINICALTNMCLASSIFICATION), expected.clinicalTnmClassification)
         compare(record.get(table.PATHOLOGICALTNMCLASSIFICATION), expected.pathologicalTnmClassification)
-        assertThat(record.get(table.CLINICALTUMORSTAGE) ?: null).isEqualTo(expected.clinicalTumorStage?.name)
-        assertThat(record.get(table.PATHOLOGICALTUMORSTAGE) ?: null).isEqualTo(expected.pathologicalTumorStage?.name)
+        assertThat(record.get(table.CLINICALTUMORSTAGE) ?: null).isEqualTo(expected.clinicalTumorStage.name)
+        assertThat(record.get(table.PATHOLOGICALTUMORSTAGE) ?: null).isEqualTo(expected.pathologicalTumorStage.name)
         assertThat(record.get(table.INVESTIGATEDLYMPHNODESCOUNT) ?: null).isEqualTo(expected.investigatedLymphNodesCount)
         assertThat(record.get(table.POSITIVELYMPHNODESCOUNT) ?: null).isEqualTo(expected.positiveLymphNodesCount)
 

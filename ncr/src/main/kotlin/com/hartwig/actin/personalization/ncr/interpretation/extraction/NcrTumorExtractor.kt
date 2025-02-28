@@ -2,12 +2,14 @@ package com.hartwig.actin.personalization.ncr.interpretation.extraction
 
 import com.hartwig.actin.personalization.datamodel.Tumor
 import com.hartwig.actin.personalization.datamodel.assessment.AsaAssessment
+import com.hartwig.actin.personalization.datamodel.assessment.ComorbidityAssessment
 import com.hartwig.actin.personalization.datamodel.assessment.WhoAssessment
 import com.hartwig.actin.personalization.datamodel.outcome.SurvivalMeasure
 import com.hartwig.actin.personalization.datamodel.treatment.HipecTreatment
 import com.hartwig.actin.personalization.ncr.datamodel.NcrRecord
 import com.hartwig.actin.personalization.ncr.interpretation.NcrFunctions
 import com.hartwig.actin.personalization.ncr.interpretation.mapping.NcrAsaClassificationMapper
+import com.hartwig.actin.personalization.ncr.interpretation.mapping.NcrBooleanMapper
 import com.hartwig.actin.personalization.ncr.interpretation.mapping.NcrVitalStatusMapper
 import com.hartwig.actin.personalization.ncr.interpretation.mapping.NcrWhoStatusMapper
 
@@ -26,7 +28,8 @@ object NcrTumorExtractor {
             hasReceivedTumorDirectedTreatment = false,
             hipecTreatment = HipecTreatment(daysSinceDiagnosis = null, hasHadHipecTreatment = false),
             whoAssessments = extractWhoAssessments(records),
-            asaAssessments = extractAsaAssessments(records)
+            asaAssessments = extractAsaAssessments(records),
+            comorbidityAssessments = extractComorbidityAssessments(diagnosis),
         )
 
 //        val episodes = records.map { record ->
@@ -89,6 +92,36 @@ object NcrTumorExtractor {
 //                hasKrasG12CMutation = hasKrasG12CMutation
 //            )
 //        }
+    }
+
+    private fun extractComorbidityAssessments(diagnosis: NcrRecord): List<ComorbidityAssessment> {
+        if (diagnosis.comorbidities.cci == null) {
+            return emptyList()
+        }
+
+        return listOf(
+            ComorbidityAssessment(
+                daysSinceDiagnosis = 0,
+                charlsonComorbidityIndex = diagnosis.comorbidities.cci,
+                hasAids = NcrBooleanMapper.resolve(diagnosis.comorbidities.cciAids)!!,
+                hasCongestiveHeartFailure = NcrBooleanMapper.resolve(diagnosis.comorbidities.cciChf)!!,
+                hasCollagenosis = NcrBooleanMapper.resolve(diagnosis.comorbidities.cciCollagenosis)!!,
+                hasCopd = NcrBooleanMapper.resolve(diagnosis.comorbidities.cciCopd)!!,
+                hasCerebrovascularDisease = NcrBooleanMapper.resolve(diagnosis.comorbidities.cciCvd)!!,
+                hasDementia = NcrBooleanMapper.resolve(diagnosis.comorbidities.cciDementia)!!,
+                hasDiabetesMellitus = NcrBooleanMapper.resolve(diagnosis.comorbidities.cciDm)!!,
+                hasDiabetesMellitusWithEndOrganDamage =  NcrBooleanMapper.resolve(diagnosis.comorbidities.cciEodDm)!!,
+                hasOtherMalignancy = NcrBooleanMapper.resolve(diagnosis.comorbidities.cciMalignancy)!!,
+                hasOtherMetastaticSolidTumor = NcrBooleanMapper.resolve(diagnosis.comorbidities.cciMetastatic)!!,
+                hasMyocardialInfarct = NcrBooleanMapper.resolve(diagnosis.comorbidities.cciMi)!!,
+                hasMildLiverDisease = NcrBooleanMapper.resolve(diagnosis.comorbidities.cciMildLiver)!!,
+                hasHemiplegiaOrParaplegia = NcrBooleanMapper.resolve(diagnosis.comorbidities.cciPlegia)!!,
+                hasPeripheralVascularDisease = NcrBooleanMapper.resolve(diagnosis.comorbidities.cciPvd)!!,
+                hasRenalDisease = NcrBooleanMapper.resolve(diagnosis.comorbidities.cciRenal)!!,
+                hasLiverDisease = NcrBooleanMapper.resolve(diagnosis.comorbidities.cciSevereLiver)!!,
+                hasUlcerDisease = NcrBooleanMapper.resolve(diagnosis.comorbidities.cciUlcer)!!
+            )
+        )
     }
 
     private fun extractWhoAssessments(records: List<NcrRecord>): List<WhoAssessment> {

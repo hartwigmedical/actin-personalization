@@ -13,35 +13,45 @@ class NcrTumorExtractorTest {
     fun `Should extract tumor from minimal diagnosis NCR record`() {
         val tumor = NcrTumorExtractor.extractTumor(TestNcrRecordFactory.minimalTumorRecords())
 
-        assertThat(tumor.diagnosisYear).isEqualTo(2020)
-        assertThat(tumor.ageAtDiagnosis).isEqualTo(75)
+        with(tumor) {
+            assertThat(diagnosisYear).isEqualTo(2020)
+            assertThat(ageAtDiagnosis).isEqualTo(75)
 
-        assertThat(tumor.latestSurvivalStatus.daysSinceDiagnosis).isEqualTo(563)
-        assertThat(tumor.latestSurvivalStatus.isAlive).isTrue()
+            assertThat(latestSurvivalStatus.daysSinceDiagnosis).isEqualTo(563)
+            assertThat(latestSurvivalStatus.isAlive).isTrue()
 
-        assertThat(tumor.whoAssessments).isEmpty()
-        assertThat(tumor.asaAssessments).isEmpty()
+            assertThat(whoAssessments).isEmpty()
+            assertThat(asaAssessments).isEmpty()
+            assertThat(comorbidityAssessments).isEmpty()
+        }
     }
 
     @Test
     fun `Should extract tumor from proper tumor NCR records`() {
         val tumor = NcrTumorExtractor.extractTumor(TestNcrRecordFactory.properTumorRecords())
 
-        assertThat(tumor.diagnosisYear).isEqualTo(2020)
-        assertThat(tumor.ageAtDiagnosis).isEqualTo(75)
+        with(tumor) {
+            assertThat(diagnosisYear).isEqualTo(2020)
+            assertThat(ageAtDiagnosis).isEqualTo(75)
 
-        assertThat(tumor.latestSurvivalStatus.daysSinceDiagnosis).isEqualTo(563)
-        assertThat(tumor.latestSurvivalStatus.isAlive).isTrue()
+            assertThat(latestSurvivalStatus.daysSinceDiagnosis).isEqualTo(563)
+            assertThat(latestSurvivalStatus.isAlive).isTrue()
 
-        assertThat(tumor.whoAssessments).containsExactly(
-            WhoAssessment(daysSinceDiagnosis = 0, whoStatus = 1),
-            WhoAssessment(daysSinceDiagnosis = 50, whoStatus = 1),
-            WhoAssessment(daysSinceDiagnosis = 100, whoStatus = 2)
-        )
-        assertThat(tumor.asaAssessments).containsExactly(
-            AsaAssessment(daysSinceDiagnosis = 0, classification = AsaClassification.V),
-            AsaAssessment(daysSinceDiagnosis = 50, classification = AsaClassification.V),
-            AsaAssessment(daysSinceDiagnosis = 100, classification = AsaClassification.VI)
-        )
+            assertThat(whoAssessments).containsExactly(
+                WhoAssessment(daysSinceDiagnosis = 0, whoStatus = 1),
+                WhoAssessment(daysSinceDiagnosis = 50, whoStatus = 1),
+                WhoAssessment(daysSinceDiagnosis = 100, whoStatus = 2)
+            )
+            assertThat(asaAssessments).containsExactly(
+                AsaAssessment(daysSinceDiagnosis = 0, classification = AsaClassification.V),
+                AsaAssessment(daysSinceDiagnosis = 50, classification = AsaClassification.V),
+                AsaAssessment(daysSinceDiagnosis = 100, classification = AsaClassification.VI)
+            )
+
+            assertThat(comorbidityAssessments).hasSize(1)
+            assertThat(comorbidityAssessments[0].charlsonComorbidityIndex).isEqualTo(2)
+            assertThat(comorbidityAssessments[0].hasCongestiveHeartFailure).isEqualTo(true)
+            assertThat(comorbidityAssessments[0].hasDementia).isEqualTo(true)
+        }
     }
 }

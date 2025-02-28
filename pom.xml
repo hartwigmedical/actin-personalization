@@ -234,6 +234,13 @@
                 <version>${testcontainers.version}</version>
                 <scope>test</scope>
             </dependency>
+            <dependency>
+                <groupId>com.hartwig.actin.personalization</groupId>
+                <artifactId>datamodel</artifactId>
+                <version>${project.version}</version>
+                <scope>test</scope>
+                <type>test-jar</type>
+            </dependency>
             <!--
             The following two dependencies were added to force using a newer version of these packages.
             The version used by org.testcontainers.mysql are reported to have 2 vulnerabilities.

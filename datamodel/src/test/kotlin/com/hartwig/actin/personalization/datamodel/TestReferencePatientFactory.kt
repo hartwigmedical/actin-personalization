@@ -1,8 +1,5 @@
-package com.hartwig.actin.personalization.database
+package com.hartwig.actin.personalization.datamodel
 
-import com.hartwig.actin.personalization.datamodel.ReferencePatient
-import com.hartwig.actin.personalization.datamodel.Sex
-import com.hartwig.actin.personalization.datamodel.Tumor
 import com.hartwig.actin.personalization.datamodel.assessment.AsaAssessment
 import com.hartwig.actin.personalization.datamodel.assessment.AsaClassification
 import com.hartwig.actin.personalization.datamodel.assessment.ComorbidityAssessment
@@ -148,14 +145,14 @@ object TestReferencePatientFactory {
     )
 
     private fun exhaustiveComorbidityAssessment() = ComorbidityAssessment(
-        charlsonComorbidityIndex = 1,
         daysSinceDiagnosis = 2,
+        charlsonComorbidityIndex = 1,
         hasAids = false,
         hasCongestiveHeartFailure = false,
         hasCollagenosis = false,
         hasCopd = false,
         hasCerebrovascularDisease = false,
-        hasDementia = false,
+        hasDementia = true,
         hasDiabetesMellitus = false,
         hasDiabetesMellitusWithEndOrganDamage = false,
         hasOtherMalignancy = false,
@@ -291,7 +288,6 @@ object TestReferencePatientFactory {
         systemicTreatmentSchemes = listOf(minimalSystemicTreatmentScheme(), exhaustiveSystemicTreatmentScheme())
     )
 
-
     private fun minimalTumor() = Tumor(
         diagnosisYear = 1961,
         ageAtDiagnosis = 73,
@@ -301,6 +297,7 @@ object TestReferencePatientFactory {
         metastaticDiagnosis = minimalMetastaticDiagnosis(),
         whoAssessments = emptyList(),
         asaAssessments = emptyList(),
+        comorbidityAssessments = emptyList(),
         hasReceivedTumorDirectedTreatment = false,
         hipecTreatment = HipecTreatment(hasHadHipecTreatment = false),
     )
@@ -316,7 +313,8 @@ object TestReferencePatientFactory {
         metastaticDiagnosis = exhaustiveMetastaticDiagnosis(),
 
         whoAssessments = listOf(
-            WhoAssessment(daysSinceDiagnosis = 1, whoStatus = 2), WhoAssessment(daysSinceDiagnosis = 10, whoStatus = 2)
+            WhoAssessment(daysSinceDiagnosis = 1, whoStatus = 2),
+            WhoAssessment(daysSinceDiagnosis = 10, whoStatus = 2)
         ),
         asaAssessments = listOf(AsaAssessment(daysSinceDiagnosis = 1, classification = AsaClassification.II)),
 
@@ -325,7 +323,8 @@ object TestReferencePatientFactory {
         labMeasurements = listOf(minimalLabMeasurement(), exhaustiveLabMeasurement()),
 
         hasReceivedTumorDirectedTreatment = false,
-        reasonRefrainmentFromTumorDirectedTreatment = ReasonRefrainmentFromTumorDirectedTreatment.COMORBIDITY_AND_OR_PERFORMANCE_OR_FUNCTIONAL_STATUS_OR_PRESENCE_OTHER_TUMOR,
+        reasonRefrainmentFromTumorDirectedTreatment =
+        ReasonRefrainmentFromTumorDirectedTreatment.COMORBIDITY_AND_OR_PERFORMANCE_OR_FUNCTIONAL_STATUS_OR_PRESENCE_OTHER_TUMOR,
         hasParticipatedInTrial = false,
 
         gastroenterologyResections = listOf(
