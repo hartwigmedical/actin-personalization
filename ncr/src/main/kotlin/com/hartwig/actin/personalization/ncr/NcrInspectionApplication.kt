@@ -7,7 +7,7 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import picocli.CommandLine
 import java.util.concurrent.Callable
 
-class NCRInspectionApplication : Callable<Int> {
+class NcrInspectionApplication : Callable<Int> {
 
     @CommandLine.Option(names = ["-ncr_file"], required = true)
     lateinit var ncrFile: String
@@ -156,4 +156,4 @@ class NCRInspectionApplication : Callable<Int> {
     }
 }
 
-fun main(args: Array<String>): Unit = kotlin.system.exitProcess(CommandLine(NCRInspectionApplication()).execute(*args))
+fun main(args: Array<String>): Unit = kotlin.system.exitProcess(CommandLine(NcrInspectionApplication()).execute(*args))
