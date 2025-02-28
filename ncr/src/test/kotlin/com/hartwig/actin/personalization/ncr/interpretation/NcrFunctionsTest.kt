@@ -57,11 +57,11 @@ class NcrFunctionsTest {
     }
 
     @Test
-    fun `Should determine days since diagnosis for minimal multiple records`() {
+    fun `Should determine min days since diagnosis for minimal multiple records`() {
         val diagnosis = TestNcrRecordFactory.minimalDiagnosisRecord()
         val followup = TestNcrRecordFactory.minimalFollowupRecord()
 
-        assertThat(NcrFunctions.recordsWithDaysSinceDiagnosis(listOf(diagnosis, followup))).isEqualTo(
+        assertThat(NcrFunctions.recordsWithMinDaysSinceDiagnosis(listOf(diagnosis, followup))).isEqualTo(
             mapOf(
                 diagnosis to 0,
                 followup to 0
@@ -70,12 +70,12 @@ class NcrFunctionsTest {
     }
 
     @Test
-    fun `Should determine days since diagnosis for proper multiple records`() {
+    fun `Should determine min days since diagnosis for proper multiple records`() {
         val diagnosis = TestNcrRecordFactory.properDiagnosisRecord()
         val followup1 = TestNcrRecordFactory.properFollowupRecord1()
         val followup2 = TestNcrRecordFactory.properFollowupRecord2()
 
-        assertThat(NcrFunctions.recordsWithDaysSinceDiagnosis(listOf(diagnosis, followup1, followup2))).isEqualTo(
+        assertThat(NcrFunctions.recordsWithMinDaysSinceDiagnosis(listOf(diagnosis, followup1, followup2))).isEqualTo(
             mapOf(
                 diagnosis to 0,
                 followup1 to 50,

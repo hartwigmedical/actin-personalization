@@ -52,6 +52,7 @@ object TestNcrRecordFactory {
             .copy(primaryDiagnosis = baseRecord.primaryDiagnosis.copy(morfCat = null))
             .copy(metastaticDiagnosis = minimalMetastaticDiagnosis())
             .copy(comorbidities = minimalComorbidities())
+            .copy(labValues = properFollowup1LabValues())
             .copy(treatment = properFollowup1Treatment())
     }
 
@@ -72,6 +73,7 @@ object TestNcrRecordFactory {
             .copy(priorMalignancies = minimalPriorMalignancies())
             .copy(primaryDiagnosis = baseRecord.primaryDiagnosis.copy(morfCat = null))
             .copy(comorbidities = minimalComorbidities())
+            .copy(labValues = minimalLabValues())
             .copy(treatment = properFollowup2Treatment())
     }
 
@@ -101,7 +103,7 @@ object TestNcrRecordFactory {
             primaryDiagnosis = properPrimaryDiagnosis(),
             metastaticDiagnosis = properMetastaticDiagnosis(),
             comorbidities = properComorbidities(),
-            labValues = properLabValues(),
+            labValues = properDiagnosisLabValues(),
             treatment = properDiagnosisTreatment(),
             treatmentResponse = properTreatmentResponse()
         )
@@ -424,7 +426,7 @@ object TestNcrRecordFactory {
         )
     }
 
-    private fun properLabValues(): NcrLabValues {
+    private fun properDiagnosisLabValues(): NcrLabValues {
         return minimalLabValues().copy(
             prechirCea = 0.1,
             postchirCea = 0.2,
@@ -438,6 +440,21 @@ object TestNcrRecordFactory {
             albumineInt1 = 4,
             leuko1 = 50.5,
             leukoInt1 = 5
+        )
+    }
+
+    private fun properFollowup1LabValues(): NcrLabValues {
+        return minimalLabValues().copy(
+            prechirCea = 0.3,
+            postchirCea = 0.4,
+            ldh1 = 100000,
+            ldhInt1 = 500,
+            af1 = 20,
+            afInt1 = 300,
+            af2 = 30,
+            afInt2 = 400,
+            af3 = 9999,
+            afInt3 = 500,
         )
     }
 

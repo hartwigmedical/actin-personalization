@@ -36,7 +36,7 @@ data class Tumor(
     val asaAssessments: List<AsaAssessment>,
     val comorbidityAssessments: List<ComorbidityAssessment>,
     val molecularResults: List<MolecularResult>,
-    val labMeasurements: List<LabMeasurement> = emptyList(),
+    val labMeasurements: List<LabMeasurement>,
 
     val hasReceivedTumorDirectedTreatment: Boolean,
     val reasonRefrainmentFromTumorDirectedTreatment: ReasonRefrainmentFromTumorDirectedTreatment? = null,

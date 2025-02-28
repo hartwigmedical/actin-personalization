@@ -23,15 +23,20 @@ object NcrTumorExtractor {
             diagnosisYear = diagnosis.primaryDiagnosis.incjr,
             ageAtDiagnosis = diagnosis.patientCharacteristics.leeft,
             latestSurvivalStatus = extractLatestSurvivalMeasure(diagnosis),
+
             priorTumors = NcrPriorTumorExtractor.extract(records),
+
             primaryDiagnosis = NcrPrimaryDiagnosisExtractor.extract(records),
             metastaticDiagnosis = NcrMetastaticDiagnosisExtractor.extract(records),
-            hasReceivedTumorDirectedTreatment = false,
-            hipecTreatment = HipecTreatment(daysSinceDiagnosis = null, hasHadHipecTreatment = false),
+
             whoAssessments = extractWhoAssessments(records),
             asaAssessments = extractAsaAssessments(records),
             comorbidityAssessments = extractComorbidityAssessments(diagnosis),
-            molecularResults = extractMolecularResults(diagnosis)
+            molecularResults = extractMolecularResults(diagnosis),
+            labMeasurements = NcrLabMeasurementExtractor.extract(records),
+
+            hasReceivedTumorDirectedTreatment = false,
+            hipecTreatment = HipecTreatment(daysSinceDiagnosis = null, hasHadHipecTreatment = false)
         )
     }
 
@@ -43,7 +48,7 @@ object NcrTumorExtractor {
     }
 
     private fun extractWhoAssessments(records: List<NcrRecord>): List<WhoAssessment> {
-        return NcrFunctions.recordsWithDaysSinceDiagnosis(records).mapNotNull {
+        return NcrFunctions.recordsWithMinDaysSinceDiagnosis(records).mapNotNull {
             NcrWhoStatusMapper.resolve(it.key.patientCharacteristics.perfStat)?.let { whoStatus ->
                 WhoAssessment(daysSinceDiagnosis = it.value, whoStatus = whoStatus)
             }
@@ -51,7 +56,7 @@ object NcrTumorExtractor {
     }
 
     private fun extractAsaAssessments(records: List<NcrRecord>): List<AsaAssessment> {
-        return NcrFunctions.recordsWithDaysSinceDiagnosis(records).mapNotNull {
+        return NcrFunctions.recordsWithMinDaysSinceDiagnosis(records).mapNotNull {
             NcrAsaClassificationMapper.resolve(it.key.patientCharacteristics.asa)?.let { classification ->
                 AsaAssessment(daysSinceDiagnosis = it.value, classification = classification)
             }

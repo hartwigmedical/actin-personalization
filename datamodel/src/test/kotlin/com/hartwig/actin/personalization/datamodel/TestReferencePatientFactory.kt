@@ -176,7 +176,7 @@ object TestReferencePatientFactory {
     )
 
     private fun minimalLabMeasurement() = LabMeasurement(
-        daysSinceDiagnosis = null,
+        daysSinceDiagnosis = 0,
         name = LabMeasure.CARCINOEMBRYONIC_ANTIGEN,
         value = 10.0,
         unit = Unit.MICROGRAM_PER_LITER,
@@ -299,6 +299,7 @@ object TestReferencePatientFactory {
         asaAssessments = emptyList(),
         comorbidityAssessments = emptyList(),
         molecularResults = emptyList(),
+        labMeasurements = emptyList(),
         hasReceivedTumorDirectedTreatment = false,
         hipecTreatment = HipecTreatment(hasHadHipecTreatment = false),
     )

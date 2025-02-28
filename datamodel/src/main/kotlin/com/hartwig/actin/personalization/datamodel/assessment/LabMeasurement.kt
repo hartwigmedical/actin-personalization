@@ -4,8 +4,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class LabMeasurement(
-    val daysSinceDiagnosis: Int?,
-
+    val daysSinceDiagnosis: Int,
     val name: LabMeasure,
     val value: Double,
     val unit: Unit,
