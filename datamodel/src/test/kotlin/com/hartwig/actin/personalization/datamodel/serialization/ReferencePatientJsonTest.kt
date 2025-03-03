@@ -9,7 +9,11 @@ import kotlin.io.path.deleteIfExists
 class ReferencePatientJsonTest {
 
     private val records =
-        listOf(TestReferencePatientFactory.minimalReferencePatientRecord(), TestReferencePatientFactory.exhaustiveReferencePatientRecord())
+        listOf(
+            TestReferencePatientFactory.emptyReferencePatient(),
+            TestReferencePatientFactory.minimalReferencePatient(),
+            TestReferencePatientFactory.exhaustiveReferencePatient()
+        )
 
     @Test
     fun `Should serialize and deserialize patient records in memory without changing their contents`() {

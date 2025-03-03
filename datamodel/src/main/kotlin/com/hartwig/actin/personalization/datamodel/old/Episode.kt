@@ -13,7 +13,7 @@ import com.hartwig.actin.personalization.datamodel.diagnosis.TnmT
 import com.hartwig.actin.personalization.datamodel.diagnosis.TumorLocation
 import com.hartwig.actin.personalization.datamodel.diagnosis.TumorRegression
 import com.hartwig.actin.personalization.datamodel.diagnosis.VenousInvasionDescription
-import com.hartwig.actin.personalization.datamodel.treatment.ReasonRefrainmentFromTumorDirectedTreatment
+import com.hartwig.actin.personalization.datamodel.treatment.ReasonRefrainmentFromTreatment
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -55,7 +55,7 @@ data class Episode(
     val labMeasurements: List<LabMeasurement> = emptyList(),
 
     val hasReceivedTumorDirectedTreatment: Boolean,
-    val reasonRefrainmentFromTumorDirectedTreatment: ReasonRefrainmentFromTumorDirectedTreatment? = null,
+    val reasonRefrainmentFromTumorDirectedTreatment: ReasonRefrainmentFromTreatment? = null,
     val hasParticipatedInTrial: Boolean? = null,
 
     val gastroenterologyResections: List<GastroenterologyResection> = emptyList(),

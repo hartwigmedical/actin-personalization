@@ -4,6 +4,5 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class HipecTreatment (
-    val daysSinceDiagnosis: Int? = null,
-    val hasHadHipecTreatment: Boolean,
+    val daysSinceDiagnosis: Int,
 )

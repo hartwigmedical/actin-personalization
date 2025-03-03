@@ -6,7 +6,6 @@ import com.hartwig.actin.personalization.datamodel.assessment.ComorbidityAssessm
 import com.hartwig.actin.personalization.datamodel.assessment.MolecularResult
 import com.hartwig.actin.personalization.datamodel.assessment.WhoAssessment
 import com.hartwig.actin.personalization.datamodel.outcome.SurvivalMeasure
-import com.hartwig.actin.personalization.datamodel.treatment.HipecTreatment
 import com.hartwig.actin.personalization.ncr.datamodel.NcrRecord
 import com.hartwig.actin.personalization.ncr.interpretation.NcrFunctions
 import com.hartwig.actin.personalization.ncr.interpretation.mapping.NcrAsaClassificationMapper
@@ -23,28 +22,15 @@ object NcrTumorExtractor {
             diagnosisYear = diagnosis.primaryDiagnosis.incjr,
             ageAtDiagnosis = diagnosis.patientCharacteristics.leeft,
             latestSurvivalStatus = extractLatestSurvivalMeasure(diagnosis),
-
             priorTumors = NcrPriorTumorExtractor.extract(records),
-
             primaryDiagnosis = NcrPrimaryDiagnosisExtractor.extract(records),
             metastaticDiagnosis = NcrMetastaticDiagnosisExtractor.extract(records),
-
             whoAssessments = extractWhoAssessments(records),
             asaAssessments = extractAsaAssessments(records),
             comorbidityAssessments = extractComorbidityAssessments(diagnosis),
             molecularResults = extractMolecularResults(diagnosis),
             labMeasurements = NcrLabMeasurementExtractor.extract(records),
-
-            hasReceivedTumorDirectedTreatment = false,
-            hipecTreatment = HipecTreatment(daysSinceDiagnosis = null, hasHadHipecTreatment = false)
-
-            /*
-                            hasReceivedTumorDirectedTreatment = NcrBooleanMapper.resolve(treatment.tumgerichtTher) == true,
-                reasonRefrainmentFromTumorDirectedTreatment =
-                NcrReasonRefrainmentFromTumorDirectedTherapyMapper.resolve(treatment.geenTherReden),
-                hasParticipatedInTrial = NcrBooleanMapper.resolve(treatment.deelnameStudie),
-
-             */
+            treatmentEpisodes = NcrTreatmentEpisodeExtractor.extract(records)
         )
     }
 

@@ -9,7 +9,7 @@ data class PrimarySurgery(
     val technique: SurgeryTechnique? = null,
     val urgency: SurgeryUrgency? = null,
     val radicality: SurgeryRadicality? = null,
-    val circumferentialResectionMargin: SurgeryCircumferentialResectionMargin? = null,
+    val circumferentialResectionMargin: CircumferentialResectionMargin? = null,
     val anastomoticLeakageAfterSurgery: AnastomoticLeakageAfterSurgery? = null,
     val hospitalizationDurationDays: Int? = null
 )

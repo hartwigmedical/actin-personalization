@@ -1,6 +1,6 @@
 package com.hartwig.actin.personalization.datamodel.treatment
 
-enum class SurgeryCircumferentialResectionMargin {
+enum class CircumferentialResectionMargin {
     AT_STAGE_PT0,
     RESECTION_MARGINS_NOT_FREE,
     RESECTION_MARGIN_BETWEEN_ZERO_AND_ONE_MM,

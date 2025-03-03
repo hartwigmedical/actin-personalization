@@ -37,19 +37,20 @@ import com.hartwig.actin.personalization.datamodel.outcome.ResponseMeasure
 import com.hartwig.actin.personalization.datamodel.outcome.ResponseType
 import com.hartwig.actin.personalization.datamodel.outcome.SurvivalMeasure
 import com.hartwig.actin.personalization.datamodel.treatment.AnastomoticLeakageAfterSurgery
+import com.hartwig.actin.personalization.datamodel.treatment.CircumferentialResectionMargin
 import com.hartwig.actin.personalization.datamodel.treatment.Drug
 import com.hartwig.actin.personalization.datamodel.treatment.GastroenterologyResection
 import com.hartwig.actin.personalization.datamodel.treatment.GastroenterologyResectionType
 import com.hartwig.actin.personalization.datamodel.treatment.HipecTreatment
 import com.hartwig.actin.personalization.datamodel.treatment.MetastasesRadiotherapyType
 import com.hartwig.actin.personalization.datamodel.treatment.MetastasesSurgeryType
+import com.hartwig.actin.personalization.datamodel.treatment.MetastaticPresence
 import com.hartwig.actin.personalization.datamodel.treatment.MetastaticRadiotherapy
 import com.hartwig.actin.personalization.datamodel.treatment.MetastaticSurgery
 import com.hartwig.actin.personalization.datamodel.treatment.PrimaryRadiotherapy
 import com.hartwig.actin.personalization.datamodel.treatment.PrimarySurgery
 import com.hartwig.actin.personalization.datamodel.treatment.RadiotherapyType
-import com.hartwig.actin.personalization.datamodel.treatment.ReasonRefrainmentFromTumorDirectedTreatment
-import com.hartwig.actin.personalization.datamodel.treatment.SurgeryCircumferentialResectionMargin
+import com.hartwig.actin.personalization.datamodel.treatment.ReasonRefrainmentFromTreatment
 import com.hartwig.actin.personalization.datamodel.treatment.SurgeryRadicality
 import com.hartwig.actin.personalization.datamodel.treatment.SurgeryTechnique
 import com.hartwig.actin.personalization.datamodel.treatment.SurgeryType
@@ -58,9 +59,67 @@ import com.hartwig.actin.personalization.datamodel.treatment.SystemicTreatment
 import com.hartwig.actin.personalization.datamodel.treatment.SystemicTreatmentDrug
 import com.hartwig.actin.personalization.datamodel.treatment.SystemicTreatmentScheme
 import com.hartwig.actin.personalization.datamodel.treatment.Treatment
+import com.hartwig.actin.personalization.datamodel.treatment.TreatmentEpisode
 import com.hartwig.actin.personalization.datamodel.treatment.TreatmentIntent
 
 object TestReferencePatientFactory {
+
+    fun emptyReferencePatient() = ReferencePatient(
+        sex = Sex.MALE, tumors = listOf(emptyTumor())
+    )
+
+    fun minimalReferencePatient() = ReferencePatient(
+        sex = Sex.MALE, tumors = listOf(minimalTumor())
+    )
+
+    fun exhaustiveReferencePatient() = ReferencePatient(
+        sex = Sex.MALE, tumors = listOf(emptyTumor(), minimalTumor(), exhaustiveTumor())
+    )
+
+    private fun emptyTumor() = Tumor(
+        diagnosisYear = 1971,
+        ageAtDiagnosis = 63,
+        latestSurvivalStatus = SurvivalMeasure(daysSinceDiagnosis = 251, isAlive = true),
+        priorTumors = emptyList(),
+        primaryDiagnosis = minimalPrimaryDiagnosis(),
+        metastaticDiagnosis = minimalMetastaticDiagnosis(),
+        whoAssessments = emptyList(),
+        asaAssessments = emptyList(),
+        comorbidityAssessments = emptyList(),
+        molecularResults = emptyList(),
+        labMeasurements = emptyList(),
+        treatmentEpisodes = emptyList()
+    )
+
+    private fun minimalTumor() = Tumor(
+        diagnosisYear = 1966,
+        ageAtDiagnosis = 73,
+        latestSurvivalStatus = SurvivalMeasure(daysSinceDiagnosis = 151, isAlive = false),
+        priorTumors = listOf(minimalPriorTumor()),
+        primaryDiagnosis = minimalPrimaryDiagnosis(),
+        metastaticDiagnosis = minimalMetastaticDiagnosis(),
+        whoAssessments = listOf(minimalWhoAssessment()),
+        asaAssessments = listOf(minimalAsaAssessment()),
+        comorbidityAssessments = listOf(minimalComorbidityAssessment()),
+        molecularResults = listOf(minimalMolecularResult()),
+        labMeasurements = listOf(minimalLabMeasurement()),
+        treatmentEpisodes = listOf(minimalTreatmentEpisode())
+    )
+
+    private fun exhaustiveTumor() = Tumor(
+        diagnosisYear = 1961,
+        ageAtDiagnosis = 83,
+        latestSurvivalStatus = SurvivalMeasure(daysSinceDiagnosis = 90, isAlive = true),
+        priorTumors = listOf(minimalPriorTumor(), exhaustivePriorTumor()),
+        primaryDiagnosis = exhaustivePrimaryDiagnosis(),
+        metastaticDiagnosis = exhaustiveMetastaticDiagnosis(),
+        whoAssessments = listOf(minimalWhoAssessment(), minimalWhoAssessment()),
+        asaAssessments = listOf(minimalAsaAssessment(), minimalAsaAssessment()),
+        comorbidityAssessments = listOf(minimalComorbidityAssessment(), minimalComorbidityAssessment()),
+        molecularResults = listOf(minimalMolecularResult(), exhaustiveMolecularResult()),
+        labMeasurements = listOf(minimalLabMeasurement(), exhaustiveLabMeasurement()),
+        treatmentEpisodes = listOf(minimalTreatmentEpisode(), exhaustiveTreatmentEpisode())
+    )
 
     private fun minimalPriorTumor() = PriorTumor(
         daysBeforeDiagnosis = 120,
@@ -144,7 +203,15 @@ object TestReferencePatientFactory {
         positiveLymphNodesCount = 10
     )
 
-    private fun exhaustiveComorbidityAssessment() = ComorbidityAssessment(
+    private fun minimalWhoAssessment() = WhoAssessment(
+        daysSinceDiagnosis = 2, whoStatus = 2
+    )
+
+    private fun minimalAsaAssessment() = AsaAssessment(
+        daysSinceDiagnosis = 2, classification = AsaClassification.V
+    )
+
+    private fun minimalComorbidityAssessment() = ComorbidityAssessment(
         daysSinceDiagnosis = 2,
         charlsonComorbidityIndex = 1,
         hasAids = false,
@@ -164,6 +231,10 @@ object TestReferencePatientFactory {
         hasRenalDisease = false,
         hasLiverDisease = false,
         hasUlcerDisease = false
+    )
+
+    private fun minimalMolecularResult() = MolecularResult(
+        daysSinceDiagnosis = 10
     )
 
     private fun exhaustiveMolecularResult() = MolecularResult(
@@ -193,13 +264,25 @@ object TestReferencePatientFactory {
         isPostSurgical = true
     )
 
+    private fun minimalGastroenterologyResection() = GastroenterologyResection(
+        daysSinceDiagnosis = null, resectionType = GastroenterologyResectionType.ENDOSCOPIC_INTERMUSCULAR_DISSECTION
+    )
+
+    private fun exhaustiveGastroenterologyResection() = GastroenterologyResection(
+        daysSinceDiagnosis = 10, resectionType = GastroenterologyResectionType.ENDOSCOPIC_INTERMUSCULAR_DISSECTION
+    )
+
+    private fun minimalPrimarySurgery() = PrimarySurgery(
+        type = SurgeryType.HEMICOLECTOMY_OR_ILEOCECAL_RESECTION,
+    )
+
     private fun exhaustivePrimarySurgery() = PrimarySurgery(
         daysSinceDiagnosis = 10,
         type = SurgeryType.TRANSANAL_ENDOSCOPIC_MICROSURGERY,
         technique = SurgeryTechnique.CONVENTIONAL_SCOPIC_WITH_CONVERSION,
         urgency = SurgeryUrgency.PLACEMENT_STENT_OR_STOMA_LATER_FOLLOWED_BY_PLANNED_SURGERY,
         radicality = SurgeryRadicality.MICROSCOPIC_RADICAL,
-        circumferentialResectionMargin = SurgeryCircumferentialResectionMargin.RESECTION_MARGIN_BETWEEN_ZERO_AND_ONE_MM,
+        circumferentialResectionMargin = CircumferentialResectionMargin.RESECTION_MARGIN_BETWEEN_ZERO_AND_ONE_MM,
         anastomoticLeakageAfterSurgery = AnastomoticLeakageAfterSurgery.COMBINATION_OF_ANASTOMOTIC_LEAKAGE_AND_ABSCESS,
         hospitalizationDurationDays = 10
     )
@@ -214,6 +297,10 @@ object TestReferencePatientFactory {
         daysSinceDiagnosis = 10,
         type = MetastasesSurgeryType.CRYOABLATION_DUE_TO_LUNG_METASTASES,
         radicality = SurgeryRadicality.MACROSCOPIC_IRRADICAL
+    )
+
+    private fun minimalHipecTreatment() = HipecTreatment(
+        daysSinceDiagnosis = 24
     )
 
     private fun minimalPrimaryRadiotherapy() = PrimaryRadiotherapy(
@@ -288,82 +375,49 @@ object TestReferencePatientFactory {
         systemicTreatmentSchemes = listOf(minimalSystemicTreatmentScheme(), exhaustiveSystemicTreatmentScheme())
     )
 
-    private fun minimalTumor() = Tumor(
-        diagnosisYear = 1961,
-        ageAtDiagnosis = 73,
-        latestSurvivalStatus = SurvivalMeasure(daysSinceDiagnosis = 151, isAlive = true),
-        priorTumors = listOf(minimalPriorTumor()),
-        primaryDiagnosis = minimalPrimaryDiagnosis(),
-        metastaticDiagnosis = minimalMetastaticDiagnosis(),
-        whoAssessments = emptyList(),
-        asaAssessments = emptyList(),
-        comorbidityAssessments = emptyList(),
-        molecularResults = emptyList(),
-        labMeasurements = emptyList(),
-        hasReceivedTumorDirectedTreatment = false,
-        hipecTreatment = HipecTreatment(hasHadHipecTreatment = false),
+    private fun minimalResponseMeasure() = ResponseMeasure(
+        daysSinceDiagnosis = null, response = ResponseType.CR
     )
 
-    private fun exhaustiveTumor() = Tumor(
-        diagnosisYear = 1961,
-        ageAtDiagnosis = 83,
-        latestSurvivalStatus = SurvivalMeasure(daysSinceDiagnosis = 90, isAlive = true),
+    private fun exhaustiveResponseMeasure() = ResponseMeasure(
+        daysSinceDiagnosis = 10, response = ResponseType.MR
+    )
 
-        priorTumors = listOf(minimalPriorTumor(), exhaustivePriorTumor()),
+    private fun minimalProgressionMeasure() = ProgressionMeasure(
+        daysSinceDiagnosis = null, type = ProgressionMeasureType.PROGRESSION, followUpEvent = null
+    )
 
-        primaryDiagnosis = exhaustivePrimaryDiagnosis(),
-        metastaticDiagnosis = exhaustiveMetastaticDiagnosis(),
+    private fun exhaustiveProgressionMeasure() = ProgressionMeasure(
+        daysSinceDiagnosis = 10,
+        type = ProgressionMeasureType.CENSOR,
+        followUpEvent = ProgressionMeasureFollowUpEvent.DISTANT_AND_POSSIBLY_REGIONAL_OR_LOCAL
+    )
 
-        whoAssessments = listOf(
-            WhoAssessment(daysSinceDiagnosis = 1, whoStatus = 2),
-            WhoAssessment(daysSinceDiagnosis = 10, whoStatus = 2)
-        ),
-        asaAssessments = listOf(AsaAssessment(daysSinceDiagnosis = 1, classification = AsaClassification.II)),
+    private fun minimalTreatmentEpisode() = TreatmentEpisode(
+        metastaticPresence = MetastaticPresence.AT_START,
+        reasonRefrainmentFromTreatment = ReasonRefrainmentFromTreatment.NOT_APPLICABLE,
+        gastroenterologyResections = listOf(minimalGastroenterologyResection()),
+        primarySurgeries = listOf(minimalPrimarySurgery()),
+        metastaticSurgeries = listOf(minimalMetastaticSurgery()),
+        hipecTreatments = listOf(minimalHipecTreatment()),
+        primaryRadiotherapies = listOf(minimalPrimaryRadiotherapy()),
+        metastaticRadiotherapies = listOf(minimalMetastaticRadiotherapy()),
+        systemicTreatments = listOf(minimalSystemicTreatment()),
+        responseMeasures = listOf(minimalResponseMeasure()),
+        progressionMeasures = listOf(minimalProgressionMeasure())
+    )
 
-        comorbidityAssessments = listOf(exhaustiveComorbidityAssessment()),
-        molecularResults = listOf(MolecularResult(daysSinceDiagnosis = 10), exhaustiveMolecularResult()),
-        labMeasurements = listOf(minimalLabMeasurement(), exhaustiveLabMeasurement()),
-
-        hasReceivedTumorDirectedTreatment = false,
-        reasonRefrainmentFromTumorDirectedTreatment =
-        ReasonRefrainmentFromTumorDirectedTreatment.COMORBIDITY_AND_OR_PERFORMANCE_OR_FUNCTIONAL_STATUS_OR_PRESENCE_OTHER_TUMOR,
-        hasParticipatedInTrial = false,
-
-        gastroenterologyResections = listOf(
-            GastroenterologyResection(
-                daysSinceDiagnosis = null, resectionType = GastroenterologyResectionType.ENDOSCOPIC_INTERMUSCULAR_DISSECTION
-            ), GastroenterologyResection(
-                daysSinceDiagnosis = 10, resectionType = GastroenterologyResectionType.ENDOSCOPIC_INTERMUSCULAR_DISSECTION
-            )
-        ),
-        primarySurgeries = listOf(
-            PrimarySurgery(type = SurgeryType.HEMICOLECTOMY_OR_ILEOCECAL_RESECTION), exhaustivePrimarySurgery()
-        ),
+    private fun exhaustiveTreatmentEpisode() = TreatmentEpisode(
+        metastaticPresence = MetastaticPresence.AT_PROGRESSION,
+        reasonRefrainmentFromTreatment = ReasonRefrainmentFromTreatment.NOT_APPLICABLE,
+        gastroenterologyResections = listOf(minimalGastroenterologyResection(), exhaustiveGastroenterologyResection()),
+        primarySurgeries = listOf(minimalPrimarySurgery(), exhaustivePrimarySurgery()),
         metastaticSurgeries = listOf(minimalMetastaticSurgery(), exhaustiveMetastaticSurgery()),
-        hipecTreatment = HipecTreatment(daysSinceDiagnosis = 10, hasHadHipecTreatment = false),
+        hipecTreatments = listOf(minimalHipecTreatment()),
         primaryRadiotherapies = listOf(minimalPrimaryRadiotherapy(), exhaustivePrimaryRadiotherapy()),
         metastaticRadiotherapies = listOf(minimalMetastaticRadiotherapy(), exhaustiveMetastaticRadiotherapy()),
         systemicTreatments = listOf(minimalSystemicTreatment(), exhaustiveSystemicTreatment()),
-        responseMeasures = listOf(
-            ResponseMeasure(daysSinceDiagnosis = null, response = ResponseType.CR),
-            ResponseMeasure(daysSinceDiagnosis = 10, response = ResponseType.MR)
-        ),
-        progressionMeasures = listOf(
-            ProgressionMeasure(
-                daysSinceDiagnosis = null, type = ProgressionMeasureType.PROGRESSION, followUpEvent = null
-            ), ProgressionMeasure(
-                daysSinceDiagnosis = 10,
-                type = ProgressionMeasureType.CENSOR,
-                followUpEvent = ProgressionMeasureFollowUpEvent.DISTANT_AND_POSSIBLY_REGIONAL_OR_LOCAL
-            )
-        )
-    )
-
-    fun minimalReferencePatientRecord() = ReferencePatient(
-        sex = Sex.MALE, tumors = listOf(minimalTumor())
-    )
-
-    fun exhaustiveReferencePatientRecord() = ReferencePatient(
-        sex = Sex.MALE, tumors = listOf(exhaustiveTumor(), minimalTumor())
+        responseMeasures = listOf(minimalResponseMeasure(), exhaustiveResponseMeasure()),
+        progressionMeasures = listOf(minimalProgressionMeasure(), exhaustiveProgressionMeasure())
     )
 }

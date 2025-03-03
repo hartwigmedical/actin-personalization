@@ -13,9 +13,6 @@ CREATE TABLE `tumor` (
     `patientId` INT NOT NULL,
     `diagnosisYear` INT NOT NULL,
     `ageAtDiagnosis` INT NOT NULL,
-    `hasReceivedTumorDirectedTreatment` BOOL NOT NULL,
-    `reasonRefrainmentFromTumorDirectedTreatment` VARCHAR(255),
-    `hasParticipatedInTrial` BOOL,
     FOREIGN KEY (`patientId`) REFERENCES `patient`(`id`),
     PRIMARY KEY (`id`)
 );
@@ -45,7 +42,7 @@ CREATE TABLE `priorTumor` (
 
 DROP TABLE IF EXISTS `primaryDiagnosis`;
 CREATE TABLE `primaryDiagnosis` (
-    `id` INT NOT NULL AUTO_INCREMENT,
+    `id` INT NOT NULL,
     `tumorId` INT NOT NULL,
     `basisOfDiagnosis` VARCHAR(255) NOT NULL,
     `hasDoublePrimaryTumor` BOOL NOT NULL,
@@ -69,7 +66,7 @@ CREATE TABLE `primaryDiagnosis` (
     `extraMuralInvasionCategory` VARCHAR(50),
     `tumorRegression` VARCHAR(50),
     FOREIGN KEY (`tumorId`) REFERENCES `tumor`(`id`),
-    PRIMARY KEY (`id`)
+    PRIMARY KEY (`id`, `tumorId`)
 );
 
 DROP TABLE IF EXISTS `metastaticDiagnosis`;
@@ -143,7 +140,6 @@ CREATE TABLE `comorbidityAssessment` (
     PRIMARY KEY (`id`)
 );
 
-
 DROP TABLE IF EXISTS `molecularResult`;
 CREATE TABLE `molecularResult` (
     `id` INT NOT NULL AUTO_INCREMENT,
@@ -172,20 +168,30 @@ CREATE TABLE `labMeasurement` (
     PRIMARY KEY (`id`)
 );
 
+DROP TABLE IF EXISTS `treatmentEpisode`;
+CREATE TABLE `treatmentEpisode` (
+    `id` INT NOT NULL,
+    `tumorId` INT NOT NULL,
+    `metastaticPresence` VARCHAR(50) NOT NULL,
+    `reasonRefrainmentFromTreatment` VARCHAR(255) NOT NULL,
+    FOREIGN KEY (`tumorId`) REFERENCES `tumor`(`id`),
+    PRIMARY KEY (`id`)
+);
+
 DROP TABLE IF EXISTS `gastroenterologyResection`;
 CREATE TABLE `gastroenterologyResection` (
     `id` INT NOT NULL AUTO_INCREMENT,
-    `tumorId` INT NOT NULL,
+    `treatmentEpisodeId` INT NOT NULL,
     `daysSinceDiagnosis` INT,
     `resectionType` VARCHAR(50) NOT NULL,
-    FOREIGN KEY (`tumorId`) REFERENCES `tumor`(`id`),
+    FOREIGN KEY (`treatmentEpisodeId`) REFERENCES `treatmentEpisode`(`id`),
     PRIMARY KEY (`id`)
 );
 
 DROP TABLE IF EXISTS `primarySurgery`;
 CREATE TABLE `primarySurgery` (
     `id` INT NOT NULL AUTO_INCREMENT,
-    `tumorId` INT NOT NULL,
+    `treatmentEpisodeId` INT NOT NULL,
     `daysSinceDiagnosis` INT,
     `type` varchar(50) NOT NULL,
     `technique` varchar(50),
@@ -194,62 +200,61 @@ CREATE TABLE `primarySurgery` (
     `circumferentialResectionMargin` varchar(50),
     `anastomoticLeakageAfterSurgery` varchar(50),
     `hospitalizationDurationDays` int,
-    FOREIGN KEY (`tumorId`) REFERENCES `tumor`(`id`),
+    FOREIGN KEY (`treatmentEpisodeId`) REFERENCES `treatmentEpisode`(`id`),
     PRIMARY KEY (`id`)
 );
 
 DROP TABLE IF EXISTS `metastaticSurgery`;
 CREATE TABLE `metastaticSurgery` (
     `id` INT NOT NULL AUTO_INCREMENT,
-    `tumorId` INT NOT NULL,
+    `treatmentEpisodeId` INT NOT NULL,
     `daysSinceDiagnosis` INT,
     `type` varchar(100) NOT NULL,
     `radicality` varchar(50),
-    FOREIGN KEY (`tumorId`) REFERENCES `tumor`(`id`),
+    FOREIGN KEY (`treatmentEpisodeId`) REFERENCES `treatmentEpisode`(`id`),
     PRIMARY KEY (`id`)
 );
 
 DROP TABLE IF EXISTS `hipecTreatment`;
 CREATE TABLE `hipecTreatment` (
     `id` INT NOT NULL AUTO_INCREMENT,
-    `tumorId` INT UNIQUE NOT NULL,
-    `daysSinceDiagnosis` INT,
-    `hasHadHipecTreatment` BOOL NOT NULL,
-    PRIMARY KEY (`id`),
-    FOREIGN KEY (`tumorId`) REFERENCES `tumor`(`id`)
+    `treatmentEpisodeId` INT NOT NULL,
+    `daysSinceDiagnosis` INT NOT NULL,
+    FOREIGN KEY (`treatmentEpisodeId`) REFERENCES `treatmentEpisode`(`id`),
+    PRIMARY KEY (`id`)
 );
 
 DROP TABLE IF EXISTS `primaryRadiotherapy`;
 CREATE TABLE `primaryRadiotherapy` (
     `id` INT NOT NULL AUTO_INCREMENT,
-    `tumorId` INT NOT NULL,
+    `treatmentEpisodeId` INT NOT NULL,
     `daysBetweenDiagnosisAndStart` INT,
     `daysBetweenDiagnosisAndStop` INT,
     `type` VARCHAR(50) NOT NULL,
     `totalDosage` DOUBLE,
-    FOREIGN KEY (`tumorId`) REFERENCES `tumor`(`id`),
+    FOREIGN KEY (`treatmentEpisodeId`) REFERENCES `treatmentEpisode`(`id`),
     PRIMARY KEY (`id`)
 );
 
 DROP TABLE IF EXISTS `metastaticRadiotherapy`;
 CREATE TABLE `metastaticRadiotherapy` (
     `id` INT NOT NULL AUTO_INCREMENT,
-    `tumorId` INT NOT NULL,
+    `treatmentEpisodeId` INT NOT NULL,
     `daysBetweenDiagnosisAndStart` INT,
     `daysBetweenDiagnosisAndStop` INT,
     `type` VARCHAR(100) NOT NULL,
-    FOREIGN KEY (`tumorId`) REFERENCES `tumor`(`id`),
+    FOREIGN KEY (`treatmentEpisodeId`) REFERENCES `treatmentEpisode`(`id`),
     PRIMARY KEY (`id`)
 );
 
 DROP TABLE IF EXISTS `systemicTreatment`;
 CREATE TABLE `systemicTreatment` (
     `id` INT NOT NULL,
-    `tumorId` INT NOT NULL,
+    `treatmentEpisodeId` INT NOT NULL,
     `daysBetweenDiagnosisAndStart` INT,
     `daysBetweenDiagnosisAndStop` INT,
     `treatment` VARCHAR(50) NOT NULL,
-    FOREIGN KEY (`tumorId`) REFERENCES `tumor`(`id`),
+    FOREIGN KEY (`treatmentEpisodeId`) REFERENCES `treatmentEpisode`(`id`),
     PRIMARY KEY (`id`)
 );
 
@@ -264,7 +269,6 @@ CREATE TABLE `systemicTreatmentScheme` (
     FOREIGN KEY (`systemicTreatmentId`) REFERENCES `systemicTreatment`(`id`),
     PRIMARY KEY (`id`)
 );
-
 
 DROP TABLE IF EXISTS `systemicTreatmentDrug`;
 CREATE TABLE `systemicTreatmentDrug` (
@@ -285,21 +289,21 @@ CREATE TABLE `systemicTreatmentDrug` (
 DROP TABLE IF EXISTS `responseMeasure`;
 CREATE TABLE `responseMeasure` (
     `id` INT NOT NULL AUTO_INCREMENT,
-    `tumorId` INT NOT NULL,
+    `treatmentEpisodeId` INT NOT NULL,
     `daysSinceDiagnosis` INT,
     `response` VARCHAR(10) NOT NULL,
-    FOREIGN KEY (`tumorId`) REFERENCES `tumor`(`id`),
+    FOREIGN KEY (`treatmentEpisodeId`) REFERENCES `treatmentEpisode`(`id`),
     PRIMARY KEY (`id`)
 );
 
 DROP TABLE IF EXISTS `progressionMeasure`;
 CREATE TABLE `progressionMeasure` (
     `id` INT NOT NULL AUTO_INCREMENT,
-    `tumorId` INT NOT NULL,
+    `treatmentEpisodeId` INT NOT NULL,
     `daysSinceDiagnosis` INT,
     `type` VARCHAR(50) NOT NULL,
     `followUpEvent` VARCHAR(50),
-    FOREIGN KEY (`tumorId`) REFERENCES `tumor`(`id`),
+    FOREIGN KEY (`treatmentEpisodeId`) REFERENCES `treatmentEpisode`(`id`),
     PRIMARY KEY (`id`)
 );
 
