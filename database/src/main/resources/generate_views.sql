@@ -45,7 +45,7 @@ SELECT
     surgeryOverview.surgeries,
     metastasisOverview.metastasisLocationGroupsPriorToSystemicTreatment,
     episode.intervalTumorIncidenceTreatmentPlanStopDays - episode.intervalTumorIncidenceTreatmentPlanStartDays AS systemicTreatmentPlanDuration
-    diagnosis.observedOsFromTumorIncidenceDays - metastasisOverview.metastasisDetectionDay AS observedOsFromMetastasisDetectionDays
+    diagnosis.observedOsFromTumorIncidenceDays - metastasisOverview.intervalTumorIncidenceMetastasisDetectionDays AS observedOsFromMetastasisDetectionDays
 FROM patient
     INNER JOIN diagnosis ON patient.id = diagnosis.patientId
     INNER JOIN episode ON diagnosis.id = episode.diagnosisId AND episode.order = diagnosis.orderOfFirstDistantMetastasesEpisode
@@ -53,11 +53,11 @@ FROM patient
         SELECT episodeId, GROUP_CONCAT(type) AS surgeries FROM surgery GROUP BY episodeId
     ) surgeryOverview ON episode.id = surgeryOverview.episodeId
     LEFT JOIN (
-        SELECT episodeId, GROUP_CONCAT(DISTINCT locationGroup ORDER BY locationGroup) AS metastasisLocationGroupsPriorToSystemicTreatment
+        SELECT episodeId, 
+               intervalTumorIncidenceMetastasisDetectionDays, 
+               GROUP_CONCAT(DISTINCT locationGroup ORDER BY locationGroup) AS metastasisLocationGroupsPriorToSystemicTreatment
         FROM metastasis INNER JOIN episode ON metastasis.episodeId = episode.id
-        WHERE 
-            intervalTumorIncidenceTreatmentPlanStartDays IS NULL
-            OR intervalTumorIncidenceMetastasisDetectionDays < intervalTumorIncidenceTreatmentPlanStartDays
+        WHERE (episode.intervalTumorIncidenceTreatmentPlanStartDays IS NULL OR(intervalTumorIncidenceMetastasisDetectionDays < intervalTumorIncidenceTreatmentPlanStartDays))
         GROUP BY episodeId
     ) metastasisOverview ON episode.id = metastasisOverview.episodeId
 );
