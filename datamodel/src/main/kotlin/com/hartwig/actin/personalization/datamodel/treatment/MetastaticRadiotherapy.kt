@@ -6,5 +6,5 @@ import kotlinx.serialization.Serializable
 data class MetastaticRadiotherapy(
     val daysBetweenDiagnosisAndStart: Int?,
     val daysBetweenDiagnosisAndStop: Int?,
-    val type: MetastasesRadiotherapyType,
+    val type: MetastaticRadiotherapyType,
 )

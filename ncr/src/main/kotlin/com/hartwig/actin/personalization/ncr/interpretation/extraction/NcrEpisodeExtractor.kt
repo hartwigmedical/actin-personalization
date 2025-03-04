@@ -25,19 +25,19 @@ import com.hartwig.actin.personalization.ncr.interpretation.mapping.NcrAnastomot
 import com.hartwig.actin.personalization.ncr.interpretation.mapping.NcrAsaClassificationMapper
 import com.hartwig.actin.personalization.ncr.interpretation.mapping.NcrBasisOfDiagnosisMapper
 import com.hartwig.actin.personalization.ncr.interpretation.mapping.NcrBooleanMapper
+import com.hartwig.actin.personalization.ncr.interpretation.mapping.NcrCircumferentialResectionMarginMapper
 import com.hartwig.actin.personalization.ncr.interpretation.mapping.NcrDifferentiationGradeMapper
 import com.hartwig.actin.personalization.ncr.interpretation.mapping.NcrDistantMetastasesStatusMapper
 import com.hartwig.actin.personalization.ncr.interpretation.mapping.NcrExtraMuralInvasionCategoryMapper
 import com.hartwig.actin.personalization.ncr.interpretation.mapping.NcrGastroenterologyResectionTypeMapper
 import com.hartwig.actin.personalization.ncr.interpretation.mapping.NcrLymphaticInvasionCategoryMapper
-import com.hartwig.actin.personalization.ncr.interpretation.mapping.NcrMetastasesRadiotherapyTypeMapper
 import com.hartwig.actin.personalization.ncr.interpretation.mapping.NcrMetastasesSurgeryTypeMapper
+import com.hartwig.actin.personalization.ncr.interpretation.mapping.NcrMetastaticRadiotherapyTypeMapper
 import com.hartwig.actin.personalization.ncr.interpretation.mapping.NcrNumberOfLiverMetastasesMapper
 import com.hartwig.actin.personalization.ncr.interpretation.mapping.NcrPfsMeasureFollowUpEventMapper
 import com.hartwig.actin.personalization.ncr.interpretation.mapping.NcrPfsMeasureTypeMapper
 import com.hartwig.actin.personalization.ncr.interpretation.mapping.NcrRadiotherapyTypeMapper
-import com.hartwig.actin.personalization.ncr.interpretation.mapping.NcrReasonRefrainmentFromTumorDirectedTherapyMapper
-import com.hartwig.actin.personalization.ncr.interpretation.mapping.NcrSurgeryCircumferentialResectionMarginMapper
+import com.hartwig.actin.personalization.ncr.interpretation.mapping.NcrReasonRefrainmentFromTreatmentMapper
 import com.hartwig.actin.personalization.ncr.interpretation.mapping.NcrSurgeryRadicalityMapper
 import com.hartwig.actin.personalization.ncr.interpretation.mapping.NcrSurgeryTechniqueMapper
 import com.hartwig.actin.personalization.ncr.interpretation.mapping.NcrSurgeryTypeMapper
@@ -115,7 +115,7 @@ class NcrEpisodeExtractor(private val systemicTreatmentPlanExtractor: NcrSystemi
                 labMeasurements = extractLabMeasurements(labValues),
                 hasReceivedTumorDirectedTreatment = NcrBooleanMapper.resolve(treatment.tumgerichtTher) == true,
                 reasonRefrainmentFromTumorDirectedTreatment =
-                NcrReasonRefrainmentFromTumorDirectedTherapyMapper.resolve(treatment.geenTherReden),
+                NcrReasonRefrainmentFromTreatmentMapper.resolve(treatment.geenTherReden),
                 hasParticipatedInTrial = NcrBooleanMapper.resolve(treatment.deelnameStudie),
                 gastroenterologyResections = extractGastroenterologyResections(treatment.gastroenterologyResection),
                 surgeries = extractSurgeries(treatment.primarySurgery),
@@ -165,7 +165,7 @@ class NcrEpisodeExtractor(private val systemicTreatmentPlanExtractor: NcrSystemi
                 .mapNotNull { (mrtType, startInterval, stopInterval) ->
                     mrtType?.let { typeCode ->
                         MetastasesRadiotherapy(
-                            NcrMetastasesRadiotherapyTypeMapper.resolve(typeCode),
+                            NcrMetastaticRadiotherapyTypeMapper.resolve(typeCode),
                             startInterval?.takeIf { it != "." }?.toInt(),
                             stopInterval?.takeIf { it != "." }?.toInt()
                         )
@@ -220,7 +220,7 @@ class NcrEpisodeExtractor(private val systemicTreatmentPlanExtractor: NcrSystemi
             NcrSurgeryTechniqueMapper.resolve(technique),
             NcrSurgeryUrgencyMapper.resolve(urgency),
             NcrSurgeryRadicalityMapper.resolve(radicality),
-            NcrSurgeryCircumferentialResectionMarginMapper.resolve(margins),
+            NcrCircumferentialResectionMarginMapper.resolve(margins),
             NcrAnastomoticLeakageAfterSurgeryMapper.resolve(leakage),
             interval,
             duration

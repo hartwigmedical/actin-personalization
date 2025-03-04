@@ -42,10 +42,10 @@ import com.hartwig.actin.personalization.datamodel.treatment.Drug
 import com.hartwig.actin.personalization.datamodel.treatment.GastroenterologyResection
 import com.hartwig.actin.personalization.datamodel.treatment.GastroenterologyResectionType
 import com.hartwig.actin.personalization.datamodel.treatment.HipecTreatment
-import com.hartwig.actin.personalization.datamodel.treatment.MetastasesRadiotherapyType
 import com.hartwig.actin.personalization.datamodel.treatment.MetastasesSurgeryType
 import com.hartwig.actin.personalization.datamodel.treatment.MetastaticPresence
 import com.hartwig.actin.personalization.datamodel.treatment.MetastaticRadiotherapy
+import com.hartwig.actin.personalization.datamodel.treatment.MetastaticRadiotherapyType
 import com.hartwig.actin.personalization.datamodel.treatment.MetastaticSurgery
 import com.hartwig.actin.personalization.datamodel.treatment.PrimaryRadiotherapy
 import com.hartwig.actin.personalization.datamodel.treatment.PrimarySurgery
@@ -324,13 +324,13 @@ object TestReferencePatientFactory {
     private fun minimalMetastaticRadiotherapy() = MetastaticRadiotherapy(
         daysBetweenDiagnosisAndStart = null,
         daysBetweenDiagnosisAndStop = null,
-        type = MetastasesRadiotherapyType.RADIOTHERAPY_ON_BRAIN_METASTASES_STEREOTACTIC_GAMMA_KNIFE_CYBER_KNIFE,
+        type = MetastaticRadiotherapyType.RADIOTHERAPY_ON_BRAIN_METASTASES_STEREOTACTIC_GAMMA_KNIFE_CYBER_KNIFE,
     )
 
     private fun exhaustiveMetastaticRadiotherapy() = MetastaticRadiotherapy(
         daysBetweenDiagnosisAndStart = 10,
         daysBetweenDiagnosisAndStop = 20,
-        type = MetastasesRadiotherapyType.RADIOTHERAPY_ON_SKIN_METASTASES,
+        type = MetastaticRadiotherapyType.RADIOTHERAPY_ON_SKIN_METASTASES,
     )
 
     private fun minimalSystemicTreatment() = SystemicTreatment(

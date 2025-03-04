@@ -2,7 +2,7 @@ package com.hartwig.actin.personalization.ncr.interpretation.mapping
 
 import com.hartwig.actin.personalization.datamodel.treatment.ReasonRefrainmentFromTreatment
 
-object NcrReasonRefrainmentFromTumorDirectedTherapyMapper : NcrIntCodeMapper<ReasonRefrainmentFromTreatment?> {
+object NcrReasonRefrainmentFromTreatmentMapper : NcrIntCodeMapper<ReasonRefrainmentFromTreatment?> {
 
     override fun resolve(code: Int): ReasonRefrainmentFromTreatment? {
         return when (code) {

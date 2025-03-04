@@ -2,7 +2,7 @@ package com.hartwig.actin.personalization.ncr.interpretation.mapping
 
 import com.hartwig.actin.personalization.datamodel.treatment.CircumferentialResectionMargin
 
-object NcrSurgeryCircumferentialResectionMarginMapper : NcrIntCodeMapper<CircumferentialResectionMargin?> {
+object NcrCircumferentialResectionMarginMapper : NcrIntCodeMapper<CircumferentialResectionMargin?> {
 
     override fun resolve(code: Int): CircumferentialResectionMargin? {
         return when (code) {

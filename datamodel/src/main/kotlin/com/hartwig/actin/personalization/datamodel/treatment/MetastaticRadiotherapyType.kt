@@ -1,6 +1,6 @@
 package com.hartwig.actin.personalization.datamodel.treatment
 
-enum class MetastasesRadiotherapyType {
+enum class MetastaticRadiotherapyType {
     PROPHYLACTIC_RADIOTHERAPY_TO_THE_CNS,
     RADIOTHERAPY_AIMED_AT_METASTASES_NNO,
     RADIOTHERAPY_FOR_LYMPH_NODE_METASTASES,
