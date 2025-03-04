@@ -45,6 +45,8 @@ SELECT
     surgeryOverview.surgeries,
     metastasisOverview.metastasisLocationGroupsPriorToSystemicTreatment,
     episode.intervalTumorIncidenceTreatmentPlanStopDays - episode.intervalTumorIncidenceTreatmentPlanStartDays AS systemicTreatmentPlanDuration
+    diagnosis.observedOsFromTumorIncidenceDays - metastasisOverview.metastasisDetectionDay AS observedOsFromMetastasisDetectionDays,
+
 FROM patient
     INNER JOIN diagnosis ON patient.id = diagnosis.patientId
     INNER JOIN episode ON diagnosis.id = episode.diagnosisId AND episode.order = diagnosis.orderOfFirstDistantMetastasesEpisode
