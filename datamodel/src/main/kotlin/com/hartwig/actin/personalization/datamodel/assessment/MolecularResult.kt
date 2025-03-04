@@ -6,9 +6,9 @@ import kotlinx.serialization.Serializable
 data class MolecularResult(
     val daysSinceDiagnosis: Int,
 
-    val hasMsi: Boolean? = null,
-    val hasBrafMutation: Boolean? = null,
-    val hasBrafV600EMutation: Boolean? = null,
-    val hasRasMutation: Boolean? = null,
-    val hasKrasG12CMutation: Boolean? = null,
+    val hasMsi: Boolean?,
+    val hasBrafMutation: Boolean?,
+    val hasBrafV600EMutation: Boolean?,
+    val hasRasMutation: Boolean?,
+    val hasKrasG12CMutation: Boolean?,
 )

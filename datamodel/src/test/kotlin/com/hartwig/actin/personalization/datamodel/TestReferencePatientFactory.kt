@@ -183,7 +183,12 @@ object TestReferencePatientFactory {
     )
 
     private fun minimalMetastaticDiagnosis() = MetastaticDiagnosis(
-        distantMetastasesDetectionStatus = MetastasesDetectionStatus.AT_START, metastases = emptyList()
+        distantMetastasesDetectionStatus = MetastasesDetectionStatus.AT_START,
+        metastases = emptyList(),
+        numberOfLiverMetastases = null,
+        maximumSizeOfLiverMetastasisMm = null,
+        investigatedLymphNodesCount = null,
+        positiveLymphNodesCount = null
     )
 
     private fun exhaustiveMetastaticDiagnosis() = MetastaticDiagnosis(
@@ -234,7 +239,12 @@ object TestReferencePatientFactory {
     )
 
     private fun minimalMolecularResult() = MolecularResult(
-        daysSinceDiagnosis = 10
+        daysSinceDiagnosis = 10,
+        hasMsi = null,
+        hasBrafMutation = null,
+        hasBrafV600EMutation = null,
+        hasRasMutation = null,
+        hasKrasG12CMutation = null
     )
 
     private fun exhaustiveMolecularResult() = MolecularResult(

@@ -6,9 +6,9 @@ import kotlinx.serialization.Serializable
 data class MetastaticDiagnosis(
     val distantMetastasesDetectionStatus: MetastasesDetectionStatus,
     val metastases: List<Metastasis>,
-    val numberOfLiverMetastases: NumberOfLiverMetastases? = null,
-    val maximumSizeOfLiverMetastasisMm: Int? = null,
+    val numberOfLiverMetastases: NumberOfLiverMetastases?,
+    val maximumSizeOfLiverMetastasisMm: Int?,
 
-    val investigatedLymphNodesCount: Int? = null,
-    val positiveLymphNodesCount: Int? = null
+    val investigatedLymphNodesCount: Int?,
+    val positiveLymphNodesCount: Int?
 )

@@ -8,7 +8,6 @@ import kotlinx.serialization.Serializable
 data class TreatmentEpisode (
     val metastaticPresence: MetastaticPresence,
     val reasonRefrainmentFromTreatment: ReasonRefrainmentFromTreatment,
-
     val gastroenterologyResections: List<GastroenterologyResection>,
     val primarySurgeries: List<PrimarySurgery>,
     val metastaticSurgeries: List<MetastaticSurgery>,
@@ -16,7 +15,6 @@ data class TreatmentEpisode (
     val primaryRadiotherapies: List<PrimaryRadiotherapy>,
     val metastaticRadiotherapies: List<MetastaticRadiotherapy>,
     val systemicTreatments: List<SystemicTreatment>,
-
     val responseMeasures: List<ResponseMeasure>,
     val progressionMeasures: List<ProgressionMeasure>
 )
