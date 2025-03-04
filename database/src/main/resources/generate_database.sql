@@ -170,7 +170,7 @@ CREATE TABLE `labMeasurement` (
 
 DROP TABLE IF EXISTS `treatmentEpisode`;
 CREATE TABLE `treatmentEpisode` (
-    `id` INT NOT NULL,
+    `id` INT NOT NULL AUTO_INCREMENT,
     `tumorId` INT NOT NULL,
     `metastaticPresence` VARCHAR(50) NOT NULL,
     `reasonRefrainmentFromTreatment` VARCHAR(255) NOT NULL,
@@ -249,7 +249,7 @@ CREATE TABLE `metastaticRadiotherapy` (
 
 DROP TABLE IF EXISTS `systemicTreatment`;
 CREATE TABLE `systemicTreatment` (
-    `id` INT NOT NULL,
+    `id` INT NOT NULL AUTO_INCREMENT,
     `treatmentEpisodeId` INT NOT NULL,
     `daysBetweenDiagnosisAndStart` INT,
     `daysBetweenDiagnosisAndStop` INT,
@@ -260,7 +260,7 @@ CREATE TABLE `systemicTreatment` (
 
 DROP TABLE IF EXISTS `systemicTreatmentScheme`;
 CREATE TABLE `systemicTreatmentScheme` (
-    `id` INT NOT NULL,
+    `id` INT NOT NULL AUTO_INCREMENT,
     `systemicTreatmentId` INT NOT NULL,
     `minDaysBetweenDiagnosisAndStart` INT,
     `maxDaysBetweenDiagnosisAndStart` INT,

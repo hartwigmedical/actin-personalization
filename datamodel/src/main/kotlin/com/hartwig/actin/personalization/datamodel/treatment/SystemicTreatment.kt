@@ -7,5 +7,5 @@ data class SystemicTreatment(
     val daysBetweenDiagnosisAndStart: Int? = null,
     val daysBetweenDiagnosisAndStop: Int? = null,
     val treatment: Treatment,
-    val systemicTreatmentSchemes: List<SystemicTreatmentScheme>,
+    val schemes: List<SystemicTreatmentScheme>,
 )

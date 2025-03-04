@@ -327,7 +327,7 @@ object TestReferencePatientFactory {
         daysBetweenDiagnosisAndStart = null,
         daysBetweenDiagnosisAndStop = null,
         treatment = Treatment.CAPECITABINE_BEVACIZUMAB,
-        systemicTreatmentSchemes = emptyList()
+        schemes = emptyList()
     )
 
     private fun minimalSystemicTreatmentScheme() = SystemicTreatmentScheme(
@@ -372,7 +372,7 @@ object TestReferencePatientFactory {
         daysBetweenDiagnosisAndStart = 10,
         daysBetweenDiagnosisAndStop = 20,
         treatment = Treatment.CAPECITABINE_BEVACIZUMAB,
-        systemicTreatmentSchemes = listOf(minimalSystemicTreatmentScheme(), exhaustiveSystemicTreatmentScheme())
+        schemes = listOf(minimalSystemicTreatmentScheme(), exhaustiveSystemicTreatmentScheme())
     )
 
     private fun minimalResponseMeasure() = ResponseMeasure(
