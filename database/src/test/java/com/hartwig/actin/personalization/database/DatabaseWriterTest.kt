@@ -50,7 +50,6 @@ class DatabaseWriterTest {
     fun `Should insert patients with empty data`() {
         val records = listOf(TestReferencePatientFactory.emptyReferencePatient())
 
-        println(records)
         writer.writeAllToDb(records)
         compare(records)
     }
@@ -59,7 +58,6 @@ class DatabaseWriterTest {
     fun `Should insert patients with minimum data`() {
         val records = listOf(TestReferencePatientFactory.minimalReferencePatient())
 
-        println(records)
         writer.writeAllToDb(records)
         compare(records)
     }
@@ -72,7 +70,6 @@ class DatabaseWriterTest {
             TestReferencePatientFactory.exhaustiveReferencePatient()
         )
 
-        println(records)
         writer.writeAllToDb(records)
         compare(records)
     }
