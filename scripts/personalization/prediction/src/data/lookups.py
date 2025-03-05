@@ -87,7 +87,6 @@ class LookupManager:
             "stageTNM": self.stageTnm_lookup,
         }
 
-
         self.features = [
              'ageAtDiagnosis',
              'tumorIncidenceYear',

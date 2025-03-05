@@ -26,7 +26,6 @@ def random_parameter_search(param_dict: Dict[str, List[Any]], n_samples: int) ->
 
 def hyperparameter_search(
     X_train: pd.DataFrame, y_train: pd.DataFrame, X_test: pd.DataFrame, y_test: pd.DataFrame,
-    treatment_col: str, 
     encoded_columns: Dict[str, List[str]], 
     event_col: str, duration_col: str, 
     max_time: int, 
@@ -80,7 +79,6 @@ def hyperparameter_search(
                     best_score = current_score
                     best_params = params
                     best_model_trained = trained_models[model_name]
-
 
         best_models[model_name] = (best_model_trained, best_params)
         print(f"Best params for {model_name}: {best_params} with auc={best_score}")
