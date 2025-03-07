@@ -6,6 +6,8 @@ import com.hartwig.actin.personalization.datamodel.DiagnosisEpisode
 import com.hartwig.actin.personalization.datamodel.LocationGroup
 import com.hartwig.actin.personalization.datamodel.ReferencePatient
 import com.hartwig.actin.personalization.datamodel.MetastasesDetectionStatus
+import com.hartwig.actin.personalization.datamodel.StageTnm
+import com.hartwig.actin.personalization.datamodel.TnmM
 import com.hartwig.actin.personalization.datamodel.Treatment
 import com.hartwig.actin.personalization.datamodel.serialization.ReferencePatientJson
 
@@ -49,7 +51,11 @@ class PersonalizedDataInterpreter(val patientsByTreatment: List<Pair<TreatmentGr
                 .map { (diagnosis, episodes) -> DiagnosisEpisode(diagnosis, episodes.single { it.order == 1 }) }
                 .filter { diagnosisEpisode ->
                     val episode = diagnosisEpisode.episode
+                    val diagnosis = diagnosisEpisode.diagnosis
+                    val tnmM1 = setOf(TnmM.M1, TnmM.M1A, TnmM.M1B, TnmM.M1C)
+                    val stageTnmIV = setOf(StageTnm.IV, StageTnm.IVA, StageTnm.IVB, StageTnm.IVC)
                     episode.distantMetastasesDetectionStatus == MetastasesDetectionStatus.AT_START &&
+                            episode.tnmCM in tnmM1 || episode.tnmPM in tnmM1 || episode.stageTNM in stageTnmIV &&
                             episode.systemicTreatmentPlan?.treatment?.let{ it != Treatment.OTHER } == true &&
                             episode.surgeries.isEmpty() &&
                             episode.doesNotIncludeAdjuvantOrNeoadjuvantTreatment()
