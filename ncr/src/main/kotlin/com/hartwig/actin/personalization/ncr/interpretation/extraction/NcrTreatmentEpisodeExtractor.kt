@@ -1,5 +1,8 @@
 package com.hartwig.actin.personalization.ncr.interpretation.extraction
 
+import com.hartwig.actin.personalization.datamodel.outcome.ProgressionMeasure
+import com.hartwig.actin.personalization.datamodel.outcome.ResponseMeasure
+import com.hartwig.actin.personalization.datamodel.outcome.ResponseType
 import com.hartwig.actin.personalization.datamodel.treatment.GastroenterologyResection
 import com.hartwig.actin.personalization.datamodel.treatment.HipecTreatment
 import com.hartwig.actin.personalization.datamodel.treatment.MetastaticRadiotherapy
@@ -15,6 +18,7 @@ import com.hartwig.actin.personalization.ncr.datamodel.NcrMetastaticSurgery
 import com.hartwig.actin.personalization.ncr.datamodel.NcrPrimaryRadiotherapy
 import com.hartwig.actin.personalization.ncr.datamodel.NcrPrimarySurgery
 import com.hartwig.actin.personalization.ncr.datamodel.NcrRecord
+import com.hartwig.actin.personalization.ncr.datamodel.NcrTreatmentResponse
 import com.hartwig.actin.personalization.ncr.interpretation.conversion.MetastaticRtIntervalConversion
 import com.hartwig.actin.personalization.ncr.interpretation.mapping.NcrAnastomoticLeakageAfterSurgeryMapper
 import com.hartwig.actin.personalization.ncr.interpretation.mapping.NcrBooleanMapper
@@ -23,6 +27,8 @@ import com.hartwig.actin.personalization.ncr.interpretation.mapping.NcrGastroent
 import com.hartwig.actin.personalization.ncr.interpretation.mapping.NcrMetastaticPresenceMapper
 import com.hartwig.actin.personalization.ncr.interpretation.mapping.NcrMetastaticRadiotherapyTypeMapper
 import com.hartwig.actin.personalization.ncr.interpretation.mapping.NcrMetastaticSurgeryTypeMapper
+import com.hartwig.actin.personalization.ncr.interpretation.mapping.NcrPfsMeasureFollowUpEventMapper
+import com.hartwig.actin.personalization.ncr.interpretation.mapping.NcrPfsMeasureTypeMapper
 import com.hartwig.actin.personalization.ncr.interpretation.mapping.NcrRadiotherapyTypeMapper
 import com.hartwig.actin.personalization.ncr.interpretation.mapping.NcrReasonRefrainmentFromTreatmentMapper
 import com.hartwig.actin.personalization.ncr.interpretation.mapping.NcrSurgeryRadicalityMapper
@@ -49,8 +55,8 @@ object NcrTreatmentEpisodeExtractor {
                 primaryRadiotherapies = extractPrimaryRadiotherapies(record.treatment.primaryRadiotherapy),
                 metastaticRadiotherapies = extractMetastasesRadiotherapies(record.treatment.metastaticRadiotherapy),
                 systemicTreatments = emptyList(),
-                responseMeasures = emptyList(),
-                progressionMeasures = emptyList()
+                responseMeasures = extractResponseMeasures(record.treatmentResponse),
+                progressionMeasures = extractProgressionMeasures(record.treatmentResponse)
             )
         }
     }
@@ -187,6 +193,36 @@ object NcrTreatmentEpisodeExtractor {
                             daysBetweenDiagnosisAndStart = MetastaticRtIntervalConversion.convert(startInterval),
                             daysBetweenDiagnosisAndStop = MetastaticRtIntervalConversion.convert(stopInterval),
                             type = NcrMetastaticRadiotherapyTypeMapper.resolve(typeCode)
+                        )
+                    }
+                }
+        }
+    }
+
+    private fun extractResponseMeasures(treatmentResponse: NcrTreatmentResponse): List<ResponseMeasure> {
+        val response = treatmentResponse.responsUitslag
+
+        if (response == null || response == "99" || response == "0") {
+            return emptyList()
+        }
+
+        return listOf(ResponseMeasure(treatmentResponse.responsInt, ResponseType.valueOf(response)))
+    }
+
+    private fun extractProgressionMeasures(treatmentResponse: NcrTreatmentResponse): List<ProgressionMeasure> {
+        return with(treatmentResponse) {
+            listOf(
+                Triple(pfsEvent1, fupEventType1, pfsInt1),
+                Triple(pfsEvent2, fupEventType2, pfsInt2),
+                Triple(pfsEvent3, fupEventType3, pfsInt3),
+                Triple(pfsEvent4, fupEventType4, pfsInt4)
+            )
+                .mapNotNull { (type, followupEvent, daysSinceDiagnosis) ->
+                    type?.let {
+                        ProgressionMeasure(
+                            daysSinceDiagnosis = daysSinceDiagnosis,
+                            type = NcrPfsMeasureTypeMapper.resolve(it),
+                            followUpEvent = NcrPfsMeasureFollowUpEventMapper.resolve(followupEvent)
                         )
                     }
                 }

@@ -33,7 +33,7 @@ object TestNcrRecordFactory {
         return baseRecord
             .copy(identification = baseRecord.identification.copy(epis = DIAGNOSIS_EPIS, metaEpis = 0, teller = 1))
             .copy(metastaticDiagnosis = minimalMetastaticDiagnosis())
-            .copy(treatment = baseRecord.treatment.copy(systemicTreatment = minimalTreatment().systemicTreatment))
+            .copy(treatmentResponse = minimalTreatmentResponse())
     }
 
     fun properFollowupRecord1(): NcrRecord {
@@ -54,6 +54,7 @@ object TestNcrRecordFactory {
             .copy(comorbidities = minimalComorbidities())
             .copy(labValues = properFollowup1LabValues())
             .copy(treatment = properFollowup1Treatment())
+            .copy(treatmentResponse = minimalTreatmentResponse())
     }
 
     fun properFollowupRecord2(): NcrRecord {

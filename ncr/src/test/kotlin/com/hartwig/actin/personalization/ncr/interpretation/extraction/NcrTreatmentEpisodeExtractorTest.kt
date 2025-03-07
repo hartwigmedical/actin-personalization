@@ -1,5 +1,10 @@
 package com.hartwig.actin.personalization.ncr.interpretation.extraction
 
+import com.hartwig.actin.personalization.datamodel.outcome.ProgressionMeasure
+import com.hartwig.actin.personalization.datamodel.outcome.ProgressionMeasureFollowUpEvent
+import com.hartwig.actin.personalization.datamodel.outcome.ProgressionMeasureType
+import com.hartwig.actin.personalization.datamodel.outcome.ResponseMeasure
+import com.hartwig.actin.personalization.datamodel.outcome.ResponseType
 import com.hartwig.actin.personalization.datamodel.treatment.GastroenterologyResection
 import com.hartwig.actin.personalization.datamodel.treatment.GastroenterologyResectionType
 import com.hartwig.actin.personalization.datamodel.treatment.HipecTreatment
@@ -86,6 +91,19 @@ class NcrTreatmentEpisodeExtractorTest {
                         daysBetweenDiagnosisAndStart = 120,
                         daysBetweenDiagnosisAndStop = 130,
                         type = MetastaticRadiotherapyType.RADIOTHERAPY_ON_LUNG_METASTASES
+                    )
+                ),
+                responseMeasures = listOf(ResponseMeasure(daysSinceDiagnosis = 5, response = ResponseType.PD)),
+                progressionMeasures = listOf(
+                    ProgressionMeasure(
+                        daysSinceDiagnosis = 400,
+                        type = ProgressionMeasureType.PROGRESSION,
+                        followUpEvent = ProgressionMeasureFollowUpEvent.LOCAL_ONLY
+                    ),
+                    ProgressionMeasure(
+                        daysSinceDiagnosis = 850,
+                        type = ProgressionMeasureType.DEATH,
+                        followUpEvent = ProgressionMeasureFollowUpEvent.REGIONAL
                     )
                 )
             )
