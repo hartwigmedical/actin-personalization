@@ -462,7 +462,7 @@ object TestNcrRecordFactory {
         return NcrTreatment(
             deelnameStudie = null,
             tumgerichtTher = null,
-            geenTherReden = null,
+            geenTherReden = 14,
             gastroenterologyResection = NcrGastroenterologyResection(
                 mdlRes = null,
                 mdlResType1 = null,
@@ -625,10 +625,22 @@ object TestNcrRecordFactory {
         return minimalTreatment().copy(
             deelnameStudie = 0,
             tumgerichtTher = 1,
+            geenTherReden = null,
+            gastroenterologyResection = NcrGastroenterologyResection(
+                mdlRes = 1,
+                mdlResType1 = 5,
+                mdlResInt1 = 10
+            ),
             primarySurgery = NcrPrimarySurgery(
                 chir = 1,
-                chirInt1 = 20
-            )
+                chirInt1 = 20,
+                chirType1 = 4
+            ),
+            primaryRadiotherapy = NcrPrimaryRadiotherapy(rt = 2,
+                rtType1 = 2,
+                rtStartInt1 = 24,
+                rtStopInt1 = 28,
+                rtDosis1 = 5.0)
         )
     }
 
@@ -636,10 +648,10 @@ object TestNcrRecordFactory {
         return minimalTreatment().copy(
             deelnameStudie = 0,
             tumgerichtTher = 1,
-            primaryRadiotherapy = NcrPrimaryRadiotherapy(
-                rt = 4,
-                rtStartInt1 = 50,
-                rtStopInt1 = 80
+            geenTherReden = null,
+            hipec = NcrHipec(
+                hipec = 1,
+                hipecInt1 = 50
             )
         )
     }
@@ -648,6 +660,17 @@ object TestNcrRecordFactory {
         return minimalTreatment().copy(
             deelnameStudie = 0,
             tumgerichtTher = 1,
+            geenTherReden = null,
+            metastaticSurgery = NcrMetastaticSurgery(
+                metaChirCode1 = "123C482M",
+                metaChirInt1 = 110,
+                metaChirRad1 = 1
+            ),
+            metastaticRadiotherapy = NcrMetastaticRadiotherapy(
+                metaRtCode1 = "320C34",
+                metaRtStartInt1 = "120",
+                metaRtStopInt1 = "130"
+            ),
             systemicTreatment = NcrSystemicTreatment(
                 chemo = 1,
                 target = 2,

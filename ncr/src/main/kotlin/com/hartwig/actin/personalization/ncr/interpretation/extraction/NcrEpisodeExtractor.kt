@@ -31,8 +31,8 @@ import com.hartwig.actin.personalization.ncr.interpretation.mapping.NcrDistantMe
 import com.hartwig.actin.personalization.ncr.interpretation.mapping.NcrExtraMuralInvasionCategoryMapper
 import com.hartwig.actin.personalization.ncr.interpretation.mapping.NcrGastroenterologyResectionTypeMapper
 import com.hartwig.actin.personalization.ncr.interpretation.mapping.NcrLymphaticInvasionCategoryMapper
-import com.hartwig.actin.personalization.ncr.interpretation.mapping.NcrMetastasesSurgeryTypeMapper
 import com.hartwig.actin.personalization.ncr.interpretation.mapping.NcrMetastaticRadiotherapyTypeMapper
+import com.hartwig.actin.personalization.ncr.interpretation.mapping.NcrMetastaticSurgeryTypeMapper
 import com.hartwig.actin.personalization.ncr.interpretation.mapping.NcrNumberOfLiverMetastasesMapper
 import com.hartwig.actin.personalization.ncr.interpretation.mapping.NcrPfsMeasureFollowUpEventMapper
 import com.hartwig.actin.personalization.ncr.interpretation.mapping.NcrPfsMeasureTypeMapper
@@ -196,7 +196,7 @@ class NcrEpisodeExtractor(private val systemicTreatmentPlanExtractor: NcrSystemi
                 .mapNotNull { (type, radicality, interval) ->
                     type?.let {
                         MetastasesSurgery(
-                            NcrMetastasesSurgeryTypeMapper.resolve(it), NcrSurgeryRadicalityMapper.resolve(radicality), interval
+                            NcrMetastaticSurgeryTypeMapper.resolve(it), NcrSurgeryRadicalityMapper.resolve(radicality), interval
                         )
                     }
                 }

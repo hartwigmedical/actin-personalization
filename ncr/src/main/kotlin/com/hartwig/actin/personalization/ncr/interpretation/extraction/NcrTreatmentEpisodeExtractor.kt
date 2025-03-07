@@ -20,9 +20,9 @@ import com.hartwig.actin.personalization.ncr.interpretation.mapping.NcrAnastomot
 import com.hartwig.actin.personalization.ncr.interpretation.mapping.NcrBooleanMapper
 import com.hartwig.actin.personalization.ncr.interpretation.mapping.NcrCircumferentialResectionMarginMapper
 import com.hartwig.actin.personalization.ncr.interpretation.mapping.NcrGastroenterologyResectionTypeMapper
-import com.hartwig.actin.personalization.ncr.interpretation.mapping.NcrMetastasesSurgeryTypeMapper
 import com.hartwig.actin.personalization.ncr.interpretation.mapping.NcrMetastaticPresenceMapper
 import com.hartwig.actin.personalization.ncr.interpretation.mapping.NcrMetastaticRadiotherapyTypeMapper
+import com.hartwig.actin.personalization.ncr.interpretation.mapping.NcrMetastaticSurgeryTypeMapper
 import com.hartwig.actin.personalization.ncr.interpretation.mapping.NcrRadiotherapyTypeMapper
 import com.hartwig.actin.personalization.ncr.interpretation.mapping.NcrReasonRefrainmentFromTreatmentMapper
 import com.hartwig.actin.personalization.ncr.interpretation.mapping.NcrSurgeryRadicalityMapper
@@ -136,7 +136,7 @@ object NcrTreatmentEpisodeExtractor {
                     type?.let {
                         MetastaticSurgery(
                             daysSinceDiagnosis = daysSinceDiagnosis,
-                            type = NcrMetastasesSurgeryTypeMapper.resolve(it),
+                            type = NcrMetastaticSurgeryTypeMapper.resolve(it),
                             radicality = NcrSurgeryRadicalityMapper.resolve(radicality),
                         )
                     }

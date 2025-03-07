@@ -5,6 +5,6 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class MetastaticSurgery (
     val daysSinceDiagnosis: Int?,
-    val type: MetastasesSurgeryType,
+    val type: MetastaticSurgeryType,
     val radicality: SurgeryRadicality?
 )

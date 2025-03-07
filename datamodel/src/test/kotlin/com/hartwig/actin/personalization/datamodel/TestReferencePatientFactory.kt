@@ -42,11 +42,11 @@ import com.hartwig.actin.personalization.datamodel.treatment.Drug
 import com.hartwig.actin.personalization.datamodel.treatment.GastroenterologyResection
 import com.hartwig.actin.personalization.datamodel.treatment.GastroenterologyResectionType
 import com.hartwig.actin.personalization.datamodel.treatment.HipecTreatment
-import com.hartwig.actin.personalization.datamodel.treatment.MetastasesSurgeryType
 import com.hartwig.actin.personalization.datamodel.treatment.MetastaticPresence
 import com.hartwig.actin.personalization.datamodel.treatment.MetastaticRadiotherapy
 import com.hartwig.actin.personalization.datamodel.treatment.MetastaticRadiotherapyType
 import com.hartwig.actin.personalization.datamodel.treatment.MetastaticSurgery
+import com.hartwig.actin.personalization.datamodel.treatment.MetastaticSurgeryType
 import com.hartwig.actin.personalization.datamodel.treatment.PrimaryRadiotherapy
 import com.hartwig.actin.personalization.datamodel.treatment.PrimarySurgery
 import com.hartwig.actin.personalization.datamodel.treatment.RadiotherapyType
@@ -283,7 +283,14 @@ object TestReferencePatientFactory {
     )
 
     private fun minimalPrimarySurgery() = PrimarySurgery(
+        daysSinceDiagnosis = null,
         type = SurgeryType.HEMICOLECTOMY_OR_ILEOCECAL_RESECTION,
+        technique = null,
+        urgency = null,
+        radicality = null,
+        circumferentialResectionMargin = null,
+        anastomoticLeakageAfterSurgery = null,
+        hospitalizationDurationDays = null
     )
 
     private fun exhaustivePrimarySurgery() = PrimarySurgery(
@@ -299,13 +306,13 @@ object TestReferencePatientFactory {
 
     private fun minimalMetastaticSurgery() = MetastaticSurgery(
         daysSinceDiagnosis = null,
-        type = MetastasesSurgeryType.BISEGMENT_OR_SEGMENT_RESECTION_OF_THE_LIVER_DUE_TO_METASTASES,
+        type = MetastaticSurgeryType.BISEGMENT_OR_SEGMENT_RESECTION_OF_THE_LIVER_DUE_TO_METASTASES,
         radicality = null
     )
 
     private fun exhaustiveMetastaticSurgery() = MetastaticSurgery(
         daysSinceDiagnosis = 10,
-        type = MetastasesSurgeryType.CRYOABLATION_DUE_TO_LUNG_METASTASES,
+        type = MetastaticSurgeryType.CRYOABLATION_DUE_TO_LUNG_METASTASES,
         radicality = SurgeryRadicality.MACROSCOPIC_IRRADICAL
     )
 

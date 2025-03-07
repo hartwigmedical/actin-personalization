@@ -1,6 +1,6 @@
 package com.hartwig.actin.personalization.datamodel.treatment
 
-enum class MetastasesSurgeryType {
+enum class MetastaticSurgeryType {
     BILOBECTOMY_DUE_TO_METASTASES,
     BISEGMENT_OR_SEGMENT_RESECTION_OF_THE_LIVER_DUE_TO_METASTASES,
     BISEGMENT_RESECTION_OF_LUNG_DUE_TO_METASTASES,

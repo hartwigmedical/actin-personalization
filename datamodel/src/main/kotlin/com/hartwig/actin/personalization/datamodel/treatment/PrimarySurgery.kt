@@ -4,12 +4,12 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class PrimarySurgery(
-    val daysSinceDiagnosis: Int? = null,
+    val daysSinceDiagnosis: Int?,
     val type: SurgeryType,
-    val technique: SurgeryTechnique? = null,
-    val urgency: SurgeryUrgency? = null,
-    val radicality: SurgeryRadicality? = null,
-    val circumferentialResectionMargin: CircumferentialResectionMargin? = null,
-    val anastomoticLeakageAfterSurgery: AnastomoticLeakageAfterSurgery? = null,
-    val hospitalizationDurationDays: Int? = null
+    val technique: SurgeryTechnique?,
+    val urgency: SurgeryUrgency?,
+    val radicality: SurgeryRadicality?,
+    val circumferentialResectionMargin: CircumferentialResectionMargin?,
+    val anastomoticLeakageAfterSurgery: AnastomoticLeakageAfterSurgery?,
+    val hospitalizationDurationDays: Int?
 )
