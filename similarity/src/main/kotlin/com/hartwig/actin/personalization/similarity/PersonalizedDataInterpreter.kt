@@ -54,19 +54,15 @@ class PersonalizedDataInterpreter(val patientsByTreatment: List<Pair<TreatmentGr
                     val tnmM1 = setOf(TnmM.M1, TnmM.M1A, TnmM.M1B, TnmM.M1C)
                     val stageTnmIV = setOf(StageTnm.IV, StageTnm.IVA, StageTnm.IVB, StageTnm.IVC)
                     episode.distantMetastasesDetectionStatus == MetastasesDetectionStatus.AT_START &&
-                            (episode.tnmCM in tnmM1 || episode.tnmPM in tnmM1 || episode.stageTNM in stageTnmIV) &&
-                            !episode.hasHadPreSurgerySystemicChemotherapy &&
-                            !episode.hasHadPostSurgerySystemicChemotherapy &&
-                            !episode.hasHadPreSurgerySystemicTargetedTherapy &&
-                            !episode.hasHadPostSurgerySystemicTargetedTherapy &&
-                            episode.surgeries.isEmpty() &&
+                            //(episode.tnmCM in tnmM1 || episode.tnmPM in tnmM1 || episode.stageTNM in stageTnmIV) &&
                             episode.doesNotIncludeAdjuvantOrNeoadjuvantTreatment() &&
+                            episode.surgeries.isEmpty() &&
                             episode.gastroenterologyResections.isEmpty() &&
                             episode.metastasesSurgeries.isEmpty() &&
                             episode.radiotherapies.isEmpty() &&
                             episode.metastasesRadiotherapies.isEmpty() &&
                             !episode.hasHadHipecTreatment &&
-                            (!episode.hasReceivedTumorDirectedTreatment || episode.systemicTreatmentPlan != null)
+                            (!episode.hasReceivedTumorDirectedTreatment || episode.systemicTreatmentPlan != null) &&
                             episode.systemicTreatmentPlan?.treatment?.let{ it != Treatment.OTHER } == true
                 }
 
