@@ -66,7 +66,7 @@ class PersonalizedDataInterpreter(val patientsByTreatment: List<Pair<TreatmentGr
                             episode.radiotherapies.isEmpty() &&
                             episode.metastasesRadiotherapies.isEmpty() &&
                             !episode.hasHadHipecTreatment &&
-                            (episode.hasReceivedTumorDirectedTreatment || episode.systemicTreatmentPlan != null)
+                            (!episode.hasReceivedTumorDirectedTreatment || episode.systemicTreatmentPlan != null)
                             episode.systemicTreatmentPlan?.treatment?.let{ it != Treatment.OTHER } == true
                 }
 
