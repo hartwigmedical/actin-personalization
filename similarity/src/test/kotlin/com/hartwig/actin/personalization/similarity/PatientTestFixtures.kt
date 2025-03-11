@@ -8,6 +8,7 @@ import com.hartwig.actin.personalization.datamodel.MetastasesDetectionStatus
 import com.hartwig.actin.personalization.datamodel.ReferencePatient
 import com.hartwig.actin.personalization.datamodel.Sex
 import com.hartwig.actin.personalization.datamodel.SystemicTreatmentPlan
+import com.hartwig.actin.personalization.datamodel.TnmM
 import com.hartwig.actin.personalization.datamodel.Treatment
 import com.hartwig.actin.personalization.datamodel.TumorBasisOfDiagnosis
 import com.hartwig.actin.personalization.datamodel.TumorEntry
@@ -68,7 +69,8 @@ fun patientWithTreatment(
     osDays: Int = 100,
     hadSurvivalEvent: Boolean? = null,
     hadProgressionEvent: Boolean? = null,
-    ageAtDiagnosis: Int? = null
+    ageAtDiagnosis: Int? = null,
+    tnmCM: TnmM? = null
 ): DiagnosisEpisode {
     val systemicTreatmentPlan = SystemicTreatmentPlan(
         treatment = treatment,
@@ -79,7 +81,8 @@ fun patientWithTreatment(
         hadProgressionEvent = hadProgressionEvent
     )
     val updatedEpisode = EPISODE.copy(
-        systemicTreatmentPlan = systemicTreatmentPlan
+        systemicTreatmentPlan = systemicTreatmentPlan,
+        tnmCM = tnmCM
     )
     val updatedDiagnosis = DIAGNOSIS.copy(
         ageAtDiagnosis = ageAtDiagnosis ?: DIAGNOSIS.ageAtDiagnosis,

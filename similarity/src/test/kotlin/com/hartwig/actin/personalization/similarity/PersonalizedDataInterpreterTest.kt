@@ -6,6 +6,7 @@ import com.hartwig.actin.personalization.datamodel.TreatmentGroup
 import com.hartwig.actin.personalization.datamodel.MetastasesDetectionStatus
 import com.hartwig.actin.personalization.datamodel.Surgery
 import com.hartwig.actin.personalization.datamodel.SurgeryType
+import com.hartwig.actin.personalization.datamodel.TnmM
 
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -14,14 +15,14 @@ class PersonalizedDataInterpreterTest {
 
     @Test
     fun `Should create interpreter with filtered and grouped patient records`() {
-        val fluorouracilEpisode = patientWithTreatment(treatment = Treatment.FLUOROURACIL).episode
-        val capecitabineEpisode = patientWithTreatment(treatment = Treatment.CAPECITABINE).episode
-        val capoxEpisode = patientWithTreatment(treatment = Treatment.CAPOX).episode
+        val fluorouracilEpisode = patientWithTreatment(treatment = Treatment.FLUOROURACIL, tnmCM = TnmM.M1).episode
+        val capecitabineEpisode = patientWithTreatment(treatment = Treatment.CAPECITABINE, tnmCM = TnmM.M1).episode
+        val capoxEpisode = patientWithTreatment(treatment = Treatment.CAPOX, tnmCM = TnmM.M1).episode
 
         val patients = listOf(
             recordWithEpisode(fluorouracilEpisode),
             recordWithEpisode(fluorouracilEpisode.copy(distantMetastasesDetectionStatus = MetastasesDetectionStatus.AT_PROGRESSION)),
-            recordWithEpisode(patientWithTreatment(treatment = Treatment.OTHER).episode),
+            recordWithEpisode(patientWithTreatment(treatment = Treatment.OTHER, tnmCM = TnmM.M1).episode),
             recordWithEpisode(fluorouracilEpisode.copy(systemicTreatmentPlan = null)),
             recordWithEpisode(fluorouracilEpisode.copy(surgeries = listOf(Surgery(SurgeryType.NOS_OR_OTHER)))),
             recordWithEpisode(fluorouracilEpisode.copy(hasHadPostSurgerySystemicChemotherapy = true)),

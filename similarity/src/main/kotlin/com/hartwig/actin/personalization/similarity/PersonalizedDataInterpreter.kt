@@ -54,7 +54,7 @@ class PersonalizedDataInterpreter(val patientsByTreatment: List<Pair<TreatmentGr
                     val tnmM1 = setOf(TnmM.M1, TnmM.M1A, TnmM.M1B, TnmM.M1C)
                     val stageTnmIV = setOf(StageTnm.IV, StageTnm.IVA, StageTnm.IVB, StageTnm.IVC)
                     episode.distantMetastasesDetectionStatus == MetastasesDetectionStatus.AT_START &&
-                            //(episode.tnmCM in tnmM1 || episode.tnmPM in tnmM1 || episode.stageTNM in stageTnmIV) &&
+                            (episode.tnmCM in tnmM1 || episode.tnmPM in tnmM1 || episode.stageTNM in stageTnmIV) &&
                             episode.doesNotIncludeAdjuvantOrNeoadjuvantTreatment() &&
                             episode.surgeries.isEmpty() &&
                             episode.gastroenterologyResections.isEmpty() &&
