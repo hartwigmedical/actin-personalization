@@ -45,7 +45,8 @@ val EPISODE = Episode(
     hasHadPreSurgerySystemicTargetedTherapy = false,
     hasHadPostSurgerySystemicTargetedTherapy = false,
     pfsMeasures = emptyList(),
-    ageAtTreatmentPlanStart = 50
+    ageAtTreatmentPlanStart = 50,
+    tnmCM = TnmM.M1
 )
 val DIAGNOSIS_EPISODE = DiagnosisEpisode(
     diagnosis = DIAGNOSIS,
@@ -69,8 +70,7 @@ fun patientWithTreatment(
     osDays: Int = 100,
     hadSurvivalEvent: Boolean? = null,
     hadProgressionEvent: Boolean? = null,
-    ageAtDiagnosis: Int? = null,
-    tnmCM: TnmM? = null
+    ageAtDiagnosis: Int? = null
 ): DiagnosisEpisode {
     val systemicTreatmentPlan = SystemicTreatmentPlan(
         treatment = treatment,
@@ -81,8 +81,7 @@ fun patientWithTreatment(
         hadProgressionEvent = hadProgressionEvent
     )
     val updatedEpisode = EPISODE.copy(
-        systemicTreatmentPlan = systemicTreatmentPlan,
-        tnmCM = tnmCM
+        systemicTreatmentPlan = systemicTreatmentPlan
     )
     val updatedDiagnosis = DIAGNOSIS.copy(
         ageAtDiagnosis = ageAtDiagnosis ?: DIAGNOSIS.ageAtDiagnosis,
