@@ -3,6 +3,7 @@ package com.hartwig.actin.personalization.ncr.interpretation.extraction
 import com.hartwig.actin.personalization.datamodel.outcome.ProgressionMeasure
 import com.hartwig.actin.personalization.datamodel.outcome.ResponseMeasure
 import com.hartwig.actin.personalization.datamodel.outcome.ResponseType
+import com.hartwig.actin.personalization.datamodel.treatment.Drug
 import com.hartwig.actin.personalization.datamodel.treatment.GastroenterologyResection
 import com.hartwig.actin.personalization.datamodel.treatment.HipecTreatment
 import com.hartwig.actin.personalization.datamodel.treatment.MetastaticRadiotherapy
@@ -10,6 +11,10 @@ import com.hartwig.actin.personalization.datamodel.treatment.MetastaticSurgery
 import com.hartwig.actin.personalization.datamodel.treatment.PrimaryRadiotherapy
 import com.hartwig.actin.personalization.datamodel.treatment.PrimarySurgery
 import com.hartwig.actin.personalization.datamodel.treatment.ReasonRefrainmentFromTreatment
+import com.hartwig.actin.personalization.datamodel.treatment.SystemicTreatment
+import com.hartwig.actin.personalization.datamodel.treatment.SystemicTreatmentDrug
+import com.hartwig.actin.personalization.datamodel.treatment.SystemicTreatmentScheme
+import com.hartwig.actin.personalization.datamodel.treatment.Treatment
 import com.hartwig.actin.personalization.datamodel.treatment.TreatmentEpisode
 import com.hartwig.actin.personalization.ncr.datamodel.NcrGastroenterologyResection
 import com.hartwig.actin.personalization.ncr.datamodel.NcrHipec
@@ -18,11 +23,13 @@ import com.hartwig.actin.personalization.ncr.datamodel.NcrMetastaticSurgery
 import com.hartwig.actin.personalization.ncr.datamodel.NcrPrimaryRadiotherapy
 import com.hartwig.actin.personalization.ncr.datamodel.NcrPrimarySurgery
 import com.hartwig.actin.personalization.ncr.datamodel.NcrRecord
+import com.hartwig.actin.personalization.ncr.datamodel.NcrSystemicTreatment
 import com.hartwig.actin.personalization.ncr.datamodel.NcrTreatmentResponse
 import com.hartwig.actin.personalization.ncr.interpretation.conversion.MetastaticRtIntervalConversion
 import com.hartwig.actin.personalization.ncr.interpretation.mapping.NcrAnastomoticLeakageAfterSurgeryMapper
 import com.hartwig.actin.personalization.ncr.interpretation.mapping.NcrBooleanMapper
 import com.hartwig.actin.personalization.ncr.interpretation.mapping.NcrCircumferentialResectionMarginMapper
+import com.hartwig.actin.personalization.ncr.interpretation.mapping.NcrDrugMapper
 import com.hartwig.actin.personalization.ncr.interpretation.mapping.NcrGastroenterologyResectionTypeMapper
 import com.hartwig.actin.personalization.ncr.interpretation.mapping.NcrMetastaticPresenceMapper
 import com.hartwig.actin.personalization.ncr.interpretation.mapping.NcrMetastaticRadiotherapyTypeMapper
@@ -35,6 +42,12 @@ import com.hartwig.actin.personalization.ncr.interpretation.mapping.NcrSurgeryRa
 import com.hartwig.actin.personalization.ncr.interpretation.mapping.NcrSurgeryTechniqueMapper
 import com.hartwig.actin.personalization.ncr.interpretation.mapping.NcrSurgeryTypeMapper
 import com.hartwig.actin.personalization.ncr.interpretation.mapping.NcrSurgeryUrgencyMapper
+import com.hartwig.actin.personalization.ncr.interpretation.mapping.resolveCyclesAndDetails
+import com.hartwig.actin.personalization.ncr.interpretation.mapping.resolvePreAndPostSurgery
+import kotlin.math.max
+import kotlin.math.min
+
+private val ALLOWED_SUBSTITUTIONS = setOf(Drug.FLUOROURACIL, Drug.CAPECITABINE, Drug.TEGAFUR, Drug.TEGAFUR_OR_GIMERACIL_OR_OTERACIL)
 
 object NcrTreatmentEpisodeExtractor {
 
@@ -54,7 +67,7 @@ object NcrTreatmentEpisodeExtractor {
                 hipecTreatments = extractHipecTreatments(record.treatment.hipec),
                 primaryRadiotherapies = extractPrimaryRadiotherapies(record.treatment.primaryRadiotherapy),
                 metastaticRadiotherapies = extractMetastasesRadiotherapies(record.treatment.metastaticRadiotherapy),
-                systemicTreatments = emptyList(),
+                systemicTreatments = extractSystemicTreatments(record.treatment.systemicTreatment),
                 responseMeasures = extractResponseMeasures(record.treatmentResponse),
                 progressionMeasures = extractProgressionMeasures(record.treatmentResponse)
             )
@@ -197,6 +210,134 @@ object NcrTreatmentEpisodeExtractor {
                     }
                 }
         }
+    }
+
+    private fun extractSystemicTreatments(systemicTreatment: NcrSystemicTreatment): List<SystemicTreatment> {
+        val schemes = with(systemicTreatment) {
+            listOfNotNull(
+                extractDrugWithSchemeNr(systCode1, systSchemanum1, systStartInt1, systStopInt1, systKuren1, systPrepost1),
+                extractDrugWithSchemeNr(systCode2, systSchemanum2, systStartInt2, systStopInt2, systKuren2, systPrepost2),
+                extractDrugWithSchemeNr(systCode3, systSchemanum3, systStartInt3, systStopInt3, systKuren3, systPrepost3),
+                extractDrugWithSchemeNr(systCode4, systSchemanum4, systStartInt4, systStopInt4, systKuren4, systPrepost4),
+                extractDrugWithSchemeNr(systCode5, systSchemanum5, systStartInt5, systStopInt5, systKuren5, systPrepost5),
+                extractDrugWithSchemeNr(systCode6, systSchemanum6, systStartInt6, systStopInt6, systKuren6, systPrepost6),
+                extractDrugWithSchemeNr(systCode7, systSchemanum7, systStartInt7, systStopInt7, systKuren7, systPrepost7),
+                extractDrugWithSchemeNr(systCode8, systSchemanum8, systStartInt8, systStopInt8, systKuren8, systPrepost8),
+                extractDrugWithSchemeNr(systCode9, systSchemanum9, systStartInt9, systStopInt9, systKuren9, systPrepost9),
+                extractDrugWithSchemeNr(systCode10, systSchemanum10, systStartInt10, systStopInt10, systKuren10, systPrepost10),
+                extractDrugWithSchemeNr(systCode11, systSchemanum11, systStartInt11, systStopInt11, systKuren11, systPrepost11),
+                extractDrugWithSchemeNr(systCode12, systSchemanum12, systStartInt12, systStopInt12, systKuren12, systPrepost12),
+                extractDrugWithSchemeNr(systCode13, systSchemanum13, systStartInt13, systStopInt13, systKuren13, systPrepost13),
+                extractDrugWithSchemeNr(systCode14, systSchemanum14, systStartInt14, systStopInt14, systKuren14, systPrepost14),
+            ).groupBy({ it.second }, { it.first })
+                .toSortedMap()
+                .map { (_, components) ->
+                    val (startMin, startMax, stopMin, stopMax) = components.map {
+                        with(it) {
+                            StartAndStopMinAndMax(
+                                daysBetweenDiagnosisAndStart,
+                                daysBetweenDiagnosisAndStart,
+                                daysBetweenDiagnosisAndStop,
+                                daysBetweenDiagnosisAndStop
+                            )
+                        }
+                    }.reduce(StartAndStopMinAndMax::plus)
+
+                    SystemicTreatmentScheme(
+                        minDaysBetweenDiagnosisAndStart = startMin,
+                        maxDaysBetweenDiagnosisAndStart = startMax,
+                        minDaysBetweenDiagnosisAndStop = stopMin,
+                        maxDaysBetweenDiagnosisAndStop = stopMax,
+                        components = components
+                    )
+                }
+        }
+
+        if (schemes.isEmpty()) {
+            return emptyList()
+        }
+
+        return listOf(
+            SystemicTreatment(
+                daysBetweenDiagnosisAndStart = schemes.first().minDaysBetweenDiagnosisAndStart,
+                daysBetweenDiagnosisAndStop = schemes.last().maxDaysBetweenDiagnosisAndStop,
+                treatment = determineTreatmentFromSchemes(schemes),
+                schemes = schemes
+            )
+        )
+    }
+
+    private fun extractDrugWithSchemeNr(
+        drugCode: String?,
+        schemaNum: Int?,
+        daysBetweenDiagnosisAndStart: Int?,
+        daysBetweenDiagnosisAndStop: Int?,
+        cycleCode: Int?,
+        prePostCode: Int?
+    ): Pair<SystemicTreatmentDrug, Int>? {
+        if (drugCode == null || schemaNum == null) {
+            return null
+        }
+
+        val (preSurgery, postSurgery) = resolvePreAndPostSurgery(prePostCode)
+        val (cycles, intent, isOngoing) = resolveCyclesAndDetails(cycleCode)
+        return Pair(
+            first = SystemicTreatmentDrug(
+                daysBetweenDiagnosisAndStart = daysBetweenDiagnosisAndStart,
+                daysBetweenDiagnosisAndStop = daysBetweenDiagnosisAndStop,
+                drug = NcrDrugMapper.resolve(drugCode),
+                numberOfCycles = cycles,
+                intent = intent,
+                drugTreatmentIsOngoing = isOngoing,
+                isAdministeredPreSurgery = preSurgery,
+                isAdministeredPostSurgery = postSurgery
+            ),
+            second = schemaNum
+        )
+    }
+
+    private data class StartAndStopMinAndMax(
+        val startMin: Int?, val startMax: Int?, val stopMin: Int?, val stopMax: Int?
+    ) {
+
+        operator fun plus(other: StartAndStopMinAndMax): StartAndStopMinAndMax {
+            return StartAndStopMinAndMax(
+                startMin = minOfNullables(startMin, other.startMin),
+                startMax = maxOfNullables(startMax, other.startMax),
+                stopMin = minOfNullables(stopMin, other.stopMin),
+                stopMax = maxOfNullables(stopMax, other.stopMax)
+            )
+        }
+
+        private fun maxOfNullables(a: Int?, b: Int?): Int? {
+            return when {
+                a == null -> b
+                b == null -> a
+                else -> max(a, b)
+            }
+        }
+
+        private fun minOfNullables(a: Int?, b: Int?): Int? {
+            return when {
+                a == null -> b
+                b == null -> a
+                else -> min(a, b)
+            }
+        }
+    }
+
+    private fun determineTreatmentFromSchemes(treatmentSchemes: Iterable<SystemicTreatmentScheme>): Treatment {
+        val firstSchemeDrugs = drugsFromScheme(treatmentSchemes.first()).toSet()
+        val followupDrugs = treatmentSchemes.drop(1).flatMap(::drugsFromScheme).toSet()
+        val newDrugsToIgnore = if (firstSchemeDrugs.intersect(ALLOWED_SUBSTITUTIONS).isNotEmpty()) ALLOWED_SUBSTITUTIONS else emptySet()
+
+        return if ((followupDrugs - firstSchemeDrugs - newDrugsToIgnore).isEmpty()) {
+            Treatment.findForDrugs(firstSchemeDrugs)
+        } else Treatment.OTHER
+    }
+
+    private fun drugsFromScheme(systemicTreatmentScheme: SystemicTreatmentScheme): List<Drug> {
+        return systemicTreatmentScheme.components.map(SystemicTreatmentDrug::drug)
     }
 
     private fun extractResponseMeasures(treatmentResponse: NcrTreatmentResponse): List<ResponseMeasure> {

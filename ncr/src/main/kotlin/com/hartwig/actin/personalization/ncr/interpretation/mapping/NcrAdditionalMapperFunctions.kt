@@ -2,13 +2,13 @@ package com.hartwig.actin.personalization.ncr.interpretation.mapping
 
 import com.hartwig.actin.personalization.datamodel.treatment.TreatmentIntent
 
-fun resolvePreAndPostSurgery(code: Int?): Pair<Boolean, Boolean> {
+fun resolvePreAndPostSurgery(code: Int?): Pair<Boolean?, Boolean?> {
     return when (code) {
         0, 4 -> Pair(false, false)
         1 -> Pair(true, false)
         2 -> Pair(false, true)
         3 -> Pair(true, true)
-        null -> Pair(false, false)
+        null -> Pair(null, null)
         else -> throw IllegalArgumentException("Unknown PreAndPostSurgery code: $code")
     }
 }
