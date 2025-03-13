@@ -22,9 +22,9 @@ class PersonalizationLoaderApplication : Callable<Int> {
     override fun call(): Int {
         LOGGER.info { "Running $APPLICATION v$VERSION" }
 
-        LOGGER.info { "Loading Reference Patients from file $referencePatientsJson" }
+        LOGGER.info { "Loading reference patients from file $referencePatientsJson" }
         val patients = ReferencePatientJson.read(referencePatientsJson)
-        LOGGER.info { " Created ${patients.size} patient records" }
+        LOGGER.info { " Loaded ${patients.size} patient records" }
 
         val writer = DatabaseWriter.fromCredentials(dbUser, dbPass, dbUrl)
         LOGGER.info { "Writing ${patients.size} patient records to database" }

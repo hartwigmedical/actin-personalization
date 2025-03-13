@@ -78,8 +78,8 @@ class DatabaseWriter(private val context: DSLContext, private val connection: ja
         writeRecords("responseMeasures", indexedTreatmentEpisodes, ::responseMeasuresFromTreatmentEpisode)
         writeRecords("progressionMeasures", indexedTreatmentEpisodes, ::progressionMeasuresFromTreatmentEpisode)
 
-        writeDrugs()
-        writeLocations()
+        writeDrugReferences()
+        writeTumorLocationReferences()
 
         connection.autoCommit = true
         context.execute("SET FOREIGN_KEY_CHECKS = 1;")
@@ -107,7 +107,7 @@ class DatabaseWriter(private val context: DSLContext, private val connection: ja
     }
 
     private fun writeTumors(patientRecords: IndexedList<ReferencePatient>): IndexedList<Tumor> {
-        LOGGER.info { "Writing tumor records" }
+        LOGGER.info { " Writing tumor records" }
 
         val (indexedRecords, rows) = patientRecords
             .flatMap { (patientId, referencePatient) ->
@@ -372,23 +372,23 @@ class DatabaseWriter(private val context: DSLContext, private val connection: ja
             dbRecord as TableRecord<*>
         }
 
-    private fun writeDrugs() {
-        LOGGER.info { " Writing drug records" }
+    private fun writeDrugReferences() {
+        LOGGER.info { " Writing drug reference records" }
         val rows = Drug.entries.map { drug ->
-            val dbRecord = context.newRecord(Tables.DRUG)
-            dbRecord.set(Tables.DRUG.NAME, drug.toString())
-            dbRecord.set(Tables.DRUG.TREATMENTCATEGORY, drug.category.toString())
+            val dbRecord = context.newRecord(Tables.DRUGREFERENCE)
+            dbRecord.set(Tables.DRUGREFERENCE.NAME, drug.toString())
+            dbRecord.set(Tables.DRUGREFERENCE.CATEGORY, drug.category.toString())
             dbRecord
         }
         insertRows(rows, "drug")
     }
 
-    private fun writeLocations() {
-        LOGGER.info { " Writing location records" }
+    private fun writeTumorLocationReferences() {
+        LOGGER.info { " Writing tumor location reference records" }
         val rows = TumorLocation.entries.map { location ->
-            val dbRecord = context.newRecord(Tables.LOCATION)
-            dbRecord.set(Tables.LOCATION.NAME, location.toString())
-            dbRecord.set(Tables.LOCATION.GROUP, location.locationGroup.toString())
+            val dbRecord = context.newRecord(Tables.TUMORLOCATIONREFERENCE)
+            dbRecord.set(Tables.TUMORLOCATIONREFERENCE.NAME, location.toString())
+            dbRecord.set(Tables.TUMORLOCATIONREFERENCE.GROUP, location.locationGroup.toString())
             dbRecord
         }
         insertRows(rows, "location")

@@ -307,16 +307,16 @@ CREATE TABLE `progressionMeasure` (
     PRIMARY KEY (`id`)
 );
 
-DROP TABLE IF EXISTS `drug`;
-CREATE TABLE `drug` (
+DROP TABLE IF EXISTS `drugReference`;
+CREATE TABLE `drugReference` (
     `id` int NOT NULL AUTO_INCREMENT,
     `name` varchar(255) NOT NULL,
-    `treatmentCategory` varchar(50) NOT NULL,
+    `category` varchar(50) NOT NULL,
     PRIMARY KEY (`id`)
 );
 
-DROP TABLE IF EXISTS `location`;
-CREATE TABLE `location` (
+DROP TABLE IF EXISTS `tumorLocationReference`;
+CREATE TABLE `tumorLocationReference` (
     `id` int NOT NULL AUTO_INCREMENT,
     `name` varchar(255) NOT NULL,
     `group` varchar(255) NOT NULL,
