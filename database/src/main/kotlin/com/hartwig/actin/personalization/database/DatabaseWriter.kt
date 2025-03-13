@@ -31,7 +31,7 @@ class DatabaseWriter(private val context: DSLContext, private val connection: ja
 
         val indexedReferencePatients = writeReferencePatients(referencePatients)
         val indexedTumors = writeTumors(indexedReferencePatients)
-        writeRecords("latestSurvivalStatus", indexedTumors, ::survivalStatusFromTumor)
+        writeRecords("survivalMeasurement", indexedTumors, ::survivalMeasurementFromTumor)
         writeRecords("priorTumor", indexedTumors, ::priorTumorFromTumor)
         writeRecords("primaryDiagnosis", indexedTumors, ::primaryDiagnosisFromTumor)
         val indexedMetastaticDiagnoses = writeRecordsAndReturnIndexedList(
@@ -40,12 +40,12 @@ class DatabaseWriter(private val context: DSLContext, private val connection: ja
             Tables.METASTATICDIAGNOSIS,
             ::metastaticDiagnosisFromTumor
         )
-        writeRecords("metastases", indexedMetastaticDiagnoses, ::metastasesFromMetastaticDiagnosis)
+        writeRecords("metastasis", indexedMetastaticDiagnoses, ::metastasesFromMetastaticDiagnosis)
         writeRecords("whoAssessment", indexedTumors, ::whoAssessmentsFromTumor)
         writeRecords("asaAssessment", indexedTumors, ::asaAssessmentsFromTumor)
         writeRecords("comorbidityAssessment", indexedTumors, ::comorbidityAssessmentsFromTumor)
-        writeRecords("molecularResults", indexedTumors, ::molecularResultsFromTumor)
-        writeRecords("labMeasurements", indexedTumors, ::labMeasurementsFromTumor)
+        writeRecords("molecularResult", indexedTumors, ::molecularResultsFromTumor)
+        writeRecords("labMeasurement", indexedTumors, ::labMeasurementsFromTumor)
 
         val indexedTreatmentEpisodes = writeRecordsAndReturnIndexedList(
             "treatmentEpisode",
@@ -53,12 +53,12 @@ class DatabaseWriter(private val context: DSLContext, private val connection: ja
             Tables.TREATMENTEPISODE,
             ::treatmentEpisodesFromTumor
         )
-        writeRecords("gastroenterologyResections", indexedTreatmentEpisodes, ::gastroenterologyResectionsFromTreatmentEpisode)
-        writeRecords("primarySurgeries", indexedTreatmentEpisodes, ::primarySurgeriesFromTreatmentEpisode)
-        writeRecords("metastaticSurgeries", indexedTreatmentEpisodes, ::metastaticSurgeriesFromTreatmentEpisode)
+        writeRecords("gastroenterologyResection", indexedTreatmentEpisodes, ::gastroenterologyResectionsFromTreatmentEpisode)
+        writeRecords("primarySurgery", indexedTreatmentEpisodes, ::primarySurgeriesFromTreatmentEpisode)
+        writeRecords("metastaticSurgery", indexedTreatmentEpisodes, ::metastaticSurgeriesFromTreatmentEpisode)
         writeRecords("hipecTreatment", indexedTreatmentEpisodes, ::hipecTreatmentsFromTreatmentEpisode)
-        writeRecords("primaryRadiotherapies", indexedTreatmentEpisodes, ::primaryRadiotherapiesFromTreatmentEpisode)
-        writeRecords("metastaticRadiotherapies", indexedTreatmentEpisodes, ::metastaticRadiotherapiesFromTreatmentEpisode)
+        writeRecords("primaryRadiotherapy", indexedTreatmentEpisodes, ::primaryRadiotherapiesFromTreatmentEpisode)
+        writeRecords("metastaticRadiotherapy", indexedTreatmentEpisodes, ::metastaticRadiotherapiesFromTreatmentEpisode)
 
         val indexedSystemicTreatments = writeRecordsAndReturnIndexedList(
             "systemicTreatment",
@@ -75,8 +75,8 @@ class DatabaseWriter(private val context: DSLContext, private val connection: ja
         )
 
         writeRecords("systemicTreatmentDrug", indexedSystemicTreatmentSchemes, ::systemicTreatmentDrugFromSystemicTreatmentScheme)
-        writeRecords("responseMeasures", indexedTreatmentEpisodes, ::responseMeasuresFromTreatmentEpisode)
-        writeRecords("progressionMeasures", indexedTreatmentEpisodes, ::progressionMeasuresFromTreatmentEpisode)
+        writeRecords("responseMeasure", indexedTreatmentEpisodes, ::responseMeasuresFromTreatmentEpisode)
+        writeRecords("progressionMeasure", indexedTreatmentEpisodes, ::progressionMeasuresFromTreatmentEpisode)
 
         writeDrugReferences()
         writeTumorLocationReferences()
@@ -156,8 +156,8 @@ class DatabaseWriter(private val context: DSLContext, private val connection: ja
         LOGGER.info { "  Inserted ${rows.size} $name records" }
     }
 
-    private fun survivalStatusFromTumor(tumorId: Int, tumor: Tumor) =
-        listOf(extractSimpleRecord(Tables.SURVIVALMEASURE, tumor.latestSurvivalStatus, "tumorId", tumorId))
+    private fun survivalMeasurementFromTumor(tumorId: Int, tumor: Tumor) =
+        listOf(extractSimpleRecord(Tables.SURVIVALMEASUREMENT, tumor.latestSurvivalMeasurement, "tumorId", tumorId))
 
     private fun priorTumorFromTumor(tumorId: Int, tumor: Tumor) =
         tumor.priorTumors.mapIndexed { index, priorTumor ->

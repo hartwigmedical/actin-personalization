@@ -8,7 +8,7 @@ import com.hartwig.actin.personalization.datamodel.assessment.WhoAssessment
 import com.hartwig.actin.personalization.datamodel.diagnosis.MetastaticDiagnosis
 import com.hartwig.actin.personalization.datamodel.diagnosis.PrimaryDiagnosis
 import com.hartwig.actin.personalization.datamodel.diagnosis.PriorTumor
-import com.hartwig.actin.personalization.datamodel.outcome.SurvivalMeasure
+import com.hartwig.actin.personalization.datamodel.outcome.SurvivalMeasurement
 import com.hartwig.actin.personalization.datamodel.treatment.TreatmentEpisode
 import kotlinx.serialization.Serializable
 
@@ -16,7 +16,7 @@ import kotlinx.serialization.Serializable
 data class Tumor(
     val diagnosisYear: Int,
     val ageAtDiagnosis: Int,
-    val latestSurvivalStatus: SurvivalMeasure,
+    val latestSurvivalMeasurement: SurvivalMeasurement,
     val priorTumors: List<PriorTumor>,
     val primaryDiagnosis: PrimaryDiagnosis,
     val metastaticDiagnosis: MetastaticDiagnosis,

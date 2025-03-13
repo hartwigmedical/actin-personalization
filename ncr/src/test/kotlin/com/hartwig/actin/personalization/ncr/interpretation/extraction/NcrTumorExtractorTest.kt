@@ -19,8 +19,8 @@ class NcrTumorExtractorTest {
             assertThat(diagnosisYear).isEqualTo(2020)
             assertThat(ageAtDiagnosis).isEqualTo(75)
 
-            assertThat(latestSurvivalStatus.daysSinceDiagnosis).isEqualTo(563)
-            assertThat(latestSurvivalStatus.isAlive).isTrue()
+            assertThat(latestSurvivalMeasurement.daysSinceDiagnosis).isEqualTo(563)
+            assertThat(latestSurvivalMeasurement.isAlive).isTrue()
 
             assertThat(whoAssessments).isEmpty()
             assertThat(asaAssessments).isEmpty()
@@ -37,8 +37,8 @@ class NcrTumorExtractorTest {
             assertThat(diagnosisYear).isEqualTo(2020)
             assertThat(ageAtDiagnosis).isEqualTo(75)
 
-            assertThat(latestSurvivalStatus.daysSinceDiagnosis).isEqualTo(563)
-            assertThat(latestSurvivalStatus.isAlive).isTrue()
+            assertThat(latestSurvivalMeasurement.daysSinceDiagnosis).isEqualTo(563)
+            assertThat(latestSurvivalMeasurement.isAlive).isTrue()
 
             assertThat(whoAssessments).containsExactly(
                 WhoAssessment(daysSinceDiagnosis = 0, whoStatus = 1),

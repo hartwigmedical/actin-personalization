@@ -3,7 +3,7 @@ package com.hartwig.actin.personalization.database
 import com.hartwig.actin.personalization.database.tables.records.MetastaticdiagnosisRecord
 import com.hartwig.actin.personalization.database.tables.records.PrimarydiagnosisRecord
 import com.hartwig.actin.personalization.database.tables.records.PriortumorRecord
-import com.hartwig.actin.personalization.database.tables.records.SurvivalmeasureRecord
+import com.hartwig.actin.personalization.database.tables.records.SurvivalmeasurementRecord
 import com.hartwig.actin.personalization.database.tables.records.TumorRecord
 import com.hartwig.actin.personalization.datamodel.ReferencePatient
 import com.hartwig.actin.personalization.datamodel.TestReferencePatientFactory
@@ -12,7 +12,7 @@ import com.hartwig.actin.personalization.datamodel.diagnosis.MetastaticDiagnosis
 import com.hartwig.actin.personalization.datamodel.diagnosis.PrimaryDiagnosis
 import com.hartwig.actin.personalization.datamodel.diagnosis.PriorTumor
 import com.hartwig.actin.personalization.datamodel.diagnosis.TnmClassification
-import com.hartwig.actin.personalization.datamodel.outcome.SurvivalMeasure
+import com.hartwig.actin.personalization.datamodel.outcome.SurvivalMeasurement
 import kotlinx.serialization.json.Json
 import org.assertj.core.api.Assertions.assertThat
 import org.jooq.JSON
@@ -101,11 +101,11 @@ class DatabaseWriterTest {
         assertThat(record.get(Tables.TUMOR.AGEATDIAGNOSIS)).isEqualTo(expectedTumor.ageAtDiagnosis)
         val tumorId = record.get(Tables.TUMOR.ID)
 
-        val survivalMeasureRecords =
-            dslContext.selectFrom(Tables.SURVIVALMEASURE).where(Tables.SURVIVALMEASURE.TUMORID.eq(tumorId)).fetchOne()
+        val survivalMeasurementRecords =
+            dslContext.selectFrom(Tables.SURVIVALMEASUREMENT).where(Tables.SURVIVALMEASUREMENT.TUMORID.eq(tumorId)).fetchOne()
 
-        assertThat(survivalMeasureRecords).isNotNull()
-        compare(survivalMeasureRecords!!, expectedTumor.latestSurvivalStatus)
+        assertThat(survivalMeasurementRecords).isNotNull()
+        compare(survivalMeasurementRecords!!, expectedTumor.latestSurvivalMeasurement)
 
         val priorTumorsRecords = dslContext.selectFrom(Tables.PRIORTUMOR).where(Tables.PRIORTUMOR.TUMORID.eq(tumorId)).fetch()
         assertThat(priorTumorsRecords.size).isEqualTo(expectedTumor.priorTumors.size)
@@ -145,9 +145,9 @@ class DatabaseWriterTest {
         // TODO validate progressionMeasures
     }
 
-    private fun compare(record: SurvivalmeasureRecord, survivalMeasure: SurvivalMeasure) {
-        assertThat(record.get(Tables.SURVIVALMEASURE.DAYSSINCEDIAGNOSIS)).isEqualTo(survivalMeasure.daysSinceDiagnosis)
-        assertThat(record.get(Tables.SURVIVALMEASURE.ISALIVE)).isEqualTo(survivalMeasure.isAlive)
+    private fun compare(record: SurvivalmeasurementRecord, survivalMeasure: SurvivalMeasurement) {
+        assertThat(record.get(Tables.SURVIVALMEASUREMENT.DAYSSINCEDIAGNOSIS)).isEqualTo(survivalMeasure.daysSinceDiagnosis)
+        assertThat(record.get(Tables.SURVIVALMEASUREMENT.ISALIVE)).isEqualTo(survivalMeasure.isAlive)
     }
 
     private fun comparePriorTumor(record: PriortumorRecord, expected: PriorTumor) {

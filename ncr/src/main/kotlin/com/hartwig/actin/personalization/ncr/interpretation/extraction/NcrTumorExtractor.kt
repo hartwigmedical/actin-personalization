@@ -5,7 +5,7 @@ import com.hartwig.actin.personalization.datamodel.assessment.AsaAssessment
 import com.hartwig.actin.personalization.datamodel.assessment.ComorbidityAssessment
 import com.hartwig.actin.personalization.datamodel.assessment.MolecularResult
 import com.hartwig.actin.personalization.datamodel.assessment.WhoAssessment
-import com.hartwig.actin.personalization.datamodel.outcome.SurvivalMeasure
+import com.hartwig.actin.personalization.datamodel.outcome.SurvivalMeasurement
 import com.hartwig.actin.personalization.ncr.datamodel.NcrRecord
 import com.hartwig.actin.personalization.ncr.interpretation.NcrFunctions
 import com.hartwig.actin.personalization.ncr.interpretation.mapping.NcrAsaClassificationMapper
@@ -21,7 +21,7 @@ object NcrTumorExtractor {
         return Tumor(
             diagnosisYear = diagnosis.primaryDiagnosis.incjr,
             ageAtDiagnosis = diagnosis.patientCharacteristics.leeft,
-            latestSurvivalStatus = extractLatestSurvivalMeasure(diagnosis),
+            latestSurvivalMeasurement = extractLatestSurvivalMeasure(diagnosis),
             priorTumors = NcrPriorTumorExtractor.extract(records),
             primaryDiagnosis = NcrPrimaryDiagnosisExtractor.extract(records),
             metastaticDiagnosis = NcrMetastaticDiagnosisExtractor.extract(records),
@@ -34,8 +34,8 @@ object NcrTumorExtractor {
         )
     }
 
-    private fun extractLatestSurvivalMeasure(diagnosisRecord: NcrRecord): SurvivalMeasure {
-        return SurvivalMeasure(
+    private fun extractLatestSurvivalMeasure(diagnosisRecord: NcrRecord): SurvivalMeasurement {
+        return SurvivalMeasurement(
             daysSinceDiagnosis = diagnosisRecord.patientCharacteristics.vitStatInt!!,
             isAlive = NcrVitalStatusMapper.resolve(diagnosisRecord.patientCharacteristics.vitStat!!)
         )

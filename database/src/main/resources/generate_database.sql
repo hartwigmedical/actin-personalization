@@ -17,8 +17,8 @@ CREATE TABLE `tumor` (
     PRIMARY KEY (`id`)
 );
 
-DROP TABLE IF EXISTS `survivalMeasure`;
-CREATE TABLE `survivalMeasure` (
+DROP TABLE IF EXISTS `survivalMeasurement`;
+CREATE TABLE `survivalMeasurement` (
     `tumorId` INT NOT NULL,
     `daysSinceDiagnosis` INT NOT NULL,
     `isAlive` BOOL NOT NULL,

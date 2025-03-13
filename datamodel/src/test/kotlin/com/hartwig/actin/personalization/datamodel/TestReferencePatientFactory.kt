@@ -35,7 +35,7 @@ import com.hartwig.actin.personalization.datamodel.outcome.ProgressionMeasureFol
 import com.hartwig.actin.personalization.datamodel.outcome.ProgressionMeasureType
 import com.hartwig.actin.personalization.datamodel.outcome.ResponseMeasure
 import com.hartwig.actin.personalization.datamodel.outcome.ResponseType
-import com.hartwig.actin.personalization.datamodel.outcome.SurvivalMeasure
+import com.hartwig.actin.personalization.datamodel.outcome.SurvivalMeasurement
 import com.hartwig.actin.personalization.datamodel.treatment.AnastomoticLeakageAfterSurgery
 import com.hartwig.actin.personalization.datamodel.treatment.CircumferentialResectionMargin
 import com.hartwig.actin.personalization.datamodel.treatment.Drug
@@ -79,7 +79,7 @@ object TestReferencePatientFactory {
     private fun emptyTumor() = Tumor(
         diagnosisYear = 1971,
         ageAtDiagnosis = 63,
-        latestSurvivalStatus = SurvivalMeasure(daysSinceDiagnosis = 251, isAlive = true),
+        latestSurvivalMeasurement = SurvivalMeasurement(daysSinceDiagnosis = 251, isAlive = true),
         priorTumors = emptyList(),
         primaryDiagnosis = minimalPrimaryDiagnosis(),
         metastaticDiagnosis = minimalMetastaticDiagnosis(),
@@ -94,7 +94,7 @@ object TestReferencePatientFactory {
     private fun minimalTumor() = Tumor(
         diagnosisYear = 1966,
         ageAtDiagnosis = 73,
-        latestSurvivalStatus = SurvivalMeasure(daysSinceDiagnosis = 151, isAlive = false),
+        latestSurvivalMeasurement = SurvivalMeasurement(daysSinceDiagnosis = 151, isAlive = false),
         priorTumors = listOf(minimalPriorTumor()),
         primaryDiagnosis = minimalPrimaryDiagnosis(),
         metastaticDiagnosis = minimalMetastaticDiagnosis(),
@@ -109,7 +109,7 @@ object TestReferencePatientFactory {
     private fun exhaustiveTumor() = Tumor(
         diagnosisYear = 1961,
         ageAtDiagnosis = 83,
-        latestSurvivalStatus = SurvivalMeasure(daysSinceDiagnosis = 90, isAlive = true),
+        latestSurvivalMeasurement = SurvivalMeasurement(daysSinceDiagnosis = 90, isAlive = true),
         priorTumors = listOf(minimalPriorTumor(), exhaustivePriorTumor()),
         primaryDiagnosis = exhaustivePrimaryDiagnosis(),
         metastaticDiagnosis = exhaustiveMetastaticDiagnosis(),
