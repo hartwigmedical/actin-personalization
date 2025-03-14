@@ -10,4 +10,4 @@ from .configs.model_configurations import os_configs, pfs_configs
 
 from .hyperparameter_optimization import random_parameter_search, hyperparameter_search
 
-from .configs.hyperparameter_grids import param_grids
+from .configs.hyperparameter_grids import curve_param_grids, days_param_grids
