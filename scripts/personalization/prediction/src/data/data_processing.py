@@ -16,15 +16,19 @@ class DataSplitter:
         self.test_size = test_size
         self.random_state = random_state
 
-    def split(self, X: pd.DataFrame, y: pd.DataFrame, event_col: str, encoded_columns: Dict[str, List[str]]) -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+    def split(self, X: pd.DataFrame, y: pd.DataFrame, event_col: str = None, encoded_columns: Dict[str, List[str]] = None) -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame]:
         """
         Split the data into training and test sets, stratified by treatment type and censoring status.
         """
-        stratify_labels = y[event_col].astype(str)
+        if event_col:
+            stratify_labels = y[event_col].astype(str)
+        else:
+            stratify_labels = None
        
         X_train, X_test, y_train, y_test = train_test_split(
             X, y, test_size=self.test_size, random_state=self.random_state, stratify=stratify_labels
         )
+
         return X_train, X_test, y_train, y_test
 
 class DataPreprocessor:

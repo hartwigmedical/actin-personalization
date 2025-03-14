@@ -6,6 +6,8 @@ import com.hartwig.actin.personalization.datamodel.DiagnosisEpisode
 import com.hartwig.actin.personalization.datamodel.LocationGroup
 import com.hartwig.actin.personalization.datamodel.ReferencePatient
 import com.hartwig.actin.personalization.datamodel.MetastasesDetectionStatus
+import com.hartwig.actin.personalization.datamodel.StageTnm
+import com.hartwig.actin.personalization.datamodel.TnmM
 import com.hartwig.actin.personalization.datamodel.Treatment
 import com.hartwig.actin.personalization.datamodel.serialization.ReferencePatientJson
 
@@ -20,6 +22,9 @@ private fun Episode.doesNotIncludeAdjuvantOrNeoadjuvantTreatment(): Boolean {
             !hasHadPreSurgerySystemicTargetedTherapy &&
             !hasHadPostSurgerySystemicTargetedTherapy
 }
+
+private val metastaticTnmM = setOf(TnmM.M1, TnmM.M1A, TnmM.M1B, TnmM.M1C)
+private val stageTnmIV = setOf(StageTnm.IV, StageTnm.IVA, StageTnm.IVB, StageTnm.IVC)
 
 class PersonalizedDataInterpreter(val patientsByTreatment: List<Pair<TreatmentGroup, List<DiagnosisEpisode>>>) {
 
@@ -48,11 +53,20 @@ class PersonalizedDataInterpreter(val patientsByTreatment: List<Pair<TreatmentGr
                 .flatMap(ReferencePatient::tumorEntries)
                 .map { (diagnosis, episodes) -> DiagnosisEpisode(diagnosis, episodes.single { it.order == 1 }) }
                 .filter { diagnosisEpisode ->
-                    val episode = diagnosisEpisode.episode
-                    episode.distantMetastasesDetectionStatus == MetastasesDetectionStatus.AT_START &&
-                            episode.systemicTreatmentPlan?.treatment?.let{ it != Treatment.OTHER } == true &&
-                            episode.surgeries.isEmpty() &&
-                            episode.doesNotIncludeAdjuvantOrNeoadjuvantTreatment()
+                    with (diagnosisEpisode.episode) {
+                        distantMetastasesDetectionStatus == MetastasesDetectionStatus.AT_START &&
+                        (tnmCM in metastaticTnmM || tnmPM in metastaticTnmM || stageTNM in stageTnmIV) &&
+                        doesNotIncludeAdjuvantOrNeoadjuvantTreatment() &&
+                        surgeries.isEmpty() &&
+                        gastroenterologyResections.isEmpty() &&
+                        metastasesSurgeries.isEmpty() &&
+                        radiotherapies.isEmpty() &&
+                        metastasesRadiotherapies.isEmpty() &&
+                        !hasHadHipecTreatment &&
+                        (!hasReceivedTumorDirectedTreatment || systemicTreatmentPlan != null) &&
+                        systemicTreatmentPlan?.treatment?.let{ it != Treatment.OTHER } == true
+                    }
+
                 }
 
             val patientsByTreatment = referencePop.groupBy { (_, episode) ->

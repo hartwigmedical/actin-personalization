@@ -8,6 +8,7 @@ import com.hartwig.actin.personalization.datamodel.MetastasesDetectionStatus
 import com.hartwig.actin.personalization.datamodel.ReferencePatient
 import com.hartwig.actin.personalization.datamodel.Sex
 import com.hartwig.actin.personalization.datamodel.SystemicTreatmentPlan
+import com.hartwig.actin.personalization.datamodel.TnmM
 import com.hartwig.actin.personalization.datamodel.Treatment
 import com.hartwig.actin.personalization.datamodel.TumorBasisOfDiagnosis
 import com.hartwig.actin.personalization.datamodel.TumorEntry
@@ -44,7 +45,8 @@ val EPISODE = Episode(
     hasHadPreSurgerySystemicTargetedTherapy = false,
     hasHadPostSurgerySystemicTargetedTherapy = false,
     pfsMeasures = emptyList(),
-    ageAtTreatmentPlanStart = 50
+    ageAtTreatmentPlanStart = 50,
+    tnmCM = TnmM.M1
 )
 val DIAGNOSIS_EPISODE = DiagnosisEpisode(
     diagnosis = DIAGNOSIS,
