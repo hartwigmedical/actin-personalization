@@ -3,7 +3,7 @@ import numpy as np
 
 from typing import List, Dict, Tuple, Union, Any, Optional
 
-from sksurv.metrics import concordance_index_censored, integrated_brier_score, brier_score, cumulative_dynamic_auc
+from sksurv.metrics import integrated_brier_score, brier_score, cumulative_dynamic_auc
 from sklearn.calibration import calibration_curve
 
 from pycox.evaluation import EvalSurv

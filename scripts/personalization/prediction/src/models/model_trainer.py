@@ -188,7 +188,7 @@ class ModelTrainer:
 
             self.results[model_name] = {key: np.nanmean(values) for key, values in model_metrics['cv'].items()}
             print(f"{model_name} CV Results: {self.results[model_name]}")
-
+            print("training final model")
             final_model = self._initialize_model(model_template, input_size=X_train.shape[1])
             y_train_df = pd.DataFrame({'duration': y_train[duration_col], 'event': y_train[event_col]}, index=X_train.index)
             y_train_structured = Surv.from_dataframe('event', 'duration', y_train_df)
