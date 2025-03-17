@@ -44,8 +44,15 @@ SELECT
     episode.*,
     surgeryOverview.surgeries,
     metastasisOverview.metastasisLocationGroupsPriorToSystemicTreatment,
-    episode.intervalTumorIncidenceTreatmentPlanStopDays - episode.intervalTumorIncidenceTreatmentPlanStartDays AS systemicTreatmentPlanDuration
-    diagnosis.observedOsFromTumorIncidenceDays - metastasisOverview.intervalTumorIncidenceMetastasisDetectionDays AS observedOsFromMetastasisDetectionDays
+    episode.intervalTumorIncidenceTreatmentPlanStopDays - episode.intervalTumorIncidenceTreatmentPlanStartDays AS systemicTreatmentPlanDuration,
+    diagnosis.observedOsFromTumorIncidenceDays - metastasisOverview.intervalTumorIncidenceMetastasisDetectionDays AS observedOsFromMetastasisDetectionDays,
+
+    labValues.albumine,
+    labValues.alkalinePhosphatase,
+    labValues.carcinoEmbryonicAntigen,
+    labValues.lactateDehydrogenase,
+    labValues.leukocytesAbsolute,
+    labValues.neutrophilsAbsolute
 FROM patient
     INNER JOIN diagnosis ON patient.id = diagnosis.patientId
     INNER JOIN episode ON diagnosis.id = episode.diagnosisId AND episode.order = diagnosis.orderOfFirstDistantMetastasesEpisode
@@ -60,6 +67,18 @@ FROM patient
         WHERE (episode.intervalTumorIncidenceTreatmentPlanStartDays IS NULL OR(intervalTumorIncidenceMetastasisDetectionDays < intervalTumorIncidenceTreatmentPlanStartDays))
         GROUP BY episodeId
     ) metastasisOverview ON episode.id = metastasisOverview.episodeId
+    LEFT JOIN (
+            SELECT 
+                episodeId,
+                MAX(CASE WHEN name = 'ALBUMINE' THEN value END) AS albumine,
+                MAX(CASE WHEN name = 'ALKALINE_PHOSPHATASE' THEN value END) AS alkalinePhosphatase,
+                MAX(CASE WHEN name = 'CARCINOEMBRYONIC_ANTIGEN' THEN value END) AS carcinoEmbryonicAntigen,
+                MAX(CASE WHEN name = 'LACTATE_DEHYDROGENASE' THEN value END) AS lactateDehydrogenase,
+                MAX(CASE WHEN name = 'LEUKOCYTES_ABSOLUTE' THEN value END) AS leukocytesAbsolute,
+                MAX(CASE WHEN name = 'NEUTROPHILS_ABSOLUTE' THEN value END) AS neutrophilsAbsolute
+            FROM actin_personalization.labMeasurement
+            GROUP BY episodeId
+        ) labValues ON episode.id = labValues.episodeId
 );
 
 CREATE OR REPLACE VIEW palliativeIntents AS (
