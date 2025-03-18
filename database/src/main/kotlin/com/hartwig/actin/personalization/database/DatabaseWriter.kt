@@ -25,7 +25,6 @@ private typealias IndexedList<T> = List<Pair<Int, T>>
 class DatabaseWriter(private val context: DSLContext, private val connection: java.sql.Connection) {
 
     fun writeAllToDb(referencePatients: List<ReferencePatient>) {
-        context.execute("SET FOREIGN_KEY_CHECKS = 0;")
         connection.autoCommit = false
         clearAll()
 
@@ -82,13 +81,15 @@ class DatabaseWriter(private val context: DSLContext, private val connection: ja
         writeTumorLocationReferences()
 
         connection.autoCommit = true
-        context.execute("SET FOREIGN_KEY_CHECKS = 1;")
     }
 
     private fun clearAll() {
         LOGGER.info { " Clearing all patient data" }
+
+        context.execute("SET FOREIGN_KEY_CHECKS = 0;")
         DefaultSchema.DEFAULT_SCHEMA.tables.forEach { context.truncate(it).execute() }
         connection.commit()
+        context.execute("SET FOREIGN_KEY_CHECKS = 1;")
     }
 
     private fun writeReferencePatients(patientRecords: List<ReferencePatient>): IndexedList<ReferencePatient> {
