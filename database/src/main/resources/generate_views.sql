@@ -44,15 +44,17 @@ SELECT
     episode.*,
     surgeryOverview.surgeries,
     metastasisOverview.metastasisLocationGroupsPriorToSystemicTreatment,
-    episode.intervalTumorIncidenceTreatmentPlanStopDays - episode.intervalTumorIncidenceTreatmentPlanStartDays AS systemicTreatmentPlanDuration,
-    diagnosis.observedOsFromTumorIncidenceDays - metastasisOverview.intervalTumorIncidenceMetastasisDetectionDays AS observedOsFromMetastasisDetectionDays,
-
     labValues.albumine,
     labValues.alkalinePhosphatase,
     labValues.carcinoEmbryonicAntigen,
     labValues.lactateDehydrogenase,
     labValues.leukocytesAbsolute,
-    labValues.neutrophilsAbsolute
+    labValues.neutrophilsAbsolute,
+
+    episode.intervalTumorIncidenceTreatmentPlanStopDays - episode.intervalTumorIncidenceTreatmentPlanStartDays AS systemicTreatmentPlanDuration,
+    diagnosis.observedOsFromTumorIncidenceDays - metastasisOverview.intervalTumorIncidenceMetastasisDetectionDays AS observedOsFromMetastasisDetectionDays,
+    diagnosis.ageAtDiagnosis + (metastasisOverview.intervalTumorIncidenceMetastasisDetectionDays / 365.25) AS ageAtMetastasisDetection
+
 FROM patient
     INNER JOIN diagnosis ON patient.id = diagnosis.patientId
     INNER JOIN episode ON diagnosis.id = episode.diagnosisId AND episode.order = diagnosis.orderOfFirstDistantMetastasesEpisode
