@@ -13,7 +13,6 @@ import com.hartwig.actin.personalization.datamodel.diagnosis.BasisOfDiagnosis
 import com.hartwig.actin.personalization.datamodel.diagnosis.DifferentiationGrade
 import com.hartwig.actin.personalization.datamodel.diagnosis.ExtraMuralInvasionCategory
 import com.hartwig.actin.personalization.datamodel.diagnosis.LymphaticInvasionCategory
-import com.hartwig.actin.personalization.datamodel.diagnosis.MetastasesDetectionStatus
 import com.hartwig.actin.personalization.datamodel.diagnosis.Metastasis
 import com.hartwig.actin.personalization.datamodel.diagnosis.MetastaticDiagnosis
 import com.hartwig.actin.personalization.datamodel.diagnosis.NumberOfLiverMetastases
@@ -183,7 +182,7 @@ object TestReferencePatientFactory {
     )
 
     private fun minimalMetastaticDiagnosis() = MetastaticDiagnosis(
-        distantMetastasesDetectionStatus = MetastasesDetectionStatus.AT_START,
+        isMetachronous = false,
         metastases = emptyList(),
         numberOfLiverMetastases = null,
         maximumSizeOfLiverMetastasisMm = null,
@@ -192,7 +191,7 @@ object TestReferencePatientFactory {
     )
 
     private fun exhaustiveMetastaticDiagnosis() = MetastaticDiagnosis(
-        distantMetastasesDetectionStatus = MetastasesDetectionStatus.AT_START,
+        isMetachronous = true,
         metastases = listOf(
             Metastasis(
                 daysSinceDiagnosis = null, location = TumorLocation.OVERLAPPING_BLADDER_LOCATION, isLinkedToProgression = null

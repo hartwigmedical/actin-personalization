@@ -1,6 +1,5 @@
 package com.hartwig.actin.personalization.ncr.interpretation.extraction
 
-import com.hartwig.actin.personalization.datamodel.diagnosis.MetastasesDetectionStatus
 import com.hartwig.actin.personalization.datamodel.diagnosis.Metastasis
 import com.hartwig.actin.personalization.datamodel.diagnosis.NumberOfLiverMetastases
 import com.hartwig.actin.personalization.datamodel.diagnosis.TumorLocation
@@ -14,7 +13,7 @@ class NcrMetastaticDiagnosisExtractorTest {
     fun `Should extract metastatic diagnosis from minimal NCR record`() {
         val metastaticDiagnosis = NcrMetastaticDiagnosisExtractor.extract(TestNcrRecordFactory.minimalTumorRecords())
 
-        assertThat(metastaticDiagnosis).isNotNull()
+        assertThat(metastaticDiagnosis.isMetachronous).isFalse()
     }
 
     @Test
@@ -22,7 +21,7 @@ class NcrMetastaticDiagnosisExtractorTest {
         val metastaticDiagnosis = NcrMetastaticDiagnosisExtractor.extract(TestNcrRecordFactory.properTumorRecords())
 
         with(metastaticDiagnosis) {
-            assertThat(distantMetastasesDetectionStatus).isEqualTo(MetastasesDetectionStatus.AT_START)
+            assertThat(isMetachronous).isTrue()
             assertThat(metastases).containsExactly(
                 Metastasis(
                     daysSinceDiagnosis = 200,

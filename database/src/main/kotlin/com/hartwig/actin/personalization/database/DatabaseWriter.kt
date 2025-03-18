@@ -197,7 +197,6 @@ class DatabaseWriter(private val context: DSLContext, private val connection: ja
             with(tumor.metastaticDiagnosis) {
                 dbRecord.from(this)
                 dbRecord.set(Tables.METASTATICDIAGNOSIS.TUMORID, tumorId)
-                dbRecord.set(Tables.METASTATICDIAGNOSIS.DISTANTMETASTASESDETECTIONSTATUS, this.distantMetastasesDetectionStatus.name)
                 dbRecord.set(Tables.METASTATICDIAGNOSIS.NUMBEROFLIVERMETASTASES, this.numberOfLiverMetastases?.name)
                 listOf(this to dbRecord)
             }

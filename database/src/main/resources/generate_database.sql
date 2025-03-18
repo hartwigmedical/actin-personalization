@@ -78,7 +78,7 @@ DROP TABLE IF EXISTS `metastaticDiagnosis`;
 CREATE TABLE `metastaticDiagnosis` (
     `id` INT NOT NULL,
     `tumorId` INT NOT NULL,
-    `distantMetastasesDetectionStatus` VARCHAR(50) NOT NULL,
+    `isMetachronous` BOOL NOT NULL,
     `numberOfLiverMetastases` VARCHAR(50),
     `maximumSizeOfLiverMetastasisMm` INT,
     `investigatedLymphNodesCount` INT,

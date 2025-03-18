@@ -4,7 +4,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class MetastaticDiagnosis(
-    val distantMetastasesDetectionStatus: MetastasesDetectionStatus,
+    val isMetachronous: Boolean,
     val metastases: List<Metastasis>,
     val numberOfLiverMetastases: NumberOfLiverMetastases?,
     val maximumSizeOfLiverMetastasisMm: Int?,

@@ -5,7 +5,6 @@ import com.hartwig.actin.personalization.datamodel.diagnosis.MetastaticDiagnosis
 import com.hartwig.actin.personalization.ncr.datamodel.NcrRecord
 import com.hartwig.actin.personalization.ncr.interpretation.NcrFunctions
 import com.hartwig.actin.personalization.ncr.interpretation.mapping.NcrBooleanMapper
-import com.hartwig.actin.personalization.ncr.interpretation.mapping.NcrDistantMetastasesStatusMapper
 import com.hartwig.actin.personalization.ncr.interpretation.mapping.NcrNumberOfLiverMetastasesMapper
 import com.hartwig.actin.personalization.ncr.interpretation.mapping.NcrTumorLocationMapper
 
@@ -15,7 +14,7 @@ object NcrMetastaticDiagnosisExtractor {
         val metastatic = NcrFunctions.metastaticRecord(records)
 
         return MetastaticDiagnosis(
-            distantMetastasesDetectionStatus = NcrDistantMetastasesStatusMapper.resolve(metastatic.identification.metaEpis),
+            isMetachronous = metastatic != NcrFunctions.diagnosisRecord(records),
             metastases = extractMetastases(metastatic),
             numberOfLiverMetastases = NcrNumberOfLiverMetastasesMapper.resolve(metastatic.metastaticDiagnosis.metaLeverAantal),
             maximumSizeOfLiverMetastasisMm = metastatic.metastaticDiagnosis.metaLeverAfm.takeIf { it != 999 },

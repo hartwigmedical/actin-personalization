@@ -191,7 +191,7 @@ class DatabaseWriterTest {
 
     private fun compare(record: MetastaticdiagnosisRecord, expected: MetastaticDiagnosis) {
         val table = Tables.METASTATICDIAGNOSIS
-        assertThat(record.get(table.DISTANTMETASTASESDETECTIONSTATUS) ?: null).isEqualTo(expected.distantMetastasesDetectionStatus.name)
+//        assertThat(record.get(table.DISTANTMETASTASESDETECTIONSTATUS) ?: null).isEqualTo(expected.distantMetastasesDetectionStatus.name)
         assertThat(record.get(table.NUMBEROFLIVERMETASTASES) ?: null).isEqualTo(expected.numberOfLiverMetastases?.name)
         assertThat(record.get(table.MAXIMUMSIZEOFLIVERMETASTASISMM) ?: null).isEqualTo(expected.maximumSizeOfLiverMetastasisMm)
         assertThat(record.get(table.INVESTIGATEDLYMPHNODESCOUNT) ?: null).isEqualTo(expected.investigatedLymphNodesCount)
