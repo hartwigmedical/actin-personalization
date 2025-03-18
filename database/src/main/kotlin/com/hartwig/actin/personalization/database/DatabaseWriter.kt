@@ -161,20 +161,18 @@ class DatabaseWriter(private val context: DSLContext, private val connection: ja
         listOf(extractSimpleRecord(Tables.SURVIVALMEASUREMENT, tumor.latestSurvivalMeasurement, "tumorId", tumorId))
 
     private fun priorTumorFromTumor(tumorId: Int, tumor: Tumor) =
-        tumor.priorTumors.mapIndexed { index, priorTumor ->
+        tumor.priorTumors.map { priorTumor ->
             val dbRecord = context.newRecord(Tables.PRIORTUMOR)
             dbRecord.from(priorTumor)
-            dbRecord.set(Tables.PRIORTUMOR.ID, index + 1)
             dbRecord.set(Tables.PRIORTUMOR.TUMORID, tumorId)
             dbRecord.set(Tables.PRIORTUMOR.SYSTEMICDRUGSRECEIVED, jsonList(priorTumor.systemicDrugsReceived))
             dbRecord
         }
 
     private fun primaryDiagnosisFromTumor(tumorId: Int, tumor: Tumor) =
-        listOf(tumor.primaryDiagnosis).mapIndexed { index, primaryDiagnosis ->
+        listOf(tumor.primaryDiagnosis).map { primaryDiagnosis ->
             val dbRecord = context.newRecord(Tables.PRIMARYDIAGNOSIS)
             dbRecord.from(primaryDiagnosis)
-            dbRecord.set(Tables.PRIMARYDIAGNOSIS.ID, index + 1)
             dbRecord.set(Tables.PRIMARYDIAGNOSIS.TUMORID, tumorId)
             dbRecord.set(Tables.PRIMARYDIAGNOSIS.BASISOFDIAGNOSIS, primaryDiagnosis.basisOfDiagnosis.name)
             dbRecord.set(Tables.PRIMARYDIAGNOSIS.PRIMARYTUMORTYPE, primaryDiagnosis.primaryTumorType.name)
@@ -339,12 +337,9 @@ class DatabaseWriter(private val context: DSLContext, private val connection: ja
             systemicTreatmentScheme to dbRecord
         }
 
-    private fun systemicTreatmentDrugFromSystemicTreatmentScheme(
-        systemicTreatmentSchemeId: Int,
-        systemicTreatmentScheme: SystemicTreatmentScheme
-    ) =
-        systemicTreatmentScheme.components.map {
-            extractSimpleRecord(Tables.SYSTEMICTREATMENTDRUG, it, "systemicTreatmentSchemeId", systemicTreatmentSchemeId)
+    private fun systemicTreatmentDrugFromSystemicTreatmentScheme(schemeId: Int, scheme: SystemicTreatmentScheme) =
+        scheme.components.map {
+            extractSimpleRecord(Tables.SYSTEMICTREATMENTDRUG, it, "systemicTreatmentSchemeId", schemeId)
         }
 
     private fun responseMeasuresFromTreatmentEpisode(treatmentEpisodeId: Int, treatmentEpisode: TreatmentEpisode) =
