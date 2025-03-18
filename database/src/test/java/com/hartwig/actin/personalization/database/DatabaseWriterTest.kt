@@ -11,11 +11,8 @@ import com.hartwig.actin.personalization.datamodel.Tumor
 import com.hartwig.actin.personalization.datamodel.diagnosis.MetastaticDiagnosis
 import com.hartwig.actin.personalization.datamodel.diagnosis.PrimaryDiagnosis
 import com.hartwig.actin.personalization.datamodel.diagnosis.PriorTumor
-import com.hartwig.actin.personalization.datamodel.diagnosis.TnmClassification
 import com.hartwig.actin.personalization.datamodel.outcome.SurvivalMeasurement
-import kotlinx.serialization.json.Json
 import org.assertj.core.api.Assertions.assertThat
-import org.jooq.JSON
 import org.jooq.SQLDialect
 import org.jooq.impl.DSL
 import org.junit.jupiter.api.Test
@@ -167,8 +164,12 @@ class DatabaseWriterTest {
         assertThat(record.get(table.PRIMARYTUMORLOCATION) ?: null).isEqualTo(expected.primaryTumorLocation.name)
         assertThat(record.get(table.DIFFERENTIATIONGRADE) ?: null).isEqualTo(expected.differentiationGrade?.name)
 
-        compare(record.get(table.CLINICALTNMCLASSIFICATION), expected.clinicalTnmClassification)
-        compare(record.get(table.PATHOLOGICALTNMCLASSIFICATION), expected.pathologicalTnmClassification)
+        assertThat(record.get(table.CLINICALTNMT) ?: null).isEqualTo(expected.clinicalTnmClassification.tnmT?.name)
+        assertThat(record.get(table.CLINICALTNMN) ?: null).isEqualTo(expected.clinicalTnmClassification.tnmN?.name)
+        assertThat(record.get(table.CLINICALTNMM) ?: null).isEqualTo(expected.clinicalTnmClassification.tnmM?.name)
+        assertThat(record.get(table.PATHOLOGICALTNMT) ?: null).isEqualTo(expected.pathologicalTnmClassification.tnmT?.name)
+        assertThat(record.get(table.PATHOLOGICALTNMN) ?: null).isEqualTo(expected.pathologicalTnmClassification.tnmN?.name)
+        assertThat(record.get(table.PATHOLOGICALTNMM) ?: null).isEqualTo(expected.pathologicalTnmClassification.tnmM?.name)
         assertThat(record.get(table.CLINICALTUMORSTAGE) ?: null).isEqualTo(expected.clinicalTumorStage.name)
         assertThat(record.get(table.PATHOLOGICALTUMORSTAGE) ?: null).isEqualTo(expected.pathologicalTumorStage.name)
         assertThat(record.get(table.INVESTIGATEDLYMPHNODESCOUNT) ?: null).isEqualTo(expected.investigatedLymphNodesCount)
@@ -196,13 +197,5 @@ class DatabaseWriterTest {
         assertThat(record.get(table.INVESTIGATEDLYMPHNODESCOUNT) ?: null).isEqualTo(expected.investigatedLymphNodesCount)
         assertThat(record.get(table.POSITIVELYMPHNODESCOUNT) ?: null).isEqualTo(expected.positiveLymphNodesCount)
         // TODO validate metastases
-    }
-
-    private fun compare(json: JSON?, expected: TnmClassification?) {
-        if (expected != null) {
-            assertThat(Json.decodeFromString<TnmClassification>(json!!.data())).isEqualTo(expected)
-        } else {
-            assertThat(json).isNull()
-        }
     }
 }

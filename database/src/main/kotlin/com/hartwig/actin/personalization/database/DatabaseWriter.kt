@@ -3,17 +3,13 @@ package com.hartwig.actin.personalization.database
 import com.hartwig.actin.personalization.datamodel.ReferencePatient
 import com.hartwig.actin.personalization.datamodel.Tumor
 import com.hartwig.actin.personalization.datamodel.diagnosis.MetastaticDiagnosis
-import com.hartwig.actin.personalization.datamodel.diagnosis.TnmClassification
 import com.hartwig.actin.personalization.datamodel.diagnosis.TumorLocation
 import com.hartwig.actin.personalization.datamodel.treatment.Drug
 import com.hartwig.actin.personalization.datamodel.treatment.SystemicTreatment
 import com.hartwig.actin.personalization.datamodel.treatment.SystemicTreatmentScheme
 import com.hartwig.actin.personalization.datamodel.treatment.TreatmentEpisode
 import io.github.oshai.kotlinlogging.KotlinLogging
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.serializer
 import org.jooq.DSLContext
-import org.jooq.JSON
 import org.jooq.SQLDialect
 import org.jooq.Table
 import org.jooq.TableRecord
@@ -165,7 +161,7 @@ class DatabaseWriter(private val context: DSLContext, private val connection: ja
             val dbRecord = context.newRecord(Tables.PRIORTUMOR)
             dbRecord.from(priorTumor)
             dbRecord.set(Tables.PRIORTUMOR.TUMORID, tumorId)
-            dbRecord.set(Tables.PRIORTUMOR.SYSTEMICDRUGSRECEIVED, jsonList(priorTumor.systemicDrugsReceived))
+            dbRecord.set(Tables.PRIORTUMOR.SYSTEMICDRUGSRECEIVED, concat(priorTumor.systemicDrugsReceived))
             dbRecord
         }
 
@@ -179,14 +175,12 @@ class DatabaseWriter(private val context: DSLContext, private val connection: ja
             dbRecord.set(Tables.PRIMARYDIAGNOSIS.PRIMARYTUMORLOCATION, primaryDiagnosis.primaryTumorLocation.name)
             dbRecord.set(Tables.PRIMARYDIAGNOSIS.ANORECTALVERGEDISTANCECATEGORY, primaryDiagnosis.anorectalVergeDistanceCategory?.name)
             dbRecord.set(Tables.PRIMARYDIAGNOSIS.DIFFERENTIATIONGRADE, primaryDiagnosis.differentiationGrade?.name)
-            dbRecord.set(
-                Tables.PRIMARYDIAGNOSIS.CLINICALTNMCLASSIFICATION,
-                tnmClassificationToJson(primaryDiagnosis.clinicalTnmClassification)
-            )
-            dbRecord.set(
-                Tables.PRIMARYDIAGNOSIS.PATHOLOGICALTNMCLASSIFICATION,
-                tnmClassificationToJson(primaryDiagnosis.pathologicalTnmClassification)
-            )
+            dbRecord.set(Tables.PRIMARYDIAGNOSIS.CLINICALTNMT,primaryDiagnosis.clinicalTnmClassification.tnmT?.name)
+            dbRecord.set(Tables.PRIMARYDIAGNOSIS.CLINICALTNMN,primaryDiagnosis.clinicalTnmClassification.tnmN?.name)
+            dbRecord.set(Tables.PRIMARYDIAGNOSIS.CLINICALTNMM,primaryDiagnosis.clinicalTnmClassification.tnmM?.name)
+            dbRecord.set(Tables.PRIMARYDIAGNOSIS.PATHOLOGICALTNMT,primaryDiagnosis.pathologicalTnmClassification.tnmT?.name)
+            dbRecord.set(Tables.PRIMARYDIAGNOSIS.PATHOLOGICALTNMN,primaryDiagnosis.pathologicalTnmClassification.tnmN?.name)
+            dbRecord.set(Tables.PRIMARYDIAGNOSIS.PATHOLOGICALTNMM,primaryDiagnosis.pathologicalTnmClassification.tnmM?.name)
             dbRecord.set(Tables.PRIMARYDIAGNOSIS.CLINICALTUMORSTAGE, primaryDiagnosis.clinicalTumorStage.name)
             dbRecord.set(Tables.PRIMARYDIAGNOSIS.PATHOLOGICALTUMORSTAGE, primaryDiagnosis.pathologicalTumorStage.name)
             dbRecord.set(Tables.PRIMARYDIAGNOSIS.VENOUSINVASIONDESCRIPTION, primaryDiagnosis.venousInvasionDescription?.name)
@@ -390,12 +384,9 @@ class DatabaseWriter(private val context: DSLContext, private val connection: ja
         insertRows(rows, "location")
     }
 
-    private fun jsonList(items: Iterable<Any>): JSON {
-        return JSON.json(items.joinToString(",", prefix = "[", postfix = "]") { "\"$it\"" })
+    private fun concat(items: Iterable<Any>): String {
+        return items.joinToString(";")
     }
-
-    private fun tnmClassificationToJson(classification: TnmClassification?): JSON? =
-        classification?.let { JSON.json(Json.encodeToString(serializer<TnmClassification>(), it)) }
 
     companion object {
         private val LOGGER = KotlinLogging.logger {}

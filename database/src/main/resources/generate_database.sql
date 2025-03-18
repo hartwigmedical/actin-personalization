@@ -35,7 +35,7 @@ CREATE TABLE `priorTumor` (
     `primaryTumorLocation` VARCHAR(255) NOT NULL,
     `primaryTumorLocationCategory` VARCHAR(50) NOT NULL,
     `primaryTumorStage` VARCHAR(10),
-    `systemicDrugsReceived` JSON NOT NULL,
+    `systemicDrugsReceived` VARCHAR(1000) NOT NULL,
     FOREIGN KEY (`tumorId`) REFERENCES `tumor`(`id`),
     PRIMARY KEY (`id`)
 );
@@ -52,8 +52,12 @@ CREATE TABLE `primaryDiagnosis` (
     `mesorectalFasciaIsClear` BOOL,
     `distanceToMesorectalFasciaMm` INT,
     `differentiationGrade` VARCHAR(255),
-    `clinicalTnmClassification` JSON NOT NULL,
-    `pathologicalTnmClassification` JSON NOT NULL,
+    `clinicalTnmT` VARCHAR(50),
+    `clinicalTnmN` VARCHAR(50),
+    `clinicalTnmM` VARCHAR(50),
+    `pathologicalTnmT` VARCHAR(50),
+    `pathologicalTnmN` VARCHAR(50),
+    `pathologicalTnmM` VARCHAR(50),
     `clinicalTumorStage` VARCHAR(50) NOT NULL,
     `pathologicalTumorStage` VARCHAR(50) NOT NULL,
     `investigatedLymphNodesCount` INT,
