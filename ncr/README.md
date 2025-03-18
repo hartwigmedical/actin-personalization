@@ -70,11 +70,11 @@ java -cp actin.jar com.hartwig.actin.personalization.ncr.NcrIngestionApplication
 - Metastatic diagnosis:
     - Number and size of liver metastases are not-null in rare (<10) occasions when meta_epis = 0. This is dropped.
 - Treatments:
-    - hasParticipatedInTrial (‘ ‘) is dropped since it is too abstract (not clear what trial, or even what kind of trial (surgery. systemic
-      trial etc.).
+    - hasParticipatedInTrial is dropped since it is too abstract (not clear what trial, or even what kind of trial (surgery. systemic
+      trial etc.)).
 
 ### Data issues/questions in NCR
- 
+
 - diffgrad is documented as “tekst” in the NCR data dictionary even though it is actually an int (code).
 - “meta_lever_aantal" and “meta_lever_afm" are not-null in rare (<10) occasions when meta_epis = 0
 - What do ond_lymf and pos_lymf mean in the context of the episode in which metastases were discovered and not in DIA?
