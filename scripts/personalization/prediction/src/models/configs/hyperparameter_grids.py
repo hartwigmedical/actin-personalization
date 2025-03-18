@@ -98,6 +98,7 @@ curve_param_grids = {
             'max_features': ['sqrt', 'log2', None]
         }
     ],
+}
 
 days_param_grids = {
     'Ridge': [
