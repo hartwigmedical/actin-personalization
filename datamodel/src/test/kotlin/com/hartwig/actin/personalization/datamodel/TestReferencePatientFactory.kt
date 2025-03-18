@@ -65,15 +65,15 @@ import com.hartwig.actin.personalization.datamodel.treatment.TreatmentIntent
 object TestReferencePatientFactory {
 
     fun emptyReferencePatient() = ReferencePatient(
-        sex = Sex.MALE, tumors = listOf(emptyTumor())
+        source = ReferenceSource.INTERNAL, sourceId = 1, sex = Sex.MALE, tumors = listOf(emptyTumor())
     )
 
     fun minimalReferencePatient() = ReferencePatient(
-        sex = Sex.MALE, tumors = listOf(minimalTumor())
+        source = ReferenceSource.INTERNAL, sourceId = 2, sex = Sex.MALE, tumors = listOf(minimalTumor())
     )
 
     fun exhaustiveReferencePatient() = ReferencePatient(
-        sex = Sex.MALE, tumors = listOf(emptyTumor(), minimalTumor(), exhaustiveTumor())
+        source = ReferenceSource.INTERNAL, sourceId = 3, sex = Sex.MALE, tumors = listOf(emptyTumor(), minimalTumor(), exhaustiveTumor())
     )
 
     private fun emptyTumor() = Tumor(

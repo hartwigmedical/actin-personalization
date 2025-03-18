@@ -95,6 +95,7 @@ class DatabaseWriter(private val context: DSLContext, private val connection: ja
             val dbRecord = context.newRecord(Tables.PATIENT)
             dbRecord.from(record)
             dbRecord.set(Tables.PATIENT.ID, patientId)
+            dbRecord.set(Tables.PATIENT.SOURCE, record.source.name)
             dbRecord.set(Tables.PATIENT.SEX, record.sex.name)
             Pair(patientId, record) to dbRecord
         }.unzip()

@@ -3,6 +3,8 @@ SET FOREIGN_KEY_CHECKS = 0;
 DROP TABLE IF EXISTS `patient`;
 CREATE TABLE `patient` (
     `id` INT NOT NULL,
+    `source` VARCHAR(50) NOT NULL,
+    `sourceId` INT NOT NULL,
     `sex` VARCHAR(50) NOT NULL,
     PRIMARY KEY (`id`)
 );
