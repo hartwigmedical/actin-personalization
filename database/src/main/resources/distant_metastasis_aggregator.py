@@ -50,9 +50,9 @@ class DistantMetastasisAggregator:
             f'All{prefix}Assessments': assessments,
             f'{prefix}AssessmentsDates': dates,
             f'{prefix}AssessmentPreTreatment': pre_value,
-            f'{prefix}Assessmentpre_treatment_assessment_date': pre_date,
+            f'{prefix}AssessmentAssessmentDatePreTreatment': pre_date,
             f'{prefix}AssessmentMetastasisDetection': met_value,
-            f'{prefix}AssessmentMetastasisDetectionDate': met_date
+            f'{prefix}AssessmentDateMetastasisDetection': met_date
         })
 
     @staticmethod
@@ -68,26 +68,46 @@ class DistantMetastasisAggregator:
         ).reset_index()
 
     @staticmethod
-    def lab_values_before_treatment(lab, treatment_episode, systemic):
-        merged = treatment_episode.merge(systemic, left_on='id', right_on='treatmentEpisodeId', how='inner')
-        first_treatment = merged.groupby('tumorId', as_index=False)['daysBetweenDiagnosisAndStart'].min().rename(
-            columns={'daysBetweenDiagnosisAndStart': 'firstTreatmentStart'}
-        )
-        merged_labs = lab.merge(first_treatment, on='tumorId', how='inner')
-        filtered = merged_labs[merged_labs['daysSinceDiagnosis'] <= merged_labs['firstTreatmentStart']]
-        lab_names = filtered['name'].dropna().unique()
+    def lab_aggregations(lab, thresholds):
+        merged_labs = lab.merge(thresholds, on='tumorId', how='inner')
+        lab_names = lab['name'].dropna().unique()
+
+        def camel_case(s):
+            parts = s.split('_')
+            return parts[0].lower() + ''.join(word.capitalize() for word in parts[1:])
 
         def aggregate(group):
             sorted_group = group.sort_values('daysSinceDiagnosis')
+            tumor_id = group['tumorId'].iloc[0]
+            treatment_start = group['firstTreatmentStart'].iloc[0]
+            metastasis_threshold = group['earliestMetastasisDetectionDays'].iloc[0]
+
             results = {
-                lab.lower(): sorted_group.loc[sorted_group['name'] == lab, 'value'].iloc[-1]
-                if not sorted_group.loc[sorted_group['name'] == lab, 'value'].empty else None
-                for lab in lab_names
+                f'{camel_case(name)}PreTreatment': None for name in lab_names
             }
-            results['closestLabValueDateBeforeTreatment'] = sorted_group['daysSinceDiagnosis'].iloc[-1] if not sorted_group.empty else None
+            results.update({
+                f'{camel_case(name)}MetastasisDetection': None for name in lab_names
+            })
+
+            for lab_name in lab_names:
+                camel_name = camel_case(lab_name)
+                lab_group = sorted_group[sorted_group['name'] == lab_name]
+
+                pre = lab_group[lab_group['daysSinceDiagnosis'] <= treatment_start]
+                if not pre.empty:
+                    results[f'{camel_name}PreTreatment'] = pre.iloc[-1]['value']
+
+                met = lab_group[lab_group['daysSinceDiagnosis'] <= metastasis_threshold]
+                if not met.empty:
+                    results[f'{camel_name}MetastasisDetection'] = met.iloc[-1]['value']
+
+            results['closestLabValueDatePreTreatment'] = sorted_group[sorted_group['daysSinceDiagnosis'] <= treatment_start]['daysSinceDiagnosis'].max()
+            results['closestLabValueDateMetastasisDetection'] = sorted_group[sorted_group['daysSinceDiagnosis'] <= metastasis_threshold]['daysSinceDiagnosis'].max()
+
             return pd.Series(results)
 
-        return filtered.groupby('tumorId').apply(aggregate).reset_index()
+        return merged_labs.groupby('tumorId').apply(aggregate).reset_index()
+
 
     @staticmethod
     def surgeries(treatment_episode, primary, metastatic, gastro, hipec):

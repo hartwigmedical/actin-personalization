@@ -72,7 +72,7 @@ class DistantMetastasisOverviewBuilder:
 
         who_agg = Agg.who_aggregations(self.dfs['whoAssessment'], thresholds)
         asa_agg = Agg.asa_aggregations(self.dfs['asaAssessment'], thresholds)
-        lab_before_treatment = Agg.lab_values_before_treatment(self.dfs['labMeasurement'], self.dfs['treatmentEpisode'], self.dfs['systemicTreatment'])
+        lab_agg = Agg.lab_aggregations(self.dfs['labMeasurement'], thresholds)
         surgeries = Agg.surgeries(self.dfs['treatmentEpisode'], self.dfs['primarySurgery'], self.dfs['metastaticSurgery'], self.dfs['gastroenterologyResection'], self.dfs['hipecTreatment'])
         radiotherapy = Agg.radiotherapies(self.dfs['treatmentEpisode'], self.dfs['primaryRadiotherapy'], self.dfs['metastaticRadiotherapy'])
 
@@ -81,7 +81,7 @@ class DistantMetastasisOverviewBuilder:
             'first_systemic': first_systemic,
             'who': who_agg,
             'asa': asa_agg,
-            'labs': lab_before_treatment,
+            'labs': lab_agg,
             'surgeries': surgeries,
             'radiotherapy': radiotherapy
         }
@@ -132,7 +132,7 @@ class DistantMetastasisOverviewBuilder:
                         if 'daysSinceDiagnosis' in col and col not in ['observedOsFromTumorIncidenceDays', 'firstTreatmentStart']]
         df = df.drop(columns=days_cols)
     
-        df = df.rename(columns={"investigatedLymphNodesCount_x" : "investigatedLymphNodesCountPrimaryDiagnosis", "investigatedLymphNodesCount_y":"investigatedLymphNodesCountMetastaticDiagnosis"})
+        df = df.rename(columns={"investigatedLymphNodesCount_x" : "investigatedLymphNodesCountPrimaryDiagnosis","positiveLymphNodesCount_x": "positiveLymphNodesCountPrimaryDiagnosis","investigatedLymphNodesCount_y":"investigatedLymphNodesCountMetastaticDiagnosis","positiveLymphNodesCount_y": "positiveLymphNodesCountMetastaticDiagnosis"})
         
         df['observedOsFromTreatmentStartDays'] = df['observedOsFromTumorIncidenceDays'] - df['firstTreatmentStart']
         return df
