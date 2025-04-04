@@ -44,7 +44,17 @@ SELECT
     episode.*,
     surgeryOverview.surgeries,
     metastasisOverview.metastasisLocationGroupsPriorToSystemicTreatment,
-    episode.intervalTumorIncidenceTreatmentPlanStopDays - episode.intervalTumorIncidenceTreatmentPlanStartDays AS systemicTreatmentPlanDuration
+    labValues.albumine,
+    labValues.alkalinePhosphatase,
+    labValues.carcinoEmbryonicAntigen,
+    labValues.lactateDehydrogenase,
+    labValues.leukocytesAbsolute,
+    labValues.neutrophilsAbsolute,
+
+    episode.intervalTumorIncidenceTreatmentPlanStopDays - episode.intervalTumorIncidenceTreatmentPlanStartDays AS systemicTreatmentPlanDuration,
+    diagnosis.observedOsFromTumorIncidenceDays - metastasisOverview.intervalTumorIncidenceMetastasisDetectionDays AS observedOsFromMetastasisDetectionDays,
+    diagnosis.ageAtDiagnosis + (metastasisOverview.intervalTumorIncidenceMetastasisDetectionDays / 365.25) AS ageAtMetastasisDetection
+
 FROM patient
     INNER JOIN diagnosis ON patient.id = diagnosis.patientId
     INNER JOIN episode ON diagnosis.id = episode.diagnosisId AND episode.order = diagnosis.orderOfFirstDistantMetastasesEpisode
@@ -52,11 +62,25 @@ FROM patient
         SELECT episodeId, GROUP_CONCAT(type) AS surgeries FROM surgery GROUP BY episodeId
     ) surgeryOverview ON episode.id = surgeryOverview.episodeId
     LEFT JOIN (
-        SELECT episodeId, GROUP_CONCAT(DISTINCT locationGroup ORDER BY locationGroup) AS metastasisLocationGroupsPriorToSystemicTreatment
+        SELECT episodeId, 
+               intervalTumorIncidenceMetastasisDetectionDays, 
+               GROUP_CONCAT(DISTINCT locationGroup ORDER BY locationGroup) AS metastasisLocationGroupsPriorToSystemicTreatment
         FROM metastasis INNER JOIN episode ON metastasis.episodeId = episode.id
-        WHERE intervalTumorIncidenceMetastasisDetectionDays < intervalTumorIncidenceTreatmentPlanStartDays
+        WHERE (episode.intervalTumorIncidenceTreatmentPlanStartDays IS NULL OR(intervalTumorIncidenceMetastasisDetectionDays < intervalTumorIncidenceTreatmentPlanStartDays))
         GROUP BY episodeId
     ) metastasisOverview ON episode.id = metastasisOverview.episodeId
+    LEFT JOIN (
+            SELECT 
+                episodeId,
+                MAX(CASE WHEN name = 'ALBUMINE' THEN value END) AS albumine,
+                MAX(CASE WHEN name = 'ALKALINE_PHOSPHATASE' THEN value END) AS alkalinePhosphatase,
+                MAX(CASE WHEN name = 'CARCINOEMBRYONIC_ANTIGEN' THEN value END) AS carcinoEmbryonicAntigen,
+                MAX(CASE WHEN name = 'LACTATE_DEHYDROGENASE' THEN value END) AS lactateDehydrogenase,
+                MAX(CASE WHEN name = 'LEUKOCYTES_ABSOLUTE' THEN value END) AS leukocytesAbsolute,
+                MAX(CASE WHEN name = 'NEUTROPHILS_ABSOLUTE' THEN value END) AS neutrophilsAbsolute
+            FROM actin_personalization.labMeasurement
+            GROUP BY episodeId
+        ) labValues ON episode.id = labValues.episodeId
 );
 
 CREATE OR REPLACE VIEW palliativeIntents AS (

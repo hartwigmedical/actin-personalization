@@ -153,7 +153,7 @@ class GradientBoostingSurvivalModel(BaseSurvivalModel):
     def __init__(self, **kwargs: Dict[str, Any]):
         super().__init__()
         self.kwargs = kwargs
-        self.model = GradientBoostingSurvivalAnalysis(random_state=42, **self.kwargs)
+        self.model = GradientBoostingSurvivalAnalysis(**self.kwargs)
         
     def fit(self, X: pd.DataFrame, y: pd.DataFrame) -> None:
         self.model.fit(X, y)

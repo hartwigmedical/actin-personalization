@@ -13,7 +13,7 @@ import os
 
 from typing import List, Dict, Tuple, Any, Optional, Callable
 
-from ..utils.metrics import calculate_c_index, calculate_brier_score, calibration_assessment, calculate_time_dependent_auc
+from ..utils.metrics import calculate_time_dependent_c_index, calculate_brier_score, calibration_assessment, calculate_time_dependent_auc
 from .survival_models import BaseSurvivalModel, NNSurvivalModel
 
 class ModelTrainer:
@@ -141,9 +141,7 @@ class ModelTrainer:
             model, model_name, surv_funcs, risk_scores, X_val, y_val_structured
         )
 
-        results['c_index'] = calculate_c_index(
-            y_val_structured['duration'], risk_scores, y_val_structured['event']
-        )
+        results['c_index'] = calculate_time_dependent_c_index(predictions, y_val_structured['duration'], y_val_structured['event'], times)
         results['ibs'] = calculate_brier_score(y_train_structured, y_val_structured, predictions, times)
         results['ce'] = calibration_assessment(predictions, y_val_structured, times)
 
@@ -190,11 +188,11 @@ class ModelTrainer:
 
             self.results[model_name] = {key: np.nanmean(values) for key, values in model_metrics['cv'].items()}
             print(f"{model_name} CV Results: {self.results[model_name]}")
-
+            print("training final model")
             final_model = self._initialize_model(model_template, input_size=X_train.shape[1])
             y_train_df = pd.DataFrame({'duration': y_train[duration_col], 'event': y_train[event_col]}, index=X_train.index)
             y_train_structured = Surv.from_dataframe('event', 'duration', y_train_df)
-            y_test_df = pd.DataFrame({'duration': y_test[duration_col], 'event': y_test[event_col]}, index=y_test.index)
+            y_test_df = pd.DataFrame({'duration': y_test[duration_col], 'event': y_test[event_col]}, index=X_test.index)
             y_test_structured = Surv.from_dataframe('event', 'duration', y_test_df)
 
             if isinstance(final_model, NNSurvivalModel):

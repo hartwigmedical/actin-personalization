@@ -6,7 +6,8 @@ curve_param_grids = {
             'dropout': [0.1, 0.15, 0.2],
             'batch_size': [32, 64, 128],
             'early_stopping_patience': [20, 30, 50],
-            'optimizer': ['Adam', 'RMSprop']
+            'optimizer': ['Adam', 'RMSprop'], 
+            'epochs' : [50, 100, 200, 500]
         }
     ],
     'DeepHitModel': [
@@ -16,7 +17,11 @@ curve_param_grids = {
             'alpha': [0.2, 0.3, 0.4],
             'sigma': [0.05, 0.1, 0.2],
             'weight_decay': [1e-3, 5e-4, 1e-4],
-            'optimizer': ['Adam', 'RMSprop']
+            'optimizer': ['Adam', 'RMSprop'],
+            'dropout': [0.1, 0.15, 0.2],  
+            'batch_size': [32, 64, 128],
+            'epochs': [50, 100, 200, 500],
+            'early_stopping_patience': [20, 30, 50]
         }
     ],
     'PCHazardModel': [
@@ -25,7 +30,10 @@ curve_param_grids = {
             'num_durations': [60, 80, 100, 120],
             'lr': [0.0005, 0.001, 0.01],
             'dropout': [0.1, 0.15, 0.2],
-            'optimizer': ['Adam', 'RMSprop']
+            'optimizer': ['Adam', 'RMSprop'],
+            'batch_size': [32, 64, 128],
+            'epochs': [50, 100, 200, 500],
+            'early_stopping_patience': [20, 30, 50]
         }
     ],
     'MTLRModel': [
@@ -33,7 +41,11 @@ curve_param_grids = {
             'num_nodes': [[256, 128, 64],[128, 64, 32], [128, 64], [64, 32], [64], [32]],
             'lr': [0.0005, 0.001, 0.01],
             'dropout': [0.1, 0.15, 0.2],
-            'optimizer': ['Adam', 'RMSprop']
+            'optimizer': ['Adam', 'RMSprop'],
+            'batch_size': [32, 64, 128],
+            'epochs': [50, 100, 200, 500],
+            'early_stopping_patience': [20, 30, 50]
+            
         }
     ],
     'AalenAdditive': [
@@ -42,6 +54,20 @@ curve_param_grids = {
             'alpha': [0.01, 0.05, 0.1],
             'coef_penalizer': [0.5, 1.0, 2.0, 5.0, 10.0],
             'smoothing_penalizer': [0.0, 0.5, 1.0],
+        }
+    ],
+    'DeepSurv': [
+        {
+            'num_nodes': [[256, 128, 64], [128, 64, 32], [128, 64], [64, 32], [64], [32]],
+            'batch_norm': [True, False],
+            'dropout': [0.1, 0.2, 0.3],
+            'weight_decay': [1e-3, 5e-4, 1e-4],
+            'lr': [0.001, 0.0005, 0.005, 0.01],
+            'activation': ['elu', 'relu'],
+            'optimizer': ['Adam', 'RMSprop'],
+            'batch_size': [32, 64, 128],
+            'epochs': [50, 100, 200, 500],
+            'early_stopping_patience': [20, 30, 50]
         }
     ],
     'CoxPH': [
@@ -70,17 +96,6 @@ curve_param_grids = {
             'min_samples_leaf': [5, 10, 20],
             'min_samples_split': [10, 20, 50],
             'max_features': ['sqrt', 'log2', None]
-        }
-    ],
-    'DeepSurv': [
-        {
-            'num_nodes': [[256, 128, 64], [128, 64, 32], [128, 64], [64, 32], [64], [32]],
-            'batch_norm': [True, False],
-            'dropout': [0.1, 0.2, 0.3],
-            'weight_decay': [1e-3, 5e-4, 1e-4],
-            'lr': [0.001, 0.0005, 0.005, 0.01],
-            'activation': ['elu', 'relu'],
-            'optimizer': ['Adam', 'RMSprop']
         }
     ],
 }
