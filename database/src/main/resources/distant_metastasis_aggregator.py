@@ -32,7 +32,10 @@ class DistantMetastasisAggregator:
 
         pre_value, pre_date = None, None
         if pd.notna(treatment_start):
-            valid = sorted_group[sorted_group['daysSinceDiagnosis'] <= treatment_start]
+            valid = sorted_group[
+                (sorted_group['daysSinceDiagnosis'] >= treatment_start - 28) &
+                (sorted_group['daysSinceDiagnosis'] <= treatment_start)
+            ]
             if not valid.empty:
                 row = valid.iloc[-1]
                 pre_value = row[assessment_col]
@@ -40,7 +43,10 @@ class DistantMetastasisAggregator:
 
         met_value, met_date = None, None
         if pd.notna(metastasis_threshold):
-            valid = sorted_group[sorted_group['daysSinceDiagnosis'] <= metastasis_threshold]
+             valid = sorted_group[
+                (sorted_group['daysSinceDiagnosis'] >= metastasis_threshold - 28) &
+                (sorted_group['daysSinceDiagnosis'] <= metastasis_threshold + 28)
+            ]
             if not valid.empty:
                 row = valid.iloc[-1]
                 met_value = row[assessment_col]
@@ -93,11 +99,17 @@ class DistantMetastasisAggregator:
                 camel_name = camel_case(lab_name)
                 lab_group = sorted_group[sorted_group['name'] == lab_name]
 
-                pre = lab_group[lab_group['daysSinceDiagnosis'] <= treatment_start]
+                pre = lab_group[
+                    (lab_group['daysSinceDiagnosis'] >= treatment_start - 28) &
+                    (lab_group['daysSinceDiagnosis'] <= treatment_start)
+                ]
                 if not pre.empty:
                     results[f'{camel_name}PreTreatment'] = pre.iloc[-1]['value']
 
-                met = lab_group[lab_group['daysSinceDiagnosis'] <= metastasis_threshold]
+                met = lab_group[
+                    (lab_group['daysSinceDiagnosis'] >= metastasis_threshold - 28) &
+                    (lab_group['daysSinceDiagnosis'] <= metastasis_threshold + 28)
+                ]
                 if not met.empty:
                     results[f'{camel_name}MetastasisDetection'] = met.iloc[-1]['value']
 
