@@ -27,18 +27,15 @@ def random_parameter_search(param_dict: Dict[str, List[Any]], n_samples: int) ->
 def hyperparameter_search(
     X_train: pd.DataFrame, y_train: pd.DataFrame, X_test: pd.DataFrame, y_test: pd.DataFrame,
     encoded_columns: Dict[str, List[str]], 
-    event_col: str, duration_col: str, 
-    max_time: int, 
     base_models: Dict[str, BaseSurvivalModel], 
     param_grids: Dict[str, List[Dict[str, Any]]], 
-    metric_comparison: str = 'auc', 
-    n_samples: int = 20, 
+    n_samples: int = 2, 
     random_state: int = 42
 ):
     random.seed(random_state)
     best_models = {}
     all_results = {}
-    trainer = ModelTrainer(models={}, n_splits=5, random_state=random_state)
+    trainer = ModelTrainer(models={})
 
     for model_name, model_instance in base_models.items():
         model_class = type(model_instance)
@@ -67,12 +64,9 @@ def hyperparameter_search(
                 results, trained_models = trainer.train_and_evaluate(
                     X_train, y_train, X_test, y_test,
                     encoded_columns=encoded_columns,
-                    event_col=event_col,
-                    duration_col=duration_col, 
-                    save_models = False
                 )
                 
-                current_score = results[model_name][metric_comparison]
+                current_score = results[model_name][settings.hyperparam_tuning_optimization_metric]
                 all_results[model_name].append((params, results[model_name]))
 
                 if current_score > best_score:
