@@ -10,25 +10,28 @@ from sklearn.preprocessing import MinMaxScaler, StandardScaler
 from sklearn.model_selection import train_test_split
 
 from .lookups import LookupManager
+from src.utils.settings import settings
 
 class DataSplitter:
     def __init__(self, test_size: float=0.1, random_state: int=42) -> None:
         self.test_size = test_size
         self.random_state = random_state
 
-    def split(self, X: pd.DataFrame, y: pd.DataFrame, event_col: str = None, encoded_columns: Dict[str, List[str]] = None) -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+    def split(self, X: pd.DataFrame, y: pd.DataFrame, encoded_columns: Dict[str, List[str]] = None) -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame]:
         """
         Split the data into training and test sets, stratified by treatment type and censoring status.
         """
-        if event_col:
-            stratify_labels = y[event_col].astype(str)
+        if settings.event_col:
+            stratify_labels = y[settings.event_col].astype(str)
         else:
             stratify_labels = None
        
         X_train, X_test, y_train, y_test = train_test_split(
             X, y, test_size=self.test_size, random_state=self.random_state, stratify=stratify_labels
         )
-
+        
+        settings.input_size = X_train.shape[1]
+        
         return X_train, X_test, y_train, y_test
 
 class DataPreprocessor:
@@ -37,19 +40,18 @@ class DataPreprocessor:
         self.db_name = db_name
         self.data_dir = "data"
         self.encoded_columns = {}
-        self.event_col = None
-        self.duration_col = None
 
-    def preprocess_data(self, query: str, duration_col: str, event_col: str, features: List[str], group_treatments: bool = False) -> Tuple[pd.DataFrame, List[str], Dict[str, List[str]]]:
-        self.duration_col = duration_col
-        self.event_col = event_col
+    def preprocess_data(self, query: str, features: List[str]) -> Tuple[pd.DataFrame, List[str], Dict[str, List[str]]]:
 
         df = self.load_data(query)
 
-        df = df[features + [self.duration_col, self.event_col]]
+        df = df[features + [settings.duration_col, settings.event_col]]
         df = df[~df[features].isna().all(axis=1)].copy()
-        if group_treatments:
-            df = self.group_treatments(df) 
+        
+        if settings.experiment_type == 'treatment_group':
+            df = self.group_treatments(df)
+        elif settings.experiment_type == 'treatment_drug':
+            df = self.add_treatment_drugs(df)
 
         df = self.impute_knn(df, ['whoStatusPreTreatmentStart'], k=7)
         lookup = LookupManager()
@@ -60,7 +62,7 @@ class DataPreprocessor:
        
         df = self.encode_categorical(df)
         
-        updated_features = [col for col in df.columns if col not in [self.duration_col, self.event_col]]
+        updated_features = [col for col in df.columns if col not in [settings.duration_col, settings.event_col]]
         
         # df = self.normalize(df, updated_features)
         df = self.standardize(df, updated_features)
@@ -78,7 +80,7 @@ class DataPreprocessor:
         df = pd.read_sql(query, db_connection)
         db_connection.close()
         
-        return df.dropna(subset=[self.duration_col, self.event_col]).copy()
+        return df.dropna(subset=[settings.duration_col, settings.event_col]).copy()
 
     def impute_knn(self, df: pd.DataFrame, columns: List[str], k: int) -> pd.DataFrame:
         """
@@ -105,23 +107,25 @@ class DataPreprocessor:
     def handle_missing_values(self, df: pd.DataFrame) -> pd.DataFrame:
         """
         Handle missing values in the DataFrame.
-        - For numerical columns, fill NaN with -1.
+        - For numerical columns, fill NaN with median and add an indicator column.
         - For categorical columns, fill NaN with 'Missing'.
         """
-       
         numerical_cols = df.select_dtypes(include=['float64', 'int64']).columns.tolist()
-        numerical_cols = [col for col in numerical_cols if col not in [self.event_col, self.duration_col]]
+        numerical_cols = [col for col in numerical_cols if col not in [settings.event_col, settings.duration_col]]
+
         for col in numerical_cols:
-            df[col] = df[col].fillna(-1)
+            df[f'{col}_missing'] = df[col].isna().astype(int)
+            df[col] = df[col].fillna(df[col].median())
 
         categorical_cols = df.select_dtypes(include=['object', 'category']).columns.tolist()
-        categorical_cols = [col for col in categorical_cols if col not in [self.event_col, self.duration_col]]
+        categorical_cols = [col for col in categorical_cols if col not in [settings.event_col, settings.duration_col]]
+        
         for col in categorical_cols:
             df[col] = df[col].fillna('Missing')
-            
-        if self.duration_col in df.columns:
-            df = df[df[self.duration_col] > 0].copy() 
-        
+
+        if settings.duration_col in df.columns:
+            df = df[df[settings.duration_col] > 0].copy() 
+
         return df
     
     def expand_column_groups(self, df: pd.DataFrame, column_name: str) -> pd.DataFrame:
@@ -147,10 +151,48 @@ class DataPreprocessor:
         )
         df = df.drop(columns = [treatment_col])
         return df
+    
+    def parse_treatment(self, treatment: str) -> Dict[str, int]:
+
+        components = {"5-FU": 0, "oxaliplatin": 0, "irinotecan": 0, "beva": 0, "panitumab": 0}
+
+        if pd.isna(treatment) or treatment.strip() == "" or treatment.lower() in ["missing", "other"]:
+            return components
+
+        t = treatment.lower()
+
+        if any(x in t for x in ["fluorouracil", "fol", "cap"]):
+            components["5-FU"] = 1
+
+        if "ox" in t:
+            components["oxaliplatin"] = 1
+
+        if "iri" in t:
+            components["irinotecan"] = 1
+
+        if "bevacizumab" in t or t.endswith("_b"):
+            components["beva"] = 1
+
+        if "panitumab" in t or t.endswith("_p"):
+            components["panitumab"] = 1
+
+        return components
+
+
+    def add_treatment_drugs(self, df: pd.DataFrame, treatment_col: str = "systemicTreatmentPlan") -> pd.DataFrame:
+        treatment_components = df[treatment_col].apply(self.parse_treatment)
+
+        components_df = pd.DataFrame(treatment_components.tolist(), index=df.index)
+
+        df = df.join(components_df)
+        
+        df.drop(columns = [treatment_col], axis = 1)
+
+        return df
 
     def encode_categorical(self, df: pd.DataFrame) -> pd.DataFrame:
         categorical_cols = df.select_dtypes(include=['object', 'category']).columns.tolist()
-        categorical_cols = [col for col in categorical_cols if col not in [self.event_col, self.duration_col]]
+        categorical_cols = [col for col in categorical_cols if col not in [settings.event_col, settings.duration_col]]
 
         for col in categorical_cols:
             if df[col].nunique() == 2:
@@ -173,20 +215,25 @@ class DataPreprocessor:
         scaler = MinMaxScaler()
         cols_to_normalize = [
             col for col in features
-            if pd.api.types.is_numeric_dtype(df[col]) and col not in [self.event_col, self.duration_col]
+            if pd.api.types.is_numeric_dtype(df[col]) and col not in [settings.event_col, settings.duration_col]
         ]
         df[cols_to_normalize] = scaler.fit_transform(df[cols_to_normalize])
         return df
 
     def standardize(self, df: pd.DataFrame, features: List[str]) -> pd.DataFrame:
         """
-        Standardize numerical features to have a mean of 0 and std dev of 1.
+        Standardize continuous numerical features to have a mean of 0 and standard deviation of 1.
+        Binary or nearly binary columns (<=2 unique values) are not standardized.
         """
         scaler = StandardScaler()
         cols_to_standardize = [
             col for col in features
-            if pd.api.types.is_numeric_dtype(df[col]) and col not in [self.event_col, self.duration_col]
+            if col != 'ncrId'
+            if pd.api.types.is_numeric_dtype(df[col])
+            and col not in [settings.event_col, settings.duration_col]
+            and df[col].nunique() > 2  # exclude binary columns
         ]
         df[cols_to_standardize] = scaler.fit_transform(df[cols_to_standardize])
         return df
+
     
