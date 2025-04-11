@@ -1,4 +1,5 @@
 import json
+import os
 import importlib
 
 from src.utils.settings import settings
@@ -8,24 +9,6 @@ class ExperimentConfig:
     def __init__(self, config_file):
         self.config_file = config_file
         self.configs = self._load_configs()
-        
-    @staticmethod 
-    def save_model_configs(configs):
-        serializable_configs = {}
-        for model_name, (model_class, model_kwargs) in configs.items():
-            if issubclass(model_class, NNSurvivalModel):
-                model_kwargs['input_size'] = settings.input_size
-       
-            class_path = f"{model_class.__module__}.{model_class.__name__}"
-            serializable_configs[model_name] = {
-                "class": class_path,
-                "kwargs": model_kwargs
-            }
-
-        with open(f"{settings.save_path}/{settings.outcome}_model_configs", "w") as f:
-            json.dump(serializable_configs, f, indent=4)
-
-        print(f"Model configurations saved to model_configs{settings.outcome}")  
 
     def _load_configs(self):
         with open(self.config_file, 'r') as f:
@@ -43,9 +26,8 @@ class ExperimentConfig:
     def load_model_configs(self):
         config_dict = self.get_config()
         model_configs = {}
-        print(config_dict)
+        print("Loaded configuration:", config_dict)
         for model_name, setting in config_dict.items():
-            print(model_name)
             class_path = setting.get("class")
             module_name, class_name = class_path.rsplit('.', 1)
             module = importlib.import_module(module_name)
@@ -57,3 +39,32 @@ class ExperimentConfig:
             model_configs[model_name] = (model_class, kwargs)
        
         return model_configs
+    
+    @staticmethod
+    def update_model_hyperparams(best_models: dict) -> None:
+        
+        if os.path.exists(settings.json_config_file):
+            with open(settings.json_config_file, "r") as f:
+                config = json.load(f)
+        else:
+            config = {}
+
+        key = f"{settings.experiment_type}_{settings.outcome}"
+        if key not in config:
+            config[key] = {}
+
+        for model_name, (model_instance, best_params) in best_models.items():
+            if best_params is None:
+                continue
+            model_class = model_instance if isinstance(model_instance, type) else type(model_instance)
+            if issubclass(model_class, NNSurvivalModel):
+                best_params['input_size'] = settings.input_size
+            config[key][model_name] = {
+                "class": f"{model_class.__module__}.{model_class.__name__}",
+                "kwargs": best_params
+            }
+
+        with open(settings.json_config_file, "w") as f:
+            json.dump(config, f, indent=4)
+
+        print(f"Updated model hyperparameters saved to '{settings.json_config_file}' under key '{key}'.")

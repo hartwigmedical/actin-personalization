@@ -48,8 +48,17 @@ class ModelTrainer:
         model_file = os.path.join(settings.save_path, f"{settings.outcome}_{model_name}")
 
         if isinstance(model, NNSurvivalModel):
-            torch.save(model.model.net.state_dict(), model_file + ".pt")
-            print(f"NN Model weights for {model_name} saved to {model_file}.pt")
+            if hasattr(model, 'compute_baseline_hazards'):
+                model.compute_baseline_hazards()
+                print('compute baseline hazards')
+            state = {
+                'net_state': model.model.net.state_dict(),
+                'baseline_hazards': getattr(model.model, 'baseline_hazards_', None),
+                'baseline_cumulative_hazards': getattr(model.model, 'baseline_cumulative_hazards_', None)
+            }
+            torch.save(state, model_file + ".pt")
+            print(f"NN Model weights and baseline hazards for {model_name} saved to {model_file}.pt")
+
         else:
             with open(model_file + ".pkl", "wb") as f:
                 dill.dump(model, f)
@@ -148,7 +157,6 @@ class ModelTrainer:
         results['auc'] = mean_auc
 
         return results
-
     
     def train_and_evaluate(
         self, 

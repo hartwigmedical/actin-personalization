@@ -278,6 +278,7 @@ class NNSurvivalModel(BaseSurvivalModel):
         return [interp1d(surv.index.values, surv.iloc[:, i].values, bounds_error=False, fill_value='extrapolate') for i in range(surv.shape[1])]
 
     def predict(self, X: pd.DataFrame) -> np.ndarray:
+        
         X_tensor = X.values.astype('float32')
         if hasattr(self.model, 'predict_risk'):
             risk_scores = self.model.predict_risk(X_tensor)

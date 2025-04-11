@@ -1,40 +1,41 @@
 {
-    "specific_treatment_OS": {
+    "treatment_specific_OS": {
         "DeepSurv": {
             "class": "src.models.survival_models.DeepSurv",
             "kwargs": {
                 "num_nodes": [
-                    256,
-                    128,
                     64
                 ],
-                "batch_norm": false,
+                "batch_norm": true,
                 "dropout": 0.1,
-                "weight_decay": 0.0001,
-                "lr": 0.001,
-                "activation": "relu",
-                "optimizer": "RMSprop",
+                "weight_decay": 0.001,
+                "lr": 0.01,
+                "activation": "elu",
+                "optimizer": "Adam",
                 "batch_size": 32,
-                "epochs": 500
+                "epochs": 50,
+                "early_stopping_patience": 30,
+                "input_size": 155
             }
         },
         "LogisticHazardModel": {
             "class": "src.models.survival_models.LogisticHazardModel",
             "kwargs": {
                 "num_nodes": [
-                    64
+                    64,
+                    32
                 ],
-                "lr": 0.001,
-                "dropout": 0.1,
-                "batch_size": 64,
-                "early_stopping_patience": 20,
+                "lr": 0.0005,
+                "dropout": 0.2,
+                "batch_size": 32,
+                "early_stopping_patience": 30,
                 "optimizer": "Adam",
                 "epochs": 500,
                 "input_size": 155
             }
         }
     },
-    "specific_treatment_PFS": {
+    "treatment_specific_PFS": {
         "DeepSurv": {
             "class": "src.models.survival_models.DeepSurv",
             "kwargs": {

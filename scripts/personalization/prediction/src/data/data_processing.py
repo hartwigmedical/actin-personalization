@@ -9,8 +9,8 @@ from sklearn.preprocessing import LabelEncoder, OneHotEncoder
 from sklearn.preprocessing import MinMaxScaler, StandardScaler
 from sklearn.model_selection import train_test_split
 
-from .lookups import LookupManager
 from src.utils.settings import settings
+from .lookups import lookup_manager
 
 class DataSplitter:
     def __init__(self, test_size: float=0.1, random_state: int=42) -> None:
@@ -41,21 +41,20 @@ class DataPreprocessor:
         self.data_dir = "data"
         self.encoded_columns = {}
 
-    def preprocess_data(self, query: str, features: List[str]) -> Tuple[pd.DataFrame, List[str], Dict[str, List[str]]]:
+    def preprocess_data(self, features = lookup_manager.features) -> Tuple[pd.DataFrame, List[str], Dict[str, List[str]]]:
 
-        df = self.load_data(query)
+        df = self.load_data()
 
         df = df[features + [settings.duration_col, settings.event_col]]
-        df = df[~df[features].isna().all(axis=1)].copy()
+        df = df[~df[lookup_manager.features].isna().all(axis=1)].copy()
         
-        if settings.experiment_type == 'treatment_group':
+        if settings.experiment_type == 'treatment_vs_no':
             df = self.group_treatments(df)
         elif settings.experiment_type == 'treatment_drug':
             df = self.add_treatment_drugs(df)
 
         df = self.impute_knn(df, ['whoStatusPreTreatmentStart'], k=7)
-        lookup = LookupManager()
-        df = self.numerize(df, lookup.lookup_dictionary)
+        df = self.numerize(df, lookup_manager.lookup_dictionary)
         df = self.handle_missing_values(df)
         
         df = self.expand_column_groups(df, column_name = 'metastasisLocationGroupsPriorToSystemicTreatment')
@@ -70,14 +69,14 @@ class DataPreprocessor:
         return df, updated_features, self.encoded_columns
 
     
-    def load_data(self, query: str) -> pd.DataFrame:
+    def load_data(self) -> pd.DataFrame:
         db_connection = pymysql.connect(
             read_default_file=self.db_config_path,
             read_default_group='RAnalysis',
             db=self.db_name
         )
     
-        df = pd.read_sql(query, db_connection)
+        df = pd.read_sql(f"SELECT * FROM {settings.view_name}", db_connection)
         db_connection.close()
         
         return df.dropna(subset=[settings.duration_col, settings.event_col]).copy()

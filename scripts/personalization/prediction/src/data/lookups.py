@@ -152,3 +152,5 @@ class LookupManager:
             'venousInvasionDescription',
             'whoStatusPreTreatmentStart',
         ]
+        
+lookup_manager = LookupManager()

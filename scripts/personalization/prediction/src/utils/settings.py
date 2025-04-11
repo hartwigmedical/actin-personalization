@@ -5,7 +5,7 @@ from typing import List, Optional
 class Settings:
     #--------------------------------------------------------------------------------------------
     # User-configurable settings:
-    experiment_type: str = 'specific_treatment'  # Options: treatment_specific, treatment_vs_no, treatment_group, treatment_drug
+    experiment_type: str = 'treatment_specific'  # Options: treatment_specific, treatment_vs_no, treatment_drug
     outcome: str = 'OS'                          # "OS" or "PFS"
     json_config_file: str = 'src/models/configs/model_hyperparams.json'
     db_name: str = 'actin_personalization'
@@ -19,6 +19,7 @@ class Settings:
     # Derived or computed settings:
     event_col: Optional[str] = None
     duration_col: Optional[str] = None
+
     save_path: Optional[str] = None
     time_points: Optional[List[int]] = None
     max_time: int = 1825
