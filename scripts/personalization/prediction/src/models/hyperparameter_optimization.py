@@ -29,7 +29,7 @@ def hyperparameter_search(
     encoded_columns: Dict[str, List[str]], 
     base_models: Dict[str, BaseSurvivalModel], 
     param_grids: Dict[str, List[Dict[str, Any]]], 
-    n_samples: int = 2, 
+    n_samples: int = 20, 
     random_state: int = 42
 ):
     random.seed(random_state)
