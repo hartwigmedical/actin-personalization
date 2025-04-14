@@ -5,7 +5,7 @@ from typing import List, Optional
 class Settings:
     #--------------------------------------------------------------------------------------------
     # User-configurable settings:
-    experiment_type: str = 'treatment_specific'  # Options: treatment_specific, treatment_vs_no, treatment_drug
+    experiment_type: str = 'treatment_drug'  # Options: treatment_specific, treatment_vs_no, treatment_drug
     outcome: str = 'OS'                          # "OS" or "PFS"
     json_config_file: str = 'src/models/configs/model_hyperparams.json'
     db_name: str = 'actin_personalization'
@@ -13,7 +13,8 @@ class Settings:
     db_config_path: str = '/home/jupyter/.my.cnf'
     save_models: bool = True
     cross_val_n_splits: int = 5
-    hyperparam_tuning_optimization_metric: str = 'c_index'  # c_index, IBS, CE, AUC
+    hyperparam_tuning_optimization_metric: str = 'auc'  # c_index, IBS, CE, AUC
+    hyperparam_tuning_number_combinations: int = 15
   
     #--------------------------------------------------------------------------------------------
     # Derived or computed settings:

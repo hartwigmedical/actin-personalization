@@ -52,5 +52,124 @@
                 "optimizer": "RMSprop"
             }
         }
+    },
+    "treatment_vs_no_OS": {
+        "DeepSurv": {
+            "class": "src.models.survival_models.DeepSurv",
+            "kwargs": {
+                "num_nodes": [
+                    256,
+                    128,
+                    64
+                ],
+                "batch_norm": false,
+                "dropout": 0.2,
+                "weight_decay": 0.001,
+                "lr": 0.005,
+                "activation": "relu",
+                "optimizer": "Adam",
+                "batch_size": 128,
+                "epochs": 50,
+                "early_stopping_patience": 20,
+                "input_size": 143
+            }
+        }
+    },
+    "treatment_drug_OS": {
+        "DeepSurv": {
+            "class": "src.models.survival_models.DeepSurv",
+            "kwargs": {
+                "num_nodes": [
+                    64
+                ],
+                "batch_norm": true,
+                "dropout": 0.1,
+                "weight_decay": 0.001,
+                "lr": 0.01,
+                "activation": "elu",
+                "optimizer": "Adam",
+                "batch_size": 32,
+                "epochs": 50,
+                "early_stopping_patience": 30,
+                "input_size": 115
+            }
+        },
+        "LogisticHazardModel": {
+            "class": "src.models.survival_models.LogisticHazardModel",
+            "kwargs": {
+                "num_nodes": [
+                    128,
+                    64,
+                    32
+                ],
+                "lr": 0.001,
+                "dropout": 0.1,
+                "batch_size": 32,
+                "early_stopping_patience": 30,
+                "optimizer": "RMSprop",
+                "epochs": 100,
+                "input_size": 165
+            }
+        },
+        "DeepHitModel": {
+            "class": "src.models.survival_models.DeepHitModel",
+            "kwargs": {
+                "num_nodes": [
+                    64
+                ],
+                "activation": "elu",
+                "alpha": 0.2,
+                "sigma": 0.1,
+                "weight_decay": 0.001,
+                "optimizer": "Adam",
+                "dropout": 0.15,
+                "batch_size": 32,
+                "epochs": 100,
+                "early_stopping_patience": 20,
+                "input_size": 165
+            }
+        },
+        "PCHazardModel": {
+            "class": "src.models.survival_models.PCHazardModel",
+            "kwargs": {
+                "num_nodes": [
+                    128,
+                    64
+                ],
+                "num_durations": 120,
+                "lr": 0.0005,
+                "dropout": 0.1,
+                "optimizer": "Adam",
+                "batch_size": 64,
+                "epochs": 500,
+                "early_stopping_patience": 20,
+                "input_size": 165
+            }
+        },
+        "MTLRModel": {
+            "class": "src.models.survival_models.MTLRModel",
+            "kwargs": {
+                "num_nodes": [
+                    128,
+                    64
+                ],
+                "lr": 0.0005,
+                "dropout": 0.2,
+                "optimizer": "Adam",
+                "batch_size": 32,
+                "epochs": 50,
+                "early_stopping_patience": 20,
+                "input_size": 165
+            }
+        },
+        "CoxPH": {
+            "class": "src.models.survival_models.CoxPHModel",
+            "kwargs": {
+                "alpha": 0.2,
+                "ties": "efron",
+                "n_iter": 500,
+                "tol": 1e-09
+            }
+        }
     }
 }

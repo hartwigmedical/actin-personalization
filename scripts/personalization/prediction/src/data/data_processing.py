@@ -107,20 +107,12 @@ class DataPreprocessor:
         """
         Handle missing values in the DataFrame.
         - For numerical columns, fill NaN with median and add an indicator column.
-        - For categorical columns, fill NaN with 'Missing'.
         """
         numerical_cols = df.select_dtypes(include=['float64', 'int64']).columns.tolist()
         numerical_cols = [col for col in numerical_cols if col not in [settings.event_col, settings.duration_col]]
 
         for col in numerical_cols:
-            df[f'{col}_missing'] = df[col].isna().astype(int)
             df[col] = df[col].fillna(df[col].median())
-
-        categorical_cols = df.select_dtypes(include=['object', 'category']).columns.tolist()
-        categorical_cols = [col for col in categorical_cols if col not in [settings.event_col, settings.duration_col]]
-        
-        for col in categorical_cols:
-            df[col] = df[col].fillna('Missing')
 
         if settings.duration_col in df.columns:
             df = df[df[settings.duration_col] > 0].copy() 
@@ -199,11 +191,10 @@ class DataPreprocessor:
                 df[col] = le.fit_transform(df[col].astype(str))
                 self.encoded_columns[col] = le.classes_
             else:
-                ohe = OneHotEncoder(sparse=False, drop='first')
-                encoded = ohe.fit_transform(df[[col]])
-                encoded_df = pd.DataFrame(encoded, columns=ohe.get_feature_names_out([col]), index=df.index)
-                df = pd.concat([df.drop(columns=[col]), encoded_df], axis=1)
-                self.encoded_columns[col] = ohe.get_feature_names_out([col])
+                dummies = pd.get_dummies(df[col], prefix=col, dummy_na=False)
+                df = pd.concat([df.drop(columns=[col]), dummies], axis=1)
+                self.encoded_columns[col] = list(dummies.columns)
+                
         return df
 
 
