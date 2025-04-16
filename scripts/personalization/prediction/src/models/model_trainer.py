@@ -44,8 +44,13 @@ class ModelTrainer:
     def save_model(self, model: BaseSurvivalModel, model_name: str)-> None:
         if not os.path.exists(settings.save_path):
             os.makedirs(settings.save_path)
-
-        model_file = os.path.join(settings.save_path, f"{settings.outcome}_{model_name}")
+            
+        if settings.NN_attention_layers and not model_name.endswith("_attention"):
+            model_name_to_save = model_name + "_attention"
+        else:
+            model_name_to_save = model_name
+            
+        model_file = os.path.join(settings.save_path, f"{settings.outcome}_{model_name_to_save}")
 
         if isinstance(model, NNSurvivalModel):
             if hasattr(model, 'compute_baseline_hazards'):

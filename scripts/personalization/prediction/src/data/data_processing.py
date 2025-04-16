@@ -61,6 +61,9 @@ class DataPreprocessor:
        
         df = self.encode_categorical(df)
         
+        if settings.add_risk_scores:
+            df = self.add_kohne_score(df)
+        
         updated_features = [col for col in df.columns if col not in [settings.duration_col, settings.event_col]]
         
         # df = self.normalize(df, updated_features)
@@ -77,7 +80,10 @@ class DataPreprocessor:
         )
     
         df = pd.read_sql(f"SELECT * FROM {settings.view_name}", db_connection)
+    
         db_connection.close()
+        if settings.event_col == "isAlive":
+            df[settings.event_col] = 1 - df["isAlive"]
         
         return df.dropna(subset=[settings.duration_col, settings.event_col]).copy()
 
@@ -145,27 +151,35 @@ class DataPreprocessor:
     
     def parse_treatment(self, treatment: str) -> Dict[str, int]:
 
-        components = {"5-FU": 0, "oxaliplatin": 0, "irinotecan": 0, "beva": 0, "panitumab": 0}
+        components = {"systemicTreatmentPlan_5-FU": 0, "systemicTreatmentPlan_oxaliplatin": 0, "systemicTreatmentPlan_irinotecan": 0, "systemicTreatmentPlan_bevacizumab": 0, "systemicTreatmentPlan_panitumab": 0, "systemicTreatmentPlan_pembrolizumab": 0, "systemicTreatmentPlan_nivolumab": 0
+                     }
 
-        if pd.isna(treatment) or treatment.strip() == "" or treatment.lower() in ["missing", "other"]:
-            return components
-
+        if pd.isna(treatment) or treatment.strip() == "":
+            return components    
+        
         t = treatment.lower()
 
         if any(x in t for x in ["fluorouracil", "fol", "cap"]):
-            components["5-FU"] = 1
+            components["systemicTreatmentPlan_5-FU"] = 1
 
         if "ox" in t:
-            components["oxaliplatin"] = 1
+            components["systemicTreatmentPlan_oxaliplatin"] = 1
 
         if "iri" in t:
-            components["irinotecan"] = 1
+            components["systemicTreatmentPlan_irinotecan"] = 1
 
         if "bevacizumab" in t or t.endswith("_b"):
-            components["beva"] = 1
+            components["systemicTreatmentPlan_bevacizumab"] = 1
 
         if "panitumab" in t or t.endswith("_p"):
-            components["panitumab"] = 1
+            components["systemicTreatmentPlan_panitumab"] = 1
+            
+        if "pembrolizumab" in t: 
+            components["systemicTreatmentPlan_pembrolizumab"] = 1
+        
+        if "nivolumab" in t: 
+            components["systemicTreatmentPlan_nivolumab"] = 1
+            
 
         return components
 
@@ -177,7 +191,7 @@ class DataPreprocessor:
 
         df = df.join(components_df)
         
-        df.drop(columns = [treatment_col], axis = 1)
+        df = df.drop(columns = [treatment_col], axis = 1)
 
         return df
 
@@ -196,6 +210,26 @@ class DataPreprocessor:
                 self.encoded_columns[col] = list(dummies.columns)
                 
         return df
+    
+    def add_kohne_score(self, df: pd.DataFrame) -> pd.DataFrame:
+        df["kohne_score"] = 0
+
+        if "lactateDehydrogenase" in df.columns:
+            df["kohne_score"] += (df["lactateDehydrogenase"] > df["lactateDehydrogenase"].median()).astype(int)  # find ULN threshold
+
+        if "metastasisLocationGroupsPriorToSystemicTreatment_LIVER" in df.columns:
+            site_cols = [col for col in df.columns if col.startswith("metastasisLocationGroupsPriorToSystemicTreatment_")]
+            df["number_of_met_sites"] = df[site_cols].sum(axis=1)
+            df["kohne_score"] += (df["number_of_met_sites"] > 1).astype(int)
+
+        if "whoStatusPreTreatmentStart" in df.columns:
+            df["kohne_score"] += (df["whoStatusPreTreatmentStart"] >= 2).astype(int)
+
+        if "leukocytesAbsolute" in df.columns:
+            df["kohne_score"] += (df["leukocytesAbsolute"] > 8.0).astype(int)
+
+        return df.drop(columns=["number_of_met_sites"], errors="ignore")
+
 
 
     def normalize(self, df: pd.DataFrame, features: List[str]) -> pd.DataFrame:

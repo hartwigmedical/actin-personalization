@@ -59,6 +59,10 @@ class ExperimentConfig:
             model_class = model_instance if isinstance(model_instance, type) else type(model_instance)
             if issubclass(model_class, NNSurvivalModel):
                 best_params['input_size'] = settings.input_size
+                
+            if settings.NN_attention_layers:
+                model_name = model_name + "_attention"
+                
             config[key][model_name] = {
                 "class": f"{model_class.__module__}.{model_class.__name__}",
                 "kwargs": best_params

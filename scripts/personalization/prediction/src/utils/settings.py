@@ -7,14 +7,18 @@ class Settings:
     # User-configurable settings:
     experiment_type: str = 'treatment_drug'  # Options: treatment_specific, treatment_vs_no, treatment_drug
     outcome: str = 'OS'                          # "OS" or "PFS"
+    
+    cross_val_n_splits: int = 5
+    hyperparam_tuning_optimization_metric: str = 'auc'  # c_index, IBS, CE, auc
+    hyperparam_tuning_number_combinations: int = 10
+    NN_attention_layers: bool = False
+    add_risk_scores: bool = False
+    
+    save_models: bool = True
     json_config_file: str = 'src/models/configs/model_hyperparams.json'
     db_name: str = 'actin_personalization'
     view_name: str = 'knownPalliativeTreatments'
     db_config_path: str = '/home/jupyter/.my.cnf'
-    save_models: bool = True
-    cross_val_n_splits: int = 5
-    hyperparam_tuning_optimization_metric: str = 'auc'  # c_index, IBS, CE, AUC
-    hyperparam_tuning_number_combinations: int = 15
   
     #--------------------------------------------------------------------------------------------
     # Derived or computed settings:
@@ -33,8 +37,8 @@ class Settings:
     def configure_data_settings(self) -> None:
         self.group_treatment = False 
         if self.outcome.upper() == 'OS':
-            self.event_col = 'hadSurvivalEvent'
-            if self.experiment_type == 'treatment_vs_no':
+            self.event_col = 'isAlive'
+            if self.experiment_type == 'treatment_vs_no' or 'treatment_drug':
                 self.duration_col = 'observedOsFromMetastasisDetectionDays'
                 self.view_name = 'palliativeIntents'
             else:
