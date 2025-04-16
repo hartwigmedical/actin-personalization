@@ -209,7 +209,8 @@ class NNSurvivalModel(BaseSurvivalModel):
         batch_norm: bool = False, 
         weight_decay: float = 1e-4, 
         activation: str = 'relu', 
-        optimizer: str = 'Adam', 
+        optimizer: str = 'Adam',
+        use_attention: bool = False,
         **kwargs: Dict[str, Any]
     ):
         super().__init__()
@@ -237,6 +238,7 @@ class NNSurvivalModel(BaseSurvivalModel):
             'weight_decay': weight_decay,
             'activation': activation,
             'optimizer': optimizer,
+            'use_attention': use_attention,
         }
 
         activation_map = {
@@ -250,11 +252,24 @@ class NNSurvivalModel(BaseSurvivalModel):
         else:
             raise ValueError(f"Unknown activation function: {activation}")
         
-        
-        if settings.NN_attention_layers:
-            self.net = AttentionMLP(input_size=self.input_size, num_nodes=self.num_nodes, out_features=self.num_durations, activation=activation_fn, batch_norm=batch_norm, dropout=self.dropout)
+        if use_attention:
+            self.net = AttentionMLP(
+                input_size=self.input_size, 
+                num_nodes=self.num_nodes, 
+                out_features=self.num_durations,
+                activation=activation_fn, 
+                batch_norm=batch_norm, 
+                dropout=self.dropout
+            )
         else:
-            self.net = tt.practical.MLPVanilla(in_features=self.input_size, num_nodes=self.num_nodes, out_features=self.num_durations, activation=activation_fn, batch_norm=batch_norm, dropout=self.dropout)
+            self.net = tt.practical.MLPVanilla(
+                in_features=self.input_size,
+                num_nodes=self.num_nodes,
+                out_features=self.num_durations,
+                activation=activation_fn,
+                batch_norm=batch_norm,
+                dropout=self.dropout
+            )
         
         
         if optimizer.lower() == "adam":
@@ -267,7 +282,7 @@ class NNSurvivalModel(BaseSurvivalModel):
         model_specific_kwargs = {k:v for k,v in self.kwargs.items() if k not in {
             'model_class', 'input_size', 'num_nodes', 'dropout', 'lr',
             'batch_size', 'epochs', 'num_durations', 'early_stopping_patience',
-            'batch_norm', 'weight_decay', 'activation', 'optimizer'
+            'batch_norm', 'weight_decay', 'activation', 'optimizer', 'use_attention'
         }}
 
         self.model = model_class(self.net, self.optimizer, **model_specific_kwargs)

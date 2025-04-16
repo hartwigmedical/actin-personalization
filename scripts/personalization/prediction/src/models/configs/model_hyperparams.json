@@ -93,7 +93,8 @@
                 "batch_size": 64,
                 "epochs": 50,
                 "early_stopping_patience": 20,
-                "input_size": 90
+                "input_size": 90, 
+                "use_attention": false
             }
         },
         "LogisticHazardModel": {
@@ -109,7 +110,8 @@
                 "early_stopping_patience": 20,
                 "optimizer": "Adam",
                 "epochs": 200,
-                "input_size": 90
+                "input_size": 90, 
+                "use_attention": false
             }
         },
         "DeepHitModel": {
@@ -129,7 +131,8 @@
                 "batch_size": 128,
                 "epochs": 500,
                 "early_stopping_patience": 30,
-                "input_size": 90
+                "input_size": 90, 
+                "use_attention": false
             }
         },
         "PCHazardModel": {
@@ -146,7 +149,8 @@
                 "batch_size": 128,
                 "epochs": 500,
                 "early_stopping_patience": 50,
-                "input_size": 90
+                "input_size": 90, 
+                "use_attention": false
             }
         },
         "MTLRModel": {
@@ -162,7 +166,8 @@
                 "batch_size": 128,
                 "epochs": 200,
                 "early_stopping_patience": 30,
-                "input_size": 90
+                "input_size": 90, 
+                "use_attention": false
             }
         },
         "CoxPH": {
@@ -191,7 +196,8 @@
                 "batch_size": 64,
                 "epochs": 50,
                 "early_stopping_patience": 20,
-                "input_size": 90
+                "input_size": 90, 
+                "use_attention": true
             }
         },
         "LogisticHazardModel_attention": {
@@ -207,7 +213,8 @@
                 "early_stopping_patience": 50,
                 "optimizer": "RMSprop",
                 "epochs": 200,
-                "input_size": 90
+                "input_size": 90, 
+                "use_attention": true
             }
         },
         "DeepHitModel_attention": {
@@ -227,7 +234,8 @@
                 "batch_size": 128,
                 "epochs": 500,
                 "early_stopping_patience": 30,
-                "input_size": 90
+                "input_size": 90, 
+                "use_attention": true
             }
         },
         "PCHazardModel_attention": {
@@ -244,7 +252,8 @@
                 "batch_size": 128,
                 "epochs": 500,
                 "early_stopping_patience": 50,
-                "input_size": 90
+                "input_size": 90, 
+                "use_attention": true
             }
         },
         "MTLRModel_attention": {
@@ -261,7 +270,8 @@
                 "batch_size": 128,
                 "epochs": 500,
                 "early_stopping_patience": 30,
-                "input_size": 90
+                "input_size": 90, 
+                "use_attention": true
             }
         },
         "RandomSurvivalForest": {

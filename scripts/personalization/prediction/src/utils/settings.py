@@ -11,7 +11,6 @@ class Settings:
     cross_val_n_splits: int = 5
     hyperparam_tuning_optimization_metric: str = 'auc'  # c_index, IBS, CE, auc
     hyperparam_tuning_number_combinations: int = 10
-    NN_attention_layers: bool = False
     add_risk_scores: bool = False
     
     save_models: bool = True

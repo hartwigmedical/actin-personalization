@@ -1,4 +1,32 @@
 curve_param_grids = {
+    'DeepSurv': [
+        {
+            'num_nodes': [[256, 128, 64], [128, 64, 32], [128, 64], [64, 32], [64], [32]],
+            'batch_norm': [True, False],
+            'dropout': [0.1, 0.2, 0.3],
+            'weight_decay': [1e-3, 5e-4, 1e-4],
+            'lr': [0.001, 0.0005, 0.005, 0.01],
+            'activation': ['elu', 'relu'],
+            'optimizer': ['Adam', 'RMSprop'],
+            'batch_size': [32, 64, 128],
+            'epochs': [50, 100, 200, 500],
+            'early_stopping_patience': [20, 30, 50]
+        }
+    ],
+     'DeepSurv_attention': [
+        {
+            'num_nodes': [[256, 128, 64], [128, 64, 32], [128, 64], [64, 32], [64], [32]],
+            'batch_norm': [True, False],
+            'dropout': [0.1, 0.2, 0.3],
+            'weight_decay': [1e-3, 5e-4, 1e-4],
+            'lr': [0.001, 0.0005, 0.005, 0.01],
+            'activation': ['elu', 'relu'],
+            'optimizer': ['Adam', 'RMSprop'],
+            'batch_size': [32, 64, 128],
+            'epochs': [50, 100, 200, 500],
+            'early_stopping_patience': [20, 30, 50]
+        }
+    ],
     'LogisticHazardModel': [
         {
             'num_nodes': [[256, 128, 64], [128, 64, 32],[128, 64], [64, 32], [64], [32]],
@@ -10,7 +38,32 @@ curve_param_grids = {
             'epochs' : [50, 100, 200, 500]
         }
     ],
+    'LogisticHazardModel_attention': [
+        {
+            'num_nodes': [[256, 128, 64], [128, 64, 32],[128, 64], [64, 32], [64], [32]],
+            'lr': [0.001, 0.0005, 0.01],
+            'dropout': [0.1, 0.15, 0.2],
+            'batch_size': [32, 64, 128],
+            'early_stopping_patience': [20, 30, 50],
+            'optimizer': ['Adam', 'RMSprop'], 
+            'epochs' : [50, 100, 200, 500]
+        }
+    ],
     'DeepHitModel': [
+        {
+            'num_nodes': [[256, 128, 64], [128, 64, 32],[128, 64], [64, 32], [64], [32]],
+            'activation': ['swish', 'elu', 'relu'],
+            'alpha': [0.2, 0.3, 0.4],
+            'sigma': [0.05, 0.1, 0.2],
+            'weight_decay': [1e-3, 5e-4, 1e-4],
+            'optimizer': ['Adam', 'RMSprop'],
+            'dropout': [0.1, 0.15, 0.2],  
+            'batch_size': [32, 64, 128],
+            'epochs': [50, 100, 200, 500],
+            'early_stopping_patience': [20, 30, 50]
+        }
+    ],
+    'DeepHitModel_attention': [
         {
             'num_nodes': [[256, 128, 64], [128, 64, 32],[128, 64], [64, 32], [64], [32]],
             'activation': ['swish', 'elu', 'relu'],
@@ -36,7 +89,31 @@ curve_param_grids = {
             'early_stopping_patience': [20, 30, 50]
         }
     ],
+    'PCHazardModel_attention': [
+        {
+            'num_nodes': [[256, 128, 64],[128, 64, 32], [128, 64], [64, 32], [64], [32]],
+            'num_durations': [60, 80, 100, 120],
+            'lr': [0.0005, 0.001, 0.01],
+            'dropout': [0.1, 0.15, 0.2],
+            'optimizer': ['Adam', 'RMSprop'],
+            'batch_size': [32, 64, 128],
+            'epochs': [50, 100, 200, 500],
+            'early_stopping_patience': [20, 30, 50]
+        }
+    ],
     'MTLRModel': [
+        {
+            'num_nodes': [[256, 128, 64],[128, 64, 32], [128, 64], [64, 32], [64], [32]],
+            'lr': [0.0005, 0.001, 0.01],
+            'dropout': [0.1, 0.15, 0.2],
+            'optimizer': ['Adam', 'RMSprop'],
+            'batch_size': [32, 64, 128],
+            'epochs': [50, 100, 200, 500],
+            'early_stopping_patience': [20, 30, 50]
+            
+        }
+    ],
+    'MTLRModel_attention': [
         {
             'num_nodes': [[256, 128, 64],[128, 64, 32], [128, 64], [64, 32], [64], [32]],
             'lr': [0.0005, 0.001, 0.01],
@@ -54,20 +131,6 @@ curve_param_grids = {
             'alpha': [0.01, 0.05, 0.1],
             'coef_penalizer': [0.5, 1.0, 2.0, 5.0, 10.0],
             'smoothing_penalizer': [0.0, 0.5, 1.0],
-        }
-    ],
-    'DeepSurv': [
-        {
-            'num_nodes': [[256, 128, 64], [128, 64, 32], [128, 64], [64, 32], [64], [32]],
-            'batch_norm': [True, False],
-            'dropout': [0.1, 0.2, 0.3],
-            'weight_decay': [1e-3, 5e-4, 1e-4],
-            'lr': [0.001, 0.0005, 0.005, 0.01],
-            'activation': ['elu', 'relu'],
-            'optimizer': ['Adam', 'RMSprop'],
-            'batch_size': [32, 64, 128],
-            'epochs': [50, 100, 200, 500],
-            'early_stopping_patience': [20, 30, 50]
         }
     ],
     'CoxPH': [
