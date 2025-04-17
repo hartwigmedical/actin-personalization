@@ -12,7 +12,6 @@ class Settings:
     hyperparam_tuning_optimization_metric: str = 'auc'  # c_index, IBS, CE, auc
     hyperparam_tuning_number_combinations: int = 10
     add_risk_scores: bool = False
-    
     save_models: bool = True
     json_config_file: str = 'src/models/configs/model_hyperparams.json'
     db_name: str = 'actin_personalization'
@@ -37,7 +36,7 @@ class Settings:
         self.group_treatment = False 
         if self.outcome.upper() == 'OS':
             self.event_col = 'isAlive'
-            if self.experiment_type == 'treatment_vs_no' or 'treatment_drug':
+            if self.experiment_type == 'treatment_vs_no' or self.experiment_type == 'treatment_drug':
                 self.duration_col = 'observedOsFromMetastasisDetectionDays'
                 self.view_name = 'palliativeIntents'
             else:
@@ -45,7 +44,7 @@ class Settings:
         else:
             self.event_col = 'hadProgressionEvent'
             self.duration_col = 'observedPfsDays'
-            if self.experiment_type == 'treatment_vs_no':
+            if self.experiment_type == 'treatment_vs_no' or self.experiment_type == 'treatment_drug':
                 warnings.warn(f"experiment type: {self.experiment_type}, but outcome is {self.outcome}", UserWarning)
     
     def configure_model_settings(self) -> None:
