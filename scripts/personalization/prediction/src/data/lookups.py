@@ -115,7 +115,7 @@ class LookupManager:
             'cciNumberOfCategories',
             'consolidatedTumorType',
             'distanceToMesorectalFasciaMm',
-            'distantMetastasesDetectionStatus',
+            # 'distantMetastasesDetectionStatus',--> for all == AT_START
             'extraMuralInvasionCategory',
             'hasBrafMutation',
             'hasBrafV600EMutation',
@@ -127,17 +127,17 @@ class LookupManager:
             'investigatedLymphNodesNumber',
             'lactateDehydrogenase',
             'leukocytesAbsolute',
-            'lymphaticInvasionCategory',
+            # 'lymphaticInvasionCategory', --> only present in very few cases (<10)
             'maximumSizeOfLiverMetastasisMm',
             'mesorectalFasciaIsClear',
-            'metastasesSurgeries',
+            # 'metastasesSurgeries', --> empty for whole view
             'metastasisLocationGroupsPriorToSystemicTreatment',
             'neutrophilsAbsolute',
             'numberOfLiverMetastases',
             'positiveLymphNodesNumber',
             'presentedWithIleus',
             'presentedWithPerforation',
-            'radiotherapies',
+            # 'radiotherapies', --> empty for whole view
             'sex',
             'sidedness',
             'stageCTNM',
@@ -148,7 +148,9 @@ class LookupManager:
             'tumorDifferentiationGrade',
             'tumorIncidenceYear',
             'tumorLocation',
-            'tumorRegression',
-            'venousInvasionDescription',
+            # 'venousInvasionDescription',--> only present in very few cases (<10)
             'whoStatusPreTreatmentStart',
+            # 'kohne_score' if settings.add_risk_scores
         ]
+        
+lookup_manager = LookupManager()
