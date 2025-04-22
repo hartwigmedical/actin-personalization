@@ -4,7 +4,7 @@ import java.util.Date
 
 data class CairoPatientCharacteristics(
     val sex: Int,
-    val age: Int,
+    val age: Double,
     val whoStat: Int,
     val weight: Float?,
     val height: Float?,

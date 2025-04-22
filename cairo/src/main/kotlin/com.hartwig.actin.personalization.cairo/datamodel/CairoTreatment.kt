@@ -7,7 +7,11 @@ data class CairoTreatment(
 
     val dateStartTreatment: Date? = null,
     val dateStartTreatmentCycleSix: Date? = null,
-    val dateEndTreatment: CairoTreatmentEnd,
+    val dateEndTreatment: Date? = null,
+
+    val dateEndTreatmentOxaliplatin: Date? = null,
+    val dateEndTreatmentBevacizumab: Date? = null,
+    val dateEndTreatmentCapecitabine: Date? = null,
 
     val treatmentCyclesTotal: Int? = null,
     val treatmentCyclesBevacizumab: Int? = null,
@@ -20,4 +24,10 @@ data class CairoTreatment(
     val primarySurgery: CairoPrimarySurgery,
     val adjuvantChemo: CairoAdjuvantChemo,
     val adjuvantRadio: CairoRadiotherapy,
+
+
 )
+// TODO: for CAIRO3 calculate dateEndTreatment (= last end date)
+function dateEndTreatment() {
+    return max(this.dateEndTreatmentOxaliplatin || this.dateEndTreatmentBevacizumab || this.dateEndTreatmentCapecitabine);
+}

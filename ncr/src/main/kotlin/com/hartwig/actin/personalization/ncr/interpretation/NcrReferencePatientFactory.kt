@@ -8,7 +8,7 @@ import com.hartwig.actin.personalization.ncr.interpretation.extraction.NcrTumorE
 import com.hartwig.actin.personalization.ncr.interpretation.mapping.NcrSexMapper
 import java.util.stream.Collectors
 
-object ReferencePatientFactory {
+object NcrReferencePatientFactory {
 
     fun create(ncrRecords: List<NcrRecord>): List<ReferencePatient> {
         return ncrRecords.groupBy { it.identification.keyNkr }.values.parallelStream()

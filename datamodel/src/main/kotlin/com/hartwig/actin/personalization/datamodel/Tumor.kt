@@ -17,7 +17,7 @@ data class Tumor(
     val diagnosisYear: Int,
     val ageAtDiagnosis: Int,
     val latestSurvivalStatus: SurvivalMeasure,
-    val priorTumors: List<PriorTumor>,
+    val priorTumors: List<PriorTumor>?,
     val primaryDiagnosis: PrimaryDiagnosis,
     val metastaticDiagnosis: MetastaticDiagnosis,
     val whoAssessments: List<WhoAssessment>,

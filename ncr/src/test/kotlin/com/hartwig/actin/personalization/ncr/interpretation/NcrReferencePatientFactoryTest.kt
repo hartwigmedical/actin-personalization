@@ -5,11 +5,11 @@ import com.hartwig.actin.personalization.ncr.datamodel.TestNcrRecordFactory
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
-class ReferencePatientFactoryTest {
+class NcrReferencePatientFactoryTest {
 
     @Test
     fun `Should create record for minimal NCR input`() {
-        val patients = ReferencePatientFactory.create(TestNcrRecordFactory.minimalTumorRecords())
+        val patients = NcrReferencePatientFactory.create(TestNcrRecordFactory.minimalTumorRecords())
 
         assertThat(patients).hasSize(1)
         assertThat(patients[0].sex).isEqualTo(Sex.FEMALE)
@@ -19,7 +19,7 @@ class ReferencePatientFactoryTest {
     @Test
     fun `Should create record for minimal NCR diagnosis and followup record`() {
         val records = listOf(TestNcrRecordFactory.minimalDiagnosisRecord(), TestNcrRecordFactory.minimalFollowupRecord())
-        val patients = ReferencePatientFactory.create(records)
+        val patients = NcrReferencePatientFactory.create(records)
 
         assertThat(patients).hasSize(1)
         assertThat(patients[0].sex).isEqualTo(Sex.FEMALE)
@@ -28,7 +28,7 @@ class ReferencePatientFactoryTest {
 
     @Test
     fun `Should create record for proper NCR diagnostic and followup input`() {
-        val patients = ReferencePatientFactory.create(TestNcrRecordFactory.properTumorRecords())
+        val patients = NcrReferencePatientFactory.create(TestNcrRecordFactory.properTumorRecords())
 
         assertThat(patients).hasSize(1)
         assertThat(patients[0].sex).isEqualTo(Sex.FEMALE)
@@ -42,7 +42,7 @@ class ReferencePatientFactoryTest {
             baseRecord.copy(identification = baseRecord.identification.copy(keyNkr = 1)),
             baseRecord.copy(identification = baseRecord.identification.copy(keyNkr = 2))
         )
-        val patients = ReferencePatientFactory.create(records)
+        val patients = NcrReferencePatientFactory.create(records)
         assertThat(patients).hasSize(2)
     }
 }

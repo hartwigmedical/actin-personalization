@@ -1,7 +1,7 @@
 package com.hartwig.actin.personalization.cairo.datamodel
 
 data class CairoMetastasesOther(
-    val otherMetastasesMethod: Int? = null,
-    val otherMetastasesInvolved: Int? = null,
-    val otherMetastasesMalignancyRelated: Int? = null,
+    val otherMethod: Int? = null,
+    val otherInvolved: Int? = null,
+    val otherSpecification Int? = null,
 )

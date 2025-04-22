@@ -1,7 +1,7 @@
 package com.hartwig.actin.personalization.ncr
 
 import com.hartwig.actin.personalization.ncr.datamodel.NcrRecord
-import com.hartwig.actin.personalization.ncr.interpretation.ReferencePatientFactory
+import com.hartwig.actin.personalization.ncr.interpretation.NcrReferencePatientFactory
 import com.hartwig.actin.personalization.ncr.serialization.NcrDataReader
 import io.github.oshai.kotlinlogging.KotlinLogging
 import picocli.CommandLine
@@ -34,7 +34,7 @@ class NcrInspectionApplication : Callable<Int> {
         printTreatmentResponseOverview(ncrRecords)
 
         LOGGER.info { "Creating patient records from NCR records" }
-        val patientRecords = ReferencePatientFactory.create(ncrRecords)
+        val patientRecords = NcrReferencePatientFactory.create(ncrRecords)
         LOGGER.info { " Created ${patientRecords.size} patient records from ${ncrRecords.size} NCR records" }
 
         LOGGER.info { "Done!" }
