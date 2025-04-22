@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 
 class DistantMetastasisAggregator:
     """Handles all aggregation logic used for building the distant metastasis overview."""
@@ -12,11 +13,11 @@ class DistantMetastasisAggregator:
             sorted_group = group.sort_values('daysSinceDiagnosis')
             return pd.Series({
                 'metastasisLocationGroups': list(sorted_group['location']),
-                'metastasisLocationGroupsDates': list(sorted_group['daysSinceDiagnosis']),
-                'earliestMetastasisDetectionDays': sorted_group['daysSinceDiagnosis'].min()
+                'metastasisLocationGroupsDays': list(sorted_group['daysSinceDiagnosis']),
+                'earliestDistantMetastasisDetectionDays': sorted_group['daysSinceDiagnosis'].min()
             })
         return merged.groupby('tumorId').apply(aggregate).reset_index()
-
+    
     @staticmethod
     def aggregate_assessment(group, thresholds, assessment_col, prefix):
         sorted_group = group.sort_values('daysSinceDiagnosis')
@@ -25,8 +26,8 @@ class DistantMetastasisAggregator:
         tumor_id = group['tumorId'].iloc[0]
 
         if tumor_id in thresholds.index:
-            treatment_start = thresholds.loc[tumor_id, 'firstTreatmentStart']
-            metastasis_threshold = thresholds.loc[tumor_id, 'earliestMetastasisDetectionDays']
+            treatment_start = thresholds.loc[tumor_id, 'firstTreatmentStartAfterMetastasis']
+            metastasis_threshold = thresholds.loc[tumor_id, 'earliestDistantMetastasisDetectionDays']
         else:
             treatment_start, metastasis_threshold = None, None
 
@@ -43,7 +44,7 @@ class DistantMetastasisAggregator:
 
         met_value, met_date = None, None
         if pd.notna(metastasis_threshold):
-             valid = sorted_group[
+            valid = sorted_group[
                 (sorted_group['daysSinceDiagnosis'] >= metastasis_threshold - 28) &
                 (sorted_group['daysSinceDiagnosis'] <= metastasis_threshold + 28)
             ]
@@ -55,11 +56,12 @@ class DistantMetastasisAggregator:
         return pd.Series({
             f'All{prefix}Assessments': assessments,
             f'{prefix}AssessmentsDates': dates,
-            f'{prefix}AssessmentPreTreatment': pre_value,
-            f'{prefix}AssessmentAssessmentDatePreTreatment': pre_date,
-            f'{prefix}AssessmentMetastasisDetection': met_value,
-            f'{prefix}AssessmentDateMetastasisDetection': met_date
+            f'{prefix}AssessmentBeforeMetastasisTreatment': pre_value,
+            f'{prefix}AssessmentDateBeforeMetastasisTreatment': pre_date,
+            f'{prefix}AssessmentAtMetastasisDetection': met_value,
+            f'{prefix}AssessmentDateAtMetastasisDetection': met_date
         })
+
 
     @staticmethod
     def who_aggregations(who_assessment, thresholds):
@@ -85,11 +87,11 @@ class DistantMetastasisAggregator:
         def aggregate(group):
             sorted_group = group.sort_values('daysSinceDiagnosis')
             tumor_id = group['tumorId'].iloc[0]
-            treatment_start = group['firstTreatmentStart'].iloc[0]
-            metastasis_threshold = group['earliestMetastasisDetectionDays'].iloc[0]
+            treatment_start = group['firstTreatmentStartAfterMetastasis'].iloc[0]
+            metastasis_threshold = group['earliestDistantMetastasisDetectionDays'].iloc[0]
 
             results = {
-                f'{camel_case(name)}PreTreatment': None for name in lab_names
+                f'{camel_case(name)}PreMetastaticTreatment': None for name in lab_names
             }
             results.update({
                 f'{camel_case(name)}MetastasisDetection': None for name in lab_names
@@ -104,7 +106,7 @@ class DistantMetastasisAggregator:
                     (lab_group['daysSinceDiagnosis'] <= treatment_start)
                 ]
                 if not pre.empty:
-                    results[f'{camel_name}PreTreatment'] = pre.iloc[-1]['value']
+                    results[f'{camel_name}PreMetastaticTreatment'] = pre.iloc[-1]['value']
 
                 met = lab_group[
                     (lab_group['daysSinceDiagnosis'] >= metastasis_threshold - 28) &
@@ -113,13 +115,12 @@ class DistantMetastasisAggregator:
                 if not met.empty:
                     results[f'{camel_name}MetastasisDetection'] = met.iloc[-1]['value']
 
-            results['closestLabValueDatePreTreatment'] = sorted_group[sorted_group['daysSinceDiagnosis'] <= treatment_start]['daysSinceDiagnosis'].max()
+            results['closestLabValueDatePreMetastaticTreatment'] = sorted_group[sorted_group['daysSinceDiagnosis'] <= treatment_start]['daysSinceDiagnosis'].max()
             results['closestLabValueDateMetastasisDetection'] = sorted_group[sorted_group['daysSinceDiagnosis'] <= metastasis_threshold]['daysSinceDiagnosis'].max()
 
             return pd.Series(results)
 
         return merged_labs.groupby('tumorId').apply(aggregate).reset_index()
-
 
     @staticmethod
     def surgeries(treatment_episode, primary, metastatic, gastro, hipec):
@@ -156,29 +157,68 @@ class DistantMetastasisAggregator:
             })
 
         return merged.groupby('tumorId').apply(aggregate).reset_index()
+
     @staticmethod
-    def systemic_treatment(treatment_episode, systemic_treatment, systemic_scheme, systemic_drug):
-        systemic_treatment = systemic_treatment.rename(columns={'id': 'systemicTreatmentId'})
-        systemic_scheme = systemic_scheme.rename(columns={'id': 'systemicSchemeId'})
-        join1 = treatment_episode.merge(systemic_treatment, left_on='id', right_on='treatmentEpisodeId', how='inner')
-        join2 = join1.merge(systemic_scheme, on='systemicTreatmentId', how='inner', suffixes=('', '_scheme'))
-        join3 = join2.merge(systemic_drug, left_on='systemicSchemeId', right_on='systemicTreatmentSchemeId', how='left', suffixes=('', '_drug'))
-        aggregated_treatment = join3.groupby('systemicTreatmentId').apply(
-            lambda group: pd.Series({
-                'tumorId': group['tumorId'].iloc[0],
-                'treatment': group['treatment'].iloc[0],
-                'daysBetweenDiagnosisAndStart': group['daysBetweenDiagnosisAndStart'].iloc[0],
-                'daysBetweenDiagnosisAndStop': group['daysBetweenDiagnosisAndStop'].iloc[0],
-                'numberOfCycles': group['numberOfCycles'].dropna().iloc[0] if not group['numberOfCycles'].dropna().empty else None
-            })
-        ).reset_index()
-        def aggregate(group):
-            sorted_group = group.sort_values('daysBetweenDiagnosisAndStart')
+    def systemic_treatment(treatment_episode, systemic_treatment, systemic_scheme, systemic_drug, metastasis_agg):
+       
+        sys_tx = systemic_treatment.rename(columns={'id': 'systemicTreatmentId'})
+        sys_scheme = systemic_scheme.rename(columns={'id': 'systemicSchemeId'})
+
+        j1 = (
+            treatment_episode
+              .merge(sys_tx,      left_on='id', right_on='treatmentEpisodeId', how='inner')
+              .merge(sys_scheme,  on='systemicTreatmentId',               how='inner', suffixes=('', '_scheme'))
+              .merge(systemic_drug,left_on='systemicSchemeId', right_on='systemicTreatmentSchemeId', how='left')
+        )
+        j1 = j1.rename(columns={
+            'daysBetweenDiagnosisAndStart_x': 'daysBetweenDiagnosisAndStart',
+            'daysBetweenDiagnosisAndStop_x':  'daysBetweenDiagnosisAndStop',
+        })
+        j1 = j1.drop(columns=['daysBetweenDiagnosisAndStart_y',
+                              'daysBetweenDiagnosisAndStop_y'])
+
+        agg = (j1.groupby('systemicTreatmentId')
+                 .apply(lambda g: pd.Series({
+                     'tumorId': g['tumorId'].iat[0],
+                     'treatment': g['treatment'].iat[0],
+                     'daysBetweenDiagnosisAndStart': g['daysBetweenDiagnosisAndStart'].iat[0],
+                     'daysBetweenDiagnosisAndStop':  g['daysBetweenDiagnosisAndStop'].iat[0],
+                     'numberOfCycles': (g['numberOfCycles'].dropna().iat[0]
+                                        if g['numberOfCycles'].notna().any()
+                                        else None)
+                 }))
+                 .reset_index(drop=True))
+
+        full = agg.merge(
+            metastasis_agg[['tumorId', 'earliestDistantMetastasisDetectionDays']],
+            on='tumorId', how='right'
+        )
+
+        def summarize(group):
+            detect_day = group['earliestDistantMetastasisDetectionDays'].iat[0]
+
+            post = group[group['daysBetweenDiagnosisAndStart'] >= detect_day]
+            if not post.empty:
+                sel = post.sort_values('daysBetweenDiagnosisAndStart').iloc[0]
+                start = sel['daysBetweenDiagnosisAndStart']
+                stop  = sel['daysBetweenDiagnosisAndStop']
+                name  = sel['treatment']
+                cycles= sel['numberOfCycles']
+            else:
+                start, stop, name, cycles = (np.nan, np.nan, None, None)
+
+            had_prior = int((group['daysBetweenDiagnosisAndStart'] < detect_day).any())
+
             return pd.Series({
-                'systemicTreatmentPlan': list(sorted_group['treatment']),
-                'firstTreatmentStart': sorted_group['daysBetweenDiagnosisAndStart'].min(),
-                'numberOfCycles': list(sorted_group['numberOfCycles']),
-                'treatmentStop': sorted_group['daysBetweenDiagnosisAndStop'].max() if not sorted_group['daysBetweenDiagnosisAndStop'].isna().all() else None
+                'tumorId': group['tumorId'].iat[0],
+                'treatment': name,
+                'firstTreatmentStartAfterMetastasis': start,
+                'treatmentStop': stop,
+                'numberOfCycles': cycles,
+                'hasHadPriorSystemicTherapy': had_prior
             })
-        return aggregated_treatment.groupby('tumorId').apply(aggregate).reset_index()
+
+        result = full.groupby('tumorId').apply(summarize).reset_index(drop=True)
+        return result
+
 
