@@ -143,7 +143,107 @@ class DistantMetastasesOverviewBuilder:
         
         df['observedOsFromTreatmentStartDays'] = df['observedOsFromTumorIncidenceDays'] - df['firstTreatmentStartAfterMetastasis']
         
-        return df
+        for col in df.select_dtypes(include='float').columns:
+            ser = df[col]
+            if ser.dropna().map(float.is_integer).all():
+                df[col] = ser.astype('Int64')
+
+        list_cols = [col for col in df.columns if df[col].apply(lambda x: isinstance(x, list)).any()]
+        
+        def _cast_list(lst):
+            if not isinstance(lst, list):
+                return lst
+            out = []
+            for x in lst:
+                if isinstance(x, float) and x.is_integer():
+                    out.append(int(x))
+                else:
+                    out.append(x)
+            return out
+
+        for col in list_cols:
+            df[col] = df[col].apply(_cast_list)
+        
+        ordered_cols = [
+            # Patient & Diagnosis
+            'tumorId', 'patientId', 'diagnosisYear', 'ageAtDiagnosis',
+            'sex', 'source', 'sourceId', 'daysSinceTumorIncidence',
+            'isAlive', 'basisOfDiagnosis', 'numberOfPriorTumors',
+            'hasDoublePrimaryTumor', 'primaryTumorType',
+            'primaryTumorLocation', 'sidedness',
+            'anorectalVergeDistanceCategory', 'mesorectalFasciaIsClear',
+            'distanceToMesorectalFasciaMm', 'differentiationGrade',
+            'clinicalTnmT', 'clinicalTnmN', 'clinicalTnmM',
+            'pathologicalTnmT', 'pathologicalTnmN', 'pathologicalTnmM',
+            'clinicalTumorStage', 'pathologicalTumorStage',
+            'investigatedLymphNodesCountPrimaryDiagnosis',
+            'positiveLymphNodesCountPrimaryDiagnosis',
+            'presentedWithIleus', 'presentedWithPerforation',
+            'venousInvasionDescription', 'lymphaticInvasionCategory',
+            'extraMuralInvasionCategory', 'tumorRegression',
+
+            # Metastatic Diagnosis
+            'isMetachronous', 'numberOfLiverMetastases',
+            'maximumSizeOfLiverMetastasisMm',
+            'investigatedLymphNodesCountMetastaticDiagnosis',
+            'positiveLymphNodesCountMetastaticDiagnosis',
+            'metastasisLocationGroups', 'metastasisLocationGroupsDays',
+            'earliestDistantMetastasisDetectionDays',
+
+            # Performance / Comorbidity
+            'AllWhoAssessments', 'WhoAssessmentsDates',
+            'WhoAssessmentBeforeMetastasisTreatment',
+            'WhoAssessmentDateBeforeMetastasisTreatment',
+            'WhoAssessmentAtMetastasisDetection',
+            'WhoAssessmentDateAtMetastasisDetection',
+            'AllAsaAssessments', 'AsaAssessmentsDates',
+            'AsaAssessmentBeforeMetastasisTreatment',
+            'AsaAssessmentDateBeforeMetastasisTreatment',
+            'AsaAssessmentAtMetastasisDetection',
+            'AsaAssessmentDateAtMetastasisDetection',
+
+            # Labs
+            'lactateDehydrogenasePreTreatment',
+            'alkalinePhosphatasePreTreatment',
+            'leukocytesAbsolutePreTreatment',
+            'carcinoembryonicAntigenPreTreatment',
+            'albuminePreTreatment',
+            'neutrophilsAbsolutePreTreatment',
+            'lactateDehydrogenaseMetastasisDetection',
+            'alkalinePhosphataseMetastasisDetection',
+            'leukocytesAbsoluteMetastasisDetection',
+            'carcinoembryonicAntigenMetastasisDetection',
+            'albumineMetastasisDetection',
+            'neutrophilsAbsoluteMetastasisDetection',
+            'closestLabValueDatePreTreatment',
+            'closestLabValueDateMetastasisDetection',
+
+            # Surgeries
+            'surgeriesPrimary', 'surgeriesPrimaryDates',
+            'surgeriesMetastatic', 'surgeriesMetastaticDates',
+            'surgeriesGastroenterology', 'surgeriesGastroenterologyDates',
+            'hadHipec', 'hadHipecDate',
+
+            # Radiotherapy
+            'radiotherapiesPrimary', 'radiotherapiesPrimaryDates',
+            'radiotherapiesMetastatic', 'radiotherapiesMetastaticDates',
+
+            # Systemic
+            'treatment', 'firstTreatmentStartAfterMetastasis',
+            'treatmentStop', 'numberOfCycles',
+            'hasHadPriorSystemicTherapy',
+
+            # Outcomes
+            'hadSurvivalEvent', 'hasHadPriorTumor',
+            'observedOsFromTumorIncidenceDays',
+            'observedOsFromMetastasisDetectionDays',
+            'observedOsFromTreatmentStartDays',
+            'systemicTreatmentPlanDuration',
+        ]
+
+        ordered = [c for c in ordered_cols if c in df.columns]
+        
+        return df[ordered]
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Generate distant metastasis overview table")
