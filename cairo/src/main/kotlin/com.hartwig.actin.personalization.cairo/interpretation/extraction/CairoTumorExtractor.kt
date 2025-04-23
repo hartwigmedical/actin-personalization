@@ -15,7 +15,7 @@ object CairoTumorExtractor {
             latestSurvivalStatus = extractLatestSurvivalMeasure(diagnosis),
             priorTumors = null, //TODO: in malignancy column sometimes tumor mentions, but is free text
             primaryDiagnosis = CairoPrimaryDiagnosisExtractor.extract(records),
-            metastaticDiagnosis =,
+            metastaticDiagnosis = CairoMetastaticDiagnosisExtractor.extract(records),
             whoAssessments =,
             asaAssessments =,
             comorbidityAssessments =,
