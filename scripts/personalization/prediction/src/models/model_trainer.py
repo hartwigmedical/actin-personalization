@@ -24,6 +24,7 @@ class ModelTrainer:
         self.random_state = random_state
         self.results = dict()
         self.trained_models = dict()
+        self.feature_names: List[str] = []
         
         self.max_time = settings.max_time
 
@@ -38,14 +39,12 @@ class ModelTrainer:
 
         if issubclass(model_class, NNSurvivalModel):
             kwargs['input_size'] = input_size
-        
+   
         return model_class(**kwargs)
     
     def save_model(self, model: BaseSurvivalModel, model_name: str)-> None:
         if not os.path.exists(settings.save_path):
             os.makedirs(settings.save_path)
-            
-        
             
         model_file = os.path.join(settings.save_path, f"{settings.outcome}_{model_name}")
 
@@ -64,6 +63,23 @@ class ModelTrainer:
         else:
             with open(model_file + ".pkl", "wb") as f:
                 dill.dump(model, f)
+                
+    @staticmethod            
+    def _set_attention_indices(model: BaseSurvivalModel, feature_names: List[str]):
+        if not (isinstance(model, NNSurvivalModel) and
+                hasattr(model.net, 'attention')):
+            return
+
+        attn = model.net.attention
+        
+        attn.msi_index = feature_names.index('hasMsi')
+        attn.immuno_index = [
+            feature_names.index('systemicTreatmentPlan_pembrolizumab'),
+            feature_names.index('systemicTreatmentPlan_nivolumab'),
+        ]
+        
+        attn.ras_index = feature_names.index('hasRasMutation')
+        attn.panitumumab_index = feature_names.index('systemicTreatmentPlan_panitumumab')
     
     def _prepare_fold_data(
         self, 
@@ -166,6 +182,7 @@ class ModelTrainer:
         X_test: pd.DataFrame, y_test: pd.DataFrame, 
         encoded_columns: Dict[str, List[str]], 
     ) -> Tuple[pd.DataFrame, Dict[str, BaseSurvivalModel]]:
+        self.feature_names = X_train.columns.tolist()
         folds = self.cross_validate(X_train, y_train, encoded_columns)
 
         for model_name, model_template in self.models.items():
@@ -177,7 +194,9 @@ class ModelTrainer:
                     X_train, y_train, fold_indices
                 )
                 model = self._initialize_model(model_template, input_size=X_train.shape[1])
-
+                ModelTrainer._set_attention_indices(model,
+                                                    self.feature_names)
+              
                 if isinstance(model, NNSurvivalModel):
                     val_data = (X_fold_val.values.astype('float32'), y_fold_val_structured)
                     model.fit(X_fold_train, y_fold_train_structured, val_data=val_data)
@@ -194,6 +213,9 @@ class ModelTrainer:
             print(f"{model_name} CV Results: {self.results[model_name]}")
             print("training final model")
             final_model = self._initialize_model(model_template, input_size=X_train.shape[1])
+            ModelTrainer._set_attention_indices(final_model,
+                                                    self.feature_names)
+            
             y_train_df = pd.DataFrame({'duration': y_train[settings.duration_col], 'event': y_train[settings.event_col]}, index=X_train.index)
             y_train_structured = Surv.from_dataframe('event', 'duration', y_train_df)
             y_test_df = pd.DataFrame({'duration': y_test[settings.duration_col], 'event': y_test[settings.event_col]}, index=X_test.index)

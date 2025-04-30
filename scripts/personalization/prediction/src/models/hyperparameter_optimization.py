@@ -45,7 +45,8 @@ def hyperparameter_search(
             print(f"No hyperparameter grid found for {model_name}, skipping optimization...")
             best_models[model_name] = (model_instance, None)
             continue
-
+            
+        ModelTrainer._set_attention_indices(model_instance, list(X_train.columns))
         best_score = -np.inf
         best_params = None
         best_model_trained = None

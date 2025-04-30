@@ -21,6 +21,7 @@ from pycox.models import CoxPH, LogisticHazard, DeepHitSingle, PCHazard, MTLR
 
 torch.manual_seed(0)
 
+
 class BaseSurvivalModel:
     def __init__(self, drop_variance_threshold: float = 1e-5, correlation_threshold: float = 0.95):
         self.drop_variance_threshold = drop_variance_threshold
@@ -166,8 +167,12 @@ class GradientBoostingSurvivalModel(BaseSurvivalModel):
 
     
 class FeatureAttention(nn.Module):
-    def __init__(self, input_size: int):
+    def __init__(self, input_size: int, msi_index: int=None, immuno_index: List[int]=None, ras_index: int = None, panitumumab_index: int = None):
         super().__init__()
+        self.msi_index  = msi_index
+        self.immuno_index  = immuno_index or []
+        self.ras_index = ras_index
+        self.panitumumab_index = panitumumab_index
         
         self.attn = nn.Sequential(
             nn.Linear(input_size, input_size),
@@ -177,13 +182,22 @@ class FeatureAttention(nn.Module):
         )
 
     def forward(self, x):
+        if settings.use_gate:
+            if self.msi_index is not None and self.immuno_index:
+                msi_gate = x[:, self.msi_index].unsqueeze(1)
+                x[:, self.immuno_index] = x[:, self.immuno_index] * msi_gate
+
+            if self.ras_index is not None and self.panitumumab_index is not None:
+                ras_gate = 1 - x[:, self.ras_index]  # shape: [batch_size]
+                x[:, self.panitumumab_index] = x[:, self.panitumumab_index] * ras_gate
+
         weights = self.attn(x)
         return x * weights
     
 class AttentionMLP(nn.Module):
-    def __init__(self, input_size, num_nodes, out_features, activation, batch_norm, dropout):
+    def __init__(self, input_size: int, num_nodes: List[int], out_features: int, activation, batch_norm: bool, dropout: float, msi_index: int = None, immuno_index: List[int] = None, ras_index: int = None, panitumumab_index: int = None):
         super().__init__()
-        self.attention = FeatureAttention(input_size)
+        self.attention = FeatureAttention(input_size, msi_index, immuno_index, ras_index, panitumumab_index)
         self.mlp = tt.practical.MLPVanilla(
             in_features=input_size, num_nodes=num_nodes, out_features=out_features,
             activation=activation, batch_norm=batch_norm, dropout=dropout)
@@ -192,8 +206,6 @@ class AttentionMLP(nn.Module):
         x = self.attention(x)
         return self.mlp(x)
 
-
-    
 class NNSurvivalModel(BaseSurvivalModel):
     def __init__(
         self, 
@@ -211,6 +223,10 @@ class NNSurvivalModel(BaseSurvivalModel):
         activation: str = 'relu', 
         optimizer: str = 'Adam',
         use_attention: bool = False,
+        gate_msi_index = None, 
+        gate_immuno_index = None,
+        gate_ras_index = None, 
+        gate_panitumumab_index = None,
         **kwargs: Dict[str, Any]
     ):
         super().__init__()
@@ -259,7 +275,11 @@ class NNSurvivalModel(BaseSurvivalModel):
                 out_features=self.num_durations,
                 activation=activation_fn, 
                 batch_norm=batch_norm, 
-                dropout=self.dropout
+                dropout=self.dropout, 
+                msi_index = gate_msi_index, 
+                immuno_index = gate_immuno_index, 
+                ras_index = gate_ras_index, 
+                panitumumab_index = gate_panitumumab_index
             )
         else:
             self.net = tt.practical.MLPVanilla(
@@ -271,7 +291,6 @@ class NNSurvivalModel(BaseSurvivalModel):
                 dropout=self.dropout
             )
         
-        
         if optimizer.lower() == "adam":
             self.optimizer = tt.optim.Adam(self.lr, weight_decay=weight_decay)
         elif optimizer.lower() == "rmsprop":
@@ -282,7 +301,7 @@ class NNSurvivalModel(BaseSurvivalModel):
         model_specific_kwargs = {k:v for k,v in self.kwargs.items() if k not in {
             'model_class', 'input_size', 'num_nodes', 'dropout', 'lr',
             'batch_size', 'epochs', 'num_durations', 'early_stopping_patience',
-            'batch_norm', 'weight_decay', 'activation', 'optimizer', 'use_attention'
+            'batch_norm', 'weight_decay', 'activation', 'optimizer', 'use_attention', 'gate_msi_index', 'gate_immuno_index'
         }}
 
         self.model = model_class(self.net, self.optimizer, **model_specific_kwargs)
@@ -319,6 +338,8 @@ class NNSurvivalModel(BaseSurvivalModel):
 
 
     def predict_survival_function(self, X: pd.DataFrame, times: np.ndarray = None) -> np.ndarray:
+  
+        
         X_tensor = X.values.astype('float32')
         surv = self.model.predict_surv_df(X_tensor)
 
@@ -327,8 +348,7 @@ class NNSurvivalModel(BaseSurvivalModel):
 
         return [interp1d(surv.index.values, surv.iloc[:, i].values, bounds_error=False, fill_value='extrapolate') for i in range(surv.shape[1])]
 
-    def predict(self, X: pd.DataFrame) -> np.ndarray:
-        
+    def predict(self, X: pd.DataFrame) -> np.ndarray:        
         X_tensor = X.values.astype('float32')
         if hasattr(self.model, 'predict_risk'):
             risk_scores = self.model.predict_risk(X_tensor)

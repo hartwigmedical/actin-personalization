@@ -41,9 +41,9 @@ class DataPreprocessor:
         self.data_dir = "data"
         self.encoded_columns = {}
 
-    def preprocess_data(self, features = lookup_manager.features) -> Tuple[pd.DataFrame, List[str], Dict[str, List[str]]]:
-
-        df = self.load_data()
+    def preprocess_data(self, features = lookup_manager.features, df = None) -> Tuple[pd.DataFrame, List[str], Dict[str, List[str]]]:
+        if df is None:
+            df = self.load_data()
 
         df = df[features + [settings.duration_col, settings.event_col]]
         df = df[~df[lookup_manager.features].isna().all(axis=1)].copy()
@@ -151,7 +151,7 @@ class DataPreprocessor:
     
     def parse_treatment(self, treatment: str) -> Dict[str, int]:
 
-        components = {"systemicTreatmentPlan_5-FU": 0, "systemicTreatmentPlan_oxaliplatin": 0, "systemicTreatmentPlan_irinotecan": 0, "systemicTreatmentPlan_bevacizumab": 0, "systemicTreatmentPlan_panitumab": 0, "systemicTreatmentPlan_pembrolizumab": 0, "systemicTreatmentPlan_nivolumab": 0
+        components = {"systemicTreatmentPlan_5-FU": 0, "systemicTreatmentPlan_oxaliplatin": 0, "systemicTreatmentPlan_irinotecan": 0, "systemicTreatmentPlan_bevacizumab": 0, "systemicTreatmentPlan_panitumumab": 0, "systemicTreatmentPlan_pembrolizumab": 0, "systemicTreatmentPlan_nivolumab": 0
                      }
 
         if pd.isna(treatment) or treatment.strip() == "":
@@ -171,8 +171,8 @@ class DataPreprocessor:
         if "bevacizumab" in t or t.endswith("_b"):
             components["systemicTreatmentPlan_bevacizumab"] = 1
 
-        if "panitumab" in t or t.endswith("_p"):
-            components["systemicTreatmentPlan_panitumab"] = 1
+        if "panitumumab" in t or t.endswith("_p"):
+            components["systemicTreatmentPlan_panitumumab"] = 1
             
         if "pembrolizumab" in t: 
             components["systemicTreatmentPlan_pembrolizumab"] = 1

@@ -27,6 +27,7 @@ class Settings:
     time_points: Optional[List[int]] = None
     max_time: int = 1825
     input_size: int = 155  # This is updated in data_processing.py once it has X_train.shape[1].
+    use_gate: bool = True
         
     def __post_init__(self):
         self.configure_data_settings()
