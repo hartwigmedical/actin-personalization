@@ -10,22 +10,22 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
 class PersonalizedDataInterpreterTest {
-//
-//    @Test
-//    fun `Should create interpreter with filtered and grouped patient records`() {
-//        val fluorouracilEpisode = patientWithTreatment(treatment = Treatment.FLUOROURACIL).episode
-//        val capecitabineEpisode = patientWithTreatment(treatment = Treatment.CAPECITABINE).episode
-//        val capoxEpisode = patientWithTreatment(treatment = Treatment.CAPOX).episode
-//
+
+    @Test
+    fun `Should create interpreter with filtered and grouped patient records`() {
+        val fluorouracilEpisode = tumorWithTreatment(treatment = Treatment.FLUOROURACIL)
+        val capecitabineEpisode = tumorWithTreatment(treatment = Treatment.CAPECITABINE)
+        val capoxEpisode = tumorWithTreatment(treatment = Treatment.CAPOX)
+
 //        val patients = listOf(
-//            recordWithEpisode(fluorouracilEpisode),
-//            recordWithEpisode(fluorouracilEpisode.copy(distantMetastasesDetectionStatus = MetastasesDetectionStatus.AT_PROGRESSION)),
-//            recordWithEpisode(patientWithTreatment(treatment = Treatment.OTHER).episode),
-//            recordWithEpisode(fluorouracilEpisode.copy(systemicTreatmentPlan = null)),
-//            recordWithEpisode(fluorouracilEpisode.copy(surgeries = listOf(Surgery(SurgeryType.NOS_OR_OTHER)))),
-//            recordWithEpisode(fluorouracilEpisode.copy(hasHadPostSurgerySystemicChemotherapy = true)),
-//            recordWithEpisode(capecitabineEpisode),
-//            recordWithEpisode(capoxEpisode)
+//            patientWithTumor(fluorouracilEpisode),
+//            patientWithTumor(fluorouracilEpisode.copy(distantMetastasesDetectionStatus = MetastasesDetectionStatus.AT_PROGRESSION)),
+//            patientWithTumor(tumorWithTreatment(treatment = Treatment.OTHER).episode),
+//            patientWithTumor(fluorouracilEpisode.copy(systemicTreatmentPlan = null)),
+//            patientWithTumor(fluorouracilEpisode.copy(surgeries = listOf(Surgery(SurgeryType.NOS_OR_OTHER)))),
+//            patientWithTumor(fluorouracilEpisode.copy(hasHadPostSurgerySystemicChemotherapy = true)),
+//            patientWithTumor(capecitabineEpisode),
+//            patientWithTumor(capoxEpisode)
 //        )
 //
 //        val interpreter = PersonalizedDataInterpreter.createFromReferencePatients(patients)
@@ -43,5 +43,5 @@ class PersonalizedDataInterpreterTest {
 //        assertThat(interpreter.tumorsByTreatment).containsExactlyInAnyOrder(
 //            *expectedDiagnosisEpisodes.entries.map { it.toPair() }.toTypedArray()
 //        )
-//    }
+    }
 }
