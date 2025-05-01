@@ -28,7 +28,7 @@ data class TableContent(val title: String, val headers: List<String>, val rows: 
             personalizedDataAnalysis: PersonalizedDataAnalysis, measurementType: MeasurementType
         ): TableContent {
             val headers = listOf("") + personalizedDataAnalysis.populations.map {
-                "${it.name} (n=${it.patientsByMeasurementType[measurementType]?.size})"
+                "${it.name} (n=${it.tumorsByMeasurementType[measurementType]?.size})"
             }
             val rows = personalizedDataAnalysis.treatmentAnalyses.map { (treatment, measurements) ->
                 val rowValues = personalizedDataAnalysis.populations.map { population ->

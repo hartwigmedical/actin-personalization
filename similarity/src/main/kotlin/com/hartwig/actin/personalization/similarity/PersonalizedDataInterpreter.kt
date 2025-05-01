@@ -1,31 +1,17 @@
 package com.hartwig.actin.personalization.similarity
 
+import com.hartwig.actin.personalization.datamodel.ReferencePatient
+import com.hartwig.actin.personalization.datamodel.Tumor
 import com.hartwig.actin.personalization.datamodel.diagnosis.LocationGroup
-import com.hartwig.actin.personalization.datamodel.diagnosis.MetastasesDetectionStatus
-import com.hartwig.actin.personalization.datamodel.diagnosis.TnmM
-import com.hartwig.actin.personalization.datamodel.old.DiagnosisEpisode
-import com.hartwig.actin.personalization.datamodel.old.Episode
-import com.hartwig.actin.personalization.datamodel.old.ReferencePatient
-import com.hartwig.actin.personalization.datamodel.old.StageTnm
 import com.hartwig.actin.personalization.datamodel.serialization.ReferencePatientJson
-import com.hartwig.actin.personalization.datamodel.treatment.Treatment
 import com.hartwig.actin.personalization.datamodel.treatment.TreatmentGroup
 import com.hartwig.actin.personalization.similarity.population.PatientPopulationBreakdown
 import com.hartwig.actin.personalization.similarity.population.PersonalizedDataAnalysis
 import com.hartwig.actin.personalization.similarity.population.PopulationDefinition
+import com.hartwig.actin.personalization.similarity.selection.TreatmentSelection
 import io.github.oshai.kotlinlogging.KotlinLogging
 
-private fun Episode.doesNotIncludeAdjuvantOrNeoadjuvantTreatment(): Boolean {
-    return !hasHadPreSurgerySystemicChemotherapy &&
-            !hasHadPostSurgerySystemicChemotherapy &&
-            !hasHadPreSurgerySystemicTargetedTherapy &&
-            !hasHadPostSurgerySystemicTargetedTherapy
-}
-
-private val metastaticTnmM = setOf(TnmM.M1, TnmM.M1A, TnmM.M1B, TnmM.M1C)
-private val stageTnmIV = setOf(StageTnm.IV, StageTnm.IVA, StageTnm.IVB, StageTnm.IVC)
-
-class PersonalizedDataInterpreter(val patientsByTreatment: List<Pair<TreatmentGroup, List<DiagnosisEpisode>>>) {
+class PersonalizedDataInterpreter(val tumorsByTreatment: List<Pair<TreatmentGroup, List<Tumor>>>) {
 
     fun analyzePatient(
         age: Int, whoStatus: Int, hasRasMutation: Boolean, metastasisLocationGroups: Set<LocationGroup>
@@ -33,7 +19,7 @@ class PersonalizedDataInterpreter(val patientsByTreatment: List<Pair<TreatmentGr
         val populationDefinitions =
             PopulationDefinition.createAllForPatientProfile(age, whoStatus, hasRasMutation, metastasisLocationGroups)
 
-        return PatientPopulationBreakdown(patientsByTreatment, populationDefinitions).analyze()
+        return PatientPopulationBreakdown(tumorsByTreatment, populationDefinitions).analyze()
     }
 
     companion object {
@@ -44,38 +30,36 @@ class PersonalizedDataInterpreter(val patientsByTreatment: List<Pair<TreatmentGr
             val patients = ReferencePatientJson.read(path)
 
             LOGGER.info { " Loaded ${patients.size} reference patients" }
-            // TODO (KD) Fix
-            return createFromReferencePatients(emptyList())
+            return createFromReferencePatients(patients)
         }
 
         fun createFromReferencePatients(patients: List<ReferencePatient>): PersonalizedDataInterpreter {
-            val referencePop = patients
-                .flatMap(ReferencePatient::tumorEntries)
-                .map { (diagnosis, episodes) -> DiagnosisEpisode(diagnosis, episodes.single { it.order == 1 }) }
-                .filter { diagnosisEpisode ->
-                    with (diagnosisEpisode.episode) {
-                        distantMetastasesDetectionStatus == MetastasesDetectionStatus.AT_START &&
-                        (tnmCM in metastaticTnmM || tnmPM in metastaticTnmM || stageTNM in stageTnmIV) &&
-                        doesNotIncludeAdjuvantOrNeoadjuvantTreatment() &&
-                        surgeries.isEmpty() &&
-                        gastroenterologyResections.isEmpty() &&
-                        metastasesSurgeries.isEmpty() &&
-                        radiotherapies.isEmpty() &&
-                        metastasesRadiotherapies.isEmpty() &&
-                        !hasHadHipecTreatment &&
-                        (!hasReceivedTumorDirectedTreatment || systemicTreatmentPlan != null) &&
-                        systemicTreatmentPlan?.treatment?.let{ it != Treatment.OTHER } == true
-                    }
+            val referenceTumors = patients
+                .flatMap(ReferencePatient::tumors)
+                .filter { hasMetastaticTreatmentEpisodeWithSystemicTreatmentOnly(it) }
 
-                }
-
-            val patientsByTreatment = referencePop.groupBy { (_, episode) ->
-                episode.systemicTreatmentPlan!!.treatment.treatmentGroup
+            val tumorsByTreatment = referenceTumors.groupBy { tumor ->
+                TreatmentSelection.definedMetastaticSystemicTreatment(tumor)!!.treatment.treatmentGroup
             }
                 .toList()
                 .sortedByDescending { it.second.size }
 
-            return PersonalizedDataInterpreter(patientsByTreatment)
+            return PersonalizedDataInterpreter(tumorsByTreatment)
+        }
+
+        private fun hasMetastaticTreatmentEpisodeWithSystemicTreatmentOnly(tumor: Tumor): Boolean {
+            // TODO (KD): Review whether filtering remains consistent with view in SQL.
+            val metastaticTreatmentEpisode = TreatmentSelection.extractMetastaticTreatmentEpisode(tumor) ?: return false
+
+            return with(metastaticTreatmentEpisode) {
+                TreatmentSelection.extractDefinedSystemicTreatment(metastaticTreatmentEpisode) != null &&
+                        gastroenterologyResections.isEmpty() &&
+                        primarySurgeries.isEmpty() &&
+                        metastaticSurgeries.isEmpty() &&
+                        hipecTreatments.isEmpty() &&
+                        primaryRadiotherapies.isEmpty() &&
+                        metastaticRadiotherapies.isEmpty()
+            }
         }
     }
 }

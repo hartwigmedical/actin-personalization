@@ -1,13 +1,13 @@
 package com.hartwig.actin.personalization.similarity.population
 
-import com.hartwig.actin.personalization.datamodel.old.DiagnosisEpisode
+import com.hartwig.actin.personalization.datamodel.Tumor
 import com.hartwig.actin.personalization.similarity.report.TableElement
 
 interface Calculation {
 
-    fun isEligible(patient: DiagnosisEpisode): Boolean
+    fun isEligible(tumor: Tumor): Boolean
 
-    fun calculate(patients: List<DiagnosisEpisode>, eligiblePopulationSize: Int): Measurement
+    fun calculate(tumors: List<Tumor>, eligiblePopulationSize: Int): Measurement
 
     fun createTableElement(measurement: Measurement): TableElement
 

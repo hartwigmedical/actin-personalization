@@ -1,35 +1,37 @@
 package com.hartwig.actin.personalization.similarity.population
 
-import com.hartwig.actin.personalization.datamodel.old.DiagnosisEpisode
+import com.hartwig.actin.personalization.datamodel.Tumor
 import com.hartwig.actin.personalization.similarity.report.TableElement
 
+// TODO (KD) Very wrong... 
 val PFS_CALCULATION = SurvivalCalculation(
-    timeFunction = { it.episode.systemicTreatmentPlan!!.observedPfsDays },
-    eventFunction = { it.episode.systemicTreatmentPlan!!.hadProgressionEvent },
+    timeFunction = { it.treatmentEpisodes.first().progressionMeasures.first().daysSinceDiagnosis },
+    eventFunction = { it.treatmentEpisodes.first().progressionMeasures.firstOrNull() != null},
     title = "Progression-free survival (median, IQR) in NCR real-world data set"
 )
 
+// TODO (KD) Very wrong...
 val OS_CALCULATION = SurvivalCalculation(
-    timeFunction = { it.episode.systemicTreatmentPlan!!.observedOsFromTreatmentStartDays },
-    eventFunction = { it.diagnosis.hadSurvivalEvent },
+    timeFunction = { it.latestSurvivalMeasurement.daysSinceDiagnosis },
+    eventFunction = { !it.latestSurvivalMeasurement.isAlive },
     title = "Overall survival (median, IQR) in NCR real-world data set"
 )
 
 class SurvivalCalculation(
-    internal val timeFunction: (DiagnosisEpisode) -> Int?,
-    private val eventFunction: (DiagnosisEpisode) -> Boolean?,
+    internal val timeFunction: (Tumor) -> Int?,
+    private val eventFunction: (Tumor) -> Boolean?,
     private val title: String
 ) : Calculation {
 
-    private val MIN_PATIENT_COUNT = 20
+    private val minPatientCount = 20
 
-    override fun isEligible(patient: DiagnosisEpisode): Boolean {
-        return eventFunction(patient) != null  && timeFunction(patient) != null
+    override fun isEligible(tumor: Tumor): Boolean {
+        return eventFunction(tumor) != null  && timeFunction(tumor) != null
     }
 
-    override fun calculate(patients: List<DiagnosisEpisode>, eligiblePopulationSize: Int): Measurement {
-        val eligiblePatients = patients.filter { isEligible(it) }
-        val eventHistory = buildEventHistory(eligiblePatients.sortedBy(timeFunction))
+    override fun calculate(tumors: List<Tumor>, eligiblePopulationSize: Int): Measurement {
+        val eligibleTumors = tumors.filter { isEligible(it) }
+        val eventHistory = buildEventHistory(eligibleTumors.sortedBy(timeFunction))
 
         if (eventHistory.isEmpty()) {
             return Measurement(Double.NaN, 0, null, null, Double.NaN)
@@ -37,7 +39,7 @@ class SurvivalCalculation(
 
         return Measurement(
             survivalForQuartile(eventHistory, 0.5),
-            eligiblePatients.size,
+            eligibleTumors.size,
             eventHistory.firstOrNull()?.daysSinceStart,
             eventHistory.lastOrNull()?.daysSinceStart,
             survivalForQuartile(eventHistory, 0.75) - survivalForQuartile(eventHistory, 0.25)
@@ -55,7 +57,7 @@ class SurvivalCalculation(
 
     override fun createTableElement(measurement: Measurement): TableElement {
         return when {
-            measurement.numPatients <= MIN_PATIENT_COUNT -> TableElement.regular("n≤$MIN_PATIENT_COUNT")
+            measurement.numPatients <= minPatientCount -> TableElement.regular("n≤$minPatientCount")
             measurement.value.isNaN() -> TableElement.regular("-")
             else -> with(measurement) {
                 val iqrString = if (iqr != null && !iqr.isNaN()) ", IQR: $iqr" else ""
@@ -69,7 +71,7 @@ class SurvivalCalculation(
     }
 
     tailrec fun buildEventHistory(
-        populationToProcess: List<DiagnosisEpisode>,
+        populationToProcess: List<Tumor>,
         eventHistory: List<EventCountAndSurvivalAtTime> = emptyList(),
     ): List<EventCountAndSurvivalAtTime> {
         if (populationToProcess.isEmpty()) return eventHistory

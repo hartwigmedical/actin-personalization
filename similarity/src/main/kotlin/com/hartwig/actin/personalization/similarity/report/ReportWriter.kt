@@ -29,7 +29,6 @@ import org.jetbrains.kotlinx.kandy.ir.Plot
 import org.jetbrains.kotlinx.kandy.letsplot.export.save
 import kotlin.io.path.Path
 
-
 private const val FONT_REGULAR_PATH = "fonts/nimbus-sans/NimbusSansL-Regular.ttf"
 private const val FONT_BOLD_PATH = "fonts/nimbus-sans/NimbusSansL-Bold.ttf"
 
@@ -47,9 +46,7 @@ private const val PAGE_MARGIN_RIGHT = 30f
 private const val PAGE_MARGIN_BOTTOM = 40f
 private const val IMAGE_FILE_EXTENSION = ".png"
 
-class ReportWriter(
-    private val writer: PdfWriter, private val outputPath: String, fontRegular: PdfFont, fontBold: PdfFont
-) {
+class ReportWriter(private val writer: PdfWriter, private val outputPath: String, fontRegular: PdfFont, fontBold: PdfFont) {
 
     private val chapterTitleStyle = Style().setFont(fontBold).setFontSize(11f).setFontColor(PALETTE_BLACK)
     private val tableTitleStyle = Style().setFont(fontBold).setFontSize(9f).setFontColor(PALETTE_BLUE)
@@ -80,7 +77,7 @@ class ReportWriter(
         }
             .dropLast(1)
             .forEach(table::addCell)
-        
+
         document.add(table)
     }
 
@@ -103,7 +100,7 @@ class ReportWriter(
             val filename = "${name.replace(" ", "_")}$IMAGE_FILE_EXTENSION"
             plot.save("$outputDir/$filename")
 
-            document.add(titleCellWithText("$name"))
+            document.add(titleCellWithText(name))
             val image = Image(ImageDataFactory.create("$outputDir/$filename"))
             image.setWidth(contentWidth())
             document.add(image)

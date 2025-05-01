@@ -1,12 +1,12 @@
 package com.hartwig.actin.personalization.similarity.population
 
+import com.hartwig.actin.personalization.datamodel.Tumor
 import com.hartwig.actin.personalization.datamodel.diagnosis.LocationGroup
-import com.hartwig.actin.personalization.datamodel.old.DiagnosisEpisode
-import com.hartwig.actin.personalization.datamodel.old.Episode
+import com.hartwig.actin.personalization.similarity.selection.TreatmentSelection
 
 const val ALL_PATIENTS_POPULATION_NAME = "All"
 
-data class PopulationDefinition(val name: String, val criteria: (DiagnosisEpisode) -> Boolean) {
+data class PopulationDefinition(val name: String, val criteria: (Tumor) -> Boolean) {
 
     companion object {
         fun createAllForPatientProfile(
@@ -15,15 +15,16 @@ data class PopulationDefinition(val name: String, val criteria: (DiagnosisEpisod
             val minAge = age - 5
             val maxAge = age + 5
 
+            // TODO (KD): Review, this is just first version. 
             return listOf(
                 PopulationDefinition(ALL_PATIENTS_POPULATION_NAME) { true },
-                PopulationDefinition("Age $minAge-${maxAge}y") { it.diagnosis.ageAtDiagnosis in minAge..maxAge },
-                PopulationDefinition("WHO $whoStatus") { it.episode.whoStatusPreTreatmentStart == whoStatus },
+                PopulationDefinition("Age $minAge-${maxAge}y") { it.ageAtDiagnosis in minAge..maxAge },
+                PopulationDefinition("WHO $whoStatus") { tumor -> tumor.whoAssessments.any { it.whoStatus == whoStatus } },
                 PopulationDefinition(
                     "RAS ${if (hasRasMutation) "positive" else "negative"}"
-                ) { (diagnosis, _) -> diagnosis.hasRasMutation == hasRasMutation },
-                PopulationDefinition("${formatLocationGroups(metastasisLocationGroups)} lesions") { (_, episode) ->
-                    episodeMatchesMetastasisLocationGroups(episode, metastasisLocationGroups)
+                ) { tumor -> tumor.molecularResults.any { it.hasRasMutation == hasRasMutation } },
+                PopulationDefinition("${formatLocationGroups(metastasisLocationGroups)} lesions") { tumor ->
+                    tumorMatchesMetastasisLocationGroups(tumor, metastasisLocationGroups)
                 }
             )
         }
@@ -37,11 +38,11 @@ data class PopulationDefinition(val name: String, val criteria: (DiagnosisEpisod
             }
         }
 
-        private fun episodeMatchesMetastasisLocationGroups(episode: Episode, metastasisLocationGroups: Set<LocationGroup>): Boolean {
-            val cutoffDays = episode.systemicTreatmentPlan?.intervalTumorIncidenceTreatmentPlanStartDays ?: Int.MAX_VALUE
+        private fun tumorMatchesMetastasisLocationGroups(tumor: Tumor, metastasisLocationGroups: Set<LocationGroup>): Boolean {
+            val cutoffDays = TreatmentSelection.definedMetastaticSystemicTreatment(tumor)?.daysBetweenDiagnosisAndStart ?: Int.MAX_VALUE
 
-            val groups = episode.metastases.filter { metastasis ->
-                metastasis.intervalTumorIncidenceMetastasisDetectionDays?.let { it < cutoffDays } == true
+            val groups = tumor.metastaticDiagnosis.metastases.filter { metastasis ->
+                metastasis.daysSinceDiagnosis?.let { it < cutoffDays } == true
             }
                 .map { it.location.locationGroup.topLevelGroup() }
                 .toSet()
