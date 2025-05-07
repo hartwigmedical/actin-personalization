@@ -5,8 +5,11 @@ import com.hartwig.actin.personalization.similarity.report.TableElement
 import com.hartwig.actin.personalization.similarity.selection.ProgressionSelection
 
 val PFS_CALCULATION = SurvivalCalculation(
-    timeFunction = { ProgressionSelection.firstProgressionAfterSystemicTreatmentStart(it)?.daysSinceDiagnosis },
-    eventFunction = { ProgressionSelection.firstProgressionAfterSystemicTreatmentStart(it) != null},
+    timeFunction = {
+        val progression = ProgressionSelection.firstProgressionAfterSystemicTreatmentStart(it)
+        if (progression != null) progression.daysSinceDiagnosis else 0
+    },
+    eventFunction = { ProgressionSelection.firstProgressionAfterSystemicTreatmentStart(it) != null },
     title = "Progression-free survival (median, IQR) in NCR real-world data set"
 )
 
@@ -25,7 +28,7 @@ class SurvivalCalculation(
     private val minPatientCount = 20
 
     override fun isEligible(tumor: Tumor): Boolean {
-        return eventFunction(tumor) != null  && timeFunction(tumor) != null
+        return eventFunction(tumor) != null && timeFunction(tumor) != null
     }
 
     override fun calculate(tumors: List<Tumor>, eligiblePopulationSize: Int): Measurement {
@@ -52,8 +55,7 @@ class SurvivalCalculation(
 
         return if (realIndex == eventHistory.size) Double.NaN else eventHistory[realIndex].daysSinceStart.toDouble()
     }
-
-
+    
     override fun createTableElement(measurement: Measurement): TableElement {
         return when {
             measurement.numPatients <= minPatientCount -> TableElement.regular("n≤$minPatientCount")

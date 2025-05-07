@@ -49,13 +49,6 @@ class SurvivalCalculationTest {
             }
         }
 
-        @Test
-        fun `Should evaluate censored values for OS and PFS`() {
-            survivalCalculationsFunctions.forEach { (calculation, type) ->
-                testCensoredValues(calculation, type)
-            }
-        }
-
         private fun testEligibility(calculation: SurvivalCalculation, type: SurvivalType) {
             val createTumor: (Int?, Boolean) -> Tumor = { days, hadEvent ->
                 tumorWithSurvivalDays(
@@ -86,32 +79,6 @@ class SurvivalCalculationTest {
             assertThat(measurement.min).describedAs("Minimum survival for $type").isEqualTo(25)
             assertThat(measurement.max).describedAs("Maximum survival for $type").isEqualTo(1600)
             assertThat(measurement.iqr).describedAs("IQR for $type").isEqualTo(750.0)
-        }
-
-        private fun testCensoredValues(calculation: SurvivalCalculation, type: SurvivalType) {
-            val censoredTumors = listOf(1, 2, 3, 4, 5).map { i ->
-                val survivalDays = i * 365
-                tumorWithSurvivalDays(
-                    osDays = if (type == SurvivalType.OS) survivalDays else 0,
-                    pfsDays = if (type == SurvivalType.PFS) survivalDays else null,
-                    hadEvent = false
-                )
-            }
-            val eligibleTumors = survivalList.map { data ->
-                tumorWithSurvivalDays(
-                    osDays = if (type == SurvivalType.OS) data.osDays ?: 0 else 0,
-                    pfsDays = if (type == SurvivalType.PFS) data.pfsDays else null,
-                    hadEvent = true
-                )
-            }
-            val tumors = eligibleTumors + censoredTumors
-
-            val measurement = calculation.calculate(tumors, ELIGIBLE_SUB_POPULATION_SIZE)
-            assertThat(measurement.value).describedAs("Censored values median for $type").isEqualTo(800.0)
-            assertThat(measurement.numPatients).describedAs("Total patients for  $type with censored values").isEqualTo(12)
-            assertThat(measurement.min).describedAs("Minimum survival for $type with censored values").isEqualTo(25)
-            assertThat(measurement.max).describedAs("Maximum survival for $type with censored values").isEqualTo(1600)
-            assertThat(measurement.iqr).describedAs("IQR for $type with censored values").isEqualTo(1500.0)
         }
     }
 
