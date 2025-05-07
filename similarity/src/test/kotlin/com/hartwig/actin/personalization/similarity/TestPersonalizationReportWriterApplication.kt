@@ -1,5 +1,6 @@
 package com.hartwig.actin.personalization.similarity
 
+import com.hartwig.actin.personalization.datamodel.TestDatamodelFactory
 import com.hartwig.actin.personalization.datamodel.treatment.Treatment
 import com.hartwig.actin.personalization.similarity.population.MeasurementType
 import com.hartwig.actin.personalization.similarity.report.ReportWriter
@@ -16,8 +17,11 @@ class TestPersonalizationReportWriterApplication {
         val outputPath = "$WORK_DIRECTORY/out.pdf"
         val analysis = PersonalizedDataInterpreter.createFromReferencePatients(
             (1..1000 step 10)
-                .map { tumorWithTreatment(Treatment.FOLFOX, pfsDays = it) }
-                .map { patientWithTumor(it) }
+                .map {
+                    val treatmentEpisode =
+                        TestDatamodelFactory.treatmentEpisode(systemicTreatment = Treatment.FOLFOX, daysBetweenDiagnosisAndProgression = it)
+                    TestDatamodelFactory.patient(TestDatamodelFactory.tumor(treatmentEpisode = treatmentEpisode))
+                }
         )
             .analyzePatient(50, 1, false, emptySet())
 
@@ -36,7 +40,7 @@ class TestPersonalizationReportWriterApplication {
     companion object {
         val LOGGER = KotlinLogging.logger {}
         const val APPLICATION = "ACTIN-Personalization Report Writer"
-        val VERSION: String = PersonalizationReportWriterApplication::class.java.getPackage().implementationVersion
+        val VERSION: String? = PersonalizationReportWriterApplication::class.java.getPackage().implementationVersion
     }
 }
 

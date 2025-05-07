@@ -2,15 +2,14 @@ package com.hartwig.actin.personalization.similarity.population
 
 import com.hartwig.actin.personalization.datamodel.Tumor
 import com.hartwig.actin.personalization.similarity.report.TableElement
+import com.hartwig.actin.personalization.similarity.selection.ProgressionSelection
 
-// TODO (KD) Very wrong... 
 val PFS_CALCULATION = SurvivalCalculation(
-    timeFunction = { it.treatmentEpisodes.first().progressionMeasures.first().daysSinceDiagnosis },
-    eventFunction = { it.treatmentEpisodes.first().progressionMeasures.firstOrNull() != null},
+    timeFunction = { ProgressionSelection.firstProgressionAfterSystemicTreatmentStart(it)?.daysSinceDiagnosis },
+    eventFunction = { ProgressionSelection.firstProgressionAfterSystemicTreatmentStart(it) != null},
     title = "Progression-free survival (median, IQR) in NCR real-world data set"
 )
 
-// TODO (KD) Very wrong...
 val OS_CALCULATION = SurvivalCalculation(
     timeFunction = { it.latestSurvivalMeasurement.daysSinceDiagnosis },
     eventFunction = { !it.latestSurvivalMeasurement.isAlive },

@@ -39,7 +39,8 @@ data class PopulationDefinition(val name: String, val criteria: (Tumor) -> Boole
         }
 
         private fun tumorMatchesMetastasisLocationGroups(tumor: Tumor, metastasisLocationGroups: Set<LocationGroup>): Boolean {
-            val cutoffDays = TreatmentSelection.firstSpecificMetastaticSystemicTreatment(tumor)?.daysBetweenDiagnosisAndStart ?: Int.MAX_VALUE
+            val cutoffDays =
+                TreatmentSelection.firstSpecificMetastaticSystemicTreatment(tumor)?.daysBetweenDiagnosisAndStart ?: Int.MAX_VALUE
 
             val groups = tumor.metastaticDiagnosis.metastases.filter { metastasis ->
                 metastasis.daysSinceDiagnosis?.let { it < cutoffDays } == true

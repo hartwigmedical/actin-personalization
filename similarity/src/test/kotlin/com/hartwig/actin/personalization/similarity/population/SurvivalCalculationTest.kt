@@ -1,9 +1,9 @@
 package com.hartwig.actin.personalization.similarity.population
 
+import com.hartwig.actin.personalization.datamodel.TestDatamodelFactory
 import com.hartwig.actin.personalization.datamodel.Tumor
 import com.hartwig.actin.personalization.datamodel.treatment.Treatment
 import com.hartwig.actin.personalization.similarity.report.TableElement
-import com.hartwig.actin.personalization.similarity.tumorWithTreatment
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -36,52 +36,51 @@ class SurvivalCalculationTest {
     inner class SurvivalTests {
 
         @Test
-        fun `Eligibility tests for OS and PFS`() {
+        fun `Should evaluate eligibility for OS and PFS`() {
             survivalCalculationsFunctions.forEach { (calculation, type) ->
                 testEligibility(calculation, type)
             }
         }
 
         @Test
-        fun `Median survival tests for OS and PFS`() {
+        fun `Should evaluate median survival for OS and PFS`() {
             survivalCalculationsFunctions.forEach { (calculation, type) ->
                 testMedianSurvival(calculation, type)
             }
         }
 
         @Test
-        fun `Censored value tests for OS and PFS`() {
+        fun `Should evaluate censored values for OS and PFS`() {
             survivalCalculationsFunctions.forEach { (calculation, type) ->
                 testCensoredValues(calculation, type)
             }
         }
 
         private fun testEligibility(calculation: SurvivalCalculation, type: SurvivalType) {
-            val createPatient: (Int?, Boolean) -> Tumor = { days, hadEvent ->
-                patientWithSurvivalDays(
+            val createTumor: (Int?, Boolean) -> Tumor = { days, hadEvent ->
+                tumorWithSurvivalDays(
                     osDays = if (type == SurvivalType.OS) days ?: 0 else 0,
                     pfsDays = if (type == SurvivalType.PFS) days else null,
                     hadEvent = hadEvent
                 )
             }
-            assertThat(calculation.isEligible(createPatient(100, true))).describedAs("Eligibility for $type").isTrue()
-            assertThat(calculation.isEligible(createPatient(100, false))).describedAs("Eligibility for $type").isTrue()
+            assertThat(calculation.isEligible(createTumor(100, true))).describedAs("Eligibility for $type").isTrue()
+            assertThat(calculation.isEligible(createTumor(100, false))).describedAs("Eligibility for $type").isTrue()
 
             if (type == SurvivalType.PFS) {
-                assertThat(calculation.isEligible(createPatient(null, true))).describedAs("Eligibility for $type with null days").isFalse()
+                assertThat(calculation.isEligible(createTumor(null, true))).describedAs("Eligibility for $type with null days").isFalse()
             }
         }
 
-
         private fun testMedianSurvival(calculation: SurvivalCalculation, type: SurvivalType) {
-            val patients = survivalList.map { data ->
-                patientWithSurvivalDays(
+            val tumors = survivalList.map { data ->
+                tumorWithSurvivalDays(
                     osDays = if (type == SurvivalType.OS) data.osDays ?: 0 else 0,
                     pfsDays = if (type == SurvivalType.PFS) data.pfsDays else null,
                     hadEvent = true
                 )
             }
-            val measurement = calculation.calculate(patients, ELIGIBLE_SUB_POPULATION_SIZE)
+            val measurement = calculation.calculate(tumors, ELIGIBLE_SUB_POPULATION_SIZE)
             assertThat(measurement.value).describedAs("Median survival value for $type").isEqualTo(200.0)
             assertThat(measurement.numPatients).describedAs("Number of patients for $type").isEqualTo(7)
             assertThat(measurement.min).describedAs("Minimum survival for $type").isEqualTo(25)
@@ -90,24 +89,24 @@ class SurvivalCalculationTest {
         }
 
         private fun testCensoredValues(calculation: SurvivalCalculation, type: SurvivalType) {
-            val censoredPatients = listOf(1, 2, 3, 4, 5).map { i ->
+            val censoredTumors = listOf(1, 2, 3, 4, 5).map { i ->
                 val survivalDays = i * 365
-                patientWithSurvivalDays(
+                tumorWithSurvivalDays(
                     osDays = if (type == SurvivalType.OS) survivalDays else 0,
                     pfsDays = if (type == SurvivalType.PFS) survivalDays else null,
                     hadEvent = false
                 )
             }
-            val eligiblePatients = survivalList.map { data ->
-                patientWithSurvivalDays(
+            val eligibleTumors = survivalList.map { data ->
+                tumorWithSurvivalDays(
                     osDays = if (type == SurvivalType.OS) data.osDays ?: 0 else 0,
                     pfsDays = if (type == SurvivalType.PFS) data.pfsDays else null,
                     hadEvent = true
                 )
             }
-            val patients = eligiblePatients + censoredPatients
+            val tumors = eligibleTumors + censoredTumors
 
-            val measurement = calculation.calculate(patients, ELIGIBLE_SUB_POPULATION_SIZE)
+            val measurement = calculation.calculate(tumors, ELIGIBLE_SUB_POPULATION_SIZE)
             assertThat(measurement.value).describedAs("Censored values median for $type").isEqualTo(800.0)
             assertThat(measurement.numPatients).describedAs("Total patients for  $type with censored values").isEqualTo(12)
             assertThat(measurement.min).describedAs("Minimum survival for $type with censored values").isEqualTo(25)
@@ -116,17 +115,17 @@ class SurvivalCalculationTest {
         }
     }
 
-    private fun patientWithSurvivalDays(
+    private fun tumorWithSurvivalDays(
         osDays: Int = 0,
         pfsDays: Int? = null,
         hadEvent: Boolean = true
     ): Tumor {
-        return tumorWithTreatment(treatment = Treatment.FLUOROURACIL,
-            pfsDays = pfsDays,
-            planStart = null,
-            osDays = osDays,
-            hadSurvivalEvent = hadEvent,
-            hadProgressionEvent = hadEvent)
+        return TestDatamodelFactory.tumor(isAlive = !hadEvent,
+            daysBetweenDiagnosisAndSurvivalMeasurement = osDays,
+            systemicTreatment = Treatment.FLUOROURACIL,
+            systemicTreatmentStart = null,
+            daysBetweenDiagnosisAndProgression = pfsDays,
+            hasProgressionEvent = hadEvent)
     }
 
     @Nested

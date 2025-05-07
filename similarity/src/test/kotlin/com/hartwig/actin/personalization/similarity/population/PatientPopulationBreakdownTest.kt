@@ -1,8 +1,8 @@
 package com.hartwig.actin.personalization.similarity.population
 
+import com.hartwig.actin.personalization.datamodel.TestDatamodelFactory
 import com.hartwig.actin.personalization.datamodel.treatment.Treatment
 import com.hartwig.actin.personalization.datamodel.treatment.TreatmentGroup
-import com.hartwig.actin.personalization.similarity.tumorWithTreatment
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
@@ -10,26 +10,26 @@ class PatientPopulationBreakdownTest {
 
     @Test
     fun `Should analyze treatments for each sub-population`() {
-        val fluorouracilPatient = tumorWithTreatment(
-            treatment = Treatment.FLUOROURACIL,
-            pfsDays = 70,
-            osDays = 300,
-            hadSurvivalEvent = true,
-            hadProgressionEvent = true
+        val fluorouracilPatient = TestDatamodelFactory.tumor(
+            systemicTreatment = Treatment.FLUOROURACIL,
+            daysBetweenDiagnosisAndProgression = 70,
+            daysBetweenDiagnosisAndSurvivalMeasurement = 300,
+            isAlive = true,
+            hasProgressionEvent = true
         )
-        val capecitabinePatient = tumorWithTreatment(
-            treatment = Treatment.CAPECITABINE,
-            pfsDays = null,
-            osDays = 350,
-            hadSurvivalEvent = true,
-            hadProgressionEvent = true
+        val capecitabinePatient = TestDatamodelFactory.tumor(
+            systemicTreatment = Treatment.CAPECITABINE,
+            daysBetweenDiagnosisAndProgression = null,
+            daysBetweenDiagnosisAndSurvivalMeasurement = 350,
+            isAlive = true,
+            hasProgressionEvent = true
         )
-        val capoxPatient = tumorWithTreatment(
-            treatment = Treatment.CAPOX,
-            pfsDays = 100,
-            osDays = 400,
-            hadSurvivalEvent = true,
-            hadProgressionEvent = true,
+        val capoxPatient = TestDatamodelFactory.tumor(
+            systemicTreatment = Treatment.CAPOX,
+            daysBetweenDiagnosisAndProgression = 100,
+            daysBetweenDiagnosisAndSurvivalMeasurement = 400,
+            isAlive = true,
+            hasProgressionEvent = true,
             ageAtDiagnosis = 85
         )
         val patientsByTreatment = listOf(
