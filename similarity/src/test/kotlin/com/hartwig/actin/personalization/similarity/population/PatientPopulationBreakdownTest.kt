@@ -10,31 +10,33 @@ class PatientPopulationBreakdownTest {
 
     @Test
     fun `Should analyze treatments for each sub-population`() {
-        val fluorouracilPatient = TestDatamodelFactory.tumor(
+        val fluorouracilTumor = TestDatamodelFactory.tumor(
+            ageAtDiagnosis = 50,
+            isAlive = false,
+            daysBetweenDiagnosisAndSurvivalMeasurement = 300,
             systemicTreatment = Treatment.FLUOROURACIL,
             daysBetweenDiagnosisAndProgression = 70,
-            daysBetweenDiagnosisAndSurvivalMeasurement = 300,
-            isAlive = true,
             hasProgressionEvent = true
         )
-        val capecitabinePatient = TestDatamodelFactory.tumor(
-            systemicTreatment = Treatment.CAPECITABINE,
-            daysBetweenDiagnosisAndProgression = null,
+        val capecitabineTumor = TestDatamodelFactory.tumor(
+            ageAtDiagnosis = 50,
+            isAlive = false,
             daysBetweenDiagnosisAndSurvivalMeasurement = 350,
-            isAlive = true,
-            hasProgressionEvent = true
-        )
-        val capoxPatient = TestDatamodelFactory.tumor(
-            systemicTreatment = Treatment.CAPOX,
-            daysBetweenDiagnosisAndProgression = 100,
-            daysBetweenDiagnosisAndSurvivalMeasurement = 400,
-            isAlive = true,
+            systemicTreatment = Treatment.CAPECITABINE,
             hasProgressionEvent = true,
-            ageAtDiagnosis = 85
+            daysBetweenDiagnosisAndProgression = null
         )
-        val patientsByTreatment = listOf(
-            TreatmentGroup.CAPECITABINE_OR_FLUOROURACIL to listOf(fluorouracilPatient, capecitabinePatient),
-            TreatmentGroup.CAPOX_OR_FOLFOX to listOf(capoxPatient)
+        val capoxTumor = TestDatamodelFactory.tumor(
+            ageAtDiagnosis = 85,
+            isAlive = false,
+            daysBetweenDiagnosisAndSurvivalMeasurement = 400,
+            systemicTreatment = Treatment.CAPOX,
+            hasProgressionEvent = true,
+            daysBetweenDiagnosisAndProgression = 100
+        )
+        val tumorsByTreatment = listOf(
+            TreatmentGroup.CAPECITABINE_OR_FLUOROURACIL to listOf(fluorouracilTumor, capecitabineTumor),
+            TreatmentGroup.CAPOX_OR_FOLFOX to listOf(capoxTumor)
         )
         val ageSubPopulation = "Age 45-55"
         val populationDefinitions = listOf(
@@ -46,21 +48,21 @@ class PatientPopulationBreakdownTest {
             MeasurementType.PROGRESSION_FREE_SURVIVAL,
             MeasurementType.OVERALL_SURVIVAL
         )
-        val analysis = PatientPopulationBreakdown(patientsByTreatment, populationDefinitions, measurementTypes).analyze()
+        val analysis = PatientPopulationBreakdown(tumorsByTreatment, populationDefinitions, measurementTypes).analyze()
 
         assertThat(analysis.populations).containsExactlyInAnyOrder(
             Population(
                 ALL_PATIENTS_POPULATION_NAME, mapOf(
-                    MeasurementType.TREATMENT_DECISION to listOf(fluorouracilPatient, capecitabinePatient, capoxPatient),
-                    MeasurementType.PROGRESSION_FREE_SURVIVAL to listOf(fluorouracilPatient, capoxPatient),
-                    MeasurementType.OVERALL_SURVIVAL to listOf(fluorouracilPatient, capecitabinePatient, capoxPatient)
+                    MeasurementType.TREATMENT_DECISION to listOf(fluorouracilTumor, capecitabineTumor, capoxTumor),
+                    MeasurementType.PROGRESSION_FREE_SURVIVAL to listOf(fluorouracilTumor, capoxTumor),
+                    MeasurementType.OVERALL_SURVIVAL to listOf(fluorouracilTumor, capecitabineTumor, capoxTumor)
                 )
             ),
             Population(
                 ageSubPopulation, mapOf(
-                    MeasurementType.TREATMENT_DECISION to listOf(fluorouracilPatient, capecitabinePatient),
-                    MeasurementType.PROGRESSION_FREE_SURVIVAL to listOf(fluorouracilPatient),
-                    MeasurementType.OVERALL_SURVIVAL to listOf(fluorouracilPatient, capecitabinePatient)
+                    MeasurementType.TREATMENT_DECISION to listOf(fluorouracilTumor, capecitabineTumor),
+                    MeasurementType.PROGRESSION_FREE_SURVIVAL to listOf(fluorouracilTumor),
+                    MeasurementType.OVERALL_SURVIVAL to listOf(fluorouracilTumor, capecitabineTumor)
                 )
             )
         )
