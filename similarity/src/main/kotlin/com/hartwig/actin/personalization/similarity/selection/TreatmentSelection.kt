@@ -12,11 +12,11 @@ object TreatmentSelection {
         return tumor.treatmentEpisodes.firstOrNull { it.metastaticPresence == MetastaticPresence.AT_START }
     }
 
-    fun definedMetastaticSystemicTreatment(tumor: Tumor): SystemicTreatment? {
-        return extractMetastaticTreatmentEpisode(tumor)?.let { extractDefinedSystemicTreatment(it) }
+    fun firstSpecificMetastaticSystemicTreatment(tumor: Tumor): SystemicTreatment? {
+        return extractMetastaticTreatmentEpisode(tumor)?.let { extractFirstSpecificSystemicTreatment(it) }
     }
 
-    fun extractDefinedSystemicTreatment(treatmentEpisode: TreatmentEpisode): SystemicTreatment? {
+    fun extractFirstSpecificSystemicTreatment(treatmentEpisode: TreatmentEpisode): SystemicTreatment? {
         return treatmentEpisode.systemicTreatments.firstOrNull { it.treatment != Treatment.OTHER }
     }
 }

@@ -14,7 +14,10 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 class PersonalizedDataInterpreter(val tumorsByTreatment: List<Pair<TreatmentGroup, List<Tumor>>>) {
 
     fun analyzePatient(
-        age: Int, whoStatus: Int, hasRasMutation: Boolean, metastasisLocationGroups: Set<LocationGroup>
+        age: Int,
+        whoStatus: Int,
+        hasRasMutation: Boolean,
+        metastasisLocationGroups: Set<LocationGroup>
     ): PersonalizedDataAnalysis {
         val populationDefinitions =
             PopulationDefinition.createAllForPatientProfile(age, whoStatus, hasRasMutation, metastasisLocationGroups)
@@ -39,7 +42,7 @@ class PersonalizedDataInterpreter(val tumorsByTreatment: List<Pair<TreatmentGrou
                 .filter { hasMetastaticTreatmentEpisodeWithSystemicTreatmentOnly(it) }
 
             val tumorsByTreatment = referenceTumors.groupBy { tumor ->
-                TreatmentSelection.definedMetastaticSystemicTreatment(tumor)!!.treatment.treatmentGroup
+                TreatmentSelection.firstSpecificMetastaticSystemicTreatment(tumor)!!.treatment.treatmentGroup
             }
                 .toList()
                 .sortedByDescending { it.second.size }
@@ -52,7 +55,7 @@ class PersonalizedDataInterpreter(val tumorsByTreatment: List<Pair<TreatmentGrou
             val metastaticTreatmentEpisode = TreatmentSelection.extractMetastaticTreatmentEpisode(tumor) ?: return false
 
             return with(metastaticTreatmentEpisode) {
-                TreatmentSelection.extractDefinedSystemicTreatment(metastaticTreatmentEpisode) != null &&
+                TreatmentSelection.extractFirstSpecificSystemicTreatment(metastaticTreatmentEpisode) != null &&
                         gastroenterologyResections.isEmpty() &&
                         primarySurgeries.isEmpty() &&
                         metastaticSurgeries.isEmpty() &&

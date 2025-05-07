@@ -10,6 +10,7 @@ class PatientPopulationBreakdown(
     private val populationDefinitions: List<PopulationDefinition>,
     private val measurementTypes: List<MeasurementType> = MeasurementType.entries
 ) {
+    
     fun analyze(): PersonalizedDataAnalysis {
         val allTumors = tumorsByTreatment.flatMap { it.second }
         val populations = populationDefinitions.map { populationFromDefinition(it, allTumors) }
@@ -64,7 +65,7 @@ class PatientPopulationBreakdown(
 
         val populationPlotsByTreatment = populationDefinitions.mapNotNull { definition ->
             val patientsByTreatment = filteredTumors.filter { definition.criteria(it) }.groupBy {
-                TreatmentSelection.definedMetastaticSystemicTreatment(it)!!.treatment.treatmentGroup.display
+                TreatmentSelection.firstSpecificMetastaticSystemicTreatment(it)!!.treatment.treatmentGroup.display
             }
             SurvivalPlot.createSurvivalPlot(patientsByTreatment, calculation, yAxisLabel)
                 ?.let { "$yAxisLabel for group ${definition.name} by treatment" to it }
