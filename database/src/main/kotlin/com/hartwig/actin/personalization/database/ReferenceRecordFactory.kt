@@ -7,6 +7,12 @@ import com.hartwig.actin.personalization.datamodel.Tumor
 object ReferenceRecordFactory {
 
     fun create(referencePatients: List<ReferencePatient>, indexedTumors: List<Pair<Int, Tumor>>): List<ReferenceRecord> {
-        return emptyList()
+        return referencePatients.flatMap { extractReferenceRecords(it, indexedTumors) }
+    }
+
+    private fun extractReferenceRecords(referencePatient: ReferencePatient, indexedTumors: List<Pair<Int, Tumor>>): List<ReferenceRecord> {
+        return referencePatient.tumors.map { 
+            ReferenceRecord(source = "")
+        }
     }
 }
