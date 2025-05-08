@@ -328,8 +328,8 @@ CREATE TABLE `tumorLocationReference` (
     PRIMARY KEY (`id`)
 );
 
-DROP TABLE IF EXISTS `referenceRecord`;
-CREATE TABLE `referenceRecord` (
+DROP TABLE IF EXISTS `referenceEntry`;
+CREATE TABLE `referenceEntry` (
     `tumorId` INT NOT NULL,
     `diagnosisYear` INT,
     `ageAtDiagnosis` INT,

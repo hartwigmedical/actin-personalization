@@ -25,53 +25,53 @@ class DatabaseWriter(private val context: DSLContext, private val connection: ja
         clearAll()
 
         val indexedPatients = writeReferencePatients(referencePatients)
-        val indexedTumors = writeTumorsAndReferenceRecords(indexedPatients)
-        writeRecords("survivalMeasurement", indexedTumors, ::survivalMeasurementFromTumor)
-        writeRecords("priorTumor", indexedTumors, ::priorTumorFromTumor)
-        writeRecords("primaryDiagnosis", indexedTumors, ::primaryDiagnosisFromTumor)
+        val indexedTumors = writeTumorsAndReferenceEntries(indexedPatients)
+        writeRecords("survival measurement", indexedTumors, ::survivalMeasurementFromTumor)
+        writeRecords("prior tumor", indexedTumors, ::priorTumorFromTumor)
+        writeRecords("primary diagnosis", indexedTumors, ::primaryDiagnosisFromTumor)
         val indexedMetastaticDiagnoses = writeRecordsAndReturnIndexedList(
-            "metastaticDiagnosis",
+            "metastatic diagnosis",
             indexedTumors,
             Tables.METASTATICDIAGNOSIS,
             ::metastaticDiagnosisFromTumor
         )
         writeRecords("metastasis", indexedMetastaticDiagnoses, ::metastasesFromMetastaticDiagnosis)
-        writeRecords("whoAssessment", indexedTumors, ::whoAssessmentsFromTumor)
-        writeRecords("asaAssessment", indexedTumors, ::asaAssessmentsFromTumor)
-        writeRecords("comorbidityAssessment", indexedTumors, ::comorbidityAssessmentsFromTumor)
-        writeRecords("molecularResult", indexedTumors, ::molecularResultsFromTumor)
-        writeRecords("labMeasurement", indexedTumors, ::labMeasurementsFromTumor)
+        writeRecords("who assessment", indexedTumors, ::whoAssessmentsFromTumor)
+        writeRecords("asa assessment", indexedTumors, ::asaAssessmentsFromTumor)
+        writeRecords("comorbidity assessment", indexedTumors, ::comorbidityAssessmentsFromTumor)
+        writeRecords("molecular result", indexedTumors, ::molecularResultsFromTumor)
+        writeRecords("lab measurement", indexedTumors, ::labMeasurementsFromTumor)
 
         val indexedTreatmentEpisodes = writeRecordsAndReturnIndexedList(
-            "treatmentEpisode",
+            "treatment episode",
             indexedTumors,
             Tables.TREATMENTEPISODE,
             ::treatmentEpisodesFromTumor
         )
-        writeRecords("gastroenterologyResection", indexedTreatmentEpisodes, ::gastroenterologyResectionsFromTreatmentEpisode)
-        writeRecords("primarySurgery", indexedTreatmentEpisodes, ::primarySurgeriesFromTreatmentEpisode)
-        writeRecords("metastaticSurgery", indexedTreatmentEpisodes, ::metastaticSurgeriesFromTreatmentEpisode)
-        writeRecords("hipecTreatment", indexedTreatmentEpisodes, ::hipecTreatmentsFromTreatmentEpisode)
-        writeRecords("primaryRadiotherapy", indexedTreatmentEpisodes, ::primaryRadiotherapiesFromTreatmentEpisode)
-        writeRecords("metastaticRadiotherapy", indexedTreatmentEpisodes, ::metastaticRadiotherapiesFromTreatmentEpisode)
+        writeRecords("gastroenterology resection", indexedTreatmentEpisodes, ::gastroenterologyResectionsFromTreatmentEpisode)
+        writeRecords("primary surgery", indexedTreatmentEpisodes, ::primarySurgeriesFromTreatmentEpisode)
+        writeRecords("metastatic surgery", indexedTreatmentEpisodes, ::metastaticSurgeriesFromTreatmentEpisode)
+        writeRecords("hipec treatment", indexedTreatmentEpisodes, ::hipecTreatmentsFromTreatmentEpisode)
+        writeRecords("primary radiotherapy", indexedTreatmentEpisodes, ::primaryRadiotherapiesFromTreatmentEpisode)
+        writeRecords("metastatic radiotherapy", indexedTreatmentEpisodes, ::metastaticRadiotherapiesFromTreatmentEpisode)
 
         val indexedSystemicTreatments = writeRecordsAndReturnIndexedList(
-            "systemicTreatment",
+            "systemic treatment",
             indexedTreatmentEpisodes,
             Tables.SYSTEMICTREATMENT,
             ::systemicTreatmentsFromTreatmentEpisode
         )
 
         val indexedSystemicTreatmentSchemes = writeRecordsAndReturnIndexedList(
-            "systemicTreatmentScheme",
+            "systemic treatment scheme",
             indexedSystemicTreatments,
             Tables.SYSTEMICTREATMENTSCHEME,
             ::systemicTreatmentSchemesFromSystemicTreatment
         )
 
-        writeRecords("systemicTreatmentDrug", indexedSystemicTreatmentSchemes, ::systemicTreatmentDrugFromSystemicTreatmentScheme)
-        writeRecords("responseMeasure", indexedTreatmentEpisodes, ::responseMeasuresFromTreatmentEpisode)
-        writeRecords("progressionMeasure", indexedTreatmentEpisodes, ::progressionMeasuresFromTreatmentEpisode)
+        writeRecords("systemic treatment drug", indexedSystemicTreatmentSchemes, ::systemicTreatmentDrugFromSystemicTreatmentScheme)
+        writeRecords("response measure", indexedTreatmentEpisodes, ::responseMeasuresFromTreatmentEpisode)
+        writeRecords("progression measure", indexedTreatmentEpisodes, ::progressionMeasuresFromTreatmentEpisode)
 
         writeDrugReferences()
         writeTumorLocationReferences()
@@ -104,13 +104,13 @@ class DatabaseWriter(private val context: DSLContext, private val connection: ja
         return indexedRecords
     }
 
-    private fun writeTumorsAndReferenceRecords(patientRecords: IndexedList<ReferencePatient>): IndexedList<Tumor> {
+    private fun writeTumorsAndReferenceEntries(patientRecords: IndexedList<ReferencePatient>): IndexedList<Tumor> {
         LOGGER.info { " Writing tumor records" }
 
         val (indexedRecords, rows) = patientRecords
             .flatMap { (patientId, referencePatient) ->
                 referencePatient.tumors.map { tumor ->
-                    val referenceRecord = ReferenceRecordFactory.create(referencePatient, tumor)
+                    val referenceRecord = ReferenceEntryFactory.create(referencePatient, tumor)
                     patientId to Pair(tumor, referenceRecord)  }
             }
             .withIndex()
@@ -122,15 +122,15 @@ class DatabaseWriter(private val context: DSLContext, private val connection: ja
                 tumorRecord.set(Tables.TUMOR.ID, tumorId)
                 tumorRecord.set(Tables.TUMOR.PATIENTID, patientId)
                 
-                val referenceRecord = context.newRecord(Tables.REFERENCERECORD)
+                val referenceRecord = context.newRecord(Tables.REFERENCEENTRY)
                 referenceRecord.from(tumorAndReference.second)
-                referenceRecord.set(Tables.REFERENCERECORD.TUMORID, tumorId)
+                referenceRecord.set(Tables.REFERENCEENTRY.TUMORID, tumorId)
                 
                 Pair(tumorId, tumorAndReference.first) to Pair(tumorRecord, referenceRecord)
             }.unzip()
 
         insertRows(rows.map { it.first }, "tumor")
-        insertRows(rows.map { it.second }, "referenceRecord")
+        insertRows(rows.map { it.second }, "reference entry")
         
         return indexedRecords
     }
