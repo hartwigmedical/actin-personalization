@@ -121,12 +121,15 @@ class DatabaseWriter(private val context: DSLContext, private val connection: ja
                 tumorRecord.from(tumorAndReference.first)
                 tumorRecord.set(Tables.TUMOR.ID, tumorId)
                 tumorRecord.set(Tables.TUMOR.PATIENTID, patientId)
+
+                val referenceEntry = tumorAndReference.second
+                val referenceEntryRecord = context.newRecord(Tables.REFERENCEENTRY)
+                referenceEntryRecord.from(referenceEntry)
+                referenceEntryRecord.set(Tables.REFERENCEENTRY.TUMORID, tumorId)
+                referenceEntryRecord.set(Tables.REFERENCEENTRY.SEX, referenceEntry.sex.name)
+                referenceEntryRecord.set(Tables.REFERENCEENTRY.SOURCE, referenceEntry.source.name)
                 
-                val referenceRecord = context.newRecord(Tables.REFERENCEENTRY)
-                referenceRecord.from(tumorAndReference.second)
-                referenceRecord.set(Tables.REFERENCEENTRY.TUMORID, tumorId)
-                
-                Pair(tumorId, tumorAndReference.first) to Pair(tumorRecord, referenceRecord)
+                Pair(tumorId, tumorAndReference.first) to Pair(tumorRecord, referenceEntryRecord)
             }.unzip()
 
         insertRows(rows.map { it.first }, "tumor")
