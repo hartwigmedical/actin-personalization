@@ -1,6 +1,5 @@
 package com.hartwig.actin.personalization.database
 
-import com.hartwig.actin.personalization.database.datamodel.ReferenceRecord
 import com.hartwig.actin.personalization.datamodel.ReferencePatient
 import com.hartwig.actin.personalization.datamodel.Tumor
 import com.hartwig.actin.personalization.datamodel.diagnosis.MetastaticDiagnosis
@@ -25,9 +24,8 @@ class DatabaseWriter(private val context: DSLContext, private val connection: ja
         connection.autoCommit = false
         clearAll()
 
-        val indexedReferencePatients = writeReferencePatients(referencePatients)
-        val indexedTumors = writeTumors(indexedReferencePatients)
-        writeReferenceRecords(ReferenceRecordFactory.create(referencePatients, indexedTumors))
+        val indexedPatients = writeReferencePatients(referencePatients)
+        val indexedTumors = writeTumorsAndReferenceRecords(indexedPatients)
         writeRecords("survivalMeasurement", indexedTumors, ::survivalMeasurementFromTumor)
         writeRecords("priorTumor", indexedTumors, ::priorTumorFromTumor)
         writeRecords("primaryDiagnosis", indexedTumors, ::primaryDiagnosisFromTumor)
@@ -90,9 +88,9 @@ class DatabaseWriter(private val context: DSLContext, private val connection: ja
         context.execute("SET FOREIGN_KEY_CHECKS = 1;")
     }
 
-    private fun writeReferencePatients(patientRecords: List<ReferencePatient>): IndexedList<ReferencePatient> {
+    private fun writeReferencePatients(referencePatients: List<ReferencePatient>): IndexedList<ReferencePatient> {
         LOGGER.info { " Writing patient records" }
-        val (indexedRecords, rows) = patientRecords.mapIndexed { index, record ->
+        val (indexedRecords, rows) = referencePatients.mapIndexed { index, record ->
             val patientId = index + 1
             val dbRecord = context.newRecord(Tables.PATIENT)
             dbRecord.from(record)
@@ -106,40 +104,37 @@ class DatabaseWriter(private val context: DSLContext, private val connection: ja
         return indexedRecords
     }
 
-    private fun writeTumors(patientRecords: IndexedList<ReferencePatient>): IndexedList<Tumor> {
+    private fun writeTumorsAndReferenceRecords(patientRecords: IndexedList<ReferencePatient>): IndexedList<Tumor> {
         LOGGER.info { " Writing tumor records" }
 
         val (indexedRecords, rows) = patientRecords
             .flatMap { (patientId, referencePatient) ->
-                referencePatient.tumors.map { tumor -> patientId to tumor }
+                referencePatient.tumors.map { tumor ->
+                    val referenceRecord = ReferenceRecordFactory.create(referencePatient, tumor)
+                    patientId to Pair(tumor, referenceRecord)  }
             }
             .withIndex()
             .map { (index, pair) ->
-                val (patientId, tumor) = pair
+                val (patientId, tumorAndReference) = pair
                 val tumorId = index + 1
-                val dbRecord = context.newRecord(Tables.TUMOR)
-                dbRecord.from(tumor)
-                dbRecord.set(Tables.TUMOR.ID, tumorId)
-                dbRecord.set(Tables.TUMOR.PATIENTID, patientId)
-                Pair(tumorId, tumor) to dbRecord
+                val tumorRecord = context.newRecord(Tables.TUMOR)
+                tumorRecord.from(tumorAndReference.first)
+                tumorRecord.set(Tables.TUMOR.ID, tumorId)
+                tumorRecord.set(Tables.TUMOR.PATIENTID, patientId)
+                
+                val referenceRecord = context.newRecord(Tables.REFERENCERECORD)
+                referenceRecord.from(tumorAndReference.second)
+                referenceRecord.set(Tables.REFERENCERECORD.TUMORID, tumorId)
+                
+                Pair(tumorId, tumorAndReference.first) to Pair(tumorRecord, referenceRecord)
             }.unzip()
 
-        insertRows(rows, "tumor")
+        insertRows(rows.map { it.first }, "tumor")
+        insertRows(rows.map { it.second }, "referenceRecord")
+        
         return indexedRecords
     }
-
-    private fun writeReferenceRecords(referenceRecords: List<ReferenceRecord>) {
-        LOGGER.info { " Writing reference records" }
-        
-        val rows = referenceRecords.map { record ->
-            val dbRecord = context.newRecord(Tables.REFERENCERECORD)
-            dbRecord.from(record)
-            dbRecord
-        }
-
-        insertRows(rows, "referenceRecord")
-    }
-
+    
     private fun <T, U : TableRecord<*>, V> writeRecordsAndReturnIndexedList(
         name: String, indexedRecords: IndexedList<T>, table: Table<U>, recordMapper: (Int, T) -> List<Pair<V, U>>
     ): IndexedList<V> {

@@ -330,8 +330,7 @@ CREATE TABLE `tumorLocationReference` (
 
 DROP TABLE IF EXISTS `referenceRecord`;
 CREATE TABLE `referenceRecord` (
-    `id` INT NOT NULL AUTO_INCREMENT,
-    `tumorId` INT,
+    `tumorId` INT NOT NULL,
     `diagnosisYear` INT,
     `ageAtDiagnosis` INT,
     `sex` TEXT, 
@@ -415,7 +414,7 @@ CREATE TABLE `referenceRecord` (
     `observedOsFromTreatmentStartDays` DOUBLE,
     `systemicTreatmentPlanDuration` DOUBLE,
     FOREIGN KEY (`tumorId`) REFERENCES `tumor`(`id`),
-    PRIMARY KEY (`id`)
+    PRIMARY KEY (`tumorId`)
 );
 
 SET FOREIGN_KEY_CHECKS = 1;

@@ -1,7 +1,6 @@
 package com.hartwig.actin.personalization.database.datamodel
 
 data class ReferenceRecord(
-    val tumorId: Int = 0,
     val diagnosisYear: Int = 0,
     val ageAtDiagnosis: Int = 0,
     val sex: String = "",
