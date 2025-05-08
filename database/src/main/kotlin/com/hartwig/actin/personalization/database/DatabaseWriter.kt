@@ -1,5 +1,6 @@
 package com.hartwig.actin.personalization.database
 
+import com.hartwig.actin.personalization.database.datamodel.ReferenceRecord
 import com.hartwig.actin.personalization.datamodel.ReferencePatient
 import com.hartwig.actin.personalization.datamodel.Tumor
 import com.hartwig.actin.personalization.datamodel.diagnosis.MetastaticDiagnosis
@@ -26,6 +27,7 @@ class DatabaseWriter(private val context: DSLContext, private val connection: ja
 
         val indexedReferencePatients = writeReferencePatients(referencePatients)
         val indexedTumors = writeTumors(indexedReferencePatients)
+        writeReferenceRecords(ReferenceRecordFactory.create(referencePatients, indexedTumors))
         writeRecords("survivalMeasurement", indexedTumors, ::survivalMeasurementFromTumor)
         writeRecords("priorTumor", indexedTumors, ::priorTumorFromTumor)
         writeRecords("primaryDiagnosis", indexedTumors, ::primaryDiagnosisFromTumor)
@@ -126,6 +128,18 @@ class DatabaseWriter(private val context: DSLContext, private val connection: ja
         return indexedRecords
     }
 
+    private fun writeReferenceRecords(referenceRecords: List<ReferenceRecord>) {
+        LOGGER.info { " Writing reference records" }
+        
+        val rows = referenceRecords.map { record ->
+            val dbRecord = context.newRecord(Tables.REFERENCERECORD)
+            dbRecord.from(record)
+            dbRecord
+        }
+
+        insertRows(rows, "referenceRecord")
+    }
+
     private fun <T, U : TableRecord<*>, V> writeRecordsAndReturnIndexedList(
         name: String, indexedRecords: IndexedList<T>, table: Table<U>, recordMapper: (Int, T) -> List<Pair<V, U>>
     ): IndexedList<V> {
@@ -153,7 +167,7 @@ class DatabaseWriter(private val context: DSLContext, private val connection: ja
         connection.commit()
         LOGGER.info { "  Inserted ${rows.size} $name records" }
     }
-
+    
     private fun survivalMeasurementFromTumor(tumorId: Int, tumor: Tumor) =
         listOf(extractSimpleRecord(Tables.SURVIVALMEASUREMENT, tumor.latestSurvivalMeasurement, "tumorId", tumorId))
 
@@ -176,12 +190,12 @@ class DatabaseWriter(private val context: DSLContext, private val connection: ja
             dbRecord.set(Tables.PRIMARYDIAGNOSIS.PRIMARYTUMORLOCATION, primaryDiagnosis.primaryTumorLocation.name)
             dbRecord.set(Tables.PRIMARYDIAGNOSIS.ANORECTALVERGEDISTANCECATEGORY, primaryDiagnosis.anorectalVergeDistanceCategory?.name)
             dbRecord.set(Tables.PRIMARYDIAGNOSIS.DIFFERENTIATIONGRADE, primaryDiagnosis.differentiationGrade?.name)
-            dbRecord.set(Tables.PRIMARYDIAGNOSIS.CLINICALTNMT,primaryDiagnosis.clinicalTnmClassification.tnmT?.name)
-            dbRecord.set(Tables.PRIMARYDIAGNOSIS.CLINICALTNMN,primaryDiagnosis.clinicalTnmClassification.tnmN?.name)
-            dbRecord.set(Tables.PRIMARYDIAGNOSIS.CLINICALTNMM,primaryDiagnosis.clinicalTnmClassification.tnmM?.name)
-            dbRecord.set(Tables.PRIMARYDIAGNOSIS.PATHOLOGICALTNMT,primaryDiagnosis.pathologicalTnmClassification.tnmT?.name)
-            dbRecord.set(Tables.PRIMARYDIAGNOSIS.PATHOLOGICALTNMN,primaryDiagnosis.pathologicalTnmClassification.tnmN?.name)
-            dbRecord.set(Tables.PRIMARYDIAGNOSIS.PATHOLOGICALTNMM,primaryDiagnosis.pathologicalTnmClassification.tnmM?.name)
+            dbRecord.set(Tables.PRIMARYDIAGNOSIS.CLINICALTNMT, primaryDiagnosis.clinicalTnmClassification.tnmT?.name)
+            dbRecord.set(Tables.PRIMARYDIAGNOSIS.CLINICALTNMN, primaryDiagnosis.clinicalTnmClassification.tnmN?.name)
+            dbRecord.set(Tables.PRIMARYDIAGNOSIS.CLINICALTNMM, primaryDiagnosis.clinicalTnmClassification.tnmM?.name)
+            dbRecord.set(Tables.PRIMARYDIAGNOSIS.PATHOLOGICALTNMT, primaryDiagnosis.pathologicalTnmClassification.tnmT?.name)
+            dbRecord.set(Tables.PRIMARYDIAGNOSIS.PATHOLOGICALTNMN, primaryDiagnosis.pathologicalTnmClassification.tnmN?.name)
+            dbRecord.set(Tables.PRIMARYDIAGNOSIS.PATHOLOGICALTNMM, primaryDiagnosis.pathologicalTnmClassification.tnmM?.name)
             dbRecord.set(Tables.PRIMARYDIAGNOSIS.CLINICALTUMORSTAGE, primaryDiagnosis.clinicalTumorStage.name)
             dbRecord.set(Tables.PRIMARYDIAGNOSIS.PATHOLOGICALTUMORSTAGE, primaryDiagnosis.pathologicalTumorStage.name)
             dbRecord.set(Tables.PRIMARYDIAGNOSIS.VENOUSINVASIONDESCRIPTION, primaryDiagnosis.venousInvasionDescription?.name)
