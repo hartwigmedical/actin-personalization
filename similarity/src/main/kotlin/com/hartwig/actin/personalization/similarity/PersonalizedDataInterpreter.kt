@@ -11,7 +11,7 @@ import com.hartwig.actin.personalization.similarity.population.PopulationDefinit
 import com.hartwig.actin.personalization.similarity.selection.TreatmentSelection
 import io.github.oshai.kotlinlogging.KotlinLogging
 
-class PersonalizedDataInterpreter(val tumorsByTreatment: List<Pair<TreatmentGroup, List<Tumor>>>) {
+class PersonalizedDataInterpreter(val entriesByTreatment: List<Pair<TreatmentGroup, List<Tumor>>>) {
 
     fun analyzePatient(
         age: Int,
@@ -22,7 +22,7 @@ class PersonalizedDataInterpreter(val tumorsByTreatment: List<Pair<TreatmentGrou
         val populationDefinitions =
             PopulationDefinition.createAllForPatientProfile(age, whoStatus, hasRasMutation, metastasisLocationGroups)
 
-        return PatientPopulationBreakdown(tumorsByTreatment, populationDefinitions).analyze()
+        return PatientPopulationBreakdown(entriesByTreatment, populationDefinitions).analyze()
     }
 
     companion object {
@@ -37,22 +37,22 @@ class PersonalizedDataInterpreter(val tumorsByTreatment: List<Pair<TreatmentGrou
         }
 
         fun createFromReferencePatients(patients: List<ReferencePatient>): PersonalizedDataInterpreter {
-            val referenceTumors = patients
+            val referenceEntries = patients
                 .flatMap(ReferencePatient::tumors)
                 .filter { hasMetastaticTreatmentEpisodeWithSystemicTreatmentOnly(it) }
 
-            val tumorsByTreatment = referenceTumors.groupBy { tumor ->
-                TreatmentSelection.firstSpecificMetastaticSystemicTreatment(tumor)!!.treatment.treatmentGroup
+            val entriesByTreatment = referenceEntries.groupBy { entry ->
+                TreatmentSelection.firstSpecificMetastaticSystemicTreatment(entry)!!.treatment.treatmentGroup
             }
                 .toList()
                 .sortedByDescending { it.second.size }
 
-            return PersonalizedDataInterpreter(tumorsByTreatment)
+            return PersonalizedDataInterpreter(entriesByTreatment)
         }
 
-        private fun hasMetastaticTreatmentEpisodeWithSystemicTreatmentOnly(tumor: Tumor): Boolean {
-            // TODO (KD): Review whether filtering remains consistent with view in SQL.
-            val metastaticTreatmentEpisode = TreatmentSelection.extractMetastaticTreatmentEpisode(tumor) ?: return false
+        private fun hasMetastaticTreatmentEpisodeWithSystemicTreatmentOnly(entry: Tumor): Boolean {
+            // TODO (KD): Review whether filtering remains consistent with data frame used by notebooks eventually.
+            val metastaticTreatmentEpisode = TreatmentSelection.extractMetastaticTreatmentEpisode(entry) ?: return false
 
             return with(metastaticTreatmentEpisode) {
                 TreatmentSelection.extractFirstSpecificSystemicTreatment(metastaticTreatmentEpisode) != null &&

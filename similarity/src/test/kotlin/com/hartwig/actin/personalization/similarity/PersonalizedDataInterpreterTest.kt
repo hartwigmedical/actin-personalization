@@ -12,12 +12,12 @@ class PersonalizedDataInterpreterTest {
 
     @Test
     fun `Should create interpreter with filtered and grouped patient records`() {
-        val fluorouracilTumor = TestDatamodelFactory.tumor(systemicTreatment = Treatment.FLUOROURACIL)
-        val capecitabineTumor = TestDatamodelFactory.tumor(systemicTreatment = Treatment.CAPECITABINE)
-        val capoxTumor = TestDatamodelFactory.tumor(systemicTreatment = Treatment.CAPOX)
+        val fluorouracilEntry = TestDatamodelFactory.tumor(systemicTreatment = Treatment.FLUOROURACIL)
+        val capecitabineEntry = TestDatamodelFactory.tumor(systemicTreatment = Treatment.CAPECITABINE)
+        val capoxEntry = TestDatamodelFactory.tumor(systemicTreatment = Treatment.CAPOX)
 
         val patients = listOf(
-            TestDatamodelFactory.patient(fluorouracilTumor),
+            TestDatamodelFactory.patient(fluorouracilEntry),
             TestDatamodelFactory.patient(
                 TestDatamodelFactory.tumor(
                     systemicTreatment = Treatment.FLUOROURACIL,
@@ -29,24 +29,24 @@ class PersonalizedDataInterpreterTest {
             TestDatamodelFactory.patient(
                 TestDatamodelFactory.tumor(systemicTreatment = Treatment.FLUOROURACIL, primarySurgeryType = SurgeryType.NOS_OR_OTHER)
             ),
-            TestDatamodelFactory.patient(capecitabineTumor),
-            TestDatamodelFactory.patient(capoxTumor)
+            TestDatamodelFactory.patient(capecitabineEntry),
+            TestDatamodelFactory.patient(capoxEntry)
         )
 
         val interpreter = PersonalizedDataInterpreter.createFromReferencePatients(patients)
 
-        val expectedGroupedTumors = mapOf(
+        val expectedGroupedEntries = mapOf(
             TreatmentGroup.CAPECITABINE_OR_FLUOROURACIL to listOf(
-                fluorouracilTumor,
-                capecitabineTumor
+                fluorouracilEntry,
+                capecitabineEntry
             ),
             TreatmentGroup.CAPOX_OR_FOLFOX to listOf(
-                capoxTumor
+                capoxEntry
             )
         )
 
-        assertThat(interpreter.tumorsByTreatment).containsExactlyInAnyOrder(
-            *expectedGroupedTumors.entries.map { it.toPair() }.toTypedArray()
+        assertThat(interpreter.entriesByTreatment).containsExactlyInAnyOrder(
+            *expectedGroupedEntries.entries.map { it.toPair() }.toTypedArray()
         )
     }
 }

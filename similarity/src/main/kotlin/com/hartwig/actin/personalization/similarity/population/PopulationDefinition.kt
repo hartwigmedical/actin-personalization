@@ -18,12 +18,12 @@ data class PopulationDefinition(val name: String, val criteria: (Tumor) -> Boole
             return listOf(
                 PopulationDefinition(ALL_PATIENTS_POPULATION_NAME) { true },
                 PopulationDefinition("Age $minAge-${maxAge}y") { it.ageAtDiagnosis in minAge..maxAge },
-                PopulationDefinition("WHO $whoStatus") { tumor -> tumor.whoAssessments.any { it.whoStatus == whoStatus } },
+                PopulationDefinition("WHO $whoStatus") { entry -> entry.whoAssessments.any { it.whoStatus == whoStatus } },
                 PopulationDefinition(
                     "RAS ${if (hasRasMutation) "positive" else "negative"}"
-                ) { tumor -> tumor.molecularResults.any { it.hasRasMutation == hasRasMutation } },
-                PopulationDefinition("${formatLocationGroups(metastasisLocationGroups)} lesions") { tumor ->
-                    tumorMatchesMetastasisLocationGroups(tumor, metastasisLocationGroups)
+                ) { entry -> entry.molecularResults.any { it.hasRasMutation == hasRasMutation } },
+                PopulationDefinition("${formatLocationGroups(metastasisLocationGroups)} lesions") { entry ->
+                    entryMatchesMetastasisLocationGroups(entry, metastasisLocationGroups)
                 }
             )
         }
@@ -37,11 +37,11 @@ data class PopulationDefinition(val name: String, val criteria: (Tumor) -> Boole
             }
         }
 
-        private fun tumorMatchesMetastasisLocationGroups(tumor: Tumor, metastasisLocationGroups: Set<LocationGroup>): Boolean {
+        private fun entryMatchesMetastasisLocationGroups(entry: Tumor, metastasisLocationGroups: Set<LocationGroup>): Boolean {
             val cutoffDays =
-                TreatmentSelection.firstSpecificMetastaticSystemicTreatment(tumor)?.daysBetweenDiagnosisAndStart ?: Int.MAX_VALUE
+                TreatmentSelection.firstSpecificMetastaticSystemicTreatment(entry)?.daysBetweenDiagnosisAndStart ?: Int.MAX_VALUE
 
-            val groups = tumor.metastaticDiagnosis.metastases.filter { metastasis ->
+            val groups = entry.metastaticDiagnosis.metastases.filter { metastasis ->
                 metastasis.daysSinceDiagnosis?.let { it < cutoffDays } == true
             }
                 .map { it.location.locationGroup.topLevelGroup() }

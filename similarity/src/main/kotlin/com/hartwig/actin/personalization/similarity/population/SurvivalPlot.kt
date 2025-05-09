@@ -9,7 +9,8 @@ import org.jetbrains.kotlinx.kandy.letsplot.layers.step
 
 object SurvivalPlot {
     
-    private const val MIN_PATIENT_COUNT = 20
+    private const val MIN_ENTRY_COUNT = 20
+    
     private val percentageArray = (0..100 step 10).map { it / 100.0 to "$it%" }.toTypedArray()
 
     fun createSurvivalPlot(
@@ -17,11 +18,11 @@ object SurvivalPlot {
         calculation: SurvivalCalculation,
         yAxisLabel: String
     ): Plot? {
-        val historiesByName = sortedPopulationsByName.mapValues { (_, patients) ->
-            val eligiblePatients = patients.filter(calculation::isEligible)
-            calculation.buildEventHistory(eligiblePatients)
+        val historiesByName = sortedPopulationsByName.mapValues { (_, entries) ->
+            val eligibleEntries = entries.filter(calculation::isEligible)
+            calculation.buildEventHistory(eligibleEntries)
         }.filter { (_, histories) ->
-            histories.size >= MIN_PATIENT_COUNT
+            histories.size >= MIN_ENTRY_COUNT
         }
 
         return historiesByName.values.maxOfOrNull { it.last().daysSinceStart }?.let { longestInterval ->

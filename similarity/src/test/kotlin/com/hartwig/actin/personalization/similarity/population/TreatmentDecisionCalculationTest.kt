@@ -21,7 +21,7 @@ class TreatmentDecisionCalculationTest {
         val patients = listOf(tumor, tumor, tumor)
         val measurement = TreatmentDecisionCalculation.calculate(patients, ELIGIBLE_SUB_POPULATION_SIZE)
         assertThat(measurement.value).isEqualTo(0.03)
-        assertThat(measurement.numPatients).isEqualTo(3)
+        assertThat(measurement.numEntries).isEqualTo(3)
     }
 
     @Test

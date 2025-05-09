@@ -5,9 +5,9 @@ import com.hartwig.actin.personalization.similarity.report.TableElement
 
 interface Calculation {
 
-    fun isEligible(tumor: Tumor): Boolean
+    fun isEligible(entry: Tumor): Boolean
 
-    fun calculate(tumors: List<Tumor>, eligiblePopulationSize: Int): Measurement
+    fun calculate(entries: List<Tumor>, eligiblePopulationSize: Int): Measurement
 
     fun createTableElement(measurement: Measurement): TableElement
 

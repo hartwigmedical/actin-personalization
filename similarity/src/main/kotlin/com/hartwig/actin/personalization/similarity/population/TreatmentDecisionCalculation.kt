@@ -6,10 +6,10 @@ import com.hartwig.actin.personalization.similarity.report.percentage
 
 object TreatmentDecisionCalculation : Calculation {
 
-    override fun isEligible(tumor: Tumor) = true
+    override fun isEligible(entry: Tumor) = true
 
-    override fun calculate(tumors: List<Tumor>, eligiblePopulationSize: Int): Measurement {
-        return Measurement(tumors.size.toDouble() / eligiblePopulationSize, tumors.size)
+    override fun calculate(entries: List<Tumor>, eligiblePopulationSize: Int): Measurement {
+        return Measurement(entries.size.toDouble() / eligiblePopulationSize, entries.size)
     }
 
     override fun createTableElement(measurement: Measurement): TableElement {

@@ -27,13 +27,13 @@ class SurvivalCalculation(
 
     private val minPatientCount = 20
 
-    override fun isEligible(tumor: Tumor): Boolean {
-        return eventFunction(tumor) != null && timeFunction(tumor) != null
+    override fun isEligible(entry: Tumor): Boolean {
+        return eventFunction(entry) != null && timeFunction(entry) != null
     }
 
-    override fun calculate(tumors: List<Tumor>, eligiblePopulationSize: Int): Measurement {
-        val eligibleTumors = tumors.filter { isEligible(it) }
-        val eventHistory = buildEventHistory(eligibleTumors.sortedBy(timeFunction))
+    override fun calculate(entries: List<Tumor>, eligiblePopulationSize: Int): Measurement {
+        val eligibleEntries = entries.filter { isEligible(it) }
+        val eventHistory = buildEventHistory(eligibleEntries.sortedBy(timeFunction))
 
         if (eventHistory.isEmpty()) {
             return Measurement(Double.NaN, 0, null, null, Double.NaN)
@@ -41,7 +41,7 @@ class SurvivalCalculation(
 
         return Measurement(
             survivalForQuartile(eventHistory, 0.5),
-            eligibleTumors.size,
+            eligibleEntries.size,
             eventHistory.firstOrNull()?.daysSinceStart,
             eventHistory.lastOrNull()?.daysSinceStart,
             survivalForQuartile(eventHistory, 0.75) - survivalForQuartile(eventHistory, 0.25)
@@ -58,11 +58,11 @@ class SurvivalCalculation(
     
     override fun createTableElement(measurement: Measurement): TableElement {
         return when {
-            measurement.numPatients <= minPatientCount -> TableElement.regular("n≤$minPatientCount")
+            measurement.numEntries <= minPatientCount -> TableElement.regular("n≤$minPatientCount")
             measurement.value.isNaN() -> TableElement.regular("-")
             else -> with(measurement) {
                 val iqrString = if (iqr != null && !iqr.isNaN()) ", IQR: $iqr" else ""
-                TableElement(value.toString(), "${iqrString}\n(n=$numPatients)")
+                TableElement(value.toString(), "${iqrString}\n(n=$numEntries)")
             }
         }
     }

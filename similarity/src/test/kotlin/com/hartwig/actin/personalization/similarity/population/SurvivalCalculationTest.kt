@@ -50,39 +50,39 @@ class SurvivalCalculationTest {
         }
 
         private fun testEligibility(calculation: SurvivalCalculation, type: SurvivalType) {
-            val createTumor: (Int?, Boolean) -> Tumor = { days, hadEvent ->
-                tumorWithSurvivalDays(
+            val createEntry: (Int?, Boolean) -> Tumor = { days, hadEvent ->
+                entryWithSurvivalDays(
                     osDays = if (type == SurvivalType.OS) days ?: 0 else 0,
                     pfsDays = if (type == SurvivalType.PFS) days else null,
                     hadEvent = hadEvent
                 )
             }
-            assertThat(calculation.isEligible(createTumor(100, true))).describedAs("Eligibility for $type").isTrue()
-            assertThat(calculation.isEligible(createTumor(100, false))).describedAs("Eligibility for $type").isTrue()
+            assertThat(calculation.isEligible(createEntry(100, true))).describedAs("Eligibility for $type").isTrue()
+            assertThat(calculation.isEligible(createEntry(100, false))).describedAs("Eligibility for $type").isTrue()
 
             if (type == SurvivalType.PFS) {
-                assertThat(calculation.isEligible(createTumor(null, true))).describedAs("Eligibility for $type with null days").isFalse()
+                assertThat(calculation.isEligible(createEntry(null, true))).describedAs("Eligibility for $type with null days").isFalse()
             }
         }
 
         private fun testMedianSurvival(calculation: SurvivalCalculation, type: SurvivalType) {
-            val tumors = survivalList.map { data ->
-                tumorWithSurvivalDays(
+            val entries = survivalList.map { data ->
+                entryWithSurvivalDays(
                     osDays = if (type == SurvivalType.OS) data.osDays ?: 0 else 0,
                     pfsDays = if (type == SurvivalType.PFS) data.pfsDays else null,
                     hadEvent = true
                 )
             }
-            val measurement = calculation.calculate(tumors, ELIGIBLE_SUB_POPULATION_SIZE)
+            val measurement = calculation.calculate(entries, ELIGIBLE_SUB_POPULATION_SIZE)
             assertThat(measurement.value).describedAs("Median survival value for $type").isEqualTo(200.0)
-            assertThat(measurement.numPatients).describedAs("Number of patients for $type").isEqualTo(7)
+            assertThat(measurement.numEntries).describedAs("Number of patients for $type").isEqualTo(7)
             assertThat(measurement.min).describedAs("Minimum survival for $type").isEqualTo(25)
             assertThat(measurement.max).describedAs("Maximum survival for $type").isEqualTo(1600)
             assertThat(measurement.iqr).describedAs("IQR for $type").isEqualTo(750.0)
         }
     }
 
-    private fun tumorWithSurvivalDays(
+    private fun entryWithSurvivalDays(
         osDays: Int = 0,
         pfsDays: Int? = null,
         hadEvent: Boolean = true
@@ -122,7 +122,7 @@ class SurvivalCalculationTest {
     fun `Should return empty measurement for empty population`() {
         val measurement = survivalCalculation.calculate(emptyList(), ELIGIBLE_SUB_POPULATION_SIZE)
         assertThat(measurement.value).isNaN()
-        assertThat(measurement.numPatients).isEqualTo(0)
+        assertThat(measurement.numEntries).isEqualTo(0)
         assertThat(measurement.min).isNull()
         assertThat(measurement.max).isNull()
         assertThat(measurement.iqr).isNaN()
