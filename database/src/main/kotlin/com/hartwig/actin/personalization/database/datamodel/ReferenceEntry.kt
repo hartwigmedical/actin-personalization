@@ -4,9 +4,18 @@ import com.hartwig.actin.personalization.datamodel.ReferenceSource
 import com.hartwig.actin.personalization.datamodel.Sex
 import com.hartwig.actin.personalization.datamodel.diagnosis.AnorectalVergeDistanceCategory
 import com.hartwig.actin.personalization.datamodel.diagnosis.BasisOfDiagnosis
+import com.hartwig.actin.personalization.datamodel.diagnosis.DifferentiationGrade
+import com.hartwig.actin.personalization.datamodel.diagnosis.ExtraMuralInvasionCategory
+import com.hartwig.actin.personalization.datamodel.diagnosis.LymphaticInvasionCategory
 import com.hartwig.actin.personalization.datamodel.diagnosis.Sidedness
+import com.hartwig.actin.personalization.datamodel.diagnosis.TnmM
+import com.hartwig.actin.personalization.datamodel.diagnosis.TnmN
+import com.hartwig.actin.personalization.datamodel.diagnosis.TnmT
 import com.hartwig.actin.personalization.datamodel.diagnosis.TumorLocation
+import com.hartwig.actin.personalization.datamodel.diagnosis.TumorRegression
+import com.hartwig.actin.personalization.datamodel.diagnosis.TumorStage
 import com.hartwig.actin.personalization.datamodel.diagnosis.TumorType
+import com.hartwig.actin.personalization.datamodel.diagnosis.VenousInvasionDescription
 
 data class ReferenceEntry(
     val source: ReferenceSource,
@@ -23,24 +32,24 @@ data class ReferenceEntry(
     val sidedness: Sidedness?,
     val anorectalVergeDistanceCategory: AnorectalVergeDistanceCategory?,
     val mesorectalFasciaIsClear: Boolean?,
-    val distanceToMesorectalFasciaMm: Double,
-    val differentiationGrade: String,
-    val clinicalTnmT: String,
-    val clinicalTnmN: String,
-    val clinicalTnmM: String,
-    val pathologicalTnmT: String,
-    val pathologicalTnmN: String,
-    val pathologicalTnmM: String,
-    val clinicalTumorStage: String,
-    val pathologicalTumorStage: String,
-    val investigatedLymphNodesCountPrimaryDiagnosis: Double,
-    val positiveLymphNodesCountPrimaryDiagnosis: Double,
-    val presentedWithIleus: Double,
-    val presentedWithPerforation: Double,
-    val venousInvasionDescription: String,
-    val lymphaticInvasionCategory: String,
-    val extraMuralInvasionCategory: String,
-    val tumorRegression: String,
+    val distanceToMesorectalFasciaMm: Int?,
+    val differentiationGrade: DifferentiationGrade?,
+    val clinicalTnmT: TnmT?,
+    val clinicalTnmN: TnmN?,
+    val clinicalTnmM: TnmM?,
+    val pathologicalTnmT: TnmT?,
+    val pathologicalTnmN: TnmN?,
+    val pathologicalTnmM: TnmM?,
+    val clinicalTumorStage: TumorStage,
+    val pathologicalTumorStage: TumorStage,
+    val investigatedLymphNodesCountPrimaryDiagnosis: Int?,
+    val positiveLymphNodesCountPrimaryDiagnosis: Int?,
+    val presentedWithIleus: Boolean?,
+    val presentedWithPerforation: Boolean?,
+    val venousInvasionDescription: VenousInvasionDescription?,
+    val lymphaticInvasionCategory: LymphaticInvasionCategory?,
+    val extraMuralInvasionCategory: ExtraMuralInvasionCategory?,
+    val tumorRegression: TumorRegression?,
     val isMetachronous: Int,
     val numberOfLiverMetastases: String,
     val maximumSizeOfLiverMetastasisMm: Double,
