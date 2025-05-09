@@ -72,6 +72,10 @@ object TestReferencePatientFactory {
     )
 
     fun exhaustiveReferencePatient() = ReferencePatient(
+        source = ReferenceSource.INTERNAL, sourceId = 2, sex = Sex.MALE, tumors = listOf(exhaustiveTumor())
+    )
+
+    fun referencePatientWithMultipleTumors() = ReferencePatient(
         source = ReferenceSource.INTERNAL, sourceId = 3, sex = Sex.MALE, tumors = listOf(emptyTumor(), minimalTumor(), exhaustiveTumor())
     )
 

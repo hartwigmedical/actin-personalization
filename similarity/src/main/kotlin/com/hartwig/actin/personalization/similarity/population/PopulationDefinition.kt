@@ -14,8 +14,7 @@ data class PopulationDefinition(val name: String, val criteria: (Tumor) -> Boole
         ): List<PopulationDefinition> {
             val minAge = age - 5
             val maxAge = age + 5
-
-            // TODO (KD): Review, this is just first version. 
+            
             return listOf(
                 PopulationDefinition(ALL_PATIENTS_POPULATION_NAME) { true },
                 PopulationDefinition("Age $minAge-${maxAge}y") { it.ageAtDiagnosis in minAge..maxAge },

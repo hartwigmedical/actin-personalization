@@ -12,7 +12,8 @@ class ReferencePatientJsonTest {
         listOf(
             TestReferencePatientFactory.emptyReferencePatient(),
             TestReferencePatientFactory.minimalReferencePatient(),
-            TestReferencePatientFactory.exhaustiveReferencePatient()
+            TestReferencePatientFactory.exhaustiveReferencePatient(),
+            TestReferencePatientFactory.referencePatientWithMultipleTumors()
         )
 
     @Test

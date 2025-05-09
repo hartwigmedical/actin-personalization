@@ -19,7 +19,7 @@ import java.sql.DriverManager
 private typealias IndexedList<T> = List<Pair<Int, T>>
 
 class DatabaseWriter(private val context: DSLContext, private val connection: java.sql.Connection) {
-
+    
     fun writeAllToDb(referencePatients: List<ReferencePatient>) {
         connection.autoCommit = false
         clearAll()
@@ -396,10 +396,6 @@ class DatabaseWriter(private val context: DSLContext, private val connection: ja
         insertRows(rows, "location")
     }
 
-    private fun concat(items: Iterable<Any>): String {
-        return items.joinToString(";")
-    }
-
     companion object {
         private val LOGGER = KotlinLogging.logger {}
 
@@ -412,6 +408,10 @@ class DatabaseWriter(private val context: DSLContext, private val connection: ja
             LOGGER.info { "Connecting to database '${conn.catalog}'" }
             val context = DSL.using(conn, SQLDialect.MYSQL)
             return DatabaseWriter(context, conn)
+        }
+
+        fun concat(items: Iterable<Any>): String {
+            return items.joinToString(";")
         }
     }
 }
