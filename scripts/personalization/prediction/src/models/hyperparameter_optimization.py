@@ -4,8 +4,11 @@ from typing import List, Dict, Tuple, Union, Any, Optional
 
 from .model_trainer import *
 from .survival_models import BaseSurvivalModel
+from src.utils.settings import settings
+from .configs.model_configurations import *
 
-def random_parameter_search(param_dict: Dict[str, List[Any]], n_samples: int) -> List[Dict[str, Any]]:
+
+def random_parameter_search(param_dict: Dict[str, List[Any]]) -> List[Dict[str, Any]]:
     """
     Randomly sample `n_samples` parameter combinations from the given param_dict.
     param_dict should be a dict of lists, e.g.:
@@ -18,28 +21,23 @@ def random_parameter_search(param_dict: Dict[str, List[Any]], n_samples: int) ->
     values = [param_dict[k] for k in keys]
 
     all_combos = list(product(*values))
-    if len(all_combos) <= n_samples:
+    if len(all_combos) <= settings.hyperparam_tuning_number_combinations:
         return [dict(zip(keys, combo)) for combo in all_combos]
 
-    sampled_combos = random.sample(all_combos, n_samples)
+    sampled_combos = random.sample(all_combos, settings.hyperparam_tuning_number_combinations)
     return [dict(zip(keys, combo)) for combo in sampled_combos]
 
 def hyperparameter_search(
     X_train: pd.DataFrame, y_train: pd.DataFrame, X_test: pd.DataFrame, y_test: pd.DataFrame,
-    treatment_col: str, 
     encoded_columns: Dict[str, List[str]], 
-    event_col: str, duration_col: str, 
-    max_time: int, 
     base_models: Dict[str, BaseSurvivalModel], 
     param_grids: Dict[str, List[Dict[str, Any]]], 
-    metric_comparison: str = 'auc', 
-    n_samples: int = 20, 
     random_state: int = 42
 ):
     random.seed(random_state)
     best_models = {}
     all_results = {}
-    trainer = ModelTrainer(models={}, n_splits=5, random_state=random_state)
+    trainer = ModelTrainer(models={})
 
     for model_name, model_instance in base_models.items():
         model_class = type(model_instance)
@@ -54,7 +52,7 @@ def hyperparameter_search(
         all_results[model_name] = []
 
         for param_dict in param_grids[model_name]:
-            sampled_params = random_parameter_search(param_dict, n_samples)
+            sampled_params = random_parameter_search(param_dict)
           
             for params in sampled_params:
                 if issubclass(model_class, NNSurvivalModel):
@@ -68,12 +66,9 @@ def hyperparameter_search(
                 results, trained_models = trainer.train_and_evaluate(
                     X_train, y_train, X_test, y_test,
                     encoded_columns=encoded_columns,
-                    event_col=event_col,
-                    duration_col=duration_col, 
-                    save_models = False
                 )
                 
-                current_score = results[model_name][metric_comparison]
+                current_score = results[model_name][settings.hyperparam_tuning_optimization_metric]
                 all_results[model_name].append((params, results[model_name]))
 
                 if current_score > best_score:
@@ -81,8 +76,10 @@ def hyperparameter_search(
                     best_params = params
                     best_model_trained = trained_models[model_name]
 
-
         best_models[model_name] = (best_model_trained, best_params)
         print(f"Best params for {model_name}: {best_params} with auc={best_score}")
+        
+        ExperimentConfig.update_model_hyperparams({model_name: (best_model_trained, best_params)})
+
 
     return best_models, all_results

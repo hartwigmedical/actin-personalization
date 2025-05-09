@@ -1,202 +1,71 @@
-from src.models.survival_models import *
+import json
+import os
+import importlib
 
-os_configs = {
-    'DeepSurv': (
-        DeepSurv, 
-        { 
-            'num_nodes': [256, 128, 64],
-            'batch_norm': False,
-            'dropout': 0.1,
-            'weight_decay': 0.0001,
-            'lr': 0.001,
-            'activation': 'relu',
-            'optimizer': 'RMSprop',
-            'batch_size': 32,
-            'epochs': 500,
-        }
-    ),
-    'LogisticHazardModel': (
-        LogisticHazardModel, 
-        {
-            'num_nodes': [256, 128, 64],
-            'lr': 0.0005,
-            'dropout': 0.15,
-            'batch_size': 128,
-            'epochs': 500,
-            'early_stopping_patience': 50,
-            'optimizer': 'RMSprop',
-        }
-    ),
-    'DeepHitModel': (
-        DeepHitModel, 
-        {
-            'num_nodes': [64, 32],
-            'activation': 'elu',
-            'alpha': 0.2,
-            'sigma': 0.1,
-            'weight_decay': 0.0001,
-            'optimizer': 'Adam',
-            'dropout': 0.1,
-            'lr': 1e-3,
-        }
-    ),
-    'PCHazardModel': (
-        PCHazardModel, 
-        {  
-            'num_nodes': [256, 128, 64],
-            'batch_norm': True,
-            'dropout': 0.15,
-            'lr': 0.01,
-            'batch_size': 32,
-            'epochs': 500,
-            'optimizer': 'Adam',
-        }
-    ),
-    'MTLRModel': (
-        MTLRModel, 
-        {
-            'num_nodes': [64, 32],
-            'lr': 0.01,
-            'dropout': 0.2,
-            'optimizer': 'RMSprop',
-        }
-    ),
+from src.utils.settings import settings
+from src.models import *
 
-    'AalenAdditive': (
-        AalenAdditiveModel, 
-        {
-            'fit_intercept': True,
-            'alpha': 0.05,
-            'coef_penalizer': 10.0,
-            'smoothing_penalizer': 0.0,
-        }
-    ),
-    'CoxPH': (
-        CoxPHModel, 
-        {
-            'alpha': 1.0,
-            'ties': 'breslow',
-            'n_iter': 100,
-            'tol': 1e-7,
-        }
-    ),
-    'RandomSurvivalForest': (
-        RandomSurvivalForestModel, 
-        {
-            'n_estimators': 200,
-            'max_depth': 50,
-            'min_samples_split': 50,
-            'min_samples_leaf': 5,
-            'max_features': None,
-            'random_state': 42,
-        }
-    ),
-    'GradientBoosting': (
-        GradientBoostingSurvivalModel, 
-        {
-            'learning_rate': 0.1,
-            'n_estimators': 500,
-            'max_depth': 3,
-            'subsample': 1.0,
-            'min_samples_leaf': 5,
-            'min_samples_split': 20,
-            'max_features': 'sqrt',
-        }
-    ),
-}
+class ExperimentConfig:
+    def __init__(self, config_file):
+        self.config_file = config_file
+        self.configs = self._load_configs()
 
-pfs_configs = {
-    'DeepSurv': (
-        DeepSurv, 
-        {
-            'num_nodes': [256, 128, 64],
-            'batch_norm': True,
-            'dropout': 0.2,
-            'weight_decay': 0.001,
-            'lr': 0.01,
-            'activation': 'elu',
-            'optimizer': 'RMSprop',
-        }
-    ),
-    'LogisticHazardModel': (
-        LogisticHazardModel, 
-        {
-            'num_nodes': [64],
-            'lr': 0.0005,
-            'dropout': 0.2,
-            'batch_size': 128,
-            'early_stopping_patience': 50,
-            'optimizer': 'Adam',
-        }
-    ),
-    'DeepHitModel': (
-        DeepHitModel, 
-        {
-            'num_nodes': [64],
-            'activation': 'swish',
-            'alpha': 0.2,
-            'sigma': 0.1,
-            'weight_decay': 0.001,
-            'optimizer': 'Adam',
-            'dropout': 0.2,  
-        }
-    ),
-    'PCHazardModel': (
-        PCHazardModel, 
-        {
-            'num_nodes': [128, 64],
-            'dropout': 0.2,
-            'lr': 0.01,
-            'optimizer': 'Adam',
-        }
-    ),
-    'MTLRModel': (
-        MTLRModel, 
-        {
-            'num_nodes': [64, 32],
-            'lr': 0.001,
-            'dropout': 0.2,
-            'optimizer': 'Adam',
-        }
-    ),
-    'CoxPH': (
-        CoxPHModel, 
-        {
-            'alpha': 1.0,
-            'ties': 'breslow',
-            'n_iter': 200,
-            'tol': 1e-7,
-        }
-    ),
-    'AalenAdditive': (
-        AalenAdditiveModel, 
-        {
-            'fit_intercept': True,
-            'alpha': 0.05,
-            'coef_penalizer': 10.0,
-            'smoothing_penalizer': 0.0,
-        }
-    ),
-    'RandomSurvivalForest': (
-        RandomSurvivalForestModel, 
-        {
-            'n_estimators': 500,
-            'max_depth': 20,
-            'min_samples_split': 100,
-            'min_samples_leaf': 10,
-            'max_features': None,
-        }
-    ),
-    'GradientBoosting': (
-        GradientBoostingSurvivalModel, 
-        {
-            'learning_rate': 0.05,
-            'n_estimators': 500,
-            'max_depth': 3,
-            'subsample': 0.8,
-            'min_samples_leaf': 20,
-            'min_samples_split': 20,
-            'max_features': None,
-        }
-    ),
-}
+    def _load_configs(self):
+        with open(self.config_file, 'r') as f:
+            configs = json.load(f)
+        return configs
+    
+    def get_config(self):
+        key = f"{settings.experiment_type}_{settings.outcome}"
+        if key not in self.configs:
+            raise ValueError(
+                f"No configuration found for experiment type '{settings.experiment_type}' and outcome '{settings.outcome}'."
+            )
+        return self.configs[key]
+
+    def load_model_configs(self):
+        config_dict = self.get_config()
+        model_configs = {}
+        print("Loaded configuration:", config_dict)
+        for model_name, setting in config_dict.items():
+            class_path = setting.get("class")
+            module_name, class_name = class_path.rsplit('.', 1)
+            module = importlib.import_module(module_name)
+            model_class = getattr(module, class_name)
+            kwargs = setting.get("kwargs", {})
+            if issubclass(model_class, NNSurvivalModel):
+                if 'input_size' not in kwargs:
+                    kwargs['input_size'] = settings.input_size
+            model_configs[model_name] = (model_class, kwargs)
+       
+        return model_configs
+    
+    @staticmethod
+    def update_model_hyperparams(best_models: dict) -> None:
+        
+        if os.path.exists(settings.json_config_file):
+            with open(settings.json_config_file, "r") as f:
+                config = json.load(f)
+        else:
+            config = {}
+
+        key = f"{settings.experiment_type}_{settings.outcome}"
+        if key not in config:
+            config[key] = {}
+
+        for model_name, (model_instance, best_params) in best_models.items():
+            if best_params is None:
+                continue
+            model_class = model_instance if isinstance(model_instance, type) else type(model_instance)
+            if issubclass(model_class, NNSurvivalModel):
+                best_params['input_size'] = settings.input_size
+                
+            config[key][model_name] = {
+                "class": f"{model_class.__module__}.{model_class.__name__}",
+                "kwargs": best_params
+            }
+
+        with open(settings.json_config_file, "w") as f:
+            json.dump(config, f, indent=4)
+
+        print(f"Updated model hyperparameters saved to '{settings.json_config_file}' under key '{key}'.")

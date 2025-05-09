@@ -6,7 +6,7 @@ from .survival_models import (
 )
 from .model_trainer import ModelTrainer
 
-from .configs.model_configurations import os_configs, pfs_configs
+from .configs.model_configurations import ExperimentConfig
 
 from .hyperparameter_optimization import random_parameter_search, hyperparameter_search
 

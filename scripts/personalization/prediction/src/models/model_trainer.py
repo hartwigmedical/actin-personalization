@@ -13,23 +13,24 @@ import os
 
 from typing import List, Dict, Tuple, Any, Optional, Callable
 
-from ..utils.metrics import calculate_c_index, calculate_brier_score, calibration_assessment, calculate_time_dependent_auc
+from ..utils.metrics import calculate_time_dependent_c_index, calculate_brier_score, calibration_assessment, calculate_time_dependent_auc
 from .survival_models import BaseSurvivalModel, NNSurvivalModel
+from src.utils.settings import settings
 
 class ModelTrainer:
-    def __init__(self, models: Dict[str, BaseSurvivalModel], n_splits: int = 5, random_state: int = 42, max_time: int = 1825):
+    def __init__(self, models: Dict[str, BaseSurvivalModel], random_state: int = 42):
         self.models = models
-        self.n_splits = n_splits
+        self.n_splits = settings.cross_val_n_splits
         self.random_state = random_state
         self.results = dict()
         self.trained_models = dict()
         
-        self.max_time = max_time
+        self.max_time = settings.max_time
 
-    def cross_validate(self, X: pd.DataFrame, y: pd.DataFrame, event_col: str, encoded_columns: Dict[str, List[str]]) -> List[Tuple[np.ndarray, np.ndarray]]:
+    def cross_validate(self, X: pd.DataFrame, y: pd.DataFrame, encoded_columns: Dict[str, List[str]]) -> List[Tuple[np.ndarray, np.ndarray]]:
         skf = StratifiedKFold(n_splits=self.n_splits, shuffle=True, random_state=self.random_state)
       
-        return list(skf.split(X, y[event_col].astype(str)))
+        return list(skf.split(X, y[settings.event_col].astype(str)))
     
     def _initialize_model(self, model_template: BaseSurvivalModel, input_size: Optional[int] = None) -> BaseSurvivalModel:
         model_class = type(model_template)
@@ -40,15 +41,26 @@ class ModelTrainer:
         
         return model_class(**kwargs)
     
-    def save_model(self, model: BaseSurvivalModel, model_name: str, title :str, save_path: str = "src/models/trained_models")-> None:
-        if not os.path.exists(save_path):
-            os.makedirs(save_path)
-
-        model_file = os.path.join(save_path, f"{title}_{model_name}")
+    def save_model(self, model: BaseSurvivalModel, model_name: str)-> None:
+        if not os.path.exists(settings.save_path):
+            os.makedirs(settings.save_path)
+            
+        
+            
+        model_file = os.path.join(settings.save_path, f"{settings.outcome}_{model_name}")
 
         if isinstance(model, NNSurvivalModel):
-            torch.save(model.model.net.state_dict(), model_file + ".pt")
-            print(f"NN Model weights for {model_name} saved to {model_file}.pt")
+            if hasattr(model, 'compute_baseline_hazards'):
+                model.compute_baseline_hazards()
+                print('compute baseline hazards')
+            state = {
+                'net_state': model.model.net.state_dict(),
+                'baseline_hazards': getattr(model.model, 'baseline_hazards_', None),
+                'baseline_cumulative_hazards': getattr(model.model, 'baseline_cumulative_hazards_', None)
+            }
+            torch.save(state, model_file + ".pt")
+            print(f"NN Model weights and baseline hazards for {model_name} saved to {model_file}.pt")
+
         else:
             with open(model_file + ".pkl", "wb") as f:
                 dill.dump(model, f)
@@ -57,14 +69,12 @@ class ModelTrainer:
         self, 
         X: pd.DataFrame, 
         y: pd.DataFrame, 
-        indices: Tuple[np.ndarray, np.ndarray], 
-        event_col: str, 
-        duration_col: str
+        indices: Tuple[np.ndarray, np.ndarray]
     ) -> Tuple[pd.DataFrame, np.ndarray, pd.DataFrame, np.ndarray, pd.DataFrame]:
         train_idx, val_idx = indices
         X_train, X_val = X.iloc[train_idx], X.iloc[val_idx]
 
-        y_df = pd.DataFrame({'duration': y[duration_col], 'event': y[event_col]}, index=X.index)
+        y_df = pd.DataFrame({'duration': y[settings.duration_col], 'event': y[settings.event_col]}, index=X.index)
         y_train_df, y_val_df = y_df.iloc[train_idx], y_df.iloc[val_idx]
 
         y_train_structured = Surv.from_dataframe('event', 'duration', y_train_df)
@@ -141,9 +151,7 @@ class ModelTrainer:
             model, model_name, surv_funcs, risk_scores, X_val, y_val_structured
         )
 
-        results['c_index'] = calculate_c_index(
-            y_val_structured['duration'], risk_scores, y_val_structured['event']
-        )
+        results['c_index'] = calculate_time_dependent_c_index(predictions, y_val_structured['duration'], y_val_structured['event'], times)
         results['ibs'] = calculate_brier_score(y_train_structured, y_val_structured, predictions, times)
         results['ce'] = calibration_assessment(predictions, y_val_structured, times)
 
@@ -151,20 +159,14 @@ class ModelTrainer:
         results['auc'] = mean_auc
 
         return results
-
     
     def train_and_evaluate(
         self, 
         X_train:  pd.DataFrame, y_train: pd.DataFrame, 
         X_test: pd.DataFrame, y_test: pd.DataFrame, 
         encoded_columns: Dict[str, List[str]], 
-        event_col: str, 
-        duration_col: str, 
-        title: str = '', 
-        save_models: bool = False, 
-        save_path: str = "src/models/trained_models"
     ) -> Tuple[pd.DataFrame, Dict[str, BaseSurvivalModel]]:
-        folds = self.cross_validate(X_train, y_train, event_col, encoded_columns)
+        folds = self.cross_validate(X_train, y_train, encoded_columns)
 
         for model_name, model_template in self.models.items():
             print(f"training model: {model_name}")
@@ -172,7 +174,7 @@ class ModelTrainer:
 
             for fold_indices in folds:
                 X_fold_train, y_fold_train_structured, X_fold_val, y_fold_val_structured, y_fold_val_df = self._prepare_fold_data(
-                    X_train, y_train, fold_indices, event_col, duration_col
+                    X_train, y_train, fold_indices
                 )
                 model = self._initialize_model(model_template, input_size=X_train.shape[1])
 
@@ -190,11 +192,11 @@ class ModelTrainer:
 
             self.results[model_name] = {key: np.nanmean(values) for key, values in model_metrics['cv'].items()}
             print(f"{model_name} CV Results: {self.results[model_name]}")
-
+            print("training final model")
             final_model = self._initialize_model(model_template, input_size=X_train.shape[1])
-            y_train_df = pd.DataFrame({'duration': y_train[duration_col], 'event': y_train[event_col]}, index=X_train.index)
+            y_train_df = pd.DataFrame({'duration': y_train[settings.duration_col], 'event': y_train[settings.event_col]}, index=X_train.index)
             y_train_structured = Surv.from_dataframe('event', 'duration', y_train_df)
-            y_test_df = pd.DataFrame({'duration': y_test[duration_col], 'event': y_test[event_col]}, index=y_test.index)
+            y_test_df = pd.DataFrame({'duration': y_test[settings.duration_col], 'event': y_test[settings.event_col]}, index=X_test.index)
             y_test_structured = Surv.from_dataframe('event', 'duration', y_test_df)
 
             if isinstance(final_model, NNSurvivalModel):
@@ -213,8 +215,8 @@ class ModelTrainer:
                final_model, X_test, y_train_structured, y_test_structured, model_name
             )
             
-            if save_models:
-                self.save_model(final_model, model_name, title, save_path=save_path)
+            if settings.save_models:
+                self.save_model(final_model, model_name)
                 
             print(f"{model_name} Hold-Out Results: {holdout_metrics}")
 

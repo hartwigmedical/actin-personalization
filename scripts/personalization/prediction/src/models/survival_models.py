@@ -12,7 +12,7 @@ from sklearn.feature_selection import VarianceThreshold
 from sklearn.model_selection import train_test_split
 
 from scipy.interpolate import interp1d
-
+from src.utils.settings import settings
 import torch
 import torch.nn as nn
 import torchtuples as tt
@@ -153,7 +153,7 @@ class GradientBoostingSurvivalModel(BaseSurvivalModel):
     def __init__(self, **kwargs: Dict[str, Any]):
         super().__init__()
         self.kwargs = kwargs
-        self.model = GradientBoostingSurvivalAnalysis(random_state=42, **self.kwargs)
+        self.model = GradientBoostingSurvivalAnalysis(**self.kwargs)
         
     def fit(self, X: pd.DataFrame, y: pd.DataFrame) -> None:
         self.model.fit(X, y)
@@ -164,6 +164,36 @@ class GradientBoostingSurvivalModel(BaseSurvivalModel):
     def predict(self, X: pd.DataFrame) -> np.ndarray:
         return self.model.predict(X)
 
+    
+class FeatureAttention(nn.Module):
+    def __init__(self, input_size: int):
+        super().__init__()
+        
+        self.attn = nn.Sequential(
+            nn.Linear(input_size, input_size),
+            nn.Tanh(),
+            nn.Linear(input_size, input_size),
+            nn.Sigmoid()
+        )
+
+    def forward(self, x):
+        weights = self.attn(x)
+        return x * weights
+    
+class AttentionMLP(nn.Module):
+    def __init__(self, input_size, num_nodes, out_features, activation, batch_norm, dropout):
+        super().__init__()
+        self.attention = FeatureAttention(input_size)
+        self.mlp = tt.practical.MLPVanilla(
+            in_features=input_size, num_nodes=num_nodes, out_features=out_features,
+            activation=activation, batch_norm=batch_norm, dropout=dropout)
+    
+    def forward(self, x):
+        x = self.attention(x)
+        return self.mlp(x)
+
+
+    
 class NNSurvivalModel(BaseSurvivalModel):
     def __init__(
         self, 
@@ -179,7 +209,8 @@ class NNSurvivalModel(BaseSurvivalModel):
         batch_norm: bool = False, 
         weight_decay: float = 1e-4, 
         activation: str = 'relu', 
-        optimizer: str = 'Adam', 
+        optimizer: str = 'Adam',
+        use_attention: bool = False,
         **kwargs: Dict[str, Any]
     ):
         super().__init__()
@@ -207,6 +238,7 @@ class NNSurvivalModel(BaseSurvivalModel):
             'weight_decay': weight_decay,
             'activation': activation,
             'optimizer': optimizer,
+            'use_attention': use_attention,
         }
 
         activation_map = {
@@ -220,7 +252,25 @@ class NNSurvivalModel(BaseSurvivalModel):
         else:
             raise ValueError(f"Unknown activation function: {activation}")
         
-        self.net = tt.practical.MLPVanilla(in_features=self.input_size, num_nodes=self.num_nodes, out_features=self.num_durations, activation=activation_fn, batch_norm=batch_norm, dropout=self.dropout)
+        if use_attention:
+            self.net = AttentionMLP(
+                input_size=self.input_size, 
+                num_nodes=self.num_nodes, 
+                out_features=self.num_durations,
+                activation=activation_fn, 
+                batch_norm=batch_norm, 
+                dropout=self.dropout
+            )
+        else:
+            self.net = tt.practical.MLPVanilla(
+                in_features=self.input_size,
+                num_nodes=self.num_nodes,
+                out_features=self.num_durations,
+                activation=activation_fn,
+                batch_norm=batch_norm,
+                dropout=self.dropout
+            )
+        
         
         if optimizer.lower() == "adam":
             self.optimizer = tt.optim.Adam(self.lr, weight_decay=weight_decay)
@@ -232,7 +282,7 @@ class NNSurvivalModel(BaseSurvivalModel):
         model_specific_kwargs = {k:v for k,v in self.kwargs.items() if k not in {
             'model_class', 'input_size', 'num_nodes', 'dropout', 'lr',
             'batch_size', 'epochs', 'num_durations', 'early_stopping_patience',
-            'batch_norm', 'weight_decay', 'activation', 'optimizer'
+            'batch_norm', 'weight_decay', 'activation', 'optimizer', 'use_attention'
         }}
 
         self.model = model_class(self.net, self.optimizer, **model_specific_kwargs)
@@ -278,6 +328,7 @@ class NNSurvivalModel(BaseSurvivalModel):
         return [interp1d(surv.index.values, surv.iloc[:, i].values, bounds_error=False, fill_value='extrapolate') for i in range(surv.shape[1])]
 
     def predict(self, X: pd.DataFrame) -> np.ndarray:
+        
         X_tensor = X.values.astype('float32')
         if hasattr(self.model, 'predict_risk'):
             risk_scores = self.model.predict_risk(X_tensor)
