@@ -5,8 +5,13 @@ import com.hartwig.actin.personalization.datamodel.ReferencePatient
 import com.hartwig.actin.personalization.datamodel.Tumor
 
 object ReferenceEntryFactory {
-    
+
     fun create(patient: ReferencePatient, tumor: Tumor): ReferenceEntry {
+        val sortedMetastases = tumor.metastaticDiagnosis.metastases.sortedBy { metastasis -> metastasis.daysSinceDiagnosis }
+        val earliestDistantMetastasisDetectionDays = sortedMetastases.firstOrNull()?.daysSinceDiagnosis
+//        val systemicTreatmentPostMetastasis =
+//            findSystemicTreatmentPostMetastasis(tumor.treatmentEpisodes, earliestDistantMetastasisDetectionDays)
+
         return ReferenceEntry(
             source = patient.source,
             sourceId = patient.sourceId,
@@ -40,14 +45,14 @@ object ReferenceEntryFactory {
             lymphaticInvasionCategory = tumor.primaryDiagnosis.lymphaticInvasionCategory,
             extraMuralInvasionCategory = tumor.primaryDiagnosis.extraMuralInvasionCategory,
             tumorRegression = tumor.primaryDiagnosis.tumorRegression,
-            isMetachronous = 0,
-            numberOfLiverMetastases = "",
-            maximumSizeOfLiverMetastasisMm = 0.0,
-            investigatedLymphNodesCountMetastaticDiagnosis = 0.0,
-            positiveLymphNodesCountMetastaticDiagnosis = 0.0,
-            metastasisLocationGroups = "",
-            metastasisLocationGroupsDays = "",
-            earliestDistantMetastasisDetectionDays = 0.0,
+            isMetachronous = tumor.metastaticDiagnosis.isMetachronous,
+            numberOfLiverMetastases = tumor.metastaticDiagnosis.numberOfLiverMetastases,
+            maximumSizeOfLiverMetastasisMm = tumor.metastaticDiagnosis.maximumSizeOfLiverMetastasisMm,
+            investigatedLymphNodesCountMetastaticDiagnosis = tumor.metastaticDiagnosis.investigatedLymphNodesCount,
+            positiveLymphNodesCountMetastaticDiagnosis = tumor.metastaticDiagnosis.positiveLymphNodesCount,
+            metastasisLocationGroups = sortedMetastases.joinToString(",") { it.location.name },
+            metastasisLocationGroupsDays = sortedMetastases.joinToString(",") { it.daysSinceDiagnosis.toString() },
+            earliestDistantMetastasisDetectionDays = earliestDistantMetastasisDetectionDays,
             AllWhoAssessments = "",
             WhoAssessmentsDates = "",
             WhoAssessmentBeforeMetastasisTreatment = 0.0,

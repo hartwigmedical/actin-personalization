@@ -7,6 +7,7 @@ import com.hartwig.actin.personalization.datamodel.diagnosis.BasisOfDiagnosis
 import com.hartwig.actin.personalization.datamodel.diagnosis.DifferentiationGrade
 import com.hartwig.actin.personalization.datamodel.diagnosis.ExtraMuralInvasionCategory
 import com.hartwig.actin.personalization.datamodel.diagnosis.LymphaticInvasionCategory
+import com.hartwig.actin.personalization.datamodel.diagnosis.NumberOfLiverMetastases
 import com.hartwig.actin.personalization.datamodel.diagnosis.Sidedness
 import com.hartwig.actin.personalization.datamodel.diagnosis.TnmM
 import com.hartwig.actin.personalization.datamodel.diagnosis.TnmN
@@ -50,14 +51,14 @@ data class ReferenceEntry(
     val lymphaticInvasionCategory: LymphaticInvasionCategory?,
     val extraMuralInvasionCategory: ExtraMuralInvasionCategory?,
     val tumorRegression: TumorRegression?,
-    val isMetachronous: Int,
-    val numberOfLiverMetastases: String,
-    val maximumSizeOfLiverMetastasisMm: Double,
-    val investigatedLymphNodesCountMetastaticDiagnosis: Double,
-    val positiveLymphNodesCountMetastaticDiagnosis: Double,
+    val isMetachronous: Boolean,
+    val numberOfLiverMetastases: NumberOfLiverMetastases?,
+    val maximumSizeOfLiverMetastasisMm: Int?,
+    val investigatedLymphNodesCountMetastaticDiagnosis: Int?,
+    val positiveLymphNodesCountMetastaticDiagnosis: Int?,
     val metastasisLocationGroups: String,
     val metastasisLocationGroupsDays: String,
-    val earliestDistantMetastasisDetectionDays: Double,
+    val earliestDistantMetastasisDetectionDays: Int?,
     val AllWhoAssessments: String,
     val WhoAssessmentsDates: String,
     val WhoAssessmentBeforeMetastasisTreatment: Double,
