@@ -12,6 +12,14 @@ object ReferenceEntryFactory {
 //        val systemicTreatmentPostMetastasis =
 //            findSystemicTreatmentPostMetastasis(tumor.treatmentEpisodes, earliestDistantMetastasisDetectionDays)
 
+        /* TODO (KD): Determine fields that go into data frame. Proposal
+            - First systemic treatment (plan) after metastasis (or none)
+            - All other kinds of treatments after metastasis ... ? 
+            - Prior (systemic) treatments? 
+            - Lab values / molecular results / WHO / comorbidities / ASA just prior to systemic treatment?
+            - Metastasis locations split over booleans?
+            - First (?) response after systemic treatment start? 
+         */
         return ReferenceEntry(
             source = patient.source,
             sourceId = patient.sourceId,
