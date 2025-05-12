@@ -371,11 +371,16 @@ CREATE TABLE `referenceEntry` (
     `tumorRegression` VARCHAR(50),
   
     `daysBetweenPrimaryAndMetastaticDiagnosis` INT NOT NULL,
+    `hasLiverOrIntrahepaticBileDuctMetastases` BOOL,
     `numberOfLiverMetastases` VARCHAR(50),
     `maximumSizeOfLiverMetastasisMm` INT,
+    `hasLymphNodeMetastases` BOOL,
     `investigatedLymphNodesCountMetastaticDiagnosis` INT,
     `positiveLymphNodesCountMetastaticDiagnosis` INT,
-    `metastaticLocations` TEXT,       
+    `hasPeritonealMetastases` BOOL,
+    `hasBronchusOrLungMetastases` BOOL,
+    `hasBrainMetastases` BOOL,
+    `hasOtherMetastases` BOOL,        
       
     `whoAssessmentAtMetastaticDiagnosis` INT,
     `asaAssessmentAtMetastaticDiagnosis` VARCHAR(50),

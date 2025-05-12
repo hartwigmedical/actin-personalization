@@ -2,7 +2,7 @@ package com.hartwig.actin.personalization.database.datamodel
 
 import com.hartwig.actin.personalization.datamodel.ReferenceSource
 import com.hartwig.actin.personalization.datamodel.Sex
-import com.hartwig.actin.personalization.datamodel.assessment.AsaAssessment
+import com.hartwig.actin.personalization.datamodel.assessment.AsaClassification
 import com.hartwig.actin.personalization.datamodel.diagnosis.AnorectalVergeDistanceCategory
 import com.hartwig.actin.personalization.datamodel.diagnosis.BasisOfDiagnosis
 import com.hartwig.actin.personalization.datamodel.diagnosis.DifferentiationGrade
@@ -60,14 +60,19 @@ data class ReferenceEntry(
     val tumorRegression: TumorRegression?,
     
     val daysBetweenPrimaryAndMetastaticDiagnosis: Int,
+    val hasLiverOrIntrahepaticBileDuctMetastases: Boolean,
     val numberOfLiverMetastases: NumberOfLiverMetastases?,
     val maximumSizeOfLiverMetastasisMm: Int?,
+    val hasLymphNodeMetastases: Boolean,
     val investigatedLymphNodesCountMetastaticDiagnosis: Int?,
     val positiveLymphNodesCountMetastaticDiagnosis: Int?,
-    val metastaticLocations: String,
+    val hasPeritonealMetastases: Boolean,
+    val hasBronchusOrLungMetastases: Boolean,
+    val hasBrainMetastases: Boolean,
+    val hasOtherMetastases: Boolean,
     
-    val whoAssessmentAtMetastaticDiagnosis: String,
-    val asaAssessmentAtMetastaticDiagnosis: AsaAssessment,
+    val whoAssessmentAtMetastaticDiagnosis: Int,
+    val asaAssessmentAtMetastaticDiagnosis: AsaClassification,
     val lactateDehydrogenaseAtMetastaticDiagnosis: Double,
     val alkalinePhosphataseAtMetastaticDiagnosis: Double,
     val leukocytesAbsoluteAtMetastaticDiagnosis: Double,
@@ -93,5 +98,5 @@ data class ReferenceEntry(
     val systemicTreatmentDurationDays: Int,
     val systemicTreatmentDurationCycles: Int,
     val hadProgressionEvent: Boolean,
-    val daysBetweenTreatmentStartAndProgression: Double
+    val daysBetweenTreatmentStartAndProgression: Int
 )

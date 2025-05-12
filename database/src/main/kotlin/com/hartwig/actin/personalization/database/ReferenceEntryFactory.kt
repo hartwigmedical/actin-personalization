@@ -3,6 +3,7 @@ package com.hartwig.actin.personalization.database
 import com.hartwig.actin.personalization.database.datamodel.ReferenceEntry
 import com.hartwig.actin.personalization.datamodel.ReferencePatient
 import com.hartwig.actin.personalization.datamodel.Tumor
+import com.hartwig.actin.personalization.datamodel.assessment.AsaClassification
 
 object ReferenceEntryFactory {
 
@@ -11,25 +12,23 @@ object ReferenceEntryFactory {
         val earliestDistantMetastasisDetectionDays = sortedMetastases.firstOrNull()?.daysSinceDiagnosis
 //        val systemicTreatmentPostMetastasis =
 //            findSystemicTreatmentPostMetastasis(tumor.treatmentEpisodes, earliestDistantMetastasisDetectionDays)
-
-        /* TODO (KD): Determine fields that go into data frame. Proposal
-            - First systemic treatment (plan) after metastasis (or none)
-            - All other kinds of treatments after metastasis ... ? 
-            - Prior (systemic) treatments? 
-            - Lab values / molecular results / WHO / comorbidities / ASA just prior to systemic treatment?
-            - Metastasis locations split over booleans?
-            - First (?) response after systemic treatment start? 
-         */
+        
         return ReferenceEntry(
             source = patient.source,
             sourceId = patient.sourceId,
             diagnosisYear = tumor.diagnosisYear,
             ageAtDiagnosis = tumor.ageAtDiagnosis,
-            isAlive = tumor.latestSurvivalMeasurement.isAlive,
             sex = patient.sex,
-            basisOfDiagnosis = tumor.primaryDiagnosis.basisOfDiagnosis,
+            
+            hadSurvivalEvent = false,
+            survivalDaysSincePrimaryDiagnosis = 0,
+            survivalDaysSinceMetastaticDiagnosis = 0,
+            survivalDaysSinceTreatmentStart = 0,
+
             numberOfPriorTumors = tumor.priorTumors.size,
             hasDoublePrimaryTumor = tumor.primaryDiagnosis.hasDoublePrimaryTumor,
+            
+            basisOfDiagnosis = tumor.primaryDiagnosis.basisOfDiagnosis,
             primaryTumorType = tumor.primaryDiagnosis.primaryTumorType,
             primaryTumorLocation = tumor.primaryDiagnosis.primaryTumorLocation,
             sidedness = tumor.primaryDiagnosis.sidedness,
@@ -53,56 +52,47 @@ object ReferenceEntryFactory {
             lymphaticInvasionCategory = tumor.primaryDiagnosis.lymphaticInvasionCategory,
             extraMuralInvasionCategory = tumor.primaryDiagnosis.extraMuralInvasionCategory,
             tumorRegression = tumor.primaryDiagnosis.tumorRegression,
-            isMetachronous = tumor.metastaticDiagnosis.isMetachronous,
+            
+            daysBetweenPrimaryAndMetastaticDiagnosis = 0,
+            hasLiverOrIntrahepaticBileDuctMetastases = false,
             numberOfLiverMetastases = tumor.metastaticDiagnosis.numberOfLiverMetastases,
             maximumSizeOfLiverMetastasisMm = tumor.metastaticDiagnosis.maximumSizeOfLiverMetastasisMm,
+            hasLymphNodeMetastases = false,
             investigatedLymphNodesCountMetastaticDiagnosis = tumor.metastaticDiagnosis.investigatedLymphNodesCount,
             positiveLymphNodesCountMetastaticDiagnosis = tumor.metastaticDiagnosis.positiveLymphNodesCount,
-            metastasisLocationGroups = sortedMetastases.joinToString(",") { it.location.name },
-            metastasisLocationGroupsDays = sortedMetastases.joinToString(",") { it.daysSinceDiagnosis.toString() },
-            earliestDistantMetastasisDetectionDays = earliestDistantMetastasisDetectionDays,
-            AllWhoAssessments = "",
-            WhoAssessmentsDates = "",
-            WhoAssessmentBeforeMetastasisTreatment = 0.0,
-            WhoAssessmentDateBeforeMetastasisTreatment = 0.0,
-            WhoAssessmentAtMetastasisDetection = 0.0,
-            WhoAssessmentDateAtMetastasisDetection = 0.0,
-            AllAsaAssessments = "",
-            AsaAssessmentsDates = "",
-            AsaAssessmentBeforeMetastasisTreatment = "",
-            AsaAssessmentDateBeforeMetastasisTreatment = 0.0,
-            AsaAssessmentAtMetastasisDetection = "",
-            AsaAssessmentDateAtMetastasisDetection = 0.0,
-            lactateDehydrogenaseMetastasisDetection = 0.0,
-            alkalinePhosphataseMetastasisDetection = 0.0,
-            leukocytesAbsoluteMetastasisDetection = 0.0,
-            carcinoembryonicAntigenMetastasisDetection = 0.0,
-            albumineMetastasisDetection = 0.0,
-            neutrophilsAbsoluteMetastasisDetection = 0.0,
-            closestLabValueDateMetastasisDetection = 0.0,
-            surgeriesPrimary = "",
-            surgeriesPrimaryDates = "",
-            surgeriesMetastatic = "",
-            surgeriesMetastaticDates = "",
-            surgeriesGastroenterology = "",
-            surgeriesGastroenterologyDates = "",
-            hadHipec = 0,
-            hadHipecDate = 0.0,
-            radiotherapiesPrimary = "",
-            radiotherapiesPrimaryDates = "",
-            radiotherapiesMetastatic = "",
-            radiotherapiesMetastaticDates = "",
-            treatment = "",
-            firstTreatmentStartAfterMetastasis = 0.0,
-            treatmentStop = 0.0,
-            numberOfCycles = 0.0,
-            hasHadPriorSystemicTherapy = 0,
-            hadSurvivalEvent = 0,
-            hasHadPriorTumor = 0,
-            survivalDaysSincePrimaryDiagnosis = 0,
-            survivalDaysSinceMetastaticDiagnosis = 0.0,
-            survivalDaysSinceTreatmentStart = 0.0,
-            systemicTreatmentPlanDuration = 0.0
+            hasPeritonealMetastases = false,
+            hasBronchusOrLungMetastases = false,
+            hasBrainMetastases = false,
+            hasOtherMetastases = false,
+            
+            whoAssessmentAtMetastaticDiagnosis = 0,
+            asaAssessmentAtMetastaticDiagnosis = AsaClassification.I,
+            lactateDehydrogenaseAtMetastaticDiagnosis = 0.0,
+            alkalinePhosphataseAtMetastaticDiagnosis = 0.0,
+            leukocytesAbsoluteAtMetastaticDiagnosis = 0.0,
+            carcinoembryonicAntigenAtMetastaticDiagnosis = 0.0,
+            albumineAtMetastaticDiagnosis = 0.0,
+            neutrophilsAbsoluteAtMetastaticDiagnosis = 0.0,
+            
+            hasHadPrimarySurgeryPriorToMetastaticDiagnosis = false,
+            hasHadPrimarySurgeryAfterMetastaticDiagnosis = false,
+            hasHadGastroenterologySurgeryPriorToMetastaticDiagnosis = false,
+            hasHadGastroenterologySurgeryAfterMetastaticDiagnosis = false,
+            hasHadHipecPriorToMetastaticDiagnosis = false,
+            hasHadHipecAfterMetastaticDiagnosis = false,
+            hasHadPrimaryRadiotherapyPriorToMetastaticDiagnosis = false,
+            hasHadPrimaryRadiotherapyAfterMetastaticDiagnosis = false,
+            
+            hasHadMetastaticSurgery = false,
+            hasHadMetastaticRadiotherapy = false,
+
+            hasHadSystemicTreatmentPriorToMetastaticDiagnosis = false,
+            daysBetweenMetastaticDiagnosisAndTreatmentStart = 0,
+            systemicTreatmentAfterMetastaticDiagnosis = "",
+            systemicTreatmentDurationDays = 0,
+            systemicTreatmentDurationCycles = 0,
+            hadProgressionEvent = false,
+            daysBetweenTreatmentStartAndProgression = 0
         )
     }
 }
