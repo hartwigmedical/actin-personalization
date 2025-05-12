@@ -376,7 +376,7 @@ CREATE TABLE `referenceEntry` (
     `maximumSizeOfLiverMetastasisMm` INT,
     `investigatedLymphNodesCountMetastaticDiagnosis` INT,
     `positiveLymphNodesCountMetastaticDiagnosis` INT,
-    `metastaticLocations` TEXT            
+    `metastaticLocations` TEXT,       
       
     `whoAssessmentAtMetastaticDiagnosis` INT,
     `asaAssessmentAtMetastaticDiagnosis` INT,
@@ -389,7 +389,7 @@ CREATE TABLE `referenceEntry` (
     
     `hasHadPrimarySurgeryPriorToMetastaticDiagnosis` BOOL,
     `hasHadPrimarySurgeryAfterMetastaticDiagnosis` BOOL,
-    `hasHadMetastaticSurgeryPriorToMetastaticDiagnosis` BOOL
+    `hasHadMetastaticSurgeryPriorToMetastaticDiagnosis` BOOL,
     `hasHadMetastaticSurgeryAfterMetastaticDiagnosis` BOOL,
     `hasHadGastroenterologySurgeryPriorToMetastaticDiagnosis` BOOL,
     `hasHadGastroenterologySurgeryAfterToMetastaticDiagnosis` BOOL,
@@ -407,7 +407,7 @@ CREATE TABLE `referenceEntry` (
     `systemicTreatmentDurationDays` DOUBLE,
     `systemicTreatmentDurationCycles` DOUBLE,
     `hadProgressionEvent` BOOL,
-    `daysBetweenTreatmentStartAndProgression` INT
+    `daysBetweenTreatmentStartAndProgression` INT,
     
     FOREIGN KEY (`id`) REFERENCES `tumor`(`id`),
     PRIMARY KEY (`id`)
