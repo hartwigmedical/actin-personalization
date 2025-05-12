@@ -99,9 +99,9 @@ object ReferenceEntryFactory {
             hasHadPriorSystemicTherapy = 0,
             hadSurvivalEvent = 0,
             hasHadPriorTumor = 0,
-            observedOsFromTumorIncidenceDays = 0,
-            observedOsFromMetastasisDetectionDays = 0.0,
-            observedOsFromTreatmentStartDays = 0.0,
+            survivalDaysSincePrimaryDiagnosis = 0,
+            survivalDaysSinceMetastaticDiagnosis = 0.0,
+            survivalDaysSinceTreatmentStart = 0.0,
             systemicTreatmentPlanDuration = 0.0
         )
     }

@@ -338,11 +338,10 @@ CREATE TABLE `referenceEntry` (
     `sex` VARCHAR(50) NOT NULL,
     
     `hadSurvivalEvent` BOOL NOT NULL,
-    `survivalDaysSincePrimaryDiagnosis` INT,
-    `survivalDaysSinceMetastaticDiagnosis` INT,
-    `survivalDaysSinceTreatmentStart` INT,
+    `survivalDaysSincePrimaryDiagnosis` INT NOT NULL,
+    `survivalDaysSinceMetastaticDiagnosis` INT NOT NULL,
+    `survivalDaysSinceTreatmentStart` INT NOT NULL,
              
-    `hasHadPriorTumor` BOOL NOT NULL,
     `numberOfPriorTumors` INT NOT NULL,
     `hasDoublePrimaryTumor` BOOL NOT NULL,
     
@@ -371,7 +370,7 @@ CREATE TABLE `referenceEntry` (
     `extraMuralInvasionCategory` VARCHAR(50),
     `tumorRegression` VARCHAR(50),
   
-    `daysBetweenDiagnosisAndMetastaticDiagnosis` INT,
+    `daysBetweenPrimaryAndMetastaticDiagnosis` INT NOT NULL,
     `numberOfLiverMetastases` VARCHAR(50),
     `maximumSizeOfLiverMetastasisMm` INT,
     `investigatedLymphNodesCountMetastaticDiagnosis` INT,
@@ -379,7 +378,7 @@ CREATE TABLE `referenceEntry` (
     `metastaticLocations` TEXT,       
       
     `whoAssessmentAtMetastaticDiagnosis` INT,
-    `asaAssessmentAtMetastaticDiagnosis` INT,
+    `asaAssessmentAtMetastaticDiagnosis` VARCHAR(50),
     `lactateDehydrogenaseAtMetastaticDiagnosis` DOUBLE,
     `alkalinePhosphataseAtMetastaticDiagnosis` DOUBLE,
     `leukocytesAbsoluteAtMetastaticDiagnosis` DOUBLE,
@@ -389,20 +388,18 @@ CREATE TABLE `referenceEntry` (
     
     `hasHadPrimarySurgeryPriorToMetastaticDiagnosis` BOOL,
     `hasHadPrimarySurgeryAfterMetastaticDiagnosis` BOOL,
-    `hasHadMetastaticSurgeryPriorToMetastaticDiagnosis` BOOL,
-    `hasHadMetastaticSurgeryAfterMetastaticDiagnosis` BOOL,
     `hasHadGastroenterologySurgeryPriorToMetastaticDiagnosis` BOOL,
     `hasHadGastroenterologySurgeryAfterToMetastaticDiagnosis` BOOL,
     `hasHadHipecPriorToMetastaticDiagnosis` BOOL,
     `hasHadHipecAfterToMetastaticDiagnosis` BOOL,
     `hasHadPrimaryRadiotherapyPriorToMetastaticDiagnosis` BOOL,
     `hasHadPrimaryRadiotherapyAfterMetastaticDiagnosis` BOOL,
-    `hasHadMetastaticRadiotherapyPriorToMetastaticDiagnosis` BOOL,
-    `hasHadMetastaticRadiotherapyAfterMetastaticDiagnosis` BOOL,
+    
+    `hasHadMetastaticSurgery` BOOL,
+    `hasHadMetastaticRadiotherapy` BOOL,
     
     `hasHadSystemicTreatmentPriorToMetastaticDiagnosis` BOOL,
-    `hasHadSystemicTreatmentAfterMetastaticDiagnosis` BOOL,
-    `daysBetweenDiagnosisAndSystemicTreatmentStart` INT,  
+    `daysBetweenMetastaticDiagnosisAndTreatmentStart` INT,  
     `systemicTreatmentAfterMetastaticDiagnosis` TEXT,
     `systemicTreatmentDurationDays` DOUBLE,
     `systemicTreatmentDurationCycles` DOUBLE,
