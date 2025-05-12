@@ -167,12 +167,13 @@ class GradientBoostingSurvivalModel(BaseSurvivalModel):
 
     
 class FeatureAttention(nn.Module):
-    def __init__(self, input_size: int, msi_index: int=None, immuno_index: List[int]=None, ras_index: int = None, panitumumab_index: int = None):
+    def __init__(self, input_size: int, msi_index: int=None, immuno_index: List[int]=None, ras_index: int = None, panitumumab_index: int = None, treatment_indices: List[int]=None):
         super().__init__()
         self.msi_index  = msi_index
         self.immuno_index  = immuno_index or []
         self.ras_index = ras_index
         self.panitumumab_index = panitumumab_index
+        self.treatment_indices: List[int] = treatment_indices or []
         
         self.attn = nn.Sequential(
             nn.Linear(input_size, input_size),
@@ -190,14 +191,20 @@ class FeatureAttention(nn.Module):
             if self.ras_index is not None and self.panitumumab_index is not None:
                 ras_gate = 1 - x[:, self.ras_index]  # shape: [batch_size]
                 x[:, self.panitumumab_index] = x[:, self.panitumumab_index] * ras_gate
+                
+            if self.treatment_indices:
+                mask = x[:, self.treatment_indices] 
+                # build a 0/1 gate from original binary: > 0.5 (since standardized 1 is > 0)
+                gate = (mask > 0).float().unsqueeze(1)
+                x[:, self.treatment_indices] *= gate
 
         weights = self.attn(x)
         return x * weights
     
 class AttentionMLP(nn.Module):
-    def __init__(self, input_size: int, num_nodes: List[int], out_features: int, activation, batch_norm: bool, dropout: float, msi_index: int = None, immuno_index: List[int] = None, ras_index: int = None, panitumumab_index: int = None):
+    def __init__(self, input_size: int, num_nodes: List[int], out_features: int, activation, batch_norm: bool, dropout: float, msi_index: int = None, immuno_index: List[int] = None, ras_index: int = None, panitumumab_index: int = None, treatment_indices: List[int]=None):
         super().__init__()
-        self.attention = FeatureAttention(input_size, msi_index, immuno_index, ras_index, panitumumab_index)
+        self.attention = FeatureAttention(input_size, msi_index, immuno_index, ras_index, panitumumab_index, treatment_indices)
         self.mlp = tt.practical.MLPVanilla(
             in_features=input_size, num_nodes=num_nodes, out_features=out_features,
             activation=activation, batch_norm=batch_norm, dropout=dropout)
@@ -227,6 +234,7 @@ class NNSurvivalModel(BaseSurvivalModel):
         gate_immuno_index = None,
         gate_ras_index = None, 
         gate_panitumumab_index = None,
+        treatment_indices: List[int]=None,
         **kwargs: Dict[str, Any]
     ):
         super().__init__()
@@ -279,7 +287,8 @@ class NNSurvivalModel(BaseSurvivalModel):
                 msi_index = gate_msi_index, 
                 immuno_index = gate_immuno_index, 
                 ras_index = gate_ras_index, 
-                panitumumab_index = gate_panitumumab_index
+                panitumumab_index = gate_panitumumab_index, 
+                treatment_indices = treatment_indices
             )
         else:
             self.net = tt.practical.MLPVanilla(
@@ -301,7 +310,7 @@ class NNSurvivalModel(BaseSurvivalModel):
         model_specific_kwargs = {k:v for k,v in self.kwargs.items() if k not in {
             'model_class', 'input_size', 'num_nodes', 'dropout', 'lr',
             'batch_size', 'epochs', 'num_durations', 'early_stopping_patience',
-            'batch_norm', 'weight_decay', 'activation', 'optimizer', 'use_attention', 'gate_msi_index', 'gate_immuno_index'
+            'batch_norm', 'weight_decay', 'activation', 'optimizer', 'use_attention', 'gate_msi_index', 'gate_immuno_index', 'treatment_indices'
         }}
 
         self.model = model_class(self.net, self.optimizer, **model_specific_kwargs)

@@ -144,9 +144,9 @@ class LookupManager:
             'stagePTNM',
             'stageTNM',
             'systemicTreatmentPlan',
-            'tumorBasisOfDiagnosis',
+            # 'tumorBasisOfDiagnosis', --> shouldn't be relevant (only introduces bias)
             'tumorDifferentiationGrade',
-            'tumorIncidenceYear',
+            # 'tumorIncidenceYear',
             'tumorLocation',
             # 'venousInvasionDescription',--> only present in very few cases (<10)
             'whoStatusPreTreatmentStart',

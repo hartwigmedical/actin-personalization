@@ -80,6 +80,11 @@ class ModelTrainer:
         
         attn.ras_index = feature_names.index('hasRasMutation')
         attn.panitumumab_index = feature_names.index('systemicTreatmentPlan_panitumumab')
+        
+        attn.treatment_indices = [
+            i for i, f in enumerate(feature_names)
+            if f.startswith('systemicTreatmentPlan_')
+        ]
     
     def _prepare_fold_data(
         self, 

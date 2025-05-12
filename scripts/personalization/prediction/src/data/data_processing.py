@@ -46,6 +46,8 @@ class DataPreprocessor:
             df = self.load_data()
 
         df = df[features + [settings.duration_col, settings.event_col]]
+        df = df[~df["systemicTreatmentPlan"].str.upper().str.contains("NIVOLUMAB", na=False)]
+
         df = df[~df[lookup_manager.features].isna().all(axis=1)].copy()
         
         if settings.experiment_type == 'treatment_vs_no':

@@ -241,7 +241,7 @@
                 "tol": 1e-05
             }
         },
-            "RandomSurvivalForest": {
+        "RandomSurvivalForest": {
             "class": "src.models.survival_models.RandomSurvivalForestModel",
             "kwargs": {
                 "n_estimators": 200,
@@ -280,25 +280,24 @@
                 "batch_size": 64,
                 "epochs": 50,
                 "early_stopping_patience": 20,
-                "input_size": 90,
-                "use_attention": true
+                "input_size": 84
             }
         },
         "LogisticHazardModel_attention": {
             "class": "src.models.survival_models.LogisticHazardModel",
             "kwargs": {
                 "num_nodes": [
+                    256,
                     128,
                     64
                 ],
-                "lr": 0.001,
+                "lr": 0.0005,
                 "dropout": 0.15,
-                "batch_size": 32,
-                "early_stopping_patience": 50,
-                "optimizer": "RMSprop",
-                "epochs": 200,
-                "input_size": 90,
-                "use_attention": true
+                "batch_size": 64,
+                "early_stopping_patience": 20,
+                "optimizer": "Adam",
+                "epochs": 50,
+                "input_size": 84
             }
         },
         "DeepHitModel_attention": {
@@ -318,8 +317,7 @@
                 "batch_size": 128,
                 "epochs": 500,
                 "early_stopping_patience": 30,
-                "input_size": 90,
-                "use_attention": true
+                "input_size": 84
             }
         },
         "PCHazardModel_attention": {
@@ -336,26 +334,23 @@
                 "batch_size": 128,
                 "epochs": 500,
                 "early_stopping_patience": 50,
-                "input_size": 90,
-                "use_attention": true
+                "input_size": 84
             }
         },
         "MTLRModel_attention": {
             "class": "src.models.survival_models.MTLRModel",
             "kwargs": {
                 "num_nodes": [
-                    256,
                     128,
                     64
                 ],
                 "lr": 0.0005,
-                "dropout": 0.15,
+                "dropout": 0.2,
                 "optimizer": "Adam",
                 "batch_size": 128,
-                "epochs": 500,
+                "epochs": 200,
                 "early_stopping_patience": 30,
-                "input_size": 90,
-                "use_attention": true
+                "input_size": 84
             }
         },
         "DeepSurv": {
