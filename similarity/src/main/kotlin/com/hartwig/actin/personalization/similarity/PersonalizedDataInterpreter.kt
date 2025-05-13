@@ -1,9 +1,8 @@
 package com.hartwig.actin.personalization.similarity
 
-import com.hartwig.actin.personalization.datamodel.ReferencePatient
-import com.hartwig.actin.personalization.datamodel.Tumor
+import com.hartwig.actin.personalization.datamodel.ReferenceEntry
 import com.hartwig.actin.personalization.datamodel.diagnosis.LocationGroup
-import com.hartwig.actin.personalization.datamodel.serialization.ReferencePatientJson
+import com.hartwig.actin.personalization.datamodel.serialization.ReferenceEntryJson
 import com.hartwig.actin.personalization.datamodel.treatment.TreatmentGroup
 import com.hartwig.actin.personalization.similarity.population.PatientPopulationBreakdown
 import com.hartwig.actin.personalization.similarity.population.PersonalizedDataAnalysis
@@ -11,7 +10,7 @@ import com.hartwig.actin.personalization.similarity.population.PopulationDefinit
 import com.hartwig.actin.personalization.similarity.selection.TreatmentSelection
 import io.github.oshai.kotlinlogging.KotlinLogging
 
-class PersonalizedDataInterpreter(val entriesByTreatment: List<Pair<TreatmentGroup, List<Tumor>>>) {
+class PersonalizedDataInterpreter(val entriesByTreatment: List<Pair<TreatmentGroup, List<ReferenceEntry>>>) {
 
     fun analyzePatient(
         age: Int,
@@ -29,19 +28,18 @@ class PersonalizedDataInterpreter(val entriesByTreatment: List<Pair<TreatmentGro
         private val LOGGER = KotlinLogging.logger {}
 
         fun createFromFile(path: String): PersonalizedDataInterpreter {
-            LOGGER.info { "Loading reference patient database from $path" }
-            val patients = ReferencePatientJson.read(path)
+            LOGGER.info { "Loading reference entry database from $path" }
+            val referenceEntries = ReferenceEntryJson.read(path)
 
-            LOGGER.info { " Loaded ${patients.size} reference patients" }
-            return createFromReferencePatients(patients)
+            LOGGER.info { " Loaded ${referenceEntries.size} reference entries" }
+            return createFromReferenceEntries(referenceEntries)
         }
 
-        fun createFromReferencePatients(patients: List<ReferencePatient>): PersonalizedDataInterpreter {
-            val referenceEntries = patients
-                .flatMap(ReferencePatient::tumors)
+        fun createFromReferenceEntries(entries: List<ReferenceEntry>): PersonalizedDataInterpreter {
+            val applicableEntries = entries
                 .filter { hasMetastaticTreatmentEpisodeWithSystemicTreatmentOnly(it) }
 
-            val entriesByTreatment = referenceEntries.groupBy { entry ->
+            val entriesByTreatment = applicableEntries.groupBy { entry ->
                 TreatmentSelection.firstSpecificMetastaticSystemicTreatment(entry)!!.treatment.treatmentGroup
             }
                 .toList()
@@ -50,7 +48,7 @@ class PersonalizedDataInterpreter(val entriesByTreatment: List<Pair<TreatmentGro
             return PersonalizedDataInterpreter(entriesByTreatment)
         }
 
-        private fun hasMetastaticTreatmentEpisodeWithSystemicTreatmentOnly(entry: Tumor): Boolean {
+        private fun hasMetastaticTreatmentEpisodeWithSystemicTreatmentOnly(entry: ReferenceEntry): Boolean {
             // TODO (KD): Review whether filtering remains consistent with data frame used by notebooks eventually.
             val metastaticTreatmentEpisode = TreatmentSelection.extractMetastaticTreatmentEpisode(entry) ?: return false
 

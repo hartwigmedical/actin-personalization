@@ -12,7 +12,7 @@ class ProgressionSelectionTest {
     fun `Should return null when no progression measures present`() {
         assertThat(
             ProgressionSelection.firstProgressionAfterSystemicTreatmentStart(
-                TestDatamodelFactory.tumor(systemicTreatment = Treatment.CAPOX)
+                TestDatamodelFactory.entry(systemicTreatment = Treatment.CAPOX)
             )
         ).isNull()
     }
@@ -29,7 +29,7 @@ class ProgressionSelectionTest {
 
         assertThat(
             ProgressionSelection.firstProgressionAfterSystemicTreatmentStart(
-                TestDatamodelFactory.tumor(treatmentEpisode = treatmentEpisode)
+                TestDatamodelFactory.entry(treatmentEpisode = treatmentEpisode)
             )
         ).isNull()
     }
@@ -52,7 +52,7 @@ class ProgressionSelectionTest {
 
         assertThat(
             ProgressionSelection.firstProgressionAfterSystemicTreatmentStart(
-                TestDatamodelFactory.tumor(treatmentEpisode = treatmentEpisodeWithMultipleProgression)
+                TestDatamodelFactory.entry(treatmentEpisode = treatmentEpisodeWithMultipleProgression)
             )?.daysSinceDiagnosis
         ).isEqualTo(12)
     }

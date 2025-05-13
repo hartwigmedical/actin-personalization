@@ -1,7 +1,6 @@
 package com.hartwig.actin.personalization.database
 
-import com.hartwig.actin.personalization.datamodel.ReferencePatient
-import com.hartwig.actin.personalization.datamodel.Tumor
+import com.hartwig.actin.personalization.datamodel.ReferenceEntry
 import com.hartwig.actin.personalization.datamodel.diagnosis.MetastaticDiagnosis
 import com.hartwig.actin.personalization.datamodel.diagnosis.TumorLocation
 import com.hartwig.actin.personalization.datamodel.treatment.Drug
@@ -20,31 +19,31 @@ private typealias IndexedList<T> = List<Pair<Int, T>>
 
 class DatabaseWriter(private val context: DSLContext, private val connection: java.sql.Connection) {
     
-    fun writeAllToDb(referencePatients: List<ReferencePatient>) {
+    fun writeAllToDb(referenceEntries: List<ReferenceEntry>) {
         connection.autoCommit = false
         clearAll()
 
-        val indexedPatients = writeReferencePatients(referencePatients)
-        val indexedTumors = writeTumorsAndReferenceEntries(indexedPatients)
-        writeRecords("survival measurement", indexedTumors, ::survivalMeasurementFromTumor)
-        writeRecords("prior tumor", indexedTumors, ::priorTumorFromTumor)
-        writeRecords("primary diagnosis", indexedTumors, ::primaryDiagnosisFromTumor)
+        val indexedEntries = writeReferenceEntries(referenceEntries)
+        writeRecords("reference object", indexedEntries, ::referenceObjectsFromEntry)
+        writeRecords("survival measurement", indexedEntries, ::survivalMeasurementFromEntry)
+        writeRecords("prior tumor", indexedEntries, ::priorTumorFromEntry)
+        writeRecords("primary diagnosis", indexedEntries, ::primaryDiagnosisFromTumor)
         val indexedMetastaticDiagnoses = writeRecordsAndReturnIndexedList(
             "metastatic diagnosis",
-            indexedTumors,
+            indexedEntries,
             Tables.METASTATICDIAGNOSIS,
             ::metastaticDiagnosisFromTumor
         )
         writeRecords("metastasis", indexedMetastaticDiagnoses, ::metastasesFromMetastaticDiagnosis)
-        writeRecords("who assessment", indexedTumors, ::whoAssessmentsFromTumor)
-        writeRecords("asa assessment", indexedTumors, ::asaAssessmentsFromTumor)
-        writeRecords("comorbidity assessment", indexedTumors, ::comorbidityAssessmentsFromTumor)
-        writeRecords("molecular result", indexedTumors, ::molecularResultsFromTumor)
-        writeRecords("lab measurement", indexedTumors, ::labMeasurementsFromTumor)
+        writeRecords("who assessment", indexedEntries, ::whoAssessmentsFromTumor)
+        writeRecords("asa assessment", indexedEntries, ::asaAssessmentsFromTumor)
+        writeRecords("comorbidity assessment", indexedEntries, ::comorbidityAssessmentsFromTumor)
+        writeRecords("molecular result", indexedEntries, ::molecularResultsFromTumor)
+        writeRecords("lab measurement", indexedEntries, ::labMeasurementsFromTumor)
 
         val indexedTreatmentEpisodes = writeRecordsAndReturnIndexedList(
             "treatment episode",
-            indexedTumors,
+            indexedEntries,
             Tables.TREATMENTEPISODE,
             ::treatmentEpisodesFromTumor
         )
@@ -88,53 +87,19 @@ class DatabaseWriter(private val context: DSLContext, private val connection: ja
         context.execute("SET FOREIGN_KEY_CHECKS = 1;")
     }
 
-    private fun writeReferencePatients(referencePatients: List<ReferencePatient>): IndexedList<ReferencePatient> {
-        LOGGER.info { " Writing patient records" }
-        val (indexedRecords, rows) = referencePatients.mapIndexed { index, record ->
-            val patientId = index + 1
-            val dbRecord = context.newRecord(Tables.PATIENT)
+    private fun writeReferenceEntries(referenceEntries: List<ReferenceEntry>): IndexedList<ReferenceEntry> {
+        LOGGER.info { " Writing reference entries" }
+        val (indexedRecords, rows) = referenceEntries.mapIndexed { index, record ->
+            val referenceEntryId = index + 1
+            val dbRecord = context.newRecord(Tables.ENTRY)
             dbRecord.from(record)
-            dbRecord.set(Tables.PATIENT.ID, patientId)
-            dbRecord.set(Tables.PATIENT.SOURCE, record.source.name)
-            dbRecord.set(Tables.PATIENT.SEX, record.sex.name)
-            Pair(patientId, record) to dbRecord
+            dbRecord.set(Tables.ENTRY.ID, referenceEntryId)
+            dbRecord.set(Tables.ENTRY.SOURCE, record.source.name)
+            dbRecord.set(Tables.ENTRY.SEX, record.sex.name)
+            Pair(referenceEntryId, record) to dbRecord
         }.unzip()
 
-        insertRows(rows, "patient")
-        return indexedRecords
-    }
-
-    private fun writeTumorsAndReferenceEntries(patientRecords: IndexedList<ReferencePatient>): IndexedList<Tumor> {
-        LOGGER.info { " Writing tumor records" }
-
-        val (indexedRecords, rows) = patientRecords
-            .flatMap { (patientId, referencePatient) ->
-                referencePatient.tumors.map { tumor ->
-                    val referenceRecord = ReferenceEntryFactory.create(referencePatient, tumor)
-                    patientId to Pair(tumor, referenceRecord)  }
-            }
-            .withIndex()
-            .map { (index, pair) ->
-                val (patientId, tumorAndReference) = pair
-                val tumorId = index + 1
-                val tumorRecord = context.newRecord(Tables.TUMOR)
-                tumorRecord.from(tumorAndReference.first)
-                tumorRecord.set(Tables.TUMOR.ID, tumorId)
-                tumorRecord.set(Tables.TUMOR.PATIENTID, patientId)
-
-                val referenceEntry = tumorAndReference.second
-                val referenceEntryRecord = context.newRecord(Tables.REFERENCEENTRY)
-                referenceEntryRecord.from(referenceEntry)
-                referenceEntryRecord.set(Tables.REFERENCEENTRY.TUMORID, tumorId)
-                referenceEntryRecord.set(Tables.REFERENCEENTRY.SEX, referenceEntry.sex.name)
-                referenceEntryRecord.set(Tables.REFERENCEENTRY.SOURCE, referenceEntry.source.name)
-                
-                Pair(tumorId, tumorAndReference.first) to Pair(tumorRecord, referenceEntryRecord)
-            }.unzip()
-
-        insertRows(rows.map { it.first }, "tumor")
-        insertRows(rows.map { it.second }, "reference entry")
-        
+        insertRows(rows, "reference entry")
         return indexedRecords
     }
     
@@ -165,24 +130,27 @@ class DatabaseWriter(private val context: DSLContext, private val connection: ja
         connection.commit()
         LOGGER.info { "  Inserted ${rows.size} $name records" }
     }
-    
-    private fun survivalMeasurementFromTumor(tumorId: Int, tumor: Tumor) =
-        listOf(extractSimpleRecord(Tables.SURVIVALMEASUREMENT, tumor.latestSurvivalMeasurement, "tumorId", tumorId))
 
-    private fun priorTumorFromTumor(tumorId: Int, tumor: Tumor) =
-        tumor.priorTumors.map { priorTumor ->
+    private fun referenceObjectsFromEntry(entryId: Int, entry: ReferenceEntry) =
+        listOf(extractSimpleRecord(Tables.REFERENCE, ReferenceObjectFactory.create(entry), "id", entryId))
+    
+    private fun survivalMeasurementFromEntry(entryId: Int, entry: ReferenceEntry) =
+        listOf(extractSimpleRecord(Tables.SURVIVALMEASUREMENT, entry.latestSurvivalMeasurement, "entryId", entryId))
+
+    private fun priorTumorFromEntry(entryId: Int, entry: ReferenceEntry) =
+        entry.priorTumors.map { priorTumor ->
             val dbRecord = context.newRecord(Tables.PRIORTUMOR)
             dbRecord.from(priorTumor)
-            dbRecord.set(Tables.PRIORTUMOR.TUMORID, tumorId)
+            dbRecord.set(Tables.PRIORTUMOR.ENTRYID, entryId)
             dbRecord.set(Tables.PRIORTUMOR.SYSTEMICDRUGSRECEIVED, concat(priorTumor.systemicDrugsReceived))
             dbRecord
         }
 
-    private fun primaryDiagnosisFromTumor(tumorId: Int, tumor: Tumor) =
-        listOf(tumor.primaryDiagnosis).map { primaryDiagnosis ->
+    private fun primaryDiagnosisFromTumor(entryId: Int, entry: ReferenceEntry) =
+        listOf(entry.primaryDiagnosis).map { primaryDiagnosis ->
             val dbRecord = context.newRecord(Tables.PRIMARYDIAGNOSIS)
             dbRecord.from(primaryDiagnosis)
-            dbRecord.set(Tables.PRIMARYDIAGNOSIS.TUMORID, tumorId)
+            dbRecord.set(Tables.PRIMARYDIAGNOSIS.ENTRYID, entryId)
             dbRecord.set(Tables.PRIMARYDIAGNOSIS.BASISOFDIAGNOSIS, primaryDiagnosis.basisOfDiagnosis.name)
             dbRecord.set(Tables.PRIMARYDIAGNOSIS.PRIMARYTUMORTYPE, primaryDiagnosis.primaryTumorType.name)
             dbRecord.set(Tables.PRIMARYDIAGNOSIS.PRIMARYTUMORLOCATION, primaryDiagnosis.primaryTumorLocation.name)
@@ -203,12 +171,12 @@ class DatabaseWriter(private val context: DSLContext, private val connection: ja
             dbRecord
         }
 
-    private fun metastaticDiagnosisFromTumor(tumorId: Int, tumor: Tumor) =
-        tumor.metastaticDiagnosis.let {
+    private fun metastaticDiagnosisFromTumor(entryId: Int, entry: ReferenceEntry) =
+        entry.metastaticDiagnosis.let {
             val dbRecord = context.newRecord(Tables.METASTATICDIAGNOSIS)
-            with(tumor.metastaticDiagnosis) {
+            with(entry.metastaticDiagnosis) {
                 dbRecord.from(this)
-                dbRecord.set(Tables.METASTATICDIAGNOSIS.TUMORID, tumorId)
+                dbRecord.set(Tables.METASTATICDIAGNOSIS.ENTRYID, entryId)
                 dbRecord.set(Tables.METASTATICDIAGNOSIS.NUMBEROFLIVERMETASTASES, this.numberOfLiverMetastases?.name)
                 listOf(this to dbRecord)
             }
@@ -223,47 +191,47 @@ class DatabaseWriter(private val context: DSLContext, private val connection: ja
             dbRecord
         }
 
-    private fun whoAssessmentsFromTumor(tumorId: Int, tumor: Tumor) =
-        tumor.whoAssessments.map { data ->
+    private fun whoAssessmentsFromTumor(entryId: Int, entry: ReferenceEntry) =
+        entry.whoAssessments.map { data ->
             val dbRecord = context.newRecord(Tables.WHOASSESSMENT)
             dbRecord.from(data)
-            dbRecord.set(Tables.WHOASSESSMENT.TUMORID, tumorId)
+            dbRecord.set(Tables.WHOASSESSMENT.ENTRYID, entryId)
             dbRecord
         }
 
-    private fun asaAssessmentsFromTumor(tumorId: Int, tumor: Tumor) =
-        tumor.asaAssessments.map { data ->
+    private fun asaAssessmentsFromTumor(entryId: Int, entry: ReferenceEntry) =
+        entry.asaAssessments.map { data ->
             val dbRecord = context.newRecord(Tables.ASAASSESSMENT)
             dbRecord.from(data)
-            dbRecord.set(Tables.ASAASSESSMENT.TUMORID, tumorId)
+            dbRecord.set(Tables.ASAASSESSMENT.ENTRYID, entryId)
             dbRecord.set(Tables.ASAASSESSMENT.ASACLASSIFICATION, data.classification.name)
             dbRecord
         }
 
-    private fun comorbidityAssessmentsFromTumor(tumorId: Int, tumor: Tumor) =
-        tumor.comorbidityAssessments.map {
-            extractSimpleRecord(Tables.COMORBIDITYASSESSMENT, it, "tumorId", tumorId)
+    private fun comorbidityAssessmentsFromTumor(entryId: Int, entry: ReferenceEntry) =
+        entry.comorbidityAssessments.map {
+            extractSimpleRecord(Tables.COMORBIDITYASSESSMENT, it, "entryId", entryId)
         }
 
-    private fun molecularResultsFromTumor(tumorId: Int, tumor: Tumor) =
-        tumor.molecularResults.map {
-            extractSimpleRecord(Tables.MOLECULARRESULT, it, "tumorId", tumorId)
+    private fun molecularResultsFromTumor(entryId: Int, entry: ReferenceEntry) =
+        entry.molecularResults.map {
+            extractSimpleRecord(Tables.MOLECULARRESULT, it, "entryId", entryId)
         }
 
-    private fun labMeasurementsFromTumor(tumorId: Int, tumor: Tumor) =
-        tumor.labMeasurements.map { data ->
+    private fun labMeasurementsFromTumor(entryId: Int, entry: ReferenceEntry) =
+        entry.labMeasurements.map { data ->
             val dbRecord = context.newRecord(Tables.LABMEASUREMENT)
             dbRecord.from(data)
-            dbRecord.set(Tables.LABMEASUREMENT.TUMORID, tumorId)
+            dbRecord.set(Tables.LABMEASUREMENT.ENTRYID, entryId)
             dbRecord.set(Tables.LABMEASUREMENT.NAME, data.name.name)
             dbRecord
         }
 
-    private fun treatmentEpisodesFromTumor(tumorId: Int, tumor: Tumor) =
-        tumor.treatmentEpisodes.map { data ->
+    private fun treatmentEpisodesFromTumor(entryId: Int, entry: ReferenceEntry) =
+        entry.treatmentEpisodes.map { data ->
             val dbRecord = context.newRecord(Tables.TREATMENTEPISODE)
             dbRecord.from(data)
-            dbRecord.set(Tables.TREATMENTEPISODE.TUMORID, tumorId)
+            dbRecord.set(Tables.TREATMENTEPISODE.ENTRYID, entryId)
             dbRecord.set(Tables.TREATMENTEPISODE.METASTATICPRESENCE, data.metastaticPresence.name)
             dbRecord.set(Tables.TREATMENTEPISODE.REASONREFRAINMENTFROMTREATMENT, data.reasonRefrainmentFromTreatment.name)
             data to dbRecord
@@ -393,7 +361,7 @@ class DatabaseWriter(private val context: DSLContext, private val connection: ja
             dbRecord.set(Tables.TUMORLOCATIONREFERENCE.GROUP, location.locationGroup.toString())
             dbRecord
         }
-        insertRows(rows, "location")
+        insertRows(rows, "tumor location")
     }
 
     companion object {

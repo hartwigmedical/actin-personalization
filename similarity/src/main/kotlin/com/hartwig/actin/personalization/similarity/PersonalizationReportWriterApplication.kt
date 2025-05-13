@@ -10,8 +10,8 @@ import java.util.concurrent.Callable
 
 class PersonalizationReportWriterApplication : Callable<Int> {
     
-    @CommandLine.Option(names = ["-reference_patients_json"], required = true)
-    lateinit var referencePatientsJson: String
+    @CommandLine.Option(names = ["-reference_entry_json"], required = true)
+    lateinit var referenceEntryJson: String
 
     @CommandLine.Option(names = ["-age"], required = true)
     var age: Int = -1
@@ -31,7 +31,7 @@ class PersonalizationReportWriterApplication : Callable<Int> {
     override fun call(): Int {
         LOGGER.info { "Running $APPLICATION v$VERSION" }
 
-        val analysis = PersonalizedDataInterpreter.createFromFile(referencePatientsJson)
+        val analysis = PersonalizedDataInterpreter.createFromFile(referenceEntryJson)
             .analyzePatient(age, whoStatus, hasRasMutation, extractTopLevelLocationGroups(metastasisLocationString))
 
         val measurementTables = listOf(

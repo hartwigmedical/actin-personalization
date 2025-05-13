@@ -1,6 +1,8 @@
 package com.hartwig.actin.personalization.ncr.interpretation.extraction
 
-import com.hartwig.actin.personalization.datamodel.Tumor
+import com.hartwig.actin.personalization.datamodel.ReferenceEntry
+import com.hartwig.actin.personalization.datamodel.ReferenceSource
+import com.hartwig.actin.personalization.datamodel.Sex
 import com.hartwig.actin.personalization.datamodel.assessment.AsaAssessment
 import com.hartwig.actin.personalization.datamodel.assessment.ComorbidityAssessment
 import com.hartwig.actin.personalization.datamodel.assessment.MolecularResult
@@ -10,17 +12,21 @@ import com.hartwig.actin.personalization.ncr.datamodel.NcrRecord
 import com.hartwig.actin.personalization.ncr.interpretation.NcrFunctions
 import com.hartwig.actin.personalization.ncr.interpretation.mapping.NcrAsaClassificationMapper
 import com.hartwig.actin.personalization.ncr.interpretation.mapping.NcrBooleanMapper
+import com.hartwig.actin.personalization.ncr.interpretation.mapping.NcrSexMapper
 import com.hartwig.actin.personalization.ncr.interpretation.mapping.NcrVitalStatusMapper
 import com.hartwig.actin.personalization.ncr.interpretation.mapping.NcrWhoStatusMapper
 
-object NcrTumorExtractor {
+object NcrReferenceEntryExtractor {
 
-    fun extractTumor(records: List<NcrRecord>): Tumor {
+    fun extract(records: List<NcrRecord>): ReferenceEntry {
         val diagnosis = NcrFunctions.diagnosisRecord(records)
 
-        return Tumor(
+        return ReferenceEntry(
+            source = ReferenceSource.NCR,
+            sourceId = extractSourceId(records),
             diagnosisYear = diagnosis.primaryDiagnosis.incjr,
             ageAtDiagnosis = diagnosis.patientCharacteristics.leeft,
+            sex = extractSex(records),
             latestSurvivalMeasurement = extractLatestSurvivalMeasure(diagnosis),
             priorTumors = NcrPriorTumorExtractor.extract(records),
             primaryDiagnosis = NcrPrimaryDiagnosisExtractor.extract(records),
@@ -32,6 +38,14 @@ object NcrTumorExtractor {
             labMeasurements = NcrLabMeasurementExtractor.extract(records),
             treatmentEpisodes = NcrTreatmentEpisodeExtractor.extract(records)
         )
+    }
+
+    private fun extractSourceId(records: List<NcrRecord>): Int {
+        return records.map { it.identification.keyZid }.distinct().single()
+    }
+
+    private fun extractSex(records: List<NcrRecord>): Sex {
+        return NcrSexMapper.resolve(records.map { it.patientCharacteristics.gesl }.distinct().single())
     }
 
     private fun extractLatestSurvivalMeasure(diagnosisRecord: NcrRecord): SurvivalMeasurement {

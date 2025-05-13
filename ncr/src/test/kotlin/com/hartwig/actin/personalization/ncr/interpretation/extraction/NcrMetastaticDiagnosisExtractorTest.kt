@@ -11,14 +11,14 @@ class NcrMetastaticDiagnosisExtractorTest {
 
     @Test
     fun `Should extract metastatic diagnosis from minimal NCR record`() {
-        val metastaticDiagnosis = NcrMetastaticDiagnosisExtractor.extract(TestNcrRecordFactory.minimalTumorRecords())
+        val metastaticDiagnosis = NcrMetastaticDiagnosisExtractor.extract(TestNcrRecordFactory.minimalEntryRecords())
 
         assertThat(metastaticDiagnosis.isMetachronous).isFalse()
     }
 
     @Test
     fun `Should extract metastatic diagnosis from proper set of NCR records`() {
-        val metastaticDiagnosis = NcrMetastaticDiagnosisExtractor.extract(TestNcrRecordFactory.properTumorRecords())
+        val metastaticDiagnosis = NcrMetastaticDiagnosisExtractor.extract(TestNcrRecordFactory.properEntryRecords())
 
         with(metastaticDiagnosis) {
             assertThat(isMetachronous).isTrue()

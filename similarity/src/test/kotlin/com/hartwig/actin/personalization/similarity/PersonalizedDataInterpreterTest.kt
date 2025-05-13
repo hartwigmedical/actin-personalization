@@ -11,29 +11,25 @@ import org.junit.jupiter.api.Test
 class PersonalizedDataInterpreterTest {
 
     @Test
-    fun `Should create interpreter with filtered and grouped patient records`() {
-        val fluorouracilEntry = TestDatamodelFactory.tumor(systemicTreatment = Treatment.FLUOROURACIL)
-        val capecitabineEntry = TestDatamodelFactory.tumor(systemicTreatment = Treatment.CAPECITABINE)
-        val capoxEntry = TestDatamodelFactory.tumor(systemicTreatment = Treatment.CAPOX)
+    fun `Should create interpreter with filtered and grouped reference entries`() {
+        val fluorouracilEntry = TestDatamodelFactory.entry(systemicTreatment = Treatment.FLUOROURACIL)
+        val capecitabineEntry = TestDatamodelFactory.entry(systemicTreatment = Treatment.CAPECITABINE)
+        val capoxEntry = TestDatamodelFactory.entry(systemicTreatment = Treatment.CAPOX)
 
-        val patients = listOf(
-            TestDatamodelFactory.patient(fluorouracilEntry),
-            TestDatamodelFactory.patient(
-                TestDatamodelFactory.tumor(
-                    systemicTreatment = Treatment.FLUOROURACIL,
-                    metastaticPresenceUnderSystemicTreatment = MetastaticPresence.AT_PROGRESSION
-                )
+        val entries = listOf(
+            fluorouracilEntry,
+            TestDatamodelFactory.entry(
+                systemicTreatment = Treatment.FLUOROURACIL,
+                metastaticPresenceUnderSystemicTreatment = MetastaticPresence.AT_PROGRESSION
             ),
-            TestDatamodelFactory.patient(TestDatamodelFactory.tumor(systemicTreatment = Treatment.OTHER)),
-            TestDatamodelFactory.patient(TestDatamodelFactory.tumor(systemicTreatment = null)),
-            TestDatamodelFactory.patient(
-                TestDatamodelFactory.tumor(systemicTreatment = Treatment.FLUOROURACIL, primarySurgeryType = SurgeryType.NOS_OR_OTHER)
-            ),
-            TestDatamodelFactory.patient(capecitabineEntry),
-            TestDatamodelFactory.patient(capoxEntry)
+            TestDatamodelFactory.entry(systemicTreatment = Treatment.OTHER),
+            TestDatamodelFactory.entry(systemicTreatment = null),
+            TestDatamodelFactory.entry(systemicTreatment = Treatment.FLUOROURACIL, primarySurgeryType = SurgeryType.NOS_OR_OTHER),
+            capecitabineEntry,
+            capoxEntry
         )
 
-        val interpreter = PersonalizedDataInterpreter.createFromReferencePatients(patients)
+        val interpreter = PersonalizedDataInterpreter.createFromReferenceEntries(entries)
 
         val expectedGroupedEntries = mapOf(
             TreatmentGroup.CAPECITABINE_OR_FLUOROURACIL to listOf(

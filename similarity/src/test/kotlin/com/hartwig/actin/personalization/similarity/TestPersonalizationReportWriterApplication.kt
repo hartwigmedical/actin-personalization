@@ -15,12 +15,12 @@ class TestPersonalizationReportWriterApplication {
         LOGGER.info { "Running $APPLICATION v$VERSION" }
 
         val outputPath = "$WORK_DIRECTORY/out.pdf"
-        val analysis = PersonalizedDataInterpreter.createFromReferencePatients(
+        val analysis = PersonalizedDataInterpreter.createFromReferenceEntries(
             (1..1000 step 10)
                 .map {
                     val treatmentEpisode =
                         TestDatamodelFactory.treatmentEpisode(systemicTreatment = Treatment.FOLFOX, daysBetweenDiagnosisAndProgression = it)
-                    TestDatamodelFactory.patient(TestDatamodelFactory.tumor(treatmentEpisode = treatmentEpisode))
+                    TestDatamodelFactory.entry(treatmentEpisode = treatmentEpisode)
                 }
         )
             .analyzePatient(50, 1, false, emptySet())

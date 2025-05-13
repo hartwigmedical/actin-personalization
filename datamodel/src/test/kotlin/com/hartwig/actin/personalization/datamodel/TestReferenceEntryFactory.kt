@@ -61,27 +61,14 @@ import com.hartwig.actin.personalization.datamodel.treatment.Treatment
 import com.hartwig.actin.personalization.datamodel.treatment.TreatmentEpisode
 import com.hartwig.actin.personalization.datamodel.treatment.TreatmentIntent
 
-object TestReferencePatientFactory {
+object TestReferenceEntryFactory {
 
-    fun emptyReferencePatient() = ReferencePatient(
-        source = ReferenceSource.INTERNAL, sourceId = 1, sex = Sex.MALE, tumors = listOf(emptyTumor())
-    )
-
-    fun minimalReferencePatient() = ReferencePatient(
-        source = ReferenceSource.INTERNAL, sourceId = 2, sex = Sex.MALE, tumors = listOf(minimalTumor())
-    )
-
-    fun exhaustiveReferencePatient() = ReferencePatient(
-        source = ReferenceSource.INTERNAL, sourceId = 2, sex = Sex.MALE, tumors = listOf(exhaustiveTumor())
-    )
-
-    fun referencePatientWithMultipleTumors() = ReferencePatient(
-        source = ReferenceSource.INTERNAL, sourceId = 3, sex = Sex.MALE, tumors = listOf(emptyTumor(), minimalTumor(), exhaustiveTumor())
-    )
-
-    private fun emptyTumor() = Tumor(
+    fun emptyReferenceEntry() = ReferenceEntry(
+        source = ReferenceSource.INTERNAL,
+        sourceId = 1,
         diagnosisYear = 1971,
         ageAtDiagnosis = 63,
+        sex = Sex.MALE,
         latestSurvivalMeasurement = SurvivalMeasurement(daysSinceDiagnosis = 251, isAlive = true),
         priorTumors = emptyList(),
         primaryDiagnosis = minimalPrimaryDiagnosis(),
@@ -94,9 +81,12 @@ object TestReferencePatientFactory {
         treatmentEpisodes = emptyList()
     )
 
-    private fun minimalTumor() = Tumor(
+    fun minimalReferenceEntry() = ReferenceEntry(
+        source = ReferenceSource.INTERNAL,
+        sourceId = 2,
         diagnosisYear = 1966,
         ageAtDiagnosis = 73,
+        sex = Sex.MALE,
         latestSurvivalMeasurement = SurvivalMeasurement(daysSinceDiagnosis = 151, isAlive = false),
         priorTumors = listOf(minimalPriorTumor()),
         primaryDiagnosis = minimalPrimaryDiagnosis(),
@@ -109,9 +99,12 @@ object TestReferencePatientFactory {
         treatmentEpisodes = listOf(minimalTreatmentEpisode())
     )
 
-    private fun exhaustiveTumor() = Tumor(
+    fun exhaustiveReferenceEntry() = ReferenceEntry(
+        source = ReferenceSource.INTERNAL, 
+        sourceId = 2, 
         diagnosisYear = 1961,
         ageAtDiagnosis = 83,
+        sex = Sex.MALE,
         latestSurvivalMeasurement = SurvivalMeasurement(daysSinceDiagnosis = 90, isAlive = true),
         priorTumors = listOf(minimalPriorTumor(), exhaustivePriorTumor()),
         primaryDiagnosis = exhaustivePrimaryDiagnosis(),
@@ -123,7 +116,7 @@ object TestReferencePatientFactory {
         labMeasurements = listOf(minimalLabMeasurement(), exhaustiveLabMeasurement()),
         treatmentEpisodes = listOf(minimalTreatmentEpisode(), exhaustiveTreatmentEpisode())
     )
-
+    
     private fun minimalPriorTumor() = PriorTumor(
         daysBeforeDiagnosis = 120,
         primaryTumorType = TumorType.GASTROINTESTINAL_STROMAL_TUMOR,

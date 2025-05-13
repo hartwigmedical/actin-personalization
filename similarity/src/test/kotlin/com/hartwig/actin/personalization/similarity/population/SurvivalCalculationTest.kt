@@ -1,7 +1,7 @@
 package com.hartwig.actin.personalization.similarity.population
 
+import com.hartwig.actin.personalization.datamodel.ReferenceEntry
 import com.hartwig.actin.personalization.datamodel.TestDatamodelFactory
-import com.hartwig.actin.personalization.datamodel.Tumor
 import com.hartwig.actin.personalization.datamodel.treatment.Treatment
 import com.hartwig.actin.personalization.similarity.report.TableElement
 import org.assertj.core.api.Assertions.assertThat
@@ -50,7 +50,7 @@ class SurvivalCalculationTest {
         }
 
         private fun testEligibility(calculation: SurvivalCalculation, type: SurvivalType) {
-            val createEntry: (Int?, Boolean) -> Tumor = { days, hadEvent ->
+            val createEntry: (Int?, Boolean) -> ReferenceEntry = { days, hadEvent ->
                 entryWithSurvivalDays(
                     osDays = if (type == SurvivalType.OS) days ?: 0 else 0,
                     pfsDays = if (type == SurvivalType.PFS) days else null,
@@ -86,8 +86,8 @@ class SurvivalCalculationTest {
         osDays: Int = 0,
         pfsDays: Int? = null,
         hadEvent: Boolean = true
-    ): Tumor {
-        return TestDatamodelFactory.tumor(isAlive = !hadEvent,
+    ): ReferenceEntry {
+        return TestDatamodelFactory.entry(isAlive = !hadEvent,
             daysBetweenDiagnosisAndSurvivalMeasurement = osDays,
             systemicTreatment = Treatment.FLUOROURACIL,
             systemicTreatmentStart = null,

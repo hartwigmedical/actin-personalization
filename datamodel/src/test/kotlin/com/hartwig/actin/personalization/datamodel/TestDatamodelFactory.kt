@@ -13,12 +13,8 @@ import com.hartwig.actin.personalization.datamodel.treatment.Treatment
 import com.hartwig.actin.personalization.datamodel.treatment.TreatmentEpisode
 
 object TestDatamodelFactory {
-
-    fun patient(tumor: Tumor): ReferencePatient {
-        return TestReferencePatientFactory.emptyReferencePatient().copy(tumors = listOf(tumor))
-    }
-
-    fun tumor(
+    
+    fun entry(
         ageAtDiagnosis: Int = 75,
         isAlive: Boolean = false,
         daysBetweenDiagnosisAndSurvivalMeasurement: Int = 100,
@@ -28,7 +24,7 @@ object TestDatamodelFactory {
         primarySurgeryType: SurgeryType? = null,
         daysBetweenDiagnosisAndProgression: Int? = null,
         hasProgressionEvent: Boolean? = null
-    ): Tumor {
+    ): ReferenceEntry {
         val treatmentEpisode = treatmentEpisode(
             metastaticPresence = metastaticPresenceUnderSystemicTreatment,
             systemicTreatment = systemicTreatment,
@@ -38,16 +34,16 @@ object TestDatamodelFactory {
             hasProgressionEvent = hasProgressionEvent
         )
 
-        return tumor(ageAtDiagnosis, isAlive, daysBetweenDiagnosisAndSurvivalMeasurement, treatmentEpisode)
+        return entry(ageAtDiagnosis, isAlive, daysBetweenDiagnosisAndSurvivalMeasurement, treatmentEpisode)
     }
 
-    fun tumor(
+    fun entry(
         ageAtDiagnosis: Int = 75,
         isAlive: Boolean = true,
         daysBetweenDiagnosisAndSurvivalMeasurement: Int = 100,
         treatmentEpisode: TreatmentEpisode? = null
-    ): Tumor {
-        return TestReferencePatientFactory.minimalReferencePatient().tumors.first().copy(
+    ): ReferenceEntry {
+        return TestReferenceEntryFactory.minimalReferenceEntry().copy(
             ageAtDiagnosis = ageAtDiagnosis,
             latestSurvivalMeasurement = SurvivalMeasurement(
                 daysSinceDiagnosis = daysBetweenDiagnosisAndSurvivalMeasurement,

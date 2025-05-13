@@ -1,5 +1,7 @@
 package com.hartwig.actin.personalization.ncr.interpretation.extraction
 
+import com.hartwig.actin.personalization.datamodel.ReferenceSource
+import com.hartwig.actin.personalization.datamodel.Sex
 import com.hartwig.actin.personalization.datamodel.assessment.AsaAssessment
 import com.hartwig.actin.personalization.datamodel.assessment.AsaClassification
 import com.hartwig.actin.personalization.datamodel.assessment.ComorbidityAssessment
@@ -9,15 +11,19 @@ import com.hartwig.actin.personalization.ncr.datamodel.TestNcrRecordFactory
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
-class NcrTumorExtractorTest {
+class NcrReferenceEntryExtractorTest {
 
     @Test
-    fun `Should extract tumor from minimal diagnosis NCR record`() {
-        val tumor = NcrTumorExtractor.extractTumor(TestNcrRecordFactory.minimalTumorRecords())
+    fun `Should extract reference entry from minimal diagnosis NCR record`() {
+        val entry = NcrReferenceEntryExtractor.extract(TestNcrRecordFactory.minimalEntryRecords())
 
-        with(tumor) {
+        with(entry) {
+            assertThat(source).isEqualTo(ReferenceSource.NCR)
+            assertThat(sourceId).isEqualTo(2)
+            
             assertThat(diagnosisYear).isEqualTo(2020)
             assertThat(ageAtDiagnosis).isEqualTo(75)
+            assertThat(sex).isEqualTo(Sex.FEMALE)
 
             assertThat(latestSurvivalMeasurement.daysSinceDiagnosis).isEqualTo(563)
             assertThat(latestSurvivalMeasurement.isAlive).isTrue()
@@ -30,12 +36,16 @@ class NcrTumorExtractorTest {
     }
 
     @Test
-    fun `Should extract tumor from proper tumor NCR records`() {
-        val tumor = NcrTumorExtractor.extractTumor(TestNcrRecordFactory.properTumorRecords())
+    fun `Should extract reference entry from proper tumor NCR records`() {
+        val entry = NcrReferenceEntryExtractor.extract(TestNcrRecordFactory.properEntryRecords())
 
-        with(tumor) {
+        with(entry) {
+            assertThat(source).isEqualTo(ReferenceSource.NCR)
+            assertThat(sourceId).isEqualTo(2)
+            
             assertThat(diagnosisYear).isEqualTo(2020)
             assertThat(ageAtDiagnosis).isEqualTo(75)
+            assertThat(sex).isEqualTo(Sex.FEMALE)
 
             assertThat(latestSurvivalMeasurement.daysSinceDiagnosis).isEqualTo(563)
             assertThat(latestSurvivalMeasurement.isAlive).isTrue()

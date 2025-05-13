@@ -1,8 +1,8 @@
 package com.hartwig.actin.personalization.similarity.population
 
-import com.hartwig.actin.personalization.datamodel.Tumor
+import com.hartwig.actin.personalization.datamodel.ReferenceEntry
 
 data class Population(
     val name: String,
-    val entriesByMeasurementType: Map<MeasurementType, List<Tumor>>
+    val entriesByMeasurementType: Map<MeasurementType, List<ReferenceEntry>>
 )

@@ -1,12 +1,12 @@
 package com.hartwig.actin.personalization.similarity.population
 
-import com.hartwig.actin.personalization.datamodel.Tumor
+import com.hartwig.actin.personalization.datamodel.ReferenceEntry
 import com.hartwig.actin.personalization.datamodel.treatment.TreatmentGroup
 import com.hartwig.actin.personalization.similarity.selection.TreatmentSelection
 import org.jetbrains.kotlinx.kandy.ir.Plot
 
 class PatientPopulationBreakdown(
-    private val entriesByTreatment: List<Pair<TreatmentGroup, List<Tumor>>>,
+    private val entriesByTreatment: List<Pair<TreatmentGroup, List<ReferenceEntry>>>,
     private val populationDefinitions: List<PopulationDefinition>,
     private val measurementTypes: List<MeasurementType> = MeasurementType.entries
 ) {
@@ -23,7 +23,7 @@ class PatientPopulationBreakdown(
         return PersonalizedDataAnalysis(treatmentAnalyses, populations, plotsForEntries(allEntries))
     }
 
-    private fun populationFromDefinition(populationDefinition: PopulationDefinition, allEntries: List<Tumor>): Population {
+    private fun populationFromDefinition(populationDefinition: PopulationDefinition, allEntries: List<ReferenceEntry>): Population {
         val matchingEntries = allEntries.filter(populationDefinition.criteria)
         val entriesByMeasurementType = measurementTypes.associateWith { measurementType ->
             matchingEntries.filter(measurementType.calculation::isEligible)
@@ -32,7 +32,7 @@ class PatientPopulationBreakdown(
     }
 
     private fun treatmentAnalysisForEntries(
-        treatment: TreatmentGroup, entries: List<Tumor>, populationsByName: Map<String, Population>
+        treatment: TreatmentGroup, entries: List<ReferenceEntry>, populationsByName: Map<String, Population>
     ): TreatmentAnalysis {
         val treatmentMeasurements = measurementTypes.associateWith { measurementType ->
             val entriesWithTreatmentAndMeasurement = entries.filter(measurementType.calculation::isEligible)
@@ -46,7 +46,7 @@ class PatientPopulationBreakdown(
     }
 
     private fun createPlotsForMeasurement(
-        allEntries: List<Tumor>, calculation: SurvivalCalculation, yAxisLabel: String
+        allEntries: List<ReferenceEntry>, calculation: SurvivalCalculation, yAxisLabel: String
     ): Map<String, Plot> {
         val filteredEntries = allEntries.filter(calculation::isEligible).sortedBy {
             calculation.timeFunction(it)!!
@@ -74,12 +74,12 @@ class PatientPopulationBreakdown(
         return (plots + populationPlotsByTreatment).toMap()
     }
 
-    private fun plotsForEntries(allEntries: List<Tumor>): Map<String, Plot> {
+    private fun plotsForEntries(allEntries: List<ReferenceEntry>): Map<String, Plot> {
         val pfsPlots = createPlotsForMeasurement(allEntries, PFS_CALCULATION, yAxisLabel = "PFS %")
         val osPlots = createPlotsForMeasurement(allEntries, OS_CALCULATION, yAxisLabel = "OS %")
         return pfsPlots + osPlots
     }
 
-    private fun groupByWho(entries: List<Tumor>) =
+    private fun groupByWho(entries: List<ReferenceEntry>) =
         entries.groupBy { "WHO ${it.whoAssessments.firstOrNull()?.whoStatus}" }.filterKeys { it != "WHO null" }
 }

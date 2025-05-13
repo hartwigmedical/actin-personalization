@@ -7,7 +7,7 @@ The NCR ingestion application requires Java 17+ and can be run as follows:
 ```
 java -cp actin.jar com.hartwig.actin.personalization.ncr.NcrIngestionApplication \
    -ncr_file /path/to/ncr_file.csv \
-   -output_fle /path/to/output_reference_patients.json
+   -output_file /path/to/output_reference_entry.json
 ```
 
 ### Assumptions about the NCR data

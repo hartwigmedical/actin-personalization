@@ -1,13 +1,13 @@
 package com.hartwig.actin.personalization.similarity.selection
 
-import com.hartwig.actin.personalization.datamodel.Tumor
+import com.hartwig.actin.personalization.datamodel.ReferenceEntry
 import com.hartwig.actin.personalization.datamodel.outcome.ProgressionMeasure
 import com.hartwig.actin.personalization.datamodel.outcome.ProgressionMeasureType
 
 object ProgressionSelection {
 
-    fun firstProgressionAfterSystemicTreatmentStart(tumor: Tumor): ProgressionMeasure? {
-        val treatmentEpisode = TreatmentSelection.extractMetastaticTreatmentEpisode(tumor) ?: return null
+    fun firstProgressionAfterSystemicTreatmentStart(entry: ReferenceEntry): ProgressionMeasure? {
+        val treatmentEpisode = TreatmentSelection.extractMetastaticTreatmentEpisode(entry) ?: return null
         val systemicTreatment = TreatmentSelection.extractFirstSpecificSystemicTreatment(treatmentEpisode) ?: return null
         val startOfTreatment = systemicTreatment.daysBetweenDiagnosisAndStart
 

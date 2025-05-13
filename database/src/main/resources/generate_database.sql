@@ -1,50 +1,45 @@
 SET FOREIGN_KEY_CHECKS = 0;
  
 DROP TABLE IF EXISTS `patient`;
-CREATE TABLE `patient` (
+DROP TABLE IF EXISTS `tumor`;
+
+DROP TABLE IF EXISTS `entry`;
+CREATE TABLE `entry` (
     `id` INT NOT NULL,
     `source` VARCHAR(50) NOT NULL,
     `sourceId` INT NOT NULL,
-    `sex` VARCHAR(50) NOT NULL,
-    PRIMARY KEY (`id`)
-);
-
-DROP TABLE IF EXISTS `tumor`;
-CREATE TABLE `tumor` (
-    `id` INT NOT NULL,
-    `patientId` INT NOT NULL,
     `diagnosisYear` INT NOT NULL,
     `ageAtDiagnosis` INT NOT NULL,
-    FOREIGN KEY (`patientId`) REFERENCES `patient`(`id`),
+    `sex` VARCHAR(50) NOT NULL,
     PRIMARY KEY (`id`)
 );
 
 DROP TABLE IF EXISTS `survivalMeasurement`;
 CREATE TABLE `survivalMeasurement` (
-    `tumorId` INT NOT NULL,
+    `entryId` INT NOT NULL,
     `daysSinceDiagnosis` INT NOT NULL,
     `isAlive` BOOL NOT NULL,
-    FOREIGN KEY (`tumorId`) REFERENCES `tumor`(`id`),
-    PRIMARY KEY (`tumorId`)
+    FOREIGN KEY (`entryId`) REFERENCES `entry`(`id`),
+    PRIMARY KEY (`entryId`)
 );
 
 DROP TABLE IF EXISTS `priorTumor`;
 CREATE TABLE `priorTumor` (
     `id` INT NOT NULL AUTO_INCREMENT,
-    `tumorId` INT NOT NULL,
+    `entryId` INT NOT NULL,
     `daysBeforeDiagnosis` INT NOT NULL,
     `primaryTumorType` VARCHAR(255) NOT NULL,
     `primaryTumorLocation` VARCHAR(255) NOT NULL,
     `primaryTumorLocationCategory` VARCHAR(50) NOT NULL,
     `primaryTumorStage` VARCHAR(10),
     `systemicDrugsReceived` VARCHAR(1000) NOT NULL,
-    FOREIGN KEY (`tumorId`) REFERENCES `tumor`(`id`),
+    FOREIGN KEY (`entryId`) REFERENCES `entry`(`id`),
     PRIMARY KEY (`id`)
 );
 
 DROP TABLE IF EXISTS `primaryDiagnosis`;
 CREATE TABLE `primaryDiagnosis` (
-    `tumorId` INT NOT NULL,
+    `entryId` INT NOT NULL,
     `basisOfDiagnosis` VARCHAR(255) NOT NULL,
     `hasDoublePrimaryTumor` BOOL NOT NULL,
     `primaryTumorType` VARCHAR(255) NOT NULL,
@@ -70,20 +65,20 @@ CREATE TABLE `primaryDiagnosis` (
     `lymphaticInvasionCategory` VARCHAR(50),
     `extraMuralInvasionCategory` VARCHAR(50),
     `tumorRegression` VARCHAR(50),
-    FOREIGN KEY (`tumorId`) REFERENCES `tumor`(`id`),
-    PRIMARY KEY (`tumorId`)
+    FOREIGN KEY (`entryId`) REFERENCES `entry`(`id`),
+    PRIMARY KEY (`entryId`)
 );
 
 DROP TABLE IF EXISTS `metastaticDiagnosis`;
 CREATE TABLE `metastaticDiagnosis` (
     `id` INT NOT NULL,
-    `tumorId` INT NOT NULL,
+    `entryId` INT NOT NULL,
     `isMetachronous` BOOL NOT NULL,
     `numberOfLiverMetastases` VARCHAR(50),
     `maximumSizeOfLiverMetastasisMm` INT,
     `investigatedLymphNodesCount` INT,
     `positiveLymphNodesCount` INT,
-    FOREIGN KEY (`tumorId`) REFERENCES `tumor`(`id`),
+    FOREIGN KEY (`entryId`) REFERENCES `entry`(`id`),
     PRIMARY KEY (`id`)
 );
 
@@ -101,27 +96,27 @@ CREATE TABLE `metastasis` (
 DROP TABLE IF EXISTS `whoAssessment`;
 CREATE TABLE `whoAssessment` (
     `id` INT NOT NULL AUTO_INCREMENT,
-    `tumorId` INT NOT NULL,
+    `entryId` INT NOT NULL,
     `daysSinceDiagnosis` INT NOT NULL,
     `whoStatus` INT NOT NULL,
-    FOREIGN KEY (`tumorId`) REFERENCES `tumor`(`id`),
+    FOREIGN KEY (`entryId`) REFERENCES `entry`(`id`),
     PRIMARY KEY (`id`)
 );
 
 DROP TABLE IF EXISTS `asaAssessment`;
 CREATE TABLE `asaAssessment` (
     `id` INT NOT NULL AUTO_INCREMENT,
-    `tumorId` INT NOT NULL,
+    `entryId` INT NOT NULL,
     `daysSinceDiagnosis` INT NOT NULL,
     `asaClassification` VARCHAR(10) NOT NULL,
-    FOREIGN KEY (`tumorId`) REFERENCES `tumor`(`id`),
+    FOREIGN KEY (`entryId`) REFERENCES `entry`(`id`),
     PRIMARY KEY (`id`)
 );
 
 DROP TABLE IF EXISTS `comorbidityAssessment`;
 CREATE TABLE `comorbidityAssessment` (
     `id` INT NOT NULL AUTO_INCREMENT,
-    `tumorId` INT NOT NULL,
+    `entryId` INT NOT NULL,
     `charlsonComorbidityIndex` INT NOT NULL,
     `daysSinceDiagnosis` INT NOT NULL,
     `hasAids` BOOL NOT NULL,
@@ -141,45 +136,45 @@ CREATE TABLE `comorbidityAssessment` (
     `hasRenalDisease` BOOL NOT NULL,
     `hasLiverDisease` BOOL NOT NULL,
     `hasUlcerDisease` BOOL NOT NULL,
-    FOREIGN KEY (`tumorId`) REFERENCES `tumor`(`id`),
+    FOREIGN KEY (`entryId`) REFERENCES `entry`(`id`),
     PRIMARY KEY (`id`)
 );
 
 DROP TABLE IF EXISTS `molecularResult`;
 CREATE TABLE `molecularResult` (
     `id` INT NOT NULL AUTO_INCREMENT,
-    `tumorId` INT NOT NULL,
+    `entryId` INT NOT NULL,
     `daysSinceDiagnosis` INT NOT NULL,
     `hasMsi` BOOL,
     `hasBrafMutation` BOOL,
     `hasBrafV600EMutation` BOOL,
     `hasRasMutation` BOOL,
     `hasKrasG12CMutation` BOOL,
-    FOREIGN KEY (`tumorId`) REFERENCES `tumor`(`id`),
+    FOREIGN KEY (`entryId`) REFERENCES `entry`(`id`),
     PRIMARY KEY (`id`)
 );
 
 DROP TABLE IF EXISTS `labMeasurement`;
 CREATE TABLE `labMeasurement` (
     `id` INT NOT NULL AUTO_INCREMENT,
-    `tumorId` INT NOT NULL,
+    `entryId` INT NOT NULL,
     `daysSinceDiagnosis` INT,
     `name` VARCHAR(50) NOT NULL,
     `value` DOUBLE NOT NULL,
     `unit` VARCHAR(50) NOT NULL,
     `isPreSurgical` BOOL,
     `isPostSurgical` BOOL,
-    FOREIGN KEY (`tumorId`) REFERENCES `tumor`(`id`),
+    FOREIGN KEY (`entryId`) REFERENCES `entry`(`id`),
     PRIMARY KEY (`id`)
 );
 
 DROP TABLE IF EXISTS `treatmentEpisode`;
 CREATE TABLE `treatmentEpisode` (
     `id` INT NOT NULL,
-    `tumorId` INT NOT NULL,
+    `entryId` INT NOT NULL,
     `metastaticPresence` VARCHAR(50) NOT NULL,
     `reasonRefrainmentFromTreatment` VARCHAR(255) NOT NULL,
-    FOREIGN KEY (`tumorId`) REFERENCES `tumor`(`id`),
+    FOREIGN KEY (`entryId`) REFERENCES `entry`(`id`),
     PRIMARY KEY (`id`)
 );
 
@@ -328,8 +323,8 @@ CREATE TABLE `tumorLocationReference` (
     PRIMARY KEY (`id`)
 );
 
-DROP TABLE IF EXISTS `referenceEntry`;
-CREATE TABLE `referenceEntry` (
+DROP TABLE IF EXISTS `reference`;
+CREATE TABLE `reference` (
     `id` INT NOT NULL,
     `source` VARCHAR(50) NOT NULL,
     `sourceId` INT NOT NULL,
@@ -411,7 +406,7 @@ CREATE TABLE `referenceEntry` (
     `hadProgressionEvent` BOOL,
     `daysBetweenTreatmentStartAndProgression` INT,
     
-    FOREIGN KEY (`id`) REFERENCES `tumor`(`id`),
+    FOREIGN KEY (`id`) REFERENCES `entry`(`id`),
     PRIMARY KEY (`id`)
 );
 

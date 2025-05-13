@@ -9,7 +9,7 @@ class NcrFunctionsTest {
 
     @Test
     fun `Should extract diagnosis and metastatic records from a single element set of records`() {
-        val record = TestNcrRecordFactory.minimalTumorRecords()[0]
+        val record = TestNcrRecordFactory.minimalEntryRecords()[0]
 
         assertThat(NcrFunctions.diagnosisRecord(listOf(record))).isEqualTo(record)
         assertThat(NcrFunctions.metastaticRecord(listOf(record))).isEqualTo(record)

@@ -21,7 +21,7 @@ class NcrPriorTumorExtractorTest {
 
     @Test
     fun `Should extract prior tumor from proper tumor NCR records`() {
-        val priorTumors = NcrPriorTumorExtractor.extract(TestNcrRecordFactory.properTumorRecords())
+        val priorTumors = NcrPriorTumorExtractor.extract(TestNcrRecordFactory.properEntryRecords())
 
         assertThat(priorTumors).containsExactly(
             PriorTumor(

@@ -5,12 +5,12 @@ object TestNcrRecordFactory {
     private const val DIAGNOSIS_EPIS = "DIA"
     private const val FOLLOWUP_EPIS = "VERB"
 
-    fun minimalTumorRecords(): List<NcrRecord> {
+    fun minimalEntryRecords(): List<NcrRecord> {
         val baseRecord = minimalDiagnosisRecord()
         return listOf(baseRecord.copy(identification = baseRecord.identification.copy(metaEpis = 1)))
     }
 
-    fun properTumorRecords(): List<NcrRecord> {
+    fun properEntryRecords(): List<NcrRecord> {
         return listOf(properDiagnosisRecord(), properFollowupRecord1(), properFollowupRecord2())
     }
 
@@ -112,8 +112,8 @@ object TestNcrRecordFactory {
 
     private fun minimalIdentification(): NcrIdentification {
         return NcrIdentification(
-            keyNkr = 1,
-            keyZid = 1,
+            keyNkr = 3,
+            keyZid = 2,
             keyEid = 1,
             epis = "",
             metaEpis = 0,

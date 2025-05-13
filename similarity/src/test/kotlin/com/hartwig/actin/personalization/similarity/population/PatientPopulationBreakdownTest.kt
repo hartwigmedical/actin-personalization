@@ -10,7 +10,7 @@ class PatientPopulationBreakdownTest {
 
     @Test
     fun `Should analyze treatments for each sub-population`() {
-        val fluorouracilEntry = TestDatamodelFactory.tumor(
+        val fluorouracilEntry = TestDatamodelFactory.entry(
             ageAtDiagnosis = 50,
             isAlive = false,
             daysBetweenDiagnosisAndSurvivalMeasurement = 300,
@@ -18,7 +18,7 @@ class PatientPopulationBreakdownTest {
             daysBetweenDiagnosisAndProgression = 70,
             hasProgressionEvent = true
         )
-        val capecitabineEntry = TestDatamodelFactory.tumor(
+        val capecitabineEntry = TestDatamodelFactory.entry(
             ageAtDiagnosis = 50,
             isAlive = false,
             daysBetweenDiagnosisAndSurvivalMeasurement = 350,
@@ -26,7 +26,7 @@ class PatientPopulationBreakdownTest {
             hasProgressionEvent = true,
             daysBetweenDiagnosisAndProgression = null
         )
-        val capoxEntry = TestDatamodelFactory.tumor(
+        val capoxEntry = TestDatamodelFactory.entry(
             ageAtDiagnosis = 85,
             isAlive = false,
             daysBetweenDiagnosisAndSurvivalMeasurement = 400,

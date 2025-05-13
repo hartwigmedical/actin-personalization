@@ -1,6 +1,6 @@
 package com.hartwig.actin.personalization.similarity.population
 
-import com.hartwig.actin.personalization.datamodel.Tumor
+import com.hartwig.actin.personalization.datamodel.ReferenceEntry
 import com.hartwig.actin.personalization.similarity.report.TableElement
 import com.hartwig.actin.personalization.similarity.selection.ProgressionSelection
 
@@ -20,18 +20,18 @@ val OS_CALCULATION = SurvivalCalculation(
 )
 
 class SurvivalCalculation(
-    internal val timeFunction: (Tumor) -> Int?,
-    private val eventFunction: (Tumor) -> Boolean?,
+    internal val timeFunction: (ReferenceEntry) -> Int?,
+    private val eventFunction: (ReferenceEntry) -> Boolean?,
     private val title: String
 ) : Calculation {
 
-    private val minPatientCount = 20
+    private val minEntryCount = 20
 
-    override fun isEligible(entry: Tumor): Boolean {
+    override fun isEligible(entry: ReferenceEntry): Boolean {
         return eventFunction(entry) != null && timeFunction(entry) != null
     }
 
-    override fun calculate(entries: List<Tumor>, eligiblePopulationSize: Int): Measurement {
+    override fun calculate(entries: List<ReferenceEntry>, eligiblePopulationSize: Int): Measurement {
         val eligibleEntries = entries.filter { isEligible(it) }
         val eventHistory = buildEventHistory(eligibleEntries.sortedBy(timeFunction))
 
@@ -58,7 +58,7 @@ class SurvivalCalculation(
     
     override fun createTableElement(measurement: Measurement): TableElement {
         return when {
-            measurement.numEntries <= minPatientCount -> TableElement.regular("n≤$minPatientCount")
+            measurement.numEntries <= minEntryCount -> TableElement.regular("n≤$minEntryCount")
             measurement.value.isNaN() -> TableElement.regular("-")
             else -> with(measurement) {
                 val iqrString = if (iqr != null && !iqr.isNaN()) ", IQR: $iqr" else ""
@@ -72,14 +72,14 @@ class SurvivalCalculation(
     }
 
     tailrec fun buildEventHistory(
-        populationToProcess: List<Tumor>,
+        populationToProcess: List<ReferenceEntry>,
         eventHistory: List<EventCountAndSurvivalAtTime> = emptyList(),
     ): List<EventCountAndSurvivalAtTime> {
         if (populationToProcess.isEmpty()) return eventHistory
 
-        val currentPatient = populationToProcess.first()
-        val time = timeFunction(currentPatient)!!
-        val eventOccurred = eventFunction(currentPatient)!!
+        val currentEntry = populationToProcess.first()
+        val time = timeFunction(currentEntry)!!
+        val eventOccurred = eventFunction(currentEntry)!!
 
         val previousEvent = eventHistory.lastOrNull() ?: EventCountAndSurvivalAtTime(0, 0, 1.0)
         val populationSize = populationToProcess.size

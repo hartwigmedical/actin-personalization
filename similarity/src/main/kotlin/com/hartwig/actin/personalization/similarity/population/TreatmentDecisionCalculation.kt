@@ -1,14 +1,14 @@
 package com.hartwig.actin.personalization.similarity.population
 
-import com.hartwig.actin.personalization.datamodel.Tumor
+import com.hartwig.actin.personalization.datamodel.ReferenceEntry
 import com.hartwig.actin.personalization.similarity.report.TableElement
 import com.hartwig.actin.personalization.similarity.report.percentage
 
 object TreatmentDecisionCalculation : Calculation {
 
-    override fun isEligible(entry: Tumor) = true
+    override fun isEligible(entry: ReferenceEntry) = true
 
-    override fun calculate(entries: List<Tumor>, eligiblePopulationSize: Int): Measurement {
+    override fun calculate(entries: List<ReferenceEntry>, eligiblePopulationSize: Int): Measurement {
         return Measurement(entries.size.toDouble() / eligiblePopulationSize, entries.size)
     }
 

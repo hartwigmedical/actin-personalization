@@ -1,12 +1,12 @@
 package com.hartwig.actin.personalization.similarity.population
 
-import com.hartwig.actin.personalization.datamodel.Tumor
+import com.hartwig.actin.personalization.datamodel.ReferenceEntry
 import com.hartwig.actin.personalization.datamodel.diagnosis.LocationGroup
 import com.hartwig.actin.personalization.similarity.selection.TreatmentSelection
 
 const val ALL_PATIENTS_POPULATION_NAME = "All"
 
-data class PopulationDefinition(val name: String, val criteria: (Tumor) -> Boolean) {
+data class PopulationDefinition(val name: String, val criteria: (ReferenceEntry) -> Boolean) {
 
     companion object {
         fun createAllForPatientProfile(
@@ -14,7 +14,7 @@ data class PopulationDefinition(val name: String, val criteria: (Tumor) -> Boole
         ): List<PopulationDefinition> {
             val minAge = age - 5
             val maxAge = age + 5
-            
+
             return listOf(
                 PopulationDefinition(ALL_PATIENTS_POPULATION_NAME) { true },
                 PopulationDefinition("Age $minAge-${maxAge}y") { it.ageAtDiagnosis in minAge..maxAge },
@@ -37,7 +37,7 @@ data class PopulationDefinition(val name: String, val criteria: (Tumor) -> Boole
             }
         }
 
-        private fun entryMatchesMetastasisLocationGroups(entry: Tumor, metastasisLocationGroups: Set<LocationGroup>): Boolean {
+        private fun entryMatchesMetastasisLocationGroups(entry: ReferenceEntry, metastasisLocationGroups: Set<LocationGroup>): Boolean {
             val cutoffDays =
                 TreatmentSelection.firstSpecificMetastaticSystemicTreatment(entry)?.daysBetweenDiagnosisAndStart ?: Int.MAX_VALUE
 

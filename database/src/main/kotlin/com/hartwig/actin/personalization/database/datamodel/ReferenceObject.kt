@@ -19,7 +19,7 @@ import com.hartwig.actin.personalization.datamodel.diagnosis.TumorStage
 import com.hartwig.actin.personalization.datamodel.diagnosis.TumorType
 import com.hartwig.actin.personalization.datamodel.diagnosis.VenousInvasionDescription
 
-data class ReferenceEntry(
+data class ReferenceObject(
     val source: ReferenceSource,
     val sourceId: Int,
     val diagnosisYear: Int,

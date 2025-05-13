@@ -1,7 +1,7 @@
 package com.hartwig.actin.personalization.ncr
 
-import com.hartwig.actin.personalization.datamodel.serialization.ReferencePatientJson
-import com.hartwig.actin.personalization.ncr.interpretation.ReferencePatientFactory
+import com.hartwig.actin.personalization.datamodel.serialization.ReferenceEntryJson
+import com.hartwig.actin.personalization.ncr.interpretation.ReferenceEntryFactory
 import com.hartwig.actin.personalization.ncr.serialization.NcrDataReader
 import io.github.oshai.kotlinlogging.KotlinLogging
 import picocli.CommandLine
@@ -21,11 +21,11 @@ class NcrIngestionApplication : Callable<Int> {
 
             LOGGER.info { "Reading NCR dataset from $ncrFile" }
             val ncrRecords = NcrDataReader.read(ncrFile)
-            val referencePatients = ReferencePatientFactory.create(ncrRecords)
-            LOGGER.info { " Created ${referencePatients.size} reference patient records from ${ncrRecords.size} NCR records" }
+            val referenceEntries = ReferenceEntryFactory.create(ncrRecords)
+            LOGGER.info { " Created ${referenceEntries.size} reference entry records from ${ncrRecords.size} NCR records" }
 
-            LOGGER.info { "Writing serialized reference patients to $outputFile" }
-            ReferencePatientJson.write(referencePatients, outputFile)
+            LOGGER.info { "Writing serialized reference entries to $outputFile" }
+            ReferenceEntryJson.write(referenceEntries, outputFile)
 
             LOGGER.info { "Done!" }
             return 0

@@ -10,12 +10,12 @@ class NcrLabMeasurementExtractorTest {
 
     @Test
     fun `Should extract lab measurements from minimal records`() {
-        assertThat(NcrLabMeasurementExtractor.extract(TestNcrRecordFactory.minimalTumorRecords())).isEmpty()
+        assertThat(NcrLabMeasurementExtractor.extract(TestNcrRecordFactory.minimalEntryRecords())).isEmpty()
     }
 
     @Test
     fun `Should extract lab measurements from proper records`() {
-        val labMeasurements = NcrLabMeasurementExtractor.extract(TestNcrRecordFactory.properTumorRecords())
+        val labMeasurements = NcrLabMeasurementExtractor.extract(TestNcrRecordFactory.properEntryRecords())
         assertThat(labMeasurements).isEqualTo(expectedLabMeasurements())
     }
 

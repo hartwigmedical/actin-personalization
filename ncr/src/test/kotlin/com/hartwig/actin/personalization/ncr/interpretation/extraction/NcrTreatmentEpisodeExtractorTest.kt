@@ -43,7 +43,7 @@ class NcrTreatmentEpisodeExtractorTest {
 
     @Test
     fun `Should extract treatment episodes from proper NCR record`() {
-        val treatmentEpisodes = NcrTreatmentEpisodeExtractor.extract(TestNcrRecordFactory.properTumorRecords())
+        val treatmentEpisodes = NcrTreatmentEpisodeExtractor.extract(TestNcrRecordFactory.properEntryRecords())
 
         assertThat(treatmentEpisodes).isEqualTo(expectedTreatmentEpisodes())
     }
