@@ -1,8 +1,5 @@
 SET FOREIGN_KEY_CHECKS = 0;
  
-DROP TABLE IF EXISTS `patient`;
-DROP TABLE IF EXISTS `tumor`;
-
 DROP TABLE IF EXISTS `entry`;
 CREATE TABLE `entry` (
     `id` INT NOT NULL,
