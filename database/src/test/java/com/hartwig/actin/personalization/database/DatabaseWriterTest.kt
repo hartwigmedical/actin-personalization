@@ -1,21 +1,31 @@
 package com.hartwig.actin.personalization.database
 
+import com.hartwig.actin.personalization.database.datamodel.ReferenceObject
 import com.hartwig.actin.personalization.database.tables.records.AsaassessmentRecord
+import com.hartwig.actin.personalization.database.tables.records.ComorbidityassessmentRecord
+import com.hartwig.actin.personalization.database.tables.records.LabmeasurementRecord
 import com.hartwig.actin.personalization.database.tables.records.MetastasisRecord
 import com.hartwig.actin.personalization.database.tables.records.MetastaticdiagnosisRecord
+import com.hartwig.actin.personalization.database.tables.records.MolecularresultRecord
 import com.hartwig.actin.personalization.database.tables.records.PrimarydiagnosisRecord
 import com.hartwig.actin.personalization.database.tables.records.PriortumorRecord
+import com.hartwig.actin.personalization.database.tables.records.ReferenceRecord
 import com.hartwig.actin.personalization.database.tables.records.SurvivalmeasurementRecord
+import com.hartwig.actin.personalization.database.tables.records.TreatmentepisodeRecord
 import com.hartwig.actin.personalization.database.tables.records.WhoassessmentRecord
 import com.hartwig.actin.personalization.datamodel.ReferenceEntry
 import com.hartwig.actin.personalization.datamodel.TestReferenceEntryFactory
 import com.hartwig.actin.personalization.datamodel.assessment.AsaAssessment
+import com.hartwig.actin.personalization.datamodel.assessment.ComorbidityAssessment
+import com.hartwig.actin.personalization.datamodel.assessment.LabMeasurement
+import com.hartwig.actin.personalization.datamodel.assessment.MolecularResult
 import com.hartwig.actin.personalization.datamodel.assessment.WhoAssessment
 import com.hartwig.actin.personalization.datamodel.diagnosis.Metastasis
 import com.hartwig.actin.personalization.datamodel.diagnosis.MetastaticDiagnosis
 import com.hartwig.actin.personalization.datamodel.diagnosis.PrimaryDiagnosis
 import com.hartwig.actin.personalization.datamodel.diagnosis.PriorTumor
 import com.hartwig.actin.personalization.datamodel.outcome.SurvivalMeasurement
+import com.hartwig.actin.personalization.datamodel.treatment.TreatmentEpisode
 import org.assertj.core.api.Assertions.assertThat
 import org.jooq.Record
 import org.jooq.SQLDialect
@@ -91,6 +101,11 @@ class DatabaseWriterTest {
             compareMetastaticDiagnosis(entryId, expected)
             compareWhoAssessments(entryId, expected)
             compareAsaAssessments(entryId, expected)
+            compareComorbidityAssessments(entryId, expected)
+            compareMolecularResults(entryId, expected)
+            compareLabMeasurements(entryId, expected)
+            compareTreatmentEpisodes(entryId, expected)
+            compareReferenceObjects(entryId, expected)
         }
     }
 
@@ -115,7 +130,7 @@ class DatabaseWriterTest {
             ::comparePriorTumor
         )
     }
-    
+
     private fun comparePrimaryDiagnosis(entryId: Int, expected: ReferenceEntry) {
         compareListOfElements(
             entryId,
@@ -160,6 +175,61 @@ class DatabaseWriterTest {
         )
     }
 
+    private fun compareComorbidityAssessments(entryId: Int, expected: ReferenceEntry) {
+        compareListOfElements(
+            entryId,
+            expected.comorbidityAssessments,
+            Tables.COMORBIDITYASSESSMENT,
+            Tables.COMORBIDITYASSESSMENT.ID,
+            Tables.COMORBIDITYASSESSMENT.ENTRYID,
+            ::compareComorbidityAssessment
+        )
+    }
+
+    private fun compareMolecularResults(entryId: Int, expected: ReferenceEntry) {
+        compareListOfElements(
+            entryId,
+            expected.molecularResults,
+            Tables.MOLECULARRESULT,
+            Tables.MOLECULARRESULT.ID,
+            Tables.MOLECULARRESULT.ENTRYID,
+            ::compareMolecularResult
+        )
+    }
+
+    private fun compareLabMeasurements(entryId: Int, expected: ReferenceEntry) {
+        compareListOfElements(
+            entryId,
+            expected.labMeasurements,
+            Tables.LABMEASUREMENT,
+            Tables.LABMEASUREMENT.ID,
+            Tables.LABMEASUREMENT.ENTRYID,
+            ::compareLabMeasurements
+        )
+    }
+
+    private fun compareTreatmentEpisodes(entryId: Int, expected: ReferenceEntry) {
+        compareListOfElements(
+            entryId,
+            expected.treatmentEpisodes,
+            Tables.TREATMENTEPISODE,
+            Tables.TREATMENTEPISODE.ID,
+            Tables.TREATMENTEPISODE.ENTRYID,
+            ::compareTreatmentEpisodes
+        )
+    }
+
+    private fun compareReferenceObjects(entryId: Int, expected: ReferenceEntry) {
+        compareListOfElements(
+            entryId,
+            listOf(ReferenceObjectFactory.create(expected)),
+            Tables.REFERENCE,
+            Tables.REFERENCE.ID,
+            Tables.REFERENCE.ID,
+            ::compareReferenceObject
+        )
+    }
+
     private fun compareSurvivalMeasurement(record: SurvivalmeasurementRecord, expected: SurvivalMeasurement) {
         val table = Tables.SURVIVALMEASUREMENT
         assertThat(record.get(table.DAYSSINCEDIAGNOSIS)).isEqualTo(expected.daysSinceDiagnosis)
@@ -175,7 +245,7 @@ class DatabaseWriterTest {
         assertThat(record.get(table.PRIMARYTUMORSTAGE ?: null)).isEqualTo(expected.primaryTumorStage?.name)
         assertThat(record.get(table.SYSTEMICDRUGSRECEIVED ?: null)).isEqualTo(DatabaseWriter.concat(expected.systemicDrugsReceived))
     }
-    
+
     private fun comparePrimaryDiagnosis(record: PrimarydiagnosisRecord, expected: PrimaryDiagnosis) {
         val table = Tables.PRIMARYDIAGNOSIS
         assertThat(record.get(table.BASISOFDIAGNOSIS) ?: null).isEqualTo(expected.basisOfDiagnosis.name)
@@ -216,7 +286,7 @@ class DatabaseWriterTest {
         assertThat(record.get(table.MAXIMUMSIZEOFLIVERMETASTASISMM) ?: null).isEqualTo(expected.maximumSizeOfLiverMetastasisMm)
         assertThat(record.get(table.INVESTIGATEDLYMPHNODESCOUNT) ?: null).isEqualTo(expected.investigatedLymphNodesCount)
         assertThat(record.get(table.POSITIVELYMPHNODESCOUNT) ?: null).isEqualTo(expected.positiveLymphNodesCount)
-        
+
         expected.metastases.mapIndexed { index, metastasis ->
             val metastasisRecord = dsl.selectFrom(Tables.METASTASIS)
                 .where(Tables.METASTASIS.ID.eq(index + 1).and(Tables.METASTASIS.METASTATICDIAGNOSISID.eq(record.get(table.ID)))).fetchOne()
@@ -231,7 +301,7 @@ class DatabaseWriterTest {
         assertThat(record.get(table.LOCATION)).isEqualTo(expected.location.name)
         assertThat(record.get(table.ISLINKEDTOPROGRESSION) ?: null).isEqualTo(expected.isLinkedToProgression)
     }
-    
+
     private fun compareWhoAssessment(record: WhoassessmentRecord, expected: WhoAssessment) {
         val table = Tables.WHOASSESSMENT
         assertThat(record.get(table.DAYSSINCEDIAGNOSIS)).isEqualTo(expected.daysSinceDiagnosis)
@@ -242,6 +312,69 @@ class DatabaseWriterTest {
         val table = Tables.ASAASSESSMENT
         assertThat(record.get(table.DAYSSINCEDIAGNOSIS)).isEqualTo(expected.daysSinceDiagnosis)
         assertThat(record.get(table.ASACLASSIFICATION)).isEqualTo(expected.classification.name)
+    }
+
+    private fun compareComorbidityAssessment(record: ComorbidityassessmentRecord, expected: ComorbidityAssessment) {
+        val table = Tables.COMORBIDITYASSESSMENT
+
+        assertThat(record.get(table.DAYSSINCEDIAGNOSIS)).isEqualTo(expected.daysSinceDiagnosis)
+
+        assertThat(record.get(table.CHARLSONCOMORBIDITYINDEX)).isEqualTo(expected.charlsonComorbidityIndex)
+
+        assertThat(record.get(table.HASAIDS)).isEqualTo(expected.hasAids)
+        assertThat(record.get(table.HASCONGESTIVEHEARTFAILURE)).isEqualTo(expected.hasCongestiveHeartFailure)
+        assertThat(record.get(table.HASCOLLAGENOSIS)).isEqualTo(expected.hasCollagenosis)
+        assertThat(record.get(table.HASCOPD)).isEqualTo(expected.hasCopd)
+        assertThat(record.get(table.HASCEREBROVASCULARDISEASE)).isEqualTo(expected.hasCerebrovascularDisease)
+        assertThat(record.get(table.HASDEMENTIA)).isEqualTo(expected.hasDementia)
+        assertThat(record.get(table.HASDIABETESMELLITUS)).isEqualTo(expected.hasDiabetesMellitus)
+        assertThat(record.get(table.HASDIABETESMELLITUSWITHENDORGANDAMAGE)).isEqualTo(expected.hasDiabetesMellitusWithEndOrganDamage)
+        assertThat(record.get(table.HASOTHERMALIGNANCY)).isEqualTo(expected.hasOtherMalignancy)
+        assertThat(record.get(table.HASOTHERMETASTATICSOLIDTUMOR)).isEqualTo(expected.hasOtherMetastaticSolidTumor)
+        assertThat(record.get(table.HASMYOCARDIALINFARCT)).isEqualTo(expected.hasMyocardialInfarct)
+        assertThat(record.get(table.HASMILDLIVERDISEASE)).isEqualTo(expected.hasMildLiverDisease)
+        assertThat(record.get(table.HASHEMIPLEGIAORPARAPLEGIA)).isEqualTo(expected.hasHemiplegiaOrParaplegia)
+        assertThat(record.get(table.HASPERIPHERALVASCULARDISEASE)).isEqualTo(expected.hasPeripheralVascularDisease)
+        assertThat(record.get(table.HASRENALDISEASE)).isEqualTo(expected.hasRenalDisease)
+        assertThat(record.get(table.HASLIVERDISEASE)).isEqualTo(expected.hasLiverDisease)
+        assertThat(record.get(table.HASULCERDISEASE)).isEqualTo(expected.hasUlcerDisease)
+
+    }
+
+    private fun compareMolecularResult(record: MolecularresultRecord, expected: MolecularResult) {
+        val table = Tables.MOLECULARRESULT
+
+        assertThat(record.get(table.DAYSSINCEDIAGNOSIS)).isEqualTo(expected.daysSinceDiagnosis)
+
+        assertThat(record.get(table.HASMSI) ?: null).isEqualTo(expected.hasMsi)
+        assertThat(record.get(table.HASBRAFMUTATION) ?: null).isEqualTo(expected.hasBrafMutation)
+        assertThat(record.get(table.HASBRAFV600EMUTATION) ?: null).isEqualTo(expected.hasBrafV600EMutation)
+        assertThat(record.get(table.HASRASMUTATION) ?: null).isEqualTo(expected.hasRasMutation)
+        assertThat(record.get(table.HASKRASG12CMUTATION) ?: null).isEqualTo(expected.hasKrasG12CMutation)
+    }
+
+    private fun compareLabMeasurements(record: LabmeasurementRecord, expected: LabMeasurement) {
+        val table = Tables.LABMEASUREMENT
+
+        assertThat(record.get(table.DAYSSINCEDIAGNOSIS)).isEqualTo(expected.daysSinceDiagnosis)
+
+        assertThat(record.get(table.NAME)).isEqualTo(expected.name.name)
+        assertThat(record.get(table.VALUE)).isEqualTo(expected.value)
+        assertThat(record.get(table.UNIT)).isEqualTo(expected.unit.name)
+        assertThat(record.get(table.ISPRESURGICAL) ?: null).isEqualTo(expected.isPreSurgical)
+        assertThat(record.get(table.ISPOSTSURGICAL) ?: null).isEqualTo(expected.isPostSurgical)
+    }
+
+    private fun compareTreatmentEpisodes(record: TreatmentepisodeRecord, expected: TreatmentEpisode) {
+        val table = Tables.TREATMENTEPISODE
+        assertThat(record.get(table.METASTATICPRESENCE)).isEqualTo(expected.metastaticPresence.name)
+        assertThat(record.get(table.REASONREFRAINMENTFROMTREATMENT)).isEqualTo(expected.reasonRefrainmentFromTreatment.name)
+    }
+
+    private fun compareReferenceObject(record: ReferenceRecord, expected: ReferenceObject) {
+        val table = Tables.REFERENCE
+        assertThat(record.get(table.SOURCE)).isEqualTo(expected.source.name)
+        assertThat(record.get(table.SOURCEID)).isEqualTo(expected.sourceId)
     }
 
     private fun <R, T> compareListOfElements(
