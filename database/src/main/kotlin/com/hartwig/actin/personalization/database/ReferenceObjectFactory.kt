@@ -19,7 +19,7 @@ object ReferenceObjectFactory {
             ageAtDiagnosis = entry.ageAtDiagnosis,
             sex = entry.sex,
             
-            hadSurvivalEvent = false,
+            hadSurvivalEvent = !entry.latestSurvivalMeasurement.isAlive,
             survivalDaysSincePrimaryDiagnosis = 0,
             survivalDaysSinceMetastaticDiagnosis = 0,
             survivalDaysSinceTreatmentStart = 0,
