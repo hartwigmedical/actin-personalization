@@ -100,8 +100,8 @@ object TestReferenceEntryFactory {
     )
 
     fun exhaustiveReferenceEntry() = ReferenceEntry(
-        source = ReferenceSource.INTERNAL, 
-        sourceId = 2, 
+        source = ReferenceSource.INTERNAL,
+        sourceId = 2,
         diagnosisYear = 1961,
         ageAtDiagnosis = 83,
         sex = Sex.MALE,
@@ -116,7 +116,7 @@ object TestReferenceEntryFactory {
         labMeasurements = listOf(minimalLabMeasurement(), exhaustiveLabMeasurement()),
         treatmentEpisodes = listOf(minimalTreatmentEpisode(), exhaustiveTreatmentEpisode())
     )
-    
+
     private fun minimalPriorTumor() = PriorTumor(
         daysBeforeDiagnosis = 120,
         primaryTumorType = TumorType.GASTROINTESTINAL_STROMAL_TUMOR,
@@ -205,11 +205,13 @@ object TestReferenceEntryFactory {
     )
 
     private fun minimalWhoAssessment() = WhoAssessment(
-        daysSinceDiagnosis = 2, whoStatus = 2
+        daysSinceDiagnosis = 2,
+        whoStatus = 2
     )
 
     private fun minimalAsaAssessment() = AsaAssessment(
-        daysSinceDiagnosis = 2, classification = AsaClassification.V
+        daysSinceDiagnosis = 2,
+        classification = AsaClassification.V
     )
 
     private fun minimalComorbidityAssessment() = ComorbidityAssessment(
