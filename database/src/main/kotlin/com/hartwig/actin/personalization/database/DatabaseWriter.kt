@@ -1,5 +1,6 @@
 package com.hartwig.actin.personalization.database
 
+import com.hartwig.actin.personalization.database.interpretation.ReferenceObjectFactory
 import com.hartwig.actin.personalization.datamodel.ReferenceEntry
 import com.hartwig.actin.personalization.datamodel.diagnosis.MetastaticDiagnosis
 import com.hartwig.actin.personalization.datamodel.diagnosis.TumorLocation
@@ -18,7 +19,7 @@ import java.sql.DriverManager
 private typealias IndexedList<T> = List<Pair<Int, T>>
 
 class DatabaseWriter(private val context: DSLContext, private val connection: java.sql.Connection) {
-    
+
     fun writeAllToDb(referenceEntries: List<ReferenceEntry>) {
         connection.autoCommit = false
         clearAll()
@@ -102,7 +103,7 @@ class DatabaseWriter(private val context: DSLContext, private val connection: ja
         insertRows(rows, "reference entry")
         return indexedRecords
     }
-    
+
     private fun <T, U : TableRecord<*>, V> writeRecordsAndReturnIndexedList(
         name: String, indexedRecords: IndexedList<T>, table: Table<U>, recordMapper: (Int, T) -> List<Pair<V, U>>
     ): IndexedList<V> {
@@ -131,8 +132,10 @@ class DatabaseWriter(private val context: DSLContext, private val connection: ja
         LOGGER.info { "  Inserted ${rows.size} $name records" }
     }
 
-    private fun referenceObjectsFromEntry(entryId: Int, entry: ReferenceEntry) =
-        listOf(extractSimpleRecord(Tables.REFERENCE, ReferenceObjectFactory.create(entry), "id", entryId))
+    private fun referenceObjectsFromEntry(entryId: Int, entry: ReferenceEntry): List<TableRecord<*>> {
+        val referenceObject = ReferenceObjectFactory.create(entry)
+        return referenceObject?.let { listOf(extractSimpleRecord(Tables.REFERENCE, referenceObject, "id", entryId)) } ?: emptyList()
+    }
     
     private fun survivalMeasurementFromEntry(entryId: Int, entry: ReferenceEntry) =
         listOf(extractSimpleRecord(Tables.SURVIVALMEASUREMENT, entry.latestSurvivalMeasurement, "entryId", entryId))

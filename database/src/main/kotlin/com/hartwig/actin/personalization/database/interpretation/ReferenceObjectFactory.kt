@@ -1,16 +1,21 @@
-package com.hartwig.actin.personalization.database
+package com.hartwig.actin.personalization.database.interpretation
 
 import com.hartwig.actin.personalization.database.datamodel.ReferenceObject
 import com.hartwig.actin.personalization.datamodel.ReferenceEntry
 import com.hartwig.actin.personalization.datamodel.assessment.AsaClassification
+import com.hartwig.actin.personalization.interpretation.MetastasisDetection
+import io.github.oshai.kotlinlogging.KotlinLogging
 
 object ReferenceObjectFactory {
 
-    fun create(entry: ReferenceEntry): ReferenceObject {
-        val sortedMetastases = entry.metastaticDiagnosis.metastases.sortedBy { metastasis -> metastasis.daysSinceDiagnosis }
-        val earliestDistantMetastasisDetectionDays = sortedMetastases.firstOrNull()?.daysSinceDiagnosis
-//        val systemicTreatmentPostMetastasis =
-//            findSystemicTreatmentPostMetastasis(tumor.treatmentEpisodes, earliestDistantMetastasisDetectionDays)
+    private val LOGGER = KotlinLogging.logger {}
+    
+    fun create(entry: ReferenceEntry): ReferenceObject? {
+        val daysBetweenPrimaryAndMetastaticDiagnosis = MetastasisDetection.determineDaysBetweenPrimaryAndMetastaticDiagnosis(entry)
+        if (daysBetweenPrimaryAndMetastaticDiagnosis == null) {
+            LOGGER.warn { "Could not determine interval towards metastatic diagnosis for entry with source ID ${entry.sourceId}" }
+            return null
+        }
         
         return ReferenceObject(
             source = entry.source,

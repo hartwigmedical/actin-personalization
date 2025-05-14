@@ -1,5 +1,9 @@
 package com.hartwig.actin.personalization.datamodel
 
+import com.hartwig.actin.personalization.datamodel.diagnosis.Metastasis
+import com.hartwig.actin.personalization.datamodel.diagnosis.MetastaticDiagnosis
+import com.hartwig.actin.personalization.datamodel.diagnosis.NumberOfLiverMetastases
+import com.hartwig.actin.personalization.datamodel.diagnosis.TumorLocation
 import com.hartwig.actin.personalization.datamodel.outcome.ProgressionMeasure
 import com.hartwig.actin.personalization.datamodel.outcome.ProgressionMeasureFollowUpEvent
 import com.hartwig.actin.personalization.datamodel.outcome.ProgressionMeasureType
@@ -13,7 +17,7 @@ import com.hartwig.actin.personalization.datamodel.treatment.Treatment
 import com.hartwig.actin.personalization.datamodel.treatment.TreatmentEpisode
 
 object TestDatamodelFactory {
-    
+
     fun entry(
         ageAtDiagnosis: Int = 75,
         isAlive: Boolean = false,
@@ -50,6 +54,36 @@ object TestDatamodelFactory {
                 isAlive = isAlive
             ),
             treatmentEpisodes = treatmentEpisode?.let { listOf(it) } ?: emptyList()
+        )
+    }
+
+    fun metastaticDiagnosis(
+        isMetachronous: Boolean = false,
+        metastases : List<Metastasis> = emptyList(),
+        numberOfLiverMetastases: NumberOfLiverMetastases? = null,
+        maximumSizeOfLiverMetastasesMm : Int? = null,
+        investigatedLymphNodesCount : Int? = null ,
+        positiveLymphNodesCount : Int? = null
+    ): MetastaticDiagnosis {
+        return MetastaticDiagnosis(
+            isMetachronous = isMetachronous,
+            metastases = metastases,
+            numberOfLiverMetastases = numberOfLiverMetastases,
+            maximumSizeOfLiverMetastasisMm = maximumSizeOfLiverMetastasesMm,
+            investigatedLymphNodesCount = investigatedLymphNodesCount,
+            positiveLymphNodesCount = positiveLymphNodesCount
+        )
+    }
+    
+    fun metastasis(
+        daysSinceDiagnosis: Int? = null,
+        location: TumorLocation = TumorLocation.OTHER_POORLY_DEFINED_LOCALIZATIONS,
+        isLinkedToProgression: Boolean? = null
+    ): Metastasis {
+        return Metastasis(
+            daysSinceDiagnosis = daysSinceDiagnosis,
+            location = location,
+            isLinkedToProgression = isLinkedToProgression
         )
     }
 

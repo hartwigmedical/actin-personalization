@@ -18,7 +18,6 @@ object NcrMetastaticDiagnosisExtractor {
             metastases = extractMetastases(metastatic),
             numberOfLiverMetastases = NcrNumberOfLiverMetastasesMapper.resolve(metastatic.metastaticDiagnosis.metaLeverAantal),
             maximumSizeOfLiverMetastasisMm = metastatic.metastaticDiagnosis.metaLeverAfm.takeIf { it != 999 },
-            // TODO (KD): Figure out what these values mean in the context of a metastatic NCR record
             investigatedLymphNodesCount = metastatic.primaryDiagnosis.ondLymf,
             positiveLymphNodesCount = metastatic.primaryDiagnosis.posLymf
         )
@@ -26,18 +25,6 @@ object NcrMetastaticDiagnosisExtractor {
 
     private fun extractMetastases(record: NcrRecord): List<Metastasis> {
         return with(record.metastaticDiagnosis) {
-            val locations = listOfNotNull(
-                metaTopoSublok1,
-                metaTopoSublok2,
-                metaTopoSublok3,
-                metaTopoSublok4,
-                metaTopoSublok5,
-                metaTopoSublok6,
-                metaTopoSublok7,
-                metaTopoSublok8,
-                metaTopoSublok9,
-                metaTopoSublok10
-            )
             val daysSinceDiagnosis = listOf(
                 metaInt1,
                 metaInt2,
@@ -49,6 +36,18 @@ object NcrMetastaticDiagnosisExtractor {
                 metaInt8,
                 metaInt9,
                 metaInt10
+            )
+            val locations = listOfNotNull(
+                metaTopoSublok1,
+                metaTopoSublok2,
+                metaTopoSublok3,
+                metaTopoSublok4,
+                metaTopoSublok5,
+                metaTopoSublok6,
+                metaTopoSublok7,
+                metaTopoSublok8,
+                metaTopoSublok9,
+                metaTopoSublok10
             )
             val isLinkedToProgression = listOf(
                 metaProg1,

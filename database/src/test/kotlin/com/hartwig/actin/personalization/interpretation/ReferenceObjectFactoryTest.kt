@@ -1,5 +1,6 @@
-package com.hartwig.actin.personalization.database
+package com.hartwig.actin.personalization.interpretation
 
+import com.hartwig.actin.personalization.database.interpretation.ReferenceObjectFactory
 import com.hartwig.actin.personalization.datamodel.TestReferenceEntryFactory
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test

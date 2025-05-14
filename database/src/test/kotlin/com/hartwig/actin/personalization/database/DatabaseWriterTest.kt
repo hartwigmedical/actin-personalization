@@ -1,6 +1,5 @@
 package com.hartwig.actin.personalization.database
 
-import com.hartwig.actin.personalization.database.datamodel.ReferenceObject
 import com.hartwig.actin.personalization.database.tables.records.AsaassessmentRecord
 import com.hartwig.actin.personalization.database.tables.records.ComorbidityassessmentRecord
 import com.hartwig.actin.personalization.database.tables.records.LabmeasurementRecord
@@ -9,7 +8,6 @@ import com.hartwig.actin.personalization.database.tables.records.Metastaticdiagn
 import com.hartwig.actin.personalization.database.tables.records.MolecularresultRecord
 import com.hartwig.actin.personalization.database.tables.records.PrimarydiagnosisRecord
 import com.hartwig.actin.personalization.database.tables.records.PriortumorRecord
-import com.hartwig.actin.personalization.database.tables.records.ReferenceRecord
 import com.hartwig.actin.personalization.database.tables.records.SurvivalmeasurementRecord
 import com.hartwig.actin.personalization.database.tables.records.TreatmentepisodeRecord
 import com.hartwig.actin.personalization.database.tables.records.WhoassessmentRecord
@@ -105,7 +103,6 @@ class DatabaseWriterTest {
             compareMolecularResults(entryId, expected)
             compareLabMeasurements(entryId, expected)
             compareTreatmentEpisodes(entryId, expected)
-            compareReferenceObjects(entryId, expected)
         }
     }
 
@@ -216,17 +213,6 @@ class DatabaseWriterTest {
             Tables.TREATMENTEPISODE.ID,
             Tables.TREATMENTEPISODE.ENTRYID,
             ::compareTreatmentEpisodes
-        )
-    }
-
-    private fun compareReferenceObjects(entryId: Int, expected: ReferenceEntry) {
-        compareListOfElements(
-            entryId,
-            listOf(ReferenceObjectFactory.create(expected)),
-            Tables.REFERENCE,
-            Tables.REFERENCE.ID,
-            Tables.REFERENCE.ID,
-            ::compareReferenceObject
         )
     }
 
@@ -370,13 +356,7 @@ class DatabaseWriterTest {
         assertThat(record.get(table.METASTATICPRESENCE)).isEqualTo(expected.metastaticPresence.name)
         assertThat(record.get(table.REASONREFRAINMENTFROMTREATMENT)).isEqualTo(expected.reasonRefrainmentFromTreatment.name)
     }
-
-    private fun compareReferenceObject(record: ReferenceRecord, expected: ReferenceObject) {
-        val table = Tables.REFERENCE
-        assertThat(record.get(table.SOURCE)).isEqualTo(expected.source.name)
-        assertThat(record.get(table.SOURCEID)).isEqualTo(expected.sourceId)
-    }
-
+    
     private fun <R, T> compareListOfElements(
         entryId: Int,
         expected: List<T>,
