@@ -1,5 +1,11 @@
 package com.hartwig.actin.personalization.datamodel
 
+import com.hartwig.actin.personalization.datamodel.assessment.AsaAssessment
+import com.hartwig.actin.personalization.datamodel.assessment.AsaClassification
+import com.hartwig.actin.personalization.datamodel.assessment.LabMeasure
+import com.hartwig.actin.personalization.datamodel.assessment.LabMeasurement
+import com.hartwig.actin.personalization.datamodel.assessment.Unit
+import com.hartwig.actin.personalization.datamodel.assessment.WhoAssessment
 import com.hartwig.actin.personalization.datamodel.diagnosis.Metastasis
 import com.hartwig.actin.personalization.datamodel.diagnosis.MetastaticDiagnosis
 import com.hartwig.actin.personalization.datamodel.diagnosis.NumberOfLiverMetastases
@@ -59,11 +65,11 @@ object TestDatamodelFactory {
 
     fun metastaticDiagnosis(
         isMetachronous: Boolean = false,
-        metastases : List<Metastasis> = emptyList(),
+        metastases: List<Metastasis> = emptyList(),
         numberOfLiverMetastases: NumberOfLiverMetastases? = null,
-        maximumSizeOfLiverMetastasesMm : Int? = null,
-        investigatedLymphNodesCount : Int? = null ,
-        positiveLymphNodesCount : Int? = null
+        maximumSizeOfLiverMetastasesMm: Int? = null,
+        investigatedLymphNodesCount: Int? = null,
+        positiveLymphNodesCount: Int? = null
     ): MetastaticDiagnosis {
         return MetastaticDiagnosis(
             isMetachronous = isMetachronous,
@@ -74,7 +80,7 @@ object TestDatamodelFactory {
             positiveLymphNodesCount = positiveLymphNodesCount
         )
     }
-    
+
     fun metastasis(
         daysSinceDiagnosis: Int? = null,
         location: TumorLocation = TumorLocation.OTHER_POORLY_DEFINED_LOCALIZATIONS,
@@ -84,6 +90,34 @@ object TestDatamodelFactory {
             daysSinceDiagnosis = daysSinceDiagnosis,
             location = location,
             isLinkedToProgression = isLinkedToProgression
+        )
+    }
+
+    fun whoAssessment(daysSinceDiagnosis: Int = 0, whoStatus: Int = 0): WhoAssessment {
+        return WhoAssessment(
+            daysSinceDiagnosis = daysSinceDiagnosis,
+            whoStatus = whoStatus
+        )
+    }
+
+    fun asaAssessment(daysSinceDiagnosis: Int = 0, classification: AsaClassification = AsaClassification.I): AsaAssessment {
+        return AsaAssessment(
+            daysSinceDiagnosis = daysSinceDiagnosis,
+            classification = classification
+        )
+    }
+
+    fun labMeasurement(
+        daysSinceDiagnosis: Int = 0, name: LabMeasure = LabMeasure.ALBUMINE, value: Double = 0.0,
+        unit: Unit = LabMeasure.ALBUMINE.unit, isPreSurgical: Boolean? = null, isPostSurgical: Boolean? = null
+    ): LabMeasurement {
+        return LabMeasurement(
+            daysSinceDiagnosis = daysSinceDiagnosis,
+            name = name,
+            value = value,
+            unit = unit,
+            isPreSurgical = isPreSurgical,
+            isPostSurgical = isPostSurgical
         )
     }
 
