@@ -73,73 +73,12 @@ class CoxPHModel(BaseSurvivalModel):
 
     def predict(self, X: pd.DataFrame) -> np.ndarray:       
         return self.model.predict(X[self.selected_features])
-    
-class AalenAdditiveModel(BaseSurvivalModel):
-    def __init__(self, **kwargs: Dict[str, Any]):
-        super().__init__()
-        self.kwargs = kwargs
-        self.model = AalenAdditiveFitter(**self.kwargs)
-
-        self.selected_features = None
-
-    def fit(self, X: pd.DataFrame, y: pd.DataFrame) -> None:
-        X = self.drop_low_variance_features(X, threshold=self.drop_variance_threshold)
-        X = self.drop_highly_correlated_features(X, threshold=self.correlation_threshold)
-        
-        y_df = pd.DataFrame({'duration': y['duration'], 'event': y['event']})
-        X = X.reset_index(drop=True)
-        y_df = y_df.reset_index(drop=True)
-
-        df = pd.concat([X, y_df], axis=1)
-
-        self.model.fit(df, duration_col='duration', event_col='event')
-        self.selected_features = X.columns
-        
-    def predict_survival_function(self, X: pd.DataFrame, times: Optional[np.ndarray] = None) -> np.ndarray:
-        X = X[self.selected_features].copy()
-        survival_functions = self.model.predict_survival_function(X)
-        if times is not None:
-            surv_funcs = []
-            for i in range(survival_functions.shape[1]):
-                sf = survival_functions.iloc[:, i]
-                interpolator = interp1d(sf.index.values, sf.values, bounds_error=False, fill_value="extrapolate")
-                surv_funcs.append(interpolator(times))
-            return np.array(surv_funcs)
-        else:
-            return survival_functions
-
-    def predict(self, X: pd.DataFrame, durations: np.ndarray) -> np.ndarray:
-        X = X[self.selected_features].copy()
-
-        cumulative_coefs = self.model.cumulative_hazards_
-        coef_times = cumulative_coefs.index.values
-
-        if cumulative_coefs.empty:
-            return np.zeros(len(X))
-
-        interpolators = {
-            col: interp1d(coef_times, cumulative_coefs[col], bounds_error=False, fill_value="extrapolate")
-            for col in cumulative_coefs.columns
-        }
-
-        X_coefs = X.reindex(columns=cumulative_coefs.columns, fill_value=0)
-
-        min_time, max_time = coef_times[0], coef_times[-1]
-        durations = np.clip(durations, min_time, max_time)
-        durations = np.asarray(durations).flatten()
-
-        interpolated_coefs = np.column_stack([interpolators[col](durations)for col in cumulative_coefs.columns])
-
-        X_array = X_coefs.values
-        risk_scores = np.einsum('ij,ij->i', X_array, interpolated_coefs)
-
-        return risk_scores
 
 class RandomSurvivalForestModel(BaseSurvivalModel):
     def __init__(self, **kwargs: Dict[str, Any]):
         super().__init__()
         self.kwargs = kwargs
-        self.model = RandomSurvivalForest(**self.kwargs)
+        self.model = RandomSurvivalForest(n_jobs = settings.n_jobs, **self.kwargs)
 
     def fit(self, X: pd.DataFrame, y: pd.DataFrame) -> None:
         self.model.fit(X, y)
@@ -182,22 +121,21 @@ class FeatureAttention(nn.Module):
             nn.Sigmoid()
         )
 
-    def forward(self, x):
+    def _apply_gate(self, x):
         if settings.use_gate:
             if self.msi_index is not None and self.immuno_index:
                 msi_gate = x[:, self.msi_index].unsqueeze(1)
-                x[:, self.immuno_index] = x[:, self.immuno_index] * msi_gate
-
-            if self.ras_index is not None and self.panitumumab_index is not None:
-                ras_gate = 1 - x[:, self.ras_index]  # shape: [batch_size]
-                x[:, self.panitumumab_index] = x[:, self.panitumumab_index] * ras_gate
-                
+                x[:, self.immuno_index] *= msi_gate
+            ras_gate = 1 - x[:, self.ras_index]
+            x[:, self.panitumumab_index] *= ras_gate
             if self.treatment_indices:
-                mask = x[:, self.treatment_indices] 
-                # build a 0/1 gate from original binary: > 0.5 (since standardized 1 is > 0)
-                gate = (mask > 0).float().unsqueeze(1)
+                mask = x[:, self.treatment_indices]
+                gate = (mask > 0).float()
                 x[:, self.treatment_indices] *= gate
+        return x
 
+    def forward(self, x):
+        x = self._apply_gate(x)
         weights = self.attn(x)
         return x * weights
     
@@ -347,8 +285,6 @@ class NNSurvivalModel(BaseSurvivalModel):
 
 
     def predict_survival_function(self, X: pd.DataFrame, times: np.ndarray = None) -> np.ndarray:
-  
-        
         X_tensor = X.values.astype('float32')
         surv = self.model.predict_surv_df(X_tensor)
 

@@ -15,7 +15,7 @@
                 "batch_size": 32,
                 "epochs": 50,
                 "early_stopping_patience": 30,
-                "input_size": 155
+                "input_size": 83
             }
         },
         "LogisticHazardModel": {
@@ -31,7 +31,7 @@
                 "early_stopping_patience": 30,
                 "optimizer": "Adam",
                 "epochs": 500,
-                "input_size": 155
+                "input_size": 83
             }
         }
     },
@@ -71,7 +71,7 @@
                 "batch_size": 128,
                 "epochs": 50,
                 "early_stopping_patience": 20,
-                "input_size": 84
+                "input_size": 83
             }
         },
         "DeepSurv_attention": {
@@ -90,7 +90,7 @@
                 "batch_size": 32,
                 "epochs": 500,
                 "early_stopping_patience": 50,
-                "input_size": 84
+                "input_size": 83
             }
         },
         "LogisticHazardModel": {
@@ -106,7 +106,7 @@
                 "early_stopping_patience": 20,
                 "optimizer": "RMSprop",
                 "epochs": 50,
-                "input_size": 84
+                "input_size": 83
             }
         },
         "LogisticHazardModel_attention": {
@@ -122,7 +122,7 @@
                 "early_stopping_patience": 30,
                 "optimizer": "Adam",
                 "epochs": 100,
-                "input_size": 84
+                "input_size": 83
             }
         },
         "DeepHitModel": {
@@ -141,7 +141,7 @@
                 "batch_size": 32,
                 "epochs": 50,
                 "early_stopping_patience": 30,
-                "input_size": 84
+                "input_size": 83
             }
         },
         "DeepHitModel_attention": {
@@ -161,7 +161,7 @@
                 "batch_size": 64,
                 "epochs": 200,
                 "early_stopping_patience": 50,
-                "input_size": 84
+                "input_size": 83
             }
         },
         "PCHazardModel": {
@@ -179,7 +179,7 @@
                 "batch_size": 64,
                 "epochs": 500,
                 "early_stopping_patience": 50,
-                "input_size": 84
+                "input_size": 83
             }
         },
         "PCHazardModel_attention": {
@@ -196,7 +196,7 @@
                 "batch_size": 64,
                 "epochs": 200,
                 "early_stopping_patience": 50,
-                "input_size": 84
+                "input_size": 83
             }
         },
         "MTLRModel": {
@@ -212,7 +212,7 @@
                 "batch_size": 64,
                 "epochs": 100,
                 "early_stopping_patience": 30,
-                "input_size": 84
+                "input_size": 83
             }
         },
         "MTLRModel_attention": {
@@ -229,7 +229,7 @@
                 "batch_size": 32,
                 "epochs": 500,
                 "early_stopping_patience": 30,
-                "input_size": 84
+                "input_size": 83
             }
         },
         "CoxPH": {
@@ -263,6 +263,24 @@
         }
     },
     "treatment_drug_OS": {
+        "LogisticHazardModel_attention": {
+            "class": "src.models.survival_models.LogisticHazardModel",
+            "kwargs": {
+                "num_nodes": [
+                    256,
+                    128,
+                    64
+                ],
+                "lr": 0.0005,
+                "dropout": 0.15,
+                "batch_size": 64,
+                "early_stopping_patience": 20,
+                "optimizer": "Adam",
+                "epochs": 50,
+                "input_size": 83,
+                "use_attention": true
+            }
+        },
         "DeepSurv_attention": {
             "class": "src.models.survival_models.DeepSurv",
             "kwargs": {
@@ -280,24 +298,8 @@
                 "batch_size": 64,
                 "epochs": 50,
                 "early_stopping_patience": 20,
-                "input_size": 84
-            }
-        },
-        "LogisticHazardModel_attention": {
-            "class": "src.models.survival_models.LogisticHazardModel",
-            "kwargs": {
-                "num_nodes": [
-                    256,
-                    128,
-                    64
-                ],
-                "lr": 0.0005,
-                "dropout": 0.15,
-                "batch_size": 64,
-                "early_stopping_patience": 20,
-                "optimizer": "Adam",
-                "epochs": 50,
-                "input_size": 84
+                "input_size": 83,
+                "use_attention": true
             }
         },
         "DeepHitModel_attention": {
@@ -317,7 +319,8 @@
                 "batch_size": 128,
                 "epochs": 500,
                 "early_stopping_patience": 30,
-                "input_size": 84
+                "input_size": 83,
+                "use_attention": true
             }
         },
         "PCHazardModel_attention": {
@@ -334,7 +337,8 @@
                 "batch_size": 128,
                 "epochs": 500,
                 "early_stopping_patience": 50,
-                "input_size": 84
+                "input_size": 83,
+                "use_attention": true
             }
         },
         "MTLRModel_attention": {
@@ -350,7 +354,8 @@
                 "batch_size": 128,
                 "epochs": 200,
                 "early_stopping_patience": 30,
-                "input_size": 84
+                "input_size": 83,
+                "use_attention": true
             }
         },
         "DeepSurv": {
@@ -370,8 +375,7 @@
                 "batch_size": 64,
                 "epochs": 50,
                 "early_stopping_patience": 20,
-                "input_size": 90,
-                "use_attention": false
+                "input_size": 83
             }
         },
         "LogisticHazardModel": {
@@ -387,7 +391,7 @@
                 "early_stopping_patience": 20,
                 "optimizer": "Adam",
                 "epochs": 200,
-                "input_size": 90,
+                "input_size": 83,
                 "use_attention": false
             }
         },
@@ -408,7 +412,7 @@
                 "batch_size": 128,
                 "epochs": 500,
                 "early_stopping_patience": 30,
-                "input_size": 90,
+                "input_size": 83,
                 "use_attention": false
             }
         },
@@ -426,7 +430,7 @@
                 "batch_size": 128,
                 "epochs": 500,
                 "early_stopping_patience": 50,
-                "input_size": 90,
+                "input_size": 83,
                 "use_attention": false
             }
         },
@@ -443,7 +447,7 @@
                 "batch_size": 128,
                 "epochs": 200,
                 "early_stopping_patience": 30,
-                "input_size": 90,
+                "input_size": 83,
                 "use_attention": false
             }
         },

@@ -26,8 +26,9 @@ class Settings:
     save_path: Optional[str] = None
     time_points: Optional[List[int]] = None
     max_time: int = 1825
-    input_size: int = 155  # This is updated in data_processing.py once it has X_train.shape[1].
+    input_size: int = 83  # This is updated in data_processing.py once it has X_train.shape[1].
     use_gate: bool = True
+    n_jobs: int = 4 # depends on how many CPU's you have available
         
     def __post_init__(self):
         self.configure_data_settings()

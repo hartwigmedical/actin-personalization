@@ -41,27 +41,32 @@ def hyperparameter_search(
 
     for model_name, model_instance in base_models.items():
         model_class = type(model_instance)
+        use_attention   = getattr(model_instance, 'kwargs', {}).get('use_attention', False)
+    
         if model_name not in param_grids:
             print(f"No hyperparameter grid found for {model_name}, skipping optimization...")
             best_models[model_name] = (model_instance, None)
             continue
             
-        ModelTrainer._set_attention_indices(model_instance, list(X_train.columns))
         best_score = -np.inf
         best_params = None
         best_model_trained = None
         all_results[model_name] = []
+        
+        for base in list(param_grids):
+            param_grids[ base + '_attention' ] = param_grids[base]
 
         for param_dict in param_grids[model_name]:
             sampled_params = random_parameter_search(param_dict)
           
             for params in sampled_params:
                 if issubclass(model_class, NNSurvivalModel):
-                    new_model = model_class(input_size=X_train.shape[1], **params)
+                    new_model = model_class(input_size=X_train.shape[1], use_attention = use_attention, **params)
+                    ModelTrainer._set_attention_indices(new_model, list(X_train.columns))
                 else:
                     new_model = model_class(**params)
 
-                print(f"Training {model_name} with parameters: {params}")
+                print(f"Training {model_name} with parameters: {params}, use_attention: {use_attention}")
 
                 trainer.models = {model_name: new_model}
                 results, trained_models = trainer.train_and_evaluate(
@@ -81,6 +86,5 @@ def hyperparameter_search(
         print(f"Best params for {model_name}: {best_params} with auc={best_score}")
         
         ExperimentConfig.update_model_hyperparams({model_name: (best_model_trained, best_params)})
-
 
     return best_models, all_results
