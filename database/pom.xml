@@ -18,7 +18,7 @@
     <dependencies>
         <dependency>
             <groupId>com.hartwig.actin.personalization</groupId>
-            <artifactId>datamodel</artifactId>
+            <artifactId>common</artifactId>
         </dependency>
 
         <dependency>

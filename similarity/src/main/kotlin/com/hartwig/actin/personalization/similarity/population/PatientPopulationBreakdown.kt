@@ -2,7 +2,7 @@ package com.hartwig.actin.personalization.similarity.population
 
 import com.hartwig.actin.personalization.datamodel.ReferenceEntry
 import com.hartwig.actin.personalization.datamodel.treatment.TreatmentGroup
-import com.hartwig.actin.personalization.similarity.selection.TreatmentSelection
+import com.hartwig.actin.personalization.selection.TreatmentSelection
 import org.jetbrains.kotlinx.kandy.ir.Plot
 
 class PatientPopulationBreakdown(

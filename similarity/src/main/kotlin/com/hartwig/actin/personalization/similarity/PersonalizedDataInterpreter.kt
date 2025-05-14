@@ -4,10 +4,10 @@ import com.hartwig.actin.personalization.datamodel.ReferenceEntry
 import com.hartwig.actin.personalization.datamodel.diagnosis.LocationGroup
 import com.hartwig.actin.personalization.datamodel.serialization.ReferenceEntryJson
 import com.hartwig.actin.personalization.datamodel.treatment.TreatmentGroup
+import com.hartwig.actin.personalization.selection.TreatmentSelection
 import com.hartwig.actin.personalization.similarity.population.PatientPopulationBreakdown
 import com.hartwig.actin.personalization.similarity.population.PersonalizedDataAnalysis
 import com.hartwig.actin.personalization.similarity.population.PopulationDefinition
-import com.hartwig.actin.personalization.similarity.selection.TreatmentSelection
 import io.github.oshai.kotlinlogging.KotlinLogging
 
 class PersonalizedDataInterpreter(val entriesByTreatment: List<Pair<TreatmentGroup, List<ReferenceEntry>>>) {

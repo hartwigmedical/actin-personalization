@@ -1,4 +1,4 @@
-package com.hartwig.actin.personalization.similarity.selection
+package com.hartwig.actin.personalization.selection
 
 import com.hartwig.actin.personalization.datamodel.ReferenceEntry
 import com.hartwig.actin.personalization.datamodel.treatment.MetastaticPresence

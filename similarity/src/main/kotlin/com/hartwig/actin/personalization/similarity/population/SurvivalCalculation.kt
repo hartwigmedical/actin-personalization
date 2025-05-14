@@ -1,8 +1,8 @@
 package com.hartwig.actin.personalization.similarity.population
 
 import com.hartwig.actin.personalization.datamodel.ReferenceEntry
+import com.hartwig.actin.personalization.selection.ProgressionSelection
 import com.hartwig.actin.personalization.similarity.report.TableElement
-import com.hartwig.actin.personalization.similarity.selection.ProgressionSelection
 
 val PFS_CALCULATION = SurvivalCalculation(
     timeFunction = {

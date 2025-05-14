@@ -11,6 +11,7 @@
     <modules>
         <module>weka-demo</module>
         <module>datamodel</module>
+        <module>common</module>
         <module>ncr</module>
         <module>database</module>
         <module>similarity</module>
@@ -118,6 +119,11 @@
             <dependency>
                 <groupId>com.hartwig.actin.personalization</groupId>
                 <artifactId>datamodel</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.hartwig.actin.personalization</groupId>
+                <artifactId>common</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>

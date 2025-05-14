@@ -20,7 +20,7 @@ object ReferenceObjectFactory {
             sex = entry.sex,
             
             hadSurvivalEvent = !entry.latestSurvivalMeasurement.isAlive,
-            survivalDaysSincePrimaryDiagnosis = 0,
+            survivalDaysSincePrimaryDiagnosis = entry.latestSurvivalMeasurement.daysSinceDiagnosis,
             survivalDaysSinceMetastaticDiagnosis = 0,
             survivalDaysSinceTreatmentStart = 0,
 

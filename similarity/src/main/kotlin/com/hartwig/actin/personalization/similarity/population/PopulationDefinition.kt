@@ -2,7 +2,7 @@ package com.hartwig.actin.personalization.similarity.population
 
 import com.hartwig.actin.personalization.datamodel.ReferenceEntry
 import com.hartwig.actin.personalization.datamodel.diagnosis.LocationGroup
-import com.hartwig.actin.personalization.similarity.selection.TreatmentSelection
+import com.hartwig.actin.personalization.selection.TreatmentSelection
 
 const val ALL_PATIENTS_POPULATION_NAME = "All"
 
