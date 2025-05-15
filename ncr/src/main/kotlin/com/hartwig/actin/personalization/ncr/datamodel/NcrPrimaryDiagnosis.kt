@@ -5,7 +5,7 @@ data class NcrPrimaryDiagnosis(
     val topoSublok: String,
     val morfCat: Int?,
     val diagBasis: Int,
-    val diffgrad: String,
+    val diffgrad: Int,
     val ct: String?,
     val cn: String?,
     val cm: String?,

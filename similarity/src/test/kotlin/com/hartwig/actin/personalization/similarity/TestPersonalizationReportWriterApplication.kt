@@ -1,6 +1,7 @@
 package com.hartwig.actin.personalization.similarity
 
-import com.hartwig.actin.personalization.datamodel.Treatment
+import com.hartwig.actin.personalization.datamodel.TestDatamodelFactory
+import com.hartwig.actin.personalization.datamodel.treatment.Treatment
 import com.hartwig.actin.personalization.similarity.population.MeasurementType
 import com.hartwig.actin.personalization.similarity.report.ReportWriter
 import com.hartwig.actin.personalization.similarity.report.TableContent
@@ -14,10 +15,13 @@ class TestPersonalizationReportWriterApplication {
         LOGGER.info { "Running $APPLICATION v$VERSION" }
 
         val outputPath = "$WORK_DIRECTORY/out.pdf"
-        val analysis = PersonalizedDataInterpreter.createFromReferencePatients(
+        val analysis = PersonalizedDataInterpreter.createFromReferenceEntries(
             (1..1000 step 10)
-                .map { patientWithTreatment(Treatment.FOLFOX, it) }
-                .map { recordWithEpisode(it.episode) }
+                .map {
+                    val treatmentEpisode =
+                        TestDatamodelFactory.treatmentEpisode(systemicTreatment = Treatment.FOLFOX, daysBetweenDiagnosisAndProgression = it)
+                    TestDatamodelFactory.entry(treatmentEpisode = treatmentEpisode)
+                }
         )
             .analyzePatient(50, 1, false, emptySet())
 
@@ -36,7 +40,7 @@ class TestPersonalizationReportWriterApplication {
     companion object {
         val LOGGER = KotlinLogging.logger {}
         const val APPLICATION = "ACTIN-Personalization Report Writer"
-        val VERSION = PersonalizationReportWriterApplication::class.java.getPackage().implementationVersion
+        val VERSION: String? = PersonalizationReportWriterApplication::class.java.getPackage().implementationVersion
     }
 }
 

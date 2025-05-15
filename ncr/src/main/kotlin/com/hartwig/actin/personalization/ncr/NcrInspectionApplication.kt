@@ -1,23 +1,22 @@
 package com.hartwig.actin.personalization.ncr
 
-import com.hartwig.actin.personalization.datamodel.ReferencePatient
 import com.hartwig.actin.personalization.ncr.datamodel.NcrRecord
-import com.hartwig.actin.personalization.ncr.interpretation.ReferencePatientFactory
+import com.hartwig.actin.personalization.ncr.interpretation.ReferenceEntryFactory
 import com.hartwig.actin.personalization.ncr.serialization.NcrDataReader
 import io.github.oshai.kotlinlogging.KotlinLogging
 import picocli.CommandLine
 import java.util.concurrent.Callable
 
-class NCRInspectionApplication : Callable<Int> {
+class NcrInspectionApplication : Callable<Int> {
 
-    @CommandLine.Option(names = ["-ncr_dataset_csv"], required = true, description = ["File containing the NCR dataset"])
-    lateinit var ncrDatasetPath: String
+    @CommandLine.Option(names = ["-ncr_file"], required = true)
+    lateinit var ncrFile: String
 
     override fun call(): Int {
         LOGGER.info { "Running NCR inspection application" }
 
-        LOGGER.info { "Reading NCR dataset from $ncrDatasetPath" }
-        val ncrRecords = NcrDataReader.read(ncrDatasetPath)
+        LOGGER.info { "Reading NCR dataset from $ncrFile" }
+        val ncrRecords = NcrDataReader.read(ncrFile)
         LOGGER.info { " Read ${ncrRecords.size} NCR records" }
 
         LOGGER.info { "Printing overview of NCR records" }
@@ -34,18 +33,18 @@ class NCRInspectionApplication : Callable<Int> {
         printTreatmentOverview(ncrRecords)
         printTreatmentResponseOverview(ncrRecords)
 
-        LOGGER.info { "Creating patient records from NCR records" }
-        val patientRecords: List<ReferencePatient> = ReferencePatientFactory.default().create(ncrRecords)
-        LOGGER.info { " Created ${patientRecords.size} patient records from ${ncrRecords.size} NCR records" }
+        LOGGER.info { "Creating reference entries from NCR records" }
+        val referenceEntries = ReferenceEntryFactory.create(ncrRecords)
+        LOGGER.info { " Created ${referenceEntries.size} reference entries from ${ncrRecords.size} NCR records" }
 
         LOGGER.info { "Done!" }
         return 0
     }
 
     private fun printIdentificationOverview(ncrRecords: List<NcrRecord>) {
-        val patientCount: Int = ncrRecords.map { it.identification.keyNkr }.distinct().count()
-        val tumorCount: Int = ncrRecords.map { it.identification.keyZid }.distinct().count()
-        val episodeCount: Int = ncrRecords.map { it.identification.keyEid }.distinct().count()
+        val patientCount = ncrRecords.map { it.identification.keyNkr }.distinct().count()
+        val tumorCount = ncrRecords.map { it.identification.keyZid }.distinct().count()
+        val episodeCount = ncrRecords.map { it.identification.keyEid }.distinct().count()
 
         LOGGER.info { " $patientCount unique patients found, with $tumorCount tumors and $episodeCount episodes" }
     }
@@ -157,4 +156,4 @@ class NCRInspectionApplication : Callable<Int> {
     }
 }
 
-fun main(args: Array<String>): Unit = kotlin.system.exitProcess(CommandLine(NCRInspectionApplication()).execute(*args))
+fun main(args: Array<String>): Unit = kotlin.system.exitProcess(CommandLine(NcrInspectionApplication()).execute(*args))
