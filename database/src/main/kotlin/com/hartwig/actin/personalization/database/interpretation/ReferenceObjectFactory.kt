@@ -109,25 +109,25 @@ object ReferenceObjectFactory {
                 daysBetweenPrimaryAndMetastaticDiagnosis
             ),
 
-            hasHadPrimarySurgeryPriorToMetastaticDiagnosis = false,
-            hasHadPrimarySurgeryAfterMetastaticDiagnosis = false,
-            hasHadGastroenterologySurgeryPriorToMetastaticDiagnosis = false,
-            hasHadGastroenterologySurgeryAfterMetastaticDiagnosis = false,
-            hasHadHipecPriorToMetastaticDiagnosis = false,
-            hasHadHipecAfterMetastaticDiagnosis = false,
-            hasHadPrimaryRadiotherapyPriorToMetastaticDiagnosis = false,
-            hasHadPrimaryRadiotherapyAfterMetastaticDiagnosis = false,
+            hasHadPrimarySurgeryPriorToMetastaticDiagnosis = treatmentInterpreter.hasPrimarySurgeryPriorToMetastaticTreatment(),
+            hasHadPrimarySurgeryAfterMetastaticDiagnosis = treatmentInterpreter.hasPrimarySurgeryDuringMetastaticTreatment(),
+            hasHadGastroenterologySurgeryPriorToMetastaticDiagnosis = treatmentInterpreter.hasGastroenterologySurgeryPriorToMetastaticTreatment(),
+            hasHadGastroenterologySurgeryAfterMetastaticDiagnosis = treatmentInterpreter.hasGastroenterologySurgeryDuringMetastaticTreatment(),
+            hasHadHipecPriorToMetastaticDiagnosis = treatmentInterpreter.hasHipecPriorToMetastaticTreatment(),
+            hasHadHipecAfterMetastaticDiagnosis = treatmentInterpreter.hasHipecDuringMetastaticTreatment(),
+            hasHadPrimaryRadiotherapyPriorToMetastaticDiagnosis = treatmentInterpreter.hasPrimaryRadiotherapyPriorToMetastaticTreatment(),
+            hasHadPrimaryRadiotherapyAfterMetastaticDiagnosis = treatmentInterpreter.hasPrimaryRadiotherapyDuringMetastaticTreatment(),
 
-            hasHadMetastaticSurgery = false,
-            hasHadMetastaticRadiotherapy = false,
+            hasHadMetastaticSurgery = treatmentInterpreter.hasMetastaticSurgery(),
+            hasHadMetastaticRadiotherapy = treatmentInterpreter.hasMetastaticRadiotherapy(),
 
-            hasHadSystemicTreatmentPriorToMetastaticDiagnosis = false,
+            hasHadSystemicTreatmentPriorToMetastaticDiagnosis = treatmentInterpreter.hasSystemicTreatmentPriorToMetastaticTreatment(),
             daysBetweenMetastaticDiagnosisAndTreatmentStart = daysBetweenMetastaticDiagnosisAndTreatmentStart,
-            systemicTreatmentAfterMetastaticDiagnosis = "",
-            systemicTreatmentDurationDays = 0,
-            systemicTreatmentDurationCycles = 0,
-            hadProgressionEvent = false,
-            daysBetweenTreatmentStartAndProgression = 0
+            systemicTreatmentsAfterMetastaticDiagnosis = treatmentInterpreter.metastaticSystemicTreatmentCount(),
+            firstSystemicTreatmentAfterMetastaticDiagnosis = treatmentInterpreter.firstMetastaticSystemicTreatment()?.display,
+            firstSystemicTreatmentDurationDays = treatmentInterpreter.firstMetastaticSystemicTreatmentDuration(),
+            hadProgressionEvent = treatmentInterpreter.hasProgressionEventAfterMetastaticSystemicTreatmentStart(),
+            daysBetweenTreatmentStartAndProgression = treatmentInterpreter.daysBetweenProgressionAndMetastaticSystemicTreatmentStart()
         )
     }
 }

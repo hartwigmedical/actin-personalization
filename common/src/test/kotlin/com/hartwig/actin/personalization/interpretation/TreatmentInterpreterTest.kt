@@ -9,14 +9,14 @@ import org.junit.jupiter.api.Test
 class TreatmentInterpreterTest {
 
     @Test
-    fun `Should return null when no progression measures present`() {
+    fun `Should determine whether progression has occurred`() {
         val interpreter = TreatmentInterpreter(listOf(TestDatamodelFactory.treatmentEpisode(systemicTreatment = Treatment.CAPOX)))
         
-        assertThat(interpreter.firstProgressionAfterSystemicTreatmentStart()).isNull()
+        assertThat(interpreter.hasProgressionEventAfterMetastaticSystemicTreatmentStart()).isFalse()
     }
 
     @Test
-    fun `Should return null when progression measures are before treatment start`() {
+    fun `Should ignore progression events prior to systemic treatment start`() {
         val treatmentEpisode =
             TestDatamodelFactory.treatmentEpisode(
                 systemicTreatment = Treatment.CAPOX,
@@ -27,7 +27,7 @@ class TreatmentInterpreterTest {
 
         val interpreter = TreatmentInterpreter(listOf(treatmentEpisode))
         
-        assertThat(interpreter.firstProgressionAfterSystemicTreatmentStart()).isNull()
+        assertThat(interpreter.hasProgressionEventAfterMetastaticSystemicTreatmentStart()).isFalse()
     }
 
     @Test
@@ -48,6 +48,7 @@ class TreatmentInterpreterTest {
 
         val interpreter = TreatmentInterpreter(listOf(treatmentEpisodeWithMultipleProgression))
 
-        assertThat(interpreter.firstProgressionAfterSystemicTreatmentStart()?.daysSinceDiagnosis).isEqualTo(12)
+        assertThat(interpreter.daysBetweenProgressionAndPrimaryDiagnosis()).isEqualTo(12)
+        assertThat(interpreter.daysBetweenProgressionAndMetastaticSystemicTreatmentStart()).isEqualTo(2)
     }
 }

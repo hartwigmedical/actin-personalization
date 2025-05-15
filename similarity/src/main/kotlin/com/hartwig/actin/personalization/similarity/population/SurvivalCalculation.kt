@@ -6,13 +6,10 @@ import com.hartwig.actin.personalization.similarity.report.TableElement
 
 val PFS_CALCULATION = SurvivalCalculation(
     timeFunction = {
-        val interpreter = TreatmentInterpreter(it.treatmentEpisodes)
-        val progression = interpreter.firstProgressionAfterSystemicTreatmentStart()
-        if (progression != null) progression.daysSinceDiagnosis else 0
+        TreatmentInterpreter(it.treatmentEpisodes).daysBetweenProgressionAndPrimaryDiagnosis()
     },
     eventFunction = {
-        val interpreter = TreatmentInterpreter(it.treatmentEpisodes)
-        interpreter.firstProgressionAfterSystemicTreatmentStart() != null
+        TreatmentInterpreter(it.treatmentEpisodes).hasProgressionEventAfterMetastaticSystemicTreatmentStart()
     },
     title = "Progression-free survival (median, IQR) in NCR real-world data set"
 )

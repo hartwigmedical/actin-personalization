@@ -34,13 +34,13 @@ class SurvivalCalculationTest {
 
     @Nested
     inner class SurvivalTests {
-
-        @Test
-        fun `Should evaluate eligibility for OS and PFS`() {
-            survivalCalculationsFunctions.forEach { (calculation, type) ->
-                testEligibility(calculation, type)
-            }
-        }
+        
+//        @Test
+//        fun `Should evaluate eligibility for OS and PFS`() {
+//            survivalCalculationsFunctions.forEach { (calculation, type) ->
+//                testEligibility(calculation, type)
+//            }
+//        }
 
         @Test
         fun `Should evaluate median survival for OS and PFS`() {

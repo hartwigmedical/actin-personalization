@@ -65,7 +65,7 @@ class PatientPopulationBreakdown(
 
         val populationPlotsByTreatment = populationDefinitions.mapNotNull { definition ->
             val entriesByTreatment = filteredEntries.filter { definition.criteria(it) }.groupBy {
-                TreatmentInterpreter(it.treatmentEpisodes).firstSpecificMetastaticSystemicTreatmentGroup()!!.display
+                TreatmentInterpreter(it.treatmentEpisodes).firstMetastaticSystemicTreatmentGroup()!!.display
             }
             SurvivalPlot.createSurvivalPlot(entriesByTreatment, calculation, yAxisLabel)
                 ?.let { "$yAxisLabel for group ${definition.name} by treatment" to it }

@@ -37,10 +37,10 @@ class PersonalizedDataInterpreter(val entriesByTreatment: List<Pair<TreatmentGro
 
         fun createFromReferenceEntries(entries: List<ReferenceEntry>): PersonalizedDataInterpreter {
             val applicableEntries = entries
-                .filter { TreatmentInterpreter(it.treatmentEpisodes).hasMetastaticTreatmentWithSpecificSystemicTreatmentOnly() }
+                .filter { TreatmentInterpreter(it.treatmentEpisodes).hasMetastaticTreatmentWithSystemicTreatmentOnly() }
 
             val entriesByTreatment = applicableEntries.groupBy { entry ->
-                TreatmentInterpreter(entry.treatmentEpisodes).firstSpecificMetastaticSystemicTreatmentGroup()!!
+                TreatmentInterpreter(entry.treatmentEpisodes).firstMetastaticSystemicTreatmentGroup()!!
             }
                 .toList()
                 .sortedByDescending { it.second.size }

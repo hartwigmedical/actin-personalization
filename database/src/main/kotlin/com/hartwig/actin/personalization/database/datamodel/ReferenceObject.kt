@@ -33,7 +33,7 @@ data class ReferenceObject(
 
     val numberOfPriorTumors: Int,
     val hasDoublePrimaryTumor: Boolean,
-    
+
     val basisOfDiagnosis: BasisOfDiagnosis,
     val primaryTumorType: TumorType,
     val primaryTumorLocation: TumorLocation,
@@ -58,7 +58,7 @@ data class ReferenceObject(
     val lymphaticInvasionCategory: LymphaticInvasionCategory?,
     val extraMuralInvasionCategory: ExtraMuralInvasionCategory?,
     val tumorRegression: TumorRegression?,
-    
+
     val daysBetweenPrimaryAndMetastaticDiagnosis: Int,
     val hasLiverOrIntrahepaticBileDuctMetastases: Boolean,
     val numberOfLiverMetastases: NumberOfLiverMetastases?,
@@ -70,7 +70,7 @@ data class ReferenceObject(
     val hasBronchusOrLungMetastases: Boolean,
     val hasBrainMetastases: Boolean,
     val hasOtherMetastases: Boolean,
-    
+
     val whoAssessmentAtMetastaticDiagnosis: Int?,
     val asaAssessmentAtMetastaticDiagnosis: AsaClassification?,
     val lactateDehydrogenaseAtMetastaticDiagnosis: Double?,
@@ -79,7 +79,7 @@ data class ReferenceObject(
     val carcinoembryonicAntigenAtMetastaticDiagnosis: Double?,
     val albumineAtMetastaticDiagnosis: Double?,
     val neutrophilsAbsoluteAtMetastaticDiagnosis: Double?,
-    
+
     val hasHadPrimarySurgeryPriorToMetastaticDiagnosis: Boolean,
     val hasHadPrimarySurgeryAfterMetastaticDiagnosis: Boolean,
     val hasHadGastroenterologySurgeryPriorToMetastaticDiagnosis: Boolean,
@@ -88,15 +88,15 @@ data class ReferenceObject(
     val hasHadHipecAfterMetastaticDiagnosis: Boolean,
     val hasHadPrimaryRadiotherapyPriorToMetastaticDiagnosis: Boolean,
     val hasHadPrimaryRadiotherapyAfterMetastaticDiagnosis: Boolean,
-    
+
     val hasHadMetastaticSurgery: Boolean,
     val hasHadMetastaticRadiotherapy: Boolean,
 
     val hasHadSystemicTreatmentPriorToMetastaticDiagnosis: Boolean,
     val daysBetweenMetastaticDiagnosisAndTreatmentStart: Int?,
-    val systemicTreatmentAfterMetastaticDiagnosis: String?,
-    val systemicTreatmentDurationDays: Int?,
-    val systemicTreatmentDurationCycles: Int?,
+    val systemicTreatmentsAfterMetastaticDiagnosis: Int?,
+    val firstSystemicTreatmentAfterMetastaticDiagnosis: String?,
+    val firstSystemicTreatmentDurationDays: Int?,
     val hadProgressionEvent: Boolean?,
     val daysBetweenTreatmentStartAndProgression: Int?
 )
