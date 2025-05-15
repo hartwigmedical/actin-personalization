@@ -137,6 +137,6 @@ class TreatmentInterpreter(private val treatmentEpisodes: List<TreatmentEpisode>
     }
 
     private fun extractFirstMetastaticSystemicTreatment(): SystemicTreatment? {
-        return extractMetastaticTreatmentEpisode()?.systemicTreatments?.first()
+        return extractMetastaticTreatmentEpisode()?.systemicTreatments?.firstOrNull()
     }
 }
