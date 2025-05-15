@@ -6,20 +6,35 @@ import com.hartwig.actin.personalization.datamodel.treatment.MetastaticPresence
 import com.hartwig.actin.personalization.datamodel.treatment.SystemicTreatment
 import com.hartwig.actin.personalization.datamodel.treatment.Treatment
 import com.hartwig.actin.personalization.datamodel.treatment.TreatmentEpisode
+import com.hartwig.actin.personalization.datamodel.treatment.TreatmentGroup
 
-class TreatmentInterpreter(private val treatmentEpisodes : List<TreatmentEpisode>) {
+class TreatmentInterpreter(private val treatmentEpisodes: List<TreatmentEpisode>) {
 
-    fun hasMetastaticTreatmentEpisode() : Boolean {
+    fun hasMetastaticTreatment(): Boolean {
         return extractMetastaticTreatmentEpisode() != null
     }
     
-    fun determineSystemicTreatmentStartForMetastaticDisease() : Int? {
+    fun determineMetastaticSystemicTreatmentStart(): Int? {
         return extractMetastaticTreatmentEpisode()?.systemicTreatments?.mapNotNull { it.daysBetweenDiagnosisAndStart }?.minOfOrNull { it }
+    }
+    
+    fun hasMetastaticTreatmentWithSpecificSystemicTreatmentOnly(): Boolean {
+        val metastaticTreatmentEpisode = extractMetastaticTreatmentEpisode() ?: return false
+
+        return with(metastaticTreatmentEpisode) {
+            extractFirstSpecificMetastaticSystemicTreatment() != null &&
+                    gastroenterologyResections.isEmpty() &&
+                    primarySurgeries.isEmpty() &&
+                    metastaticSurgeries.isEmpty() &&
+                    hipecTreatments.isEmpty() &&
+                    primaryRadiotherapies.isEmpty() &&
+                    metastaticRadiotherapies.isEmpty()
+        }
     }
 
     fun firstProgressionAfterSystemicTreatmentStart(): ProgressionMeasure? {
         val treatmentEpisode = extractMetastaticTreatmentEpisode() ?: return null
-        val systemicTreatment = extractFirstSpecificSystemicTreatment(treatmentEpisode) ?: return null
+        val systemicTreatment = extractFirstSpecificMetastaticSystemicTreatment() ?: return null
         val startOfTreatment = systemicTreatment.daysBetweenDiagnosisAndStart
 
         return treatmentEpisode.progressionMeasures
@@ -28,16 +43,16 @@ class TreatmentInterpreter(private val treatmentEpisodes : List<TreatmentEpisode
             .sortedBy { it.daysSinceDiagnosis }
             .firstOrNull()
     }
+    
+    fun firstSpecificMetastaticSystemicTreatmentGroup(): TreatmentGroup? {
+        return extractFirstSpecificMetastaticSystemicTreatment()?.treatment?.treatmentGroup
+    }
 
-    fun extractMetastaticTreatmentEpisode(): TreatmentEpisode? {
+    private fun extractMetastaticTreatmentEpisode(): TreatmentEpisode? {
         return treatmentEpisodes.firstOrNull { it.metastaticPresence == MetastaticPresence.AT_START }
     }
 
-    fun firstSpecificMetastaticSystemicTreatment(): SystemicTreatment? {
-        return extractMetastaticTreatmentEpisode()?.let { extractFirstSpecificSystemicTreatment(it) }
-    }
-
-    fun extractFirstSpecificSystemicTreatment(treatmentEpisode: TreatmentEpisode): SystemicTreatment? {
-        return treatmentEpisode.systemicTreatments.firstOrNull { it.treatment != Treatment.OTHER }
+    private fun extractFirstSpecificMetastaticSystemicTreatment(): SystemicTreatment? {
+        return extractMetastaticTreatmentEpisode()?.systemicTreatments?.firstOrNull { it.treatment != Treatment.OTHER }
     }
 }

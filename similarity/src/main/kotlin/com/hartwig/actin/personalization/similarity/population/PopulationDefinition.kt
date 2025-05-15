@@ -38,8 +38,7 @@ data class PopulationDefinition(val name: String, val criteria: (ReferenceEntry)
         }
 
         private fun entryMatchesMetastasisLocationGroups(entry: ReferenceEntry, metastasisLocationGroups: Set<LocationGroup>): Boolean {
-            val interpreter = TreatmentInterpreter(entry.treatmentEpisodes)
-            val cutoffDays = interpreter.firstSpecificMetastaticSystemicTreatment()?.daysBetweenDiagnosisAndStart ?: Int.MAX_VALUE
+            val cutoffDays = TreatmentInterpreter(entry.treatmentEpisodes).determineMetastaticSystemicTreatmentStart() ?: Int.MAX_VALUE
 
             val groups = entry.metastaticDiagnosis.metastases.filter { metastasis ->
                 metastasis.daysSinceDiagnosis?.let { it < cutoffDays } == true

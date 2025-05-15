@@ -22,7 +22,7 @@ object ReferenceObjectFactory {
         }
 
         val treatmentInterpreter = TreatmentInterpreter(entry.treatmentEpisodes)
-        if (!treatmentInterpreter.hasMetastaticTreatmentEpisode()) {
+        if (!treatmentInterpreter.hasMetastaticTreatment()) {
             LOGGER.warn { "No metastatic-at-start treatment episode found for entry with source ID ${entry.sourceId}" }
             return null
         }
@@ -32,7 +32,7 @@ object ReferenceObjectFactory {
         val labInterpreter = LabInterpreter(entry.labMeasurements)
 
         val survivalSincePrimaryDiagnosis = entry.latestSurvivalMeasurement.daysSinceDiagnosis
-        val daysBetweenPrimaryDiagnosisAndTreatmentStart = treatmentInterpreter.determineSystemicTreatmentStartForMetastaticDisease()
+        val daysBetweenPrimaryDiagnosisAndTreatmentStart = treatmentInterpreter.determineMetastaticSystemicTreatmentStart()
         val daysBetweenMetastaticDiagnosisAndTreatmentStart =
             daysBetweenPrimaryDiagnosisAndTreatmentStart?.let { daysBetweenPrimaryAndMetastaticDiagnosis - it }
 

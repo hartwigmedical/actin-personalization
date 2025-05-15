@@ -37,32 +37,15 @@ class PersonalizedDataInterpreter(val entriesByTreatment: List<Pair<TreatmentGro
 
         fun createFromReferenceEntries(entries: List<ReferenceEntry>): PersonalizedDataInterpreter {
             val applicableEntries = entries
-                .filter { hasMetastaticTreatmentEpisodeWithSystemicTreatmentOnly(it) }
+                .filter { TreatmentInterpreter(it.treatmentEpisodes).hasMetastaticTreatmentWithSpecificSystemicTreatmentOnly() }
 
             val entriesByTreatment = applicableEntries.groupBy { entry ->
-                val interpreter = TreatmentInterpreter(entry.treatmentEpisodes)
-                interpreter.firstSpecificMetastaticSystemicTreatment()!!.treatment.treatmentGroup
+                TreatmentInterpreter(entry.treatmentEpisodes).firstSpecificMetastaticSystemicTreatmentGroup()!!
             }
                 .toList()
                 .sortedByDescending { it.second.size }
 
             return PersonalizedDataInterpreter(entriesByTreatment)
-        }
-
-        private fun hasMetastaticTreatmentEpisodeWithSystemicTreatmentOnly(entry: ReferenceEntry): Boolean {
-            // TODO (KD): Review whether filtering remains consistent with data frame used by notebooks eventually.
-            val interpreter = TreatmentInterpreter(entry.treatmentEpisodes)
-            val metastaticTreatmentEpisode = interpreter.extractMetastaticTreatmentEpisode() ?: return false
-
-            return with(metastaticTreatmentEpisode) {
-                interpreter.extractFirstSpecificSystemicTreatment(metastaticTreatmentEpisode) != null &&
-                        gastroenterologyResections.isEmpty() &&
-                        primarySurgeries.isEmpty() &&
-                        metastaticSurgeries.isEmpty() &&
-                        hipecTreatments.isEmpty() &&
-                        primaryRadiotherapies.isEmpty() &&
-                        metastaticRadiotherapies.isEmpty()
-            }
         }
     }
 }
