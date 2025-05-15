@@ -2,7 +2,7 @@ package com.hartwig.actin.personalization.similarity.population
 
 import com.hartwig.actin.personalization.datamodel.ReferenceEntry
 import com.hartwig.actin.personalization.datamodel.diagnosis.LocationGroup
-import com.hartwig.actin.personalization.selection.TreatmentSelection
+import com.hartwig.actin.personalization.interpretation.TreatmentInterpreter
 
 const val ALL_PATIENTS_POPULATION_NAME = "All"
 
@@ -38,8 +38,8 @@ data class PopulationDefinition(val name: String, val criteria: (ReferenceEntry)
         }
 
         private fun entryMatchesMetastasisLocationGroups(entry: ReferenceEntry, metastasisLocationGroups: Set<LocationGroup>): Boolean {
-            val cutoffDays =
-                TreatmentSelection.firstSpecificMetastaticSystemicTreatment(entry)?.daysBetweenDiagnosisAndStart ?: Int.MAX_VALUE
+            val interpreter = TreatmentInterpreter(entry.treatmentEpisodes)
+            val cutoffDays = interpreter.firstSpecificMetastaticSystemicTreatment()?.daysBetweenDiagnosisAndStart ?: Int.MAX_VALUE
 
             val groups = entry.metastaticDiagnosis.metastases.filter { metastasis ->
                 metastasis.daysSinceDiagnosis?.let { it < cutoffDays } == true

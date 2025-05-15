@@ -4,7 +4,7 @@ import com.hartwig.actin.personalization.datamodel.ReferenceEntry
 import com.hartwig.actin.personalization.datamodel.diagnosis.LocationGroup
 import com.hartwig.actin.personalization.datamodel.serialization.ReferenceEntryJson
 import com.hartwig.actin.personalization.datamodel.treatment.TreatmentGroup
-import com.hartwig.actin.personalization.selection.TreatmentSelection
+import com.hartwig.actin.personalization.interpretation.TreatmentInterpreter
 import com.hartwig.actin.personalization.similarity.population.PatientPopulationBreakdown
 import com.hartwig.actin.personalization.similarity.population.PersonalizedDataAnalysis
 import com.hartwig.actin.personalization.similarity.population.PopulationDefinition
@@ -40,7 +40,8 @@ class PersonalizedDataInterpreter(val entriesByTreatment: List<Pair<TreatmentGro
                 .filter { hasMetastaticTreatmentEpisodeWithSystemicTreatmentOnly(it) }
 
             val entriesByTreatment = applicableEntries.groupBy { entry ->
-                TreatmentSelection.firstSpecificMetastaticSystemicTreatment(entry)!!.treatment.treatmentGroup
+                val interpreter = TreatmentInterpreter(entry.treatmentEpisodes)
+                interpreter.firstSpecificMetastaticSystemicTreatment()!!.treatment.treatmentGroup
             }
                 .toList()
                 .sortedByDescending { it.second.size }
@@ -50,10 +51,11 @@ class PersonalizedDataInterpreter(val entriesByTreatment: List<Pair<TreatmentGro
 
         private fun hasMetastaticTreatmentEpisodeWithSystemicTreatmentOnly(entry: ReferenceEntry): Boolean {
             // TODO (KD): Review whether filtering remains consistent with data frame used by notebooks eventually.
-            val metastaticTreatmentEpisode = TreatmentSelection.extractMetastaticTreatmentEpisode(entry.treatmentEpisodes) ?: return false
+            val interpreter = TreatmentInterpreter(entry.treatmentEpisodes)
+            val metastaticTreatmentEpisode = interpreter.extractMetastaticTreatmentEpisode() ?: return false
 
             return with(metastaticTreatmentEpisode) {
-                TreatmentSelection.extractFirstSpecificSystemicTreatment(metastaticTreatmentEpisode) != null &&
+                interpreter.extractFirstSpecificSystemicTreatment(metastaticTreatmentEpisode) != null &&
                         gastroenterologyResections.isEmpty() &&
                         primarySurgeries.isEmpty() &&
                         metastaticSurgeries.isEmpty() &&

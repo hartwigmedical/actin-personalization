@@ -2,7 +2,7 @@ package com.hartwig.actin.personalization.similarity.population
 
 import com.hartwig.actin.personalization.datamodel.ReferenceEntry
 import com.hartwig.actin.personalization.datamodel.treatment.TreatmentGroup
-import com.hartwig.actin.personalization.selection.TreatmentSelection
+import com.hartwig.actin.personalization.interpretation.TreatmentInterpreter
 import org.jetbrains.kotlinx.kandy.ir.Plot
 
 class PatientPopulationBreakdown(
@@ -65,7 +65,8 @@ class PatientPopulationBreakdown(
 
         val populationPlotsByTreatment = populationDefinitions.mapNotNull { definition ->
             val entriesByTreatment = filteredEntries.filter { definition.criteria(it) }.groupBy {
-                TreatmentSelection.firstSpecificMetastaticSystemicTreatment(it)!!.treatment.treatmentGroup.display
+                val interpreter = TreatmentInterpreter(it.treatmentEpisodes)
+                interpreter.firstSpecificMetastaticSystemicTreatment()!!.treatment.treatmentGroup.display
             }
             SurvivalPlot.createSurvivalPlot(entriesByTreatment, calculation, yAxisLabel)
                 ?.let { "$yAxisLabel for group ${definition.name} by treatment" to it }

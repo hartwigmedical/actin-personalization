@@ -1,4 +1,4 @@
-package com.hartwig.actin.personalization.selection
+package com.hartwig.actin.personalization.interpretation
 
 import com.hartwig.actin.personalization.datamodel.TestDatamodelFactory
 import com.hartwig.actin.personalization.datamodel.outcome.ProgressionMeasureType
@@ -6,15 +6,13 @@ import com.hartwig.actin.personalization.datamodel.treatment.Treatment
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
-class ProgressionSelectionTest {
+class TreatmentInterpreterTest {
 
     @Test
     fun `Should return null when no progression measures present`() {
-        assertThat(
-            ProgressionSelection.firstProgressionAfterSystemicTreatmentStart(
-                TestDatamodelFactory.entry(systemicTreatment = Treatment.CAPOX)
-            )
-        ).isNull()
+        val interpreter = TreatmentInterpreter(listOf(TestDatamodelFactory.treatmentEpisode(systemicTreatment = Treatment.CAPOX)))
+        
+        assertThat(interpreter.firstProgressionAfterSystemicTreatmentStart()).isNull()
     }
 
     @Test
@@ -27,11 +25,9 @@ class ProgressionSelectionTest {
                 daysBetweenDiagnosisAndProgression = 8
             )
 
-        assertThat(
-            ProgressionSelection.firstProgressionAfterSystemicTreatmentStart(
-                TestDatamodelFactory.entry(treatmentEpisode = treatmentEpisode)
-            )
-        ).isNull()
+        val interpreter = TreatmentInterpreter(listOf(treatmentEpisode))
+        
+        assertThat(interpreter.firstProgressionAfterSystemicTreatmentStart()).isNull()
     }
 
     @Test
@@ -50,10 +46,8 @@ class ProgressionSelectionTest {
                 )
             )
 
-        assertThat(
-            ProgressionSelection.firstProgressionAfterSystemicTreatmentStart(
-                TestDatamodelFactory.entry(treatmentEpisode = treatmentEpisodeWithMultipleProgression)
-            )?.daysSinceDiagnosis
-        ).isEqualTo(12)
+        val interpreter = TreatmentInterpreter(listOf(treatmentEpisodeWithMultipleProgression))
+
+        assertThat(interpreter.firstProgressionAfterSystemicTreatmentStart()?.daysSinceDiagnosis).isEqualTo(12)
     }
 }

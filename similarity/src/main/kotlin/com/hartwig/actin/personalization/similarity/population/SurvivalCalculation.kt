@@ -1,15 +1,19 @@
 package com.hartwig.actin.personalization.similarity.population
 
 import com.hartwig.actin.personalization.datamodel.ReferenceEntry
-import com.hartwig.actin.personalization.selection.ProgressionSelection
+import com.hartwig.actin.personalization.interpretation.TreatmentInterpreter
 import com.hartwig.actin.personalization.similarity.report.TableElement
 
 val PFS_CALCULATION = SurvivalCalculation(
     timeFunction = {
-        val progression = ProgressionSelection.firstProgressionAfterSystemicTreatmentStart(it)
+        val interpreter = TreatmentInterpreter(it.treatmentEpisodes)
+        val progression = interpreter.firstProgressionAfterSystemicTreatmentStart()
         if (progression != null) progression.daysSinceDiagnosis else 0
     },
-    eventFunction = { ProgressionSelection.firstProgressionAfterSystemicTreatmentStart(it) != null },
+    eventFunction = {
+        val interpreter = TreatmentInterpreter(it.treatmentEpisodes)
+        interpreter.firstProgressionAfterSystemicTreatmentStart() != null
+    },
     title = "Progression-free survival (median, IQR) in NCR real-world data set"
 )
 
@@ -55,7 +59,7 @@ class SurvivalCalculation(
 
         return if (realIndex == eventHistory.size) Double.NaN else eventHistory[realIndex].daysSinceStart.toDouble()
     }
-    
+
     override fun createTableElement(measurement: Measurement): TableElement {
         return when {
             measurement.numEntries <= minEntryCount -> TableElement.regular("n≤$minEntryCount")
