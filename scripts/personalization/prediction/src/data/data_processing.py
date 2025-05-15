@@ -189,7 +189,8 @@ class DataPreprocessor:
     def add_treatment_drugs(self, df: pd.DataFrame, treatment_col: str = "systemicTreatmentPlan") -> pd.DataFrame:
         treatment_components = df[treatment_col].apply(self.parse_treatment)
 
-        components_df = pd.DataFrame(treatment_components.tolist(), index=df.index)
+        components_df = pd.DataFrame(treatment_components.tolist(), index=df.index)         
+        components_df["hasTreatment"] = components_df.sum(axis=1).clip(upper=1)
 
         df = df.join(components_df)
         
