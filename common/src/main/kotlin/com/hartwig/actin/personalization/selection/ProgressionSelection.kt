@@ -7,7 +7,7 @@ import com.hartwig.actin.personalization.datamodel.outcome.ProgressionMeasureTyp
 object ProgressionSelection {
 
     fun firstProgressionAfterSystemicTreatmentStart(entry: ReferenceEntry): ProgressionMeasure? {
-        val treatmentEpisode = TreatmentSelection.extractMetastaticTreatmentEpisode(entry) ?: return null
+        val treatmentEpisode = TreatmentSelection.extractMetastaticTreatmentEpisode(entry.treatmentEpisodes) ?: return null
         val systemicTreatment = TreatmentSelection.extractFirstSpecificSystemicTreatment(treatmentEpisode) ?: return null
         val startOfTreatment = systemicTreatment.daysBetweenDiagnosisAndStart
 

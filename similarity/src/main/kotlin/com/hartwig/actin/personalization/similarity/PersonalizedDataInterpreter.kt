@@ -50,7 +50,7 @@ class PersonalizedDataInterpreter(val entriesByTreatment: List<Pair<TreatmentGro
 
         private fun hasMetastaticTreatmentEpisodeWithSystemicTreatmentOnly(entry: ReferenceEntry): Boolean {
             // TODO (KD): Review whether filtering remains consistent with data frame used by notebooks eventually.
-            val metastaticTreatmentEpisode = TreatmentSelection.extractMetastaticTreatmentEpisode(entry) ?: return false
+            val metastaticTreatmentEpisode = TreatmentSelection.extractMetastaticTreatmentEpisode(entry.treatmentEpisodes) ?: return false
 
             return with(metastaticTreatmentEpisode) {
                 TreatmentSelection.extractFirstSpecificSystemicTreatment(metastaticTreatmentEpisode) != null &&

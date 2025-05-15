@@ -8,12 +8,12 @@ import com.hartwig.actin.personalization.datamodel.treatment.TreatmentEpisode
 
 object TreatmentSelection {
     
-    fun extractMetastaticTreatmentEpisode(entry: ReferenceEntry): TreatmentEpisode? {
-        return entry.treatmentEpisodes.firstOrNull { it.metastaticPresence == MetastaticPresence.AT_START }
+    fun extractMetastaticTreatmentEpisode(treatmentEpisodes: List<TreatmentEpisode>): TreatmentEpisode? {
+        return treatmentEpisodes.firstOrNull { it.metastaticPresence == MetastaticPresence.AT_START }
     }
 
     fun firstSpecificMetastaticSystemicTreatment(entry: ReferenceEntry): SystemicTreatment? {
-        return extractMetastaticTreatmentEpisode(entry)?.let { extractFirstSpecificSystemicTreatment(it) }
+        return extractMetastaticTreatmentEpisode(entry.treatmentEpisodes)?.let { extractFirstSpecificSystemicTreatment(it) }
     }
 
     fun extractFirstSpecificSystemicTreatment(treatmentEpisode: TreatmentEpisode): SystemicTreatment? {

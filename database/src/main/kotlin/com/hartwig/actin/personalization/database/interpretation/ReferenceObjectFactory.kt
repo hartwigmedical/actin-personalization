@@ -2,12 +2,11 @@ package com.hartwig.actin.personalization.database.interpretation
 
 import com.hartwig.actin.personalization.database.datamodel.ReferenceObject
 import com.hartwig.actin.personalization.datamodel.ReferenceEntry
-import com.hartwig.actin.personalization.interpretation.AsaAssessments
-import com.hartwig.actin.personalization.interpretation.LabMeasurements
-import com.hartwig.actin.personalization.interpretation.Metastases
-import com.hartwig.actin.personalization.interpretation.Treatments
-import com.hartwig.actin.personalization.interpretation.WhoAssessments
-import com.hartwig.actin.personalization.selection.TreatmentSelection
+import com.hartwig.actin.personalization.interpretation.AsaInterpreter
+import com.hartwig.actin.personalization.interpretation.LabInterpreter
+import com.hartwig.actin.personalization.interpretation.MetastaticInterpreter
+import com.hartwig.actin.personalization.interpretation.TreatmentInterpreter
+import com.hartwig.actin.personalization.interpretation.WhoInterpreter
 import io.github.oshai.kotlinlogging.KotlinLogging
 
 object ReferenceObjectFactory {
@@ -15,16 +14,27 @@ object ReferenceObjectFactory {
     private val LOGGER = KotlinLogging.logger {}
 
     fun create(entry: ReferenceEntry): ReferenceObject? {
-        val daysBetweenPrimaryAndMetastaticDiagnosis =
-            Metastases.daysBetweenPrimaryAndMetastaticDiagnosis(entry.metastaticDiagnosis)
+        val metastaticInterpreter = MetastaticInterpreter(entry.metastaticDiagnosis)
+        val daysBetweenPrimaryAndMetastaticDiagnosis = metastaticInterpreter.daysBetweenPrimaryAndMetastaticDiagnosis()
         if (daysBetweenPrimaryAndMetastaticDiagnosis == null) {
             LOGGER.warn { "Could not determine interval towards metastatic diagnosis for entry with source ID ${entry.sourceId}" }
             return null
         }
 
+        val treatmentInterpreter = TreatmentInterpreter(entry.treatmentEpisodes)
+        if (!treatmentInterpreter.hasMetastaticTreatmentEpisode()) {
+            LOGGER.warn { "No metastatic-at-start treatment episode found for entry with source ID ${entry.sourceId}" }
+            return null
+        }
+
+        val whoInterpreter = WhoInterpreter(entry.whoAssessments)
+        val asaInterpreter = AsaInterpreter(entry.asaAssessments)
+        val labInterpreter = LabInterpreter(entry.labMeasurements)
+
         val survivalSincePrimaryDiagnosis = entry.latestSurvivalMeasurement.daysSinceDiagnosis
-        val metastaticTreatmentEpisode = TreatmentSelection.extractMetastaticTreatmentEpisode(entry) ?: return null
-        val systemicTreatmentStart = Treatments.determineSystemicTreatmentStart(metastaticTreatmentEpisode)
+        val daysBetweenPrimaryDiagnosisAndTreatmentStart = treatmentInterpreter.determineSystemicTreatmentStartForMetastaticDisease()
+        val daysBetweenMetastaticDiagnosisAndTreatmentStart =
+            daysBetweenPrimaryDiagnosisAndTreatmentStart?.let { daysBetweenPrimaryAndMetastaticDiagnosis - it }
 
         return ReferenceObject(
             source = entry.source,
@@ -36,7 +46,7 @@ object ReferenceObjectFactory {
             hadSurvivalEvent = !entry.latestSurvivalMeasurement.isAlive,
             survivalDaysSincePrimaryDiagnosis = survivalSincePrimaryDiagnosis,
             survivalDaysSinceMetastaticDiagnosis = survivalSincePrimaryDiagnosis - daysBetweenPrimaryAndMetastaticDiagnosis,
-            survivalDaysSinceTreatmentStart = systemicTreatmentStart?.let { survivalSincePrimaryDiagnosis - it },
+            survivalDaysSinceTreatmentStart = daysBetweenPrimaryDiagnosisAndTreatmentStart?.let { survivalSincePrimaryDiagnosis - it },
 
             numberOfPriorTumors = entry.priorTumors.size,
             hasDoublePrimaryTumor = entry.primaryDiagnosis.hasDoublePrimaryTumor,
@@ -67,48 +77,36 @@ object ReferenceObjectFactory {
             tumorRegression = entry.primaryDiagnosis.tumorRegression,
 
             daysBetweenPrimaryAndMetastaticDiagnosis = daysBetweenPrimaryAndMetastaticDiagnosis,
-            hasLiverOrIntrahepaticBileDuctMetastases = Metastases.hasLiverOrIntrahepaticBileDuctMetastases(entry.metastaticDiagnosis),
+            hasLiverOrIntrahepaticBileDuctMetastases = metastaticInterpreter.hasLiverOrIntrahepaticBileDuctMetastases(),
             numberOfLiverMetastases = entry.metastaticDiagnosis.numberOfLiverMetastases,
             maximumSizeOfLiverMetastasisMm = entry.metastaticDiagnosis.maximumSizeOfLiverMetastasisMm,
-            hasLymphNodeMetastases = Metastases.hasLymphNodeMetastases(entry.metastaticDiagnosis),
+            hasLymphNodeMetastases = metastaticInterpreter.hasLymphNodeMetastases(),
             investigatedLymphNodesCountMetastaticDiagnosis = entry.metastaticDiagnosis.investigatedLymphNodesCount,
             positiveLymphNodesCountMetastaticDiagnosis = entry.metastaticDiagnosis.positiveLymphNodesCount,
-            hasPeritonealMetastases = Metastases.hasPeritonealMetastases(entry.metastaticDiagnosis),
-            hasBronchusOrLungMetastases = Metastases.hasBronchusOrLungMetastases(entry.metastaticDiagnosis),
-            hasBrainMetastases = Metastases.hasBrainMetastases(entry.metastaticDiagnosis),
-            hasOtherMetastases = Metastases.hasOtherMetastases(entry.metastaticDiagnosis),
+            hasPeritonealMetastases = metastaticInterpreter.hasPeritonealMetastases(),
+            hasBronchusOrLungMetastases = metastaticInterpreter.hasBronchusOrLungMetastases(),
+            hasBrainMetastases = metastaticInterpreter.hasBrainMetastases(),
+            hasOtherMetastases = metastaticInterpreter.hasOtherMetastases(),
 
-            whoAssessmentAtMetastaticDiagnosis = WhoAssessments.statusAtMetastaticDiagnosis(
-                whoAssessments = entry.whoAssessments,
-                daysBetweenPrimaryAndMetastaticDiagnosis = daysBetweenPrimaryAndMetastaticDiagnosis
+            whoAssessmentAtMetastaticDiagnosis = whoInterpreter.mostRecentStatusPriorTo(daysBetweenPrimaryAndMetastaticDiagnosis),
+            asaAssessmentAtMetastaticDiagnosis = asaInterpreter.mostRecentClassificationPriorTo(daysBetweenPrimaryAndMetastaticDiagnosis),
+            lactateDehydrogenaseAtMetastaticDiagnosis = labInterpreter.mostRecentLactateDehydrogenasePriorTo(
+                daysBetweenPrimaryAndMetastaticDiagnosis
             ),
-            asaAssessmentAtMetastaticDiagnosis = AsaAssessments.classificationAtMetastaticDiagnosis(
-                asaAssessments = entry.asaAssessments,
-                daysBetweenPrimaryAndMetastaticDiagnosis = daysBetweenPrimaryAndMetastaticDiagnosis
+            alkalinePhosphataseAtMetastaticDiagnosis = labInterpreter.mostRecentAlkalinePhosphatasePriorTo(
+                daysBetweenPrimaryAndMetastaticDiagnosis
             ),
-            lactateDehydrogenaseAtMetastaticDiagnosis = LabMeasurements.lactateDehydrogenaseAtMetastaticDiagnosis(
-                labMeasurements = entry.labMeasurements,
-                daysBetweenPrimaryAndMetastaticDiagnosis = daysBetweenPrimaryAndMetastaticDiagnosis
+            leukocytesAbsoluteAtMetastaticDiagnosis = labInterpreter.mostRecentLeukocytesAbsolutePriorTo(
+                daysBetweenPrimaryAndMetastaticDiagnosis
             ),
-            alkalinePhosphataseAtMetastaticDiagnosis = LabMeasurements.alkalinePhosphataseAtMetastaticDiagnosis(
-                labMeasurements = entry.labMeasurements,
-                daysBetweenPrimaryAndMetastaticDiagnosis = daysBetweenPrimaryAndMetastaticDiagnosis
+            carcinoembryonicAntigenAtMetastaticDiagnosis = labInterpreter.mostRecentCarcinoembryonicAntigenPriorTo(
+                daysBetweenPrimaryAndMetastaticDiagnosis
             ),
-            leukocytesAbsoluteAtMetastaticDiagnosis = LabMeasurements.leukocytesAbsoluteAtMetastaticDiagnosis(
-                labMeasurements = entry.labMeasurements,
-                daysBetweenPrimaryAndMetastaticDiagnosis = daysBetweenPrimaryAndMetastaticDiagnosis
+            albumineAtMetastaticDiagnosis = labInterpreter.mostRecentAlbuminePriorTo(
+                daysBetweenPrimaryAndMetastaticDiagnosis
             ),
-            carcinoembryonicAntigenAtMetastaticDiagnosis = LabMeasurements.carcinoembryonicAntigenAtMetastaticDiagnosis(
-                labMeasurements = entry.labMeasurements,
-                daysBetweenPrimaryAndMetastaticDiagnosis = daysBetweenPrimaryAndMetastaticDiagnosis
-            ),
-            albumineAtMetastaticDiagnosis = LabMeasurements.albumineAtMetastaticDiagnosis(
-                labMeasurements = entry.labMeasurements,
-                daysBetweenPrimaryAndMetastaticDiagnosis = daysBetweenPrimaryAndMetastaticDiagnosis
-            ),
-            neutrophilsAbsoluteAtMetastaticDiagnosis = LabMeasurements.neutrophilsAbsoluteAtMetastaticDiagnosis(
-                labMeasurements = entry.labMeasurements,
-                daysBetweenPrimaryAndMetastaticDiagnosis = daysBetweenPrimaryAndMetastaticDiagnosis
+            neutrophilsAbsoluteAtMetastaticDiagnosis = labInterpreter.mostRecentNeutrophilsAbsolutePriorTo(
+                daysBetweenPrimaryAndMetastaticDiagnosis
             ),
 
             hasHadPrimarySurgeryPriorToMetastaticDiagnosis = false,
@@ -124,7 +122,7 @@ object ReferenceObjectFactory {
             hasHadMetastaticRadiotherapy = false,
 
             hasHadSystemicTreatmentPriorToMetastaticDiagnosis = false,
-            daysBetweenMetastaticDiagnosisAndTreatmentStart = 0,
+            daysBetweenMetastaticDiagnosisAndTreatmentStart = daysBetweenMetastaticDiagnosisAndTreatmentStart,
             systemicTreatmentAfterMetastaticDiagnosis = "",
             systemicTreatmentDurationDays = 0,
             systemicTreatmentDurationCycles = 0,

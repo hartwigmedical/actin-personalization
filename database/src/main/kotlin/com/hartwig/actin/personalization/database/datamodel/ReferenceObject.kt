@@ -93,10 +93,10 @@ data class ReferenceObject(
     val hasHadMetastaticRadiotherapy: Boolean,
 
     val hasHadSystemicTreatmentPriorToMetastaticDiagnosis: Boolean,
-    val daysBetweenMetastaticDiagnosisAndTreatmentStart: Int,
-    val systemicTreatmentAfterMetastaticDiagnosis: String,
-    val systemicTreatmentDurationDays: Int,
-    val systemicTreatmentDurationCycles: Int,
-    val hadProgressionEvent: Boolean,
-    val daysBetweenTreatmentStartAndProgression: Int
+    val daysBetweenMetastaticDiagnosisAndTreatmentStart: Int?,
+    val systemicTreatmentAfterMetastaticDiagnosis: String?,
+    val systemicTreatmentDurationDays: Int?,
+    val systemicTreatmentDurationCycles: Int?,
+    val hadProgressionEvent: Boolean?,
+    val daysBetweenTreatmentStartAndProgression: Int?
 )
