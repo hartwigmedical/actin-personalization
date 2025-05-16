@@ -25,16 +25,16 @@ library(ggsurvfit)
  setwd(wd)
 
 # Get access to functions ---------------------------------------------------------------
-source(paste0(Sys.getenv("HOME"), "/hmf/repos/actin-personalization/scripts/cpct/cpct_data_analysis_functions.R"))
-source(paste0(Sys.getenv("HOME"), "/hmf/repos/actin-personalization/scripts/cpct/cpct_treatment_curation.R"))
+source(paste0(Sys.getenv("HOME"), "/hmf/repos/actin-personalization/scripts/cpct/ACTIN-542_cpct_data_analysis_functions.R"))
+source(paste0(Sys.getenv("HOME"), "/hmf/repos/actin-personalization/scripts/cpct/ACTIN-542_cpct_data_analysis_treatment_curation.R"))
  
 # Retrieve data ------------------------------------------------------------------
 dbProd <- dbConnect(MySQL(), dbname='hmfpatients', groups="RAnalysis")
 
-queryCPCT <-"select d.sampleId, biopsy.patientId, gender, birthYear, registrationDate, deathDate, primaryTumorLocation, primaryTumorSubLocation, primaryTumorType, primaryTumorSubType, hasSystemicPreTreatment, hasRadiotherapyPreTreatment, preTreatments, preTreatmentsType, preTreatmentsMechanism, d.treatmentGiven, d.radiotherapyGiven, treatmentStartDate, treatmentEndDate, treatment, consolidatedTreatmentType, concatenatedTreatmentType, consolidatedTreatmentMechanism, concatenatedTreatmentMechanism, d.firstResponse as firstResponseOrig, d.responseDate as firstResponseDateOrig, firstMatchedResponse.response as firstResponse, firstMatchedResponse.responseDate as firstResponseDate, firstMatchedPDResponse.response as firstResponsePD, firstMatchedPDResponse.responseDate as firstResponsePDDate, bestResponse
+queryCPCT <-"select d.sampleId, biopsy.patientId, gender, birthYear, registrationDate, deathDate, primaryTumorLocation, primaryTumorType, hasSystemicPreTreatment, hasRadiotherapyPreTreatment, preTreatments, preTreatmentsType, preTreatmentsMechanism, d.treatmentGiven, d.radiotherapyGiven, treatmentStartDate, treatmentEndDate, treatment, consolidatedTreatmentType, concatenatedTreatmentType, consolidatedTreatmentMechanism, concatenatedTreatmentMechanism, d.firstResponse as firstResponseOrig, d.responseDate as firstResponseDateOrig, firstMatchedResponse.response as firstResponse, firstMatchedResponse.responseDate as firstResponseDate, firstMatchedPDResponse.response as firstResponsePD, firstMatchedPDResponse.responseDate as firstResponsePDDate, bestResponse
 from sample s
-inner join datarequest d on d.sampleId=s.sampleId
-left join biopsy on biopsy.sampleId = s.sampleId
+inner join datarequest d on d.specimenId=s.specimenId
+left join biopsy on biopsy.specimenId = s.specimenId
 left join treatment on treatment.biopsyId = biopsy.id
 left join (select * 
           from
@@ -159,7 +159,7 @@ pembrolizumab <- cpct %>%
 
 ## Colorectal df
 colorectal <- cpct %>% 
-  dplyr::filter(primaryTumorLocation == 'Colorectum') %>%
+  dplyr::filter(primaryTumorLocation == 'Colon') %>%
   cpct_colorectal_treatment_curation() %>%
   subset(select = c(sampleId, patientId, isFemale, ageAtTreatmentStart, hasSystemicPreTreatment, primaryTumorLocation, isKrasWildtype, hasKrasG12Mut, hasKrasG13Mut, hasKrasNonG12G13Mut, isNrasWildtype, isBRAFV600EWildtype, isTp53Wildtype, hasErbb2Amp, hasMsi, tumorMutationalLoad, totalDriverCount, treatment, treatmentCurated, bestResponse, pfs, os))
 
