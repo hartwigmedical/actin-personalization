@@ -9,12 +9,12 @@
     <name>Hartwig ACTIN Personalization</name>
 
     <modules>
-        <module>weka-demo</module>
         <module>datamodel</module>
         <module>common</module>
         <module>ncr</module>
-        <module>database</module>
         <module>similarity</module>
+        <module>database</module>
+        <module>weka-demo</module>
         <module>system</module>
     </modules>
 
@@ -22,8 +22,8 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
         <kotlin.version>2.0.0</kotlin.version>
-        <kotlin.jvm.target>17</kotlin.jvm.target>
         <kotlin.compiler.apiVersion>2.0</kotlin.compiler.apiVersion>
+        <kotlin.jvm.target>17</kotlin.jvm.target>
         <kotlin.code.style>official</kotlin.code.style>
 
         <!-- KD: Even though all code is in kotlin, the jooq code generator generates java code that needs to be compiled -->
@@ -99,6 +99,9 @@
                     <groupId>org.jetbrains.kotlin</groupId>
                     <artifactId>kotlin-maven-plugin</artifactId>
                     <version>${kotlin.version}</version>
+                    <configuration>
+                        <apiVersion>${kotlin.compiler.apiVersion}</apiVersion>
+                    </configuration>
                 </plugin>
                 <plugin>
                     <groupId>org.jooq</groupId>
