@@ -63,9 +63,6 @@ class DataPreprocessor:
        
         df = self.encode_categorical(df)
         
-        if settings.add_risk_scores:
-            df = self.add_kohne_score(df)
-        
         updated_features = [col for col in df.columns if col not in [settings.duration_col, settings.event_col]]
         
         # df = self.normalize(df, updated_features)
@@ -213,27 +210,6 @@ class DataPreprocessor:
                 self.encoded_columns[col] = list(dummies.columns)
                 
         return df
-    
-    def add_kohne_score(self, df: pd.DataFrame) -> pd.DataFrame:
-        df["kohne_score"] = 0
-
-        if "lactateDehydrogenase" in df.columns:
-            df["kohne_score"] += (df["lactateDehydrogenase"] > df["lactateDehydrogenase"].median()).astype(int)  # find ULN threshold
-
-        if "metastasisLocationGroupsPriorToSystemicTreatment_LIVER" in df.columns:
-            site_cols = [col for col in df.columns if col.startswith("metastasisLocationGroupsPriorToSystemicTreatment_")]
-            df["number_of_met_sites"] = df[site_cols].sum(axis=1)
-            df["kohne_score"] += (df["number_of_met_sites"] > 1).astype(int)
-
-        if "whoStatusPreTreatmentStart" in df.columns:
-            df["kohne_score"] += (df["whoStatusPreTreatmentStart"] >= 2).astype(int)
-
-        if "leukocytesAbsolute" in df.columns:
-            df["kohne_score"] += (df["leukocytesAbsolute"] > 8.0).astype(int)
-
-        return df.drop(columns=["number_of_met_sites"], errors="ignore")
-
-
 
     def normalize(self, df: pd.DataFrame, features: List[str]) -> pd.DataFrame:
         """

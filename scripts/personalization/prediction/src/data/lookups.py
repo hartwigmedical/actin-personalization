@@ -149,8 +149,7 @@ class LookupManager:
             # 'tumorIncidenceYear',
             'tumorLocation',
             # 'venousInvasionDescription',--> only present in very few cases (<10)
-            'whoStatusPreTreatmentStart',
-            # 'kohne_score' if settings.add_risk_scores
+            'whoStatusPreTreatmentStart'
         ]
         
 lookup_manager = LookupManager()
