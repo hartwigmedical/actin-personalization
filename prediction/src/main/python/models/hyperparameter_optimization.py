@@ -1,10 +1,10 @@
 import random
 from itertools import product
-from src.utils.settings import settings
+from utils.settings import settings
 from typing import List, Dict, Any
 
 from .configs.model_configurations import *
-from .model_trainer import *
+from models.model_trainer import *
 from .survival_models import BaseSurvivalModel
 
 

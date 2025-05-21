@@ -14,8 +14,8 @@ class Settings:
     add_risk_scores: bool = False
     save_models: bool = True
     json_config_file: str = 'src/models/configs/model_hyperparams.json'
-    db_name: str = 'actin_personalization'
-    view_name: str = 'knownPalliativeTreatments'
+    db_name: str = 'actin_personalization_v2'
+    view_name: str = 'knownPalliativeTreatedReference'
     db_config_path: str = '/home/jupyter/.my.cnf'
   
     #--------------------------------------------------------------------------------------------
@@ -35,15 +35,12 @@ class Settings:
     def configure_data_settings(self) -> None:
         self.group_treatment = False 
         if self.outcome.upper() == 'OS':
-            self.event_col = 'isAlive'
-            if self.experiment_type == 'treatment_vs_no' or self.experiment_type == 'treatment_drug':
-                self.duration_col = 'observedOsFromMetastasisDetectionDays'
-                self.view_name = 'palliativeIntents'
-            else:
-                self.duration_col = 'observedOsFromTreatmentStartDays'
+            self.event_col = 'hadSurvivalEvent'
+            self.duration_col = 'survivalDaysSinceMetastaticDiagnosis'
+            self.view_name = 'palliativeReference'
         else:
             self.event_col = 'hadProgressionEvent'
-            self.duration_col = 'observedPfsDays'
+            self.duration_col = 'daysBetweenTreatmentStartAndProgression'
             if self.experiment_type == 'treatment_vs_no' or self.experiment_type == 'treatment_drug':
                 warnings.warn(f"experiment type: {self.experiment_type}, but outcome is {self.outcome}", UserWarning)
     

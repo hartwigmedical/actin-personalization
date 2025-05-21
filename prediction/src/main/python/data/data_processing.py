@@ -4,7 +4,7 @@ from sklearn.impute import KNNImputer
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
 from sklearn.preprocessing import MinMaxScaler, StandardScaler
-from src.utils.settings import settings
+from utils.settings import settings
 from typing import List, Dict, Tuple, Any
 
 from .lookups import lookup_manager
@@ -51,11 +51,9 @@ class DataPreprocessor:
         elif settings.experiment_type == 'treatment_drug':
             df = self.add_treatment_drugs(df)
 
-        df = self.impute_knn(df, ['whoStatusPreTreatmentStart'], k=7)
+        df = self.impute_knn(df, ['whoAssessmentAtMetastaticDiagnosis'], k=7)
         df = self.numerize(df, lookup_manager.lookup_dictionary)
         df = self.handle_missing_values(df)
-        
-        df = self.expand_column_groups(df, column_name = 'metastasisLocationGroupsPriorToSystemicTreatment')
        
         df = self.encode_categorical(df)
         
@@ -123,24 +121,7 @@ class DataPreprocessor:
 
         return df
     
-    def expand_column_groups(self, df: pd.DataFrame, column_name: str) -> pd.DataFrame:
-        """
-        Expand a multi-label column into separate binary columns for each unique label.
-        """
-     
-        metastasis_sets = df[column_name].dropna().apply(lambda x: x.split(',')).tolist()
-        unique_metastases_categories = sorted(set(item for sublist in metastasis_sets for item in sublist))
-
-        for metastasis in unique_metastases_categories:
-            df[f'{column_name}_{metastasis}'] = df[column_name].apply(
-                lambda x: 1 if isinstance(x, str) and metastasis in x.split(',') else 0
-            )
-
-        df = df.drop(columns=[column_name], errors='ignore')
-
-        return df
-    
-    def group_treatments(self, df: pd.DataFrame, treatment_col: str = 'systemicTreatmentPlan') -> pd.DataFrame:
+    def group_treatments(self, df: pd.DataFrame, treatment_col: str = 'firstSystemicTreatmentAfterMetastaticDiagnosis') -> pd.DataFrame:
         df['treatment'] = df[treatment_col].apply(
             lambda x: 1 if pd.notnull(x) and str(x).strip() != '' else 0
         )
@@ -182,7 +163,7 @@ class DataPreprocessor:
         return components
 
 
-    def add_treatment_drugs(self, df: pd.DataFrame, treatment_col: str = "systemicTreatmentPlan") -> pd.DataFrame:
+    def add_treatment_drugs(self, df: pd.DataFrame, treatment_col: str = "firstSystemicTreatmentAfterMetastaticDiagnosis") -> pd.DataFrame:
         treatment_components = df[treatment_col].apply(self.parse_treatment)
 
         components_df = pd.DataFrame(treatment_components.tolist(), index=df.index)
@@ -208,27 +189,6 @@ class DataPreprocessor:
                 self.encoded_columns[col] = list(dummies.columns)
                 
         return df
-    
-    def add_kohne_score(self, df: pd.DataFrame) -> pd.DataFrame:
-        df["kohne_score"] = 0
-
-        if "lactateDehydrogenase" in df.columns:
-            df["kohne_score"] += (df["lactateDehydrogenase"] > df["lactateDehydrogenase"].median()).astype(int)  # find ULN threshold
-
-        if "metastasisLocationGroupsPriorToSystemicTreatment_LIVER" in df.columns:
-            site_cols = [col for col in df.columns if col.startswith("metastasisLocationGroupsPriorToSystemicTreatment_")]
-            df["number_of_met_sites"] = df[site_cols].sum(axis=1)
-            df["kohne_score"] += (df["number_of_met_sites"] > 1).astype(int)
-
-        if "whoStatusPreTreatmentStart" in df.columns:
-            df["kohne_score"] += (df["whoStatusPreTreatmentStart"] >= 2).astype(int)
-
-        if "leukocytesAbsolute" in df.columns:
-            df["kohne_score"] += (df["leukocytesAbsolute"] > 8.0).astype(int)
-
-        return df.drop(columns=["number_of_met_sites"], errors="ignore")
-
-
 
     def normalize(self, df: pd.DataFrame, features: List[str]) -> pd.DataFrame:
         """

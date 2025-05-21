@@ -6,11 +6,11 @@ import torch
 from sklearn.model_selection import StratifiedKFold
 from sklearn.model_selection import train_test_split
 from sksurv.util import Surv
-from src.utils.settings import settings
+from utils.settings import settings
 from typing import List, Dict, Tuple, Optional, Callable
 
 from .survival_models import BaseSurvivalModel, NNSurvivalModel
-from ..utils.metrics import calculate_time_dependent_c_index, calculate_brier_score, calibration_assessment, calculate_time_dependent_auc
+from utils.metrics import calculate_time_dependent_c_index, calculate_brier_score, calibration_assessment, calculate_time_dependent_auc
 
 
 class ModelTrainer:

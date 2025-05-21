@@ -1,8 +1,8 @@
 import importlib
 import json
 import os
-from src.models import *
-from src.utils.settings import settings
+from models import *
+from utils.settings import settings
 
 
 class ExperimentConfig:
