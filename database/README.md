@@ -18,11 +18,11 @@ The `reference_entry_json` should be created from single or multiple input sourc
 
 A number of key properties are derived from a `ReferenceEntry` as follows:
 
-| Property                                       | Description                                                                                                                                                                        |
-|------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `daysBetweenPrimaryAndMetastaticDiagnosis`     | For synchronous tumors this field is set to 0. For metachronous tumors, this field is set to the `daysSinceDiagnosis` of the first metastasis defined in the `metastaticDiagnosis` |
-| `metastaticTreatmentEpisode`                   | This is defined as the first treatment episode where metastases were present `AT_START`.                                                                                           |
-| `daysBetweenPrimaryDiagnosisAndTreatmentStart` | This is defined as the smallest `daysBetweenDiagnosisAndStart` of all systemic treatments that are given as part of the `metastaticTreatmentEpisode`                               |
+| Property                                       | Description                                                                                                                                                                          |
+|------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `daysBetweenPrimaryAndMetastaticDiagnosis`     | For synchronous entries this field is set to 0. For metachronous entries, this field is set to the `daysSinceDiagnosis` of the first metastasis defined in the `metastaticDiagnosis` |
+| `metastaticTreatmentEpisode`                   | This is defined as the first treatment episode where metastases were present `AT_START`.                                                                                             |
+| `daysBetweenPrimaryDiagnosisAndTreatmentStart` | This is defined as the lowest `daysBetweenDiagnosisAndStart` of all systemic treatments that are given as part of the `metastaticTreatmentEpisode`                                   |
 
 Reference entries are filtered in the following cases:
 
@@ -35,10 +35,10 @@ Reference entries are filtered in the following cases:
 All other fields of the `reference` table are either trivially derived from the underlying datamodel, or via a simple algo in the following
 cases:
 
-| Property                          | Description                                                                                                                                                                        |
-|-----------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `survivalDaysSinceTreatmentStart` | For patients who have been systemically treated after metastatic diagnosis, field is defined as ```survivalSincePrimaryDiagnosis - daysBetweenPrimaryDiagnosisAndTreatmentStart``` |
-| etc                               | etc                                                                                                                                                                                | 
+| Property                          | Description                                                                                                                                                                 |
+|-----------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `survivalDaysSinceTreatmentStart` | For entries with systemic treatment after metastatic diagnosis, this field is defined as ```survivalSincePrimaryDiagnosis - daysBetweenPrimaryDiagnosisAndTreatmentStart``` |
+| etc                               | etc                                                                                                                                                                         | 
 
 ### Creation of further filtered views
 
