@@ -4,10 +4,11 @@ This module contains the datamodel that is exposed from this project to downstre
 
 ### High-level Data Structure
 
-A `ReferencePatient` contains basic information and a list of tumor entries, each of which has a `Diagnosis` and a list
-of `Episode`s.
-Each episode includes an assessment of the tumor at that time and a treatment plan, captured in the
-`systemicTreatmentPlan` field.
+A `ReferenceEntry` is the highest level object and represents a single diagnosis, treatment and followup of a tumor. 
+
+Note that in theory multiple reference entries can belong to the same patient (in case one patient has had multiple independent tumors)
+
+## TODO (KD): Rewrite and/or move below
 
 ### Treatment Extraction
 
