@@ -1,7 +1,7 @@
 ## ACTIN Personalization - Database
 
 This module writes a personalization reference database to MySQL. In addition to writing the datamodel itself, the application creates a "
-reference" table which is a table of flattened reference entries. This table is meant to serve as the starting point for learning
+reference" table containing a flattened view on reference entries. This table is meant to serve as the starting point for learning
 algorithms and other types of analyses.
 
 This application requires Java 17+ and can be run as follows:
