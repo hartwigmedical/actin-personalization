@@ -32,6 +32,10 @@ class TreatmentInterpreter(private val treatmentEpisodes: List<TreatmentEpisode>
         }
     }
 
+    fun reasonRefrainmentFromTreatment(): String? {
+        return extractMetastaticTreatmentEpisode()?.reasonRefrainmentFromTreatment?.name
+    }
+
     fun hasPrimarySurgeryPriorToMetastaticTreatment(): Boolean {
         return extractPreMetastaticTreatmentEpisodes().any { it.primarySurgeries.isNotEmpty() }
     }

@@ -18,12 +18,14 @@ import com.hartwig.actin.personalization.datamodel.diagnosis.TumorRegression
 import com.hartwig.actin.personalization.datamodel.diagnosis.TumorStage
 import com.hartwig.actin.personalization.datamodel.diagnosis.TumorType
 import com.hartwig.actin.personalization.datamodel.diagnosis.VenousInvasionDescription
+import org.w3c.dom.events.MutationEvent
 
 data class ReferenceObject(
     val source: ReferenceSource,
     val sourceId: Int,
     val diagnosisYear: Int,
     val ageAtDiagnosis: Int,
+    val ageAtMetastaticDiagnosis: Int,
     val sex: Sex,
 
     val hadSurvivalEvent: Boolean,
@@ -59,7 +61,27 @@ data class ReferenceObject(
     val extraMuralInvasionCategory: ExtraMuralInvasionCategory?,
     val tumorRegression: TumorRegression?,
 
+    val charlsonComorbidityIndex: Int?,
+    val hasAids: Boolean?,
+    val hasCongestiveHeartFailure: Boolean?,
+    val hasCollagenosis: Boolean?,
+    val hasCopd: Boolean?,
+    val hasCerebrovascularDisease: Boolean?,
+    val hasDementia: Boolean?,
+    val hasDiabetesMellitus: Boolean?,
+    val hasDiabetesMellitusWithEndOrganDamage: Boolean?,
+    val hasOtherMalignancy: Boolean?,
+    val hasOtherMetastaticSolidTumor: Boolean?,
+    val hasMyocardialInfarct: Boolean?,
+    val hasMildLiverDisease: Boolean?,
+    val hasHemiplegiaOrParaplegia: Boolean?,
+    val hasPeripheralVascularDisease: Boolean?,
+    val hasRenalDisease: Boolean?,
+    val hasLiverDisease: Boolean?,
+    val hasUlcerDisease: Boolean?,
+
     val daysBetweenPrimaryAndMetastaticDiagnosis: Int,
+    val isMetachronous: Boolean,
     val hasLiverOrIntrahepaticBileDuctMetastases: Boolean,
     val numberOfLiverMetastases: NumberOfLiverMetastases?,
     val maximumSizeOfLiverMetastasisMm: Int?,
@@ -80,6 +102,12 @@ data class ReferenceObject(
     val albumineAtMetastaticDiagnosis: Double?,
     val neutrophilsAbsoluteAtMetastaticDiagnosis: Double?,
 
+    val hasMsi: Boolean?,
+    val hasBrafMutation: Boolean?,
+    val hasBrafV600EMutation: Boolean?,
+    val hasRasMutation: Boolean?,
+    val hasKrasG12CMutation: Boolean?,
+
     val hasHadPrimarySurgeryPriorToMetastaticDiagnosis: Boolean,
     val hasHadPrimarySurgeryAfterMetastaticDiagnosis: Boolean,
     val hasHadGastroenterologySurgeryPriorToMetastaticDiagnosis: Boolean,
@@ -93,6 +121,7 @@ data class ReferenceObject(
     val hasHadMetastaticRadiotherapy: Boolean,
 
     val hasHadSystemicTreatmentPriorToMetastaticDiagnosis: Boolean,
+    val reasonRefrainmentFromTreatment: String?,
     val daysBetweenMetastaticDiagnosisAndTreatmentStart: Int?,
     val systemicTreatmentsAfterMetastaticDiagnosis: Int?,
     val firstSystemicTreatmentAfterMetastaticDiagnosis: String?,
