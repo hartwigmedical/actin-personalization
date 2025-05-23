@@ -5,63 +5,81 @@ import com.hartwig.actin.personalization.datamodel.assessment.ComorbidityAssessm
 class ComorbidityInterpreter(
     private val comorbidityAssessments: List<ComorbidityAssessment>
 ) {
+    fun mostRecentCharlsonComorbidityIndexPriorTo(maxDaysSinceDiagnosis: Int): Int? {
+        return assessmentPriorTo(maxDaysSinceDiagnosis)?.charlsonComorbidityIndex
+    }
 
-    private fun assessmentPriorTo(maxDaysSinceDiagnosis: Int): ComorbidityAssessment? =
-        comorbidityAssessments
-            .filter  { it.daysSinceDiagnosis <= maxDaysSinceDiagnosis }
+    fun mostRecentHasAidsPriorTo(maxDaysSinceDiagnosis: Int): Boolean? {
+        return assessmentPriorTo(maxDaysSinceDiagnosis)?.hasAids
+    }
+
+    fun mostRecentHasCongestiveHeartFailurePriorTo(maxDaysSinceDiagnosis: Int): Boolean? {
+        return assessmentPriorTo(maxDaysSinceDiagnosis)?.hasCongestiveHeartFailure
+    }
+
+    fun mostRecentHasCollagenosisPriorTo(maxDaysSinceDiagnosis: Int): Boolean? {
+        return assessmentPriorTo(maxDaysSinceDiagnosis)?.hasCollagenosis
+    }
+
+    fun mostRecentHasCopdPriorTo(maxDaysSinceDiagnosis: Int): Boolean? {
+        return assessmentPriorTo(maxDaysSinceDiagnosis)?.hasCopd
+    }
+
+    fun mostRecentHasCerebrovascularDiseasePriorTo(maxDaysSinceDiagnosis: Int): Boolean? {
+        return assessmentPriorTo(maxDaysSinceDiagnosis)?.hasCerebrovascularDisease
+    }
+
+    fun mostRecentHasDementiaPriorTo(maxDaysSinceDiagnosis: Int): Boolean? {
+        return assessmentPriorTo(maxDaysSinceDiagnosis)?.hasDementia
+    }
+
+    fun mostRecentHasDiabetesMellitusPriorTo(maxDaysSinceDiagnosis: Int): Boolean? {
+        return assessmentPriorTo(maxDaysSinceDiagnosis)?.hasDiabetesMellitus
+    }
+
+    fun mostRecentHasDiabetesMellitusWithEndOrganDamagePriorTo(maxDaysSinceDiagnosis: Int): Boolean? {
+        return assessmentPriorTo(maxDaysSinceDiagnosis)?.hasDiabetesMellitusWithEndOrganDamage
+    }
+
+    fun mostRecentHasOtherMalignancyPriorTo(maxDaysSinceDiagnosis: Int): Boolean? {
+        return assessmentPriorTo(maxDaysSinceDiagnosis)?.hasOtherMalignancy
+    }
+
+    fun mostRecentHasOtherMetastaticSolidTumorPriorTo(maxDaysSinceDiagnosis: Int): Boolean? {
+        return assessmentPriorTo(maxDaysSinceDiagnosis)?.hasOtherMetastaticSolidTumor
+    }
+
+    fun mostRecentHasMyocardialInfarctPriorTo(maxDaysSinceDiagnosis: Int): Boolean? {
+        return assessmentPriorTo(maxDaysSinceDiagnosis)?.hasMyocardialInfarct
+    }
+
+    fun mostRecentHasMildLiverDiseasePriorTo(maxDaysSinceDiagnosis: Int): Boolean? {
+        return assessmentPriorTo(maxDaysSinceDiagnosis)?.hasMildLiverDisease
+    }
+
+    fun mostRecentHasHemiplegiaOrParaplegiaPriorTo(maxDaysSinceDiagnosis: Int): Boolean? {
+        return assessmentPriorTo(maxDaysSinceDiagnosis)?.hasHemiplegiaOrParaplegia
+    }
+
+    fun mostRecentHasPeripheralVascularDiseasePriorTo(maxDaysSinceDiagnosis: Int): Boolean? {
+        return assessmentPriorTo(maxDaysSinceDiagnosis)?.hasPeripheralVascularDisease
+    }
+
+    fun mostRecentHasRenalDiseasePriorTo(maxDaysSinceDiagnosis: Int): Boolean? {
+        return assessmentPriorTo(maxDaysSinceDiagnosis)?.hasRenalDisease
+    }
+
+    fun mostRecentHasLiverDiseasePriorTo(maxDaysSinceDiagnosis: Int): Boolean?{
+        return assessmentPriorTo(maxDaysSinceDiagnosis)?.hasLiverDisease
+    }
+
+    fun mostRecentHasUlcerDiseasePriorTo(maxDaysSinceDiagnosis: Int): Boolean? {
+        return assessmentPriorTo(maxDaysSinceDiagnosis)?.hasUlcerDisease
+    }
+
+    private fun assessmentPriorTo(maxDaysSinceDiagnosis: Int): ComorbidityAssessment? {
+        return comorbidityAssessments
+            .filter { it.daysSinceDiagnosis <= maxDaysSinceDiagnosis }
             .maxByOrNull { it.daysSinceDiagnosis }
-
-    fun mostRecentCharlsonComorbidityIndexPriorTo(maxDaysSinceDiagnosis: Int): Int? =
-        assessmentPriorTo(maxDaysSinceDiagnosis)?.charlsonComorbidityIndex
-
-    fun mostRecentHasAidsPriorTo(maxDaysSinceDiagnosis: Int): Boolean? =
-        assessmentPriorTo(maxDaysSinceDiagnosis)?.hasAids
-
-    fun mostRecentHasCongestiveHeartFailurePriorTo(maxDaysSinceDiagnosis: Int): Boolean? =
-        assessmentPriorTo(maxDaysSinceDiagnosis)?.hasCongestiveHeartFailure
-
-    fun mostRecentHasCollagenosisPriorTo(maxDaysSinceDiagnosis: Int): Boolean? =
-        assessmentPriorTo(maxDaysSinceDiagnosis)?.hasCollagenosis
-
-    fun mostRecentHasCopdPriorTo(maxDaysSinceDiagnosis: Int): Boolean? =
-        assessmentPriorTo(maxDaysSinceDiagnosis)?.hasCopd
-
-    fun mostRecentHasCerebrovascularDiseasePriorTo(maxDaysSinceDiagnosis: Int): Boolean? =
-        assessmentPriorTo(maxDaysSinceDiagnosis)?.hasCerebrovascularDisease
-
-    fun mostRecentHasDementiaPriorTo(maxDaysSinceDiagnosis: Int): Boolean? =
-        assessmentPriorTo(maxDaysSinceDiagnosis)?.hasDementia
-
-    fun mostRecentHasDiabetesMellitusPriorTo(maxDaysSinceDiagnosis: Int): Boolean? =
-        assessmentPriorTo(maxDaysSinceDiagnosis)?.hasDiabetesMellitus
-
-    fun mostRecentHasDiabetesMellitusWithEndOrganDamagePriorTo(maxDaysSinceDiagnosis: Int): Boolean? =
-        assessmentPriorTo(maxDaysSinceDiagnosis)?.hasDiabetesMellitusWithEndOrganDamage
-
-    fun mostRecentHasOtherMalignancyPriorTo(maxDaysSinceDiagnosis: Int): Boolean? =
-        assessmentPriorTo(maxDaysSinceDiagnosis)?.hasOtherMalignancy
-
-    fun mostRecentHasOtherMetastaticSolidTumorPriorTo(maxDaysSinceDiagnosis: Int): Boolean? =
-        assessmentPriorTo(maxDaysSinceDiagnosis)?.hasOtherMetastaticSolidTumor
-
-    fun mostRecentHasMyocardialInfarctPriorTo(maxDaysSinceDiagnosis: Int): Boolean? =
-        assessmentPriorTo(maxDaysSinceDiagnosis)?.hasMyocardialInfarct
-
-    fun mostRecentHasMildLiverDiseasePriorTo(maxDaysSinceDiagnosis: Int): Boolean? =
-        assessmentPriorTo(maxDaysSinceDiagnosis)?.hasMildLiverDisease
-
-    fun mostRecentHasHemiplegiaOrParaplegiaPriorTo(maxDaysSinceDiagnosis: Int): Boolean? =
-        assessmentPriorTo(maxDaysSinceDiagnosis)?.hasHemiplegiaOrParaplegia
-
-    fun mostRecentHasPeripheralVascularDiseasePriorTo(maxDaysSinceDiagnosis: Int): Boolean? =
-        assessmentPriorTo(maxDaysSinceDiagnosis)?.hasPeripheralVascularDisease
-
-    fun mostRecentHasRenalDiseasePriorTo(maxDaysSinceDiagnosis: Int): Boolean? =
-        assessmentPriorTo(maxDaysSinceDiagnosis)?.hasRenalDisease
-
-    fun mostRecentHasLiverDiseasePriorTo(maxDaysSinceDiagnosis: Int): Boolean? =
-        assessmentPriorTo(maxDaysSinceDiagnosis)?.hasLiverDisease
-
-    fun mostRecentHasUlcerDiseasePriorTo(maxDaysSinceDiagnosis: Int): Boolean? =
-        assessmentPriorTo(maxDaysSinceDiagnosis)?.hasUlcerDisease
+    }
 }
