@@ -5,6 +5,7 @@ import com.hartwig.actin.personalization.datamodel.assessment.MolecularResult
 class MolecularInterpreter(
     private val molecularResults: List<MolecularResult>
 ) {
+
     fun mostRecentHasMsiPriorTo(maxDaysSinceDiagnosis: Int): Boolean? {
         return resultPriorTo(maxDaysSinceDiagnosis)?.hasMsi
     }

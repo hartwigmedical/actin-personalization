@@ -5,6 +5,7 @@ import com.hartwig.actin.personalization.datamodel.assessment.ComorbidityAssessm
 class ComorbidityInterpreter(
     private val comorbidityAssessments: List<ComorbidityAssessment>
 ) {
+
     fun mostRecentCharlsonComorbidityIndexPriorTo(maxDaysSinceDiagnosis: Int): Int? {
         return assessmentPriorTo(maxDaysSinceDiagnosis)?.charlsonComorbidityIndex
     }

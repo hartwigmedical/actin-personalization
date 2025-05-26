@@ -12,7 +12,6 @@ import com.hartwig.actin.personalization.interpretation.WhoInterpreter
 import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlin.math.roundToInt
 
-
 object ReferenceObjectFactory {
 
     private val LOGGER = KotlinLogging.logger {}
