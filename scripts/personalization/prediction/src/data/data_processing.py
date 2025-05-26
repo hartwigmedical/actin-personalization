@@ -41,11 +41,14 @@ class DataPreprocessor:
         self.data_dir = "data"
         self.encoded_columns = {}
 
-    def preprocess_data(self, features = lookup_manager.features) -> Tuple[pd.DataFrame, List[str], Dict[str, List[str]]]:
-
-        df = self.load_data()
+    def preprocess_data(self, features = lookup_manager.features, df = None) -> Tuple[pd.DataFrame, List[str], Dict[str, List[str]]]:
+        if df is None:
+            df = self.load_data()
 
         df = df[features + [settings.duration_col, settings.event_col]]
+        df = df[~df["systemicTreatmentPlan"].str.upper().str.contains("NIVOLUMAB", na=False)]
+
+
         df = df[~df[lookup_manager.features].isna().all(axis=1)].copy()
         
         if settings.experiment_type == 'treatment_vs_no':
@@ -60,9 +63,6 @@ class DataPreprocessor:
         df = self.expand_column_groups(df, column_name = 'metastasisLocationGroupsPriorToSystemicTreatment')
        
         df = self.encode_categorical(df)
-        
-        if settings.add_risk_scores:
-            df = self.add_kohne_score(df)
         
         updated_features = [col for col in df.columns if col not in [settings.duration_col, settings.event_col]]
         
@@ -151,8 +151,7 @@ class DataPreprocessor:
     
     def parse_treatment(self, treatment: str) -> Dict[str, int]:
 
-        components = {"systemicTreatmentPlan_5-FU": 0, "systemicTreatmentPlan_oxaliplatin": 0, "systemicTreatmentPlan_irinotecan": 0, "systemicTreatmentPlan_bevacizumab": 0, "systemicTreatmentPlan_panitumab": 0, "systemicTreatmentPlan_pembrolizumab": 0, "systemicTreatmentPlan_nivolumab": 0
-                     }
+        components = {"systemicTreatmentPlan_5-FU": 0, "systemicTreatmentPlan_oxaliplatin": 0, "systemicTreatmentPlan_irinotecan": 0, "systemicTreatmentPlan_bevacizumab": 0, "systemicTreatmentPlan_panitumumab": 0, "systemicTreatmentPlan_pembrolizumab": 0, "systemicTreatmentPlan_nivolumab": 0}
 
         if pd.isna(treatment) or treatment.strip() == "":
             return components    
@@ -171,9 +170,9 @@ class DataPreprocessor:
         if "bevacizumab" in t or t.endswith("_b"):
             components["systemicTreatmentPlan_bevacizumab"] = 1
 
-        if "panitumab" in t or t.endswith("_p"):
-            components["systemicTreatmentPlan_panitumab"] = 1
-            
+        if "panitumumab" in t or t.endswith("_p"):
+            components["systemicTreatmentPlan_panitumumab"] = 1
+
         if "pembrolizumab" in t: 
             components["systemicTreatmentPlan_pembrolizumab"] = 1
         
@@ -187,7 +186,8 @@ class DataPreprocessor:
     def add_treatment_drugs(self, df: pd.DataFrame, treatment_col: str = "systemicTreatmentPlan") -> pd.DataFrame:
         treatment_components = df[treatment_col].apply(self.parse_treatment)
 
-        components_df = pd.DataFrame(treatment_components.tolist(), index=df.index)
+        components_df = pd.DataFrame(treatment_components.tolist(), index=df.index)         
+        components_df["hasTreatment"] = components_df.sum(axis=1).clip(upper=1)
 
         df = df.join(components_df)
         
@@ -229,7 +229,6 @@ class DataPreprocessor:
             df["kohne_score"] += (df["leukocytesAbsolute"] > 8.0).astype(int)
 
         return df.drop(columns=["number_of_met_sites"], errors="ignore")
-
 
 
     def normalize(self, df: pd.DataFrame, features: List[str]) -> pd.DataFrame:
