@@ -1,6 +1,8 @@
 package com.hartwig.actin.personalization.system
 
 import com.hartwig.actin.personalization.database.PersonalizationLoaderApplication
+import com.hartwig.actin.personalization.ncr.NcrIngestionApplication
+import com.hartwig.actin.personalization.ncr.NcrInspectionApplication
 import com.hartwig.actin.personalization.similarity.PersonalizationReportWriterApplication
 import io.github.oshai.kotlinlogging.KotlinLogging
 
@@ -14,5 +16,7 @@ fun main() {
     listOf(
         PersonalizationLoaderApplication::class,
         PersonalizationReportWriterApplication::class,
+        NcrIngestionApplication::class,
+        NcrInspectionApplication::class
     ).forEach { applicationClass -> SystemApplication.LOGGER.info { " ${applicationClass.java}" } }
 }

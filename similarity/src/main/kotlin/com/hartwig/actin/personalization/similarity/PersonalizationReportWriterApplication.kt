@@ -1,6 +1,6 @@
 package com.hartwig.actin.personalization.similarity
 
-import com.hartwig.actin.personalization.datamodel.LocationGroup
+import com.hartwig.actin.personalization.datamodel.diagnosis.LocationGroup
 import com.hartwig.actin.personalization.similarity.population.MeasurementType
 import com.hartwig.actin.personalization.similarity.report.ReportWriter
 import com.hartwig.actin.personalization.similarity.report.TableContent
@@ -9,9 +9,9 @@ import picocli.CommandLine
 import java.util.concurrent.Callable
 
 class PersonalizationReportWriterApplication : Callable<Int> {
-
-    @CommandLine.Option(names = ["-patient_file"], required = true)
-    lateinit var patientFile: String
+    
+    @CommandLine.Option(names = ["-reference_entry_json"], required = true)
+    lateinit var referenceEntryJson: String
 
     @CommandLine.Option(names = ["-age"], required = true)
     var age: Int = -1
@@ -31,7 +31,7 @@ class PersonalizationReportWriterApplication : Callable<Int> {
     override fun call(): Int {
         LOGGER.info { "Running $APPLICATION v$VERSION" }
 
-        val analysis = PersonalizedDataInterpreter.createFromFile(patientFile)
+        val analysis = PersonalizedDataInterpreter.createFromFile(referenceEntryJson)
             .analyzePatient(age, whoStatus, hasRasMutation, extractTopLevelLocationGroups(metastasisLocationString))
 
         val measurementTables = listOf(
@@ -57,7 +57,7 @@ class PersonalizationReportWriterApplication : Callable<Int> {
     companion object {
         val LOGGER = KotlinLogging.logger {}
         const val APPLICATION = "ACTIN-Personalization Report Writer"
-        val VERSION = PersonalizationReportWriterApplication::class.java.getPackage().implementationVersion
+        val VERSION: String = PersonalizationReportWriterApplication::class.java.getPackage().implementationVersion
     }
 }
 

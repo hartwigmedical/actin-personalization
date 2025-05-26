@@ -1,86 +1,85 @@
 package com.hartwig.actin.personalization.similarity.population
 
-import com.hartwig.actin.personalization.datamodel.DiagnosisEpisode
-import com.hartwig.actin.personalization.datamodel.TreatmentGroup
+import com.hartwig.actin.personalization.datamodel.ReferenceEntry
+import com.hartwig.actin.personalization.datamodel.treatment.TreatmentGroup
+import com.hartwig.actin.personalization.interpretation.TreatmentInterpreter
 import org.jetbrains.kotlinx.kandy.ir.Plot
 
 class PatientPopulationBreakdown(
-    private val patientsByTreatment: List<Pair<TreatmentGroup, List<DiagnosisEpisode>>>,
+    private val entriesByTreatment: List<Pair<TreatmentGroup, List<ReferenceEntry>>>,
     private val populationDefinitions: List<PopulationDefinition>,
     private val measurementTypes: List<MeasurementType> = MeasurementType.entries
 ) {
+    
     fun analyze(): PersonalizedDataAnalysis {
-        val allPatients = patientsByTreatment.flatMap { it.second }
-        val populations = populationDefinitions.map { populationFromDefinition(it, allPatients) }
+        val allEntries = entriesByTreatment.flatMap { it.second }
+        val populations = populationDefinitions.map { populationFromDefinition(it, allEntries) }
         val populationsByNameAndMeasurement = populations.associateBy(Population::name)
 
-        val treatmentAnalyses = patientsByTreatment.map { (treatment, patientsWithTreatment) ->
-            treatmentAnalysisForPatients(treatment, patientsWithTreatment, populationsByNameAndMeasurement)
+        val treatmentAnalyses = entriesByTreatment.map { (treatment, entriesWithTreatment) ->
+            treatmentAnalysisForEntries(treatment, entriesWithTreatment, populationsByNameAndMeasurement)
         }
 
-        return PersonalizedDataAnalysis(treatmentAnalyses, populations, plotsForPatients(allPatients))
+        return PersonalizedDataAnalysis(treatmentAnalyses, populations, plotsForEntries(allEntries))
     }
 
-    private fun populationFromDefinition(
-        populationDefinition: PopulationDefinition, allPatients: List<DiagnosisEpisode>
-    ): Population {
-        val matchingPatients = allPatients.filter(populationDefinition.criteria)
-        val patientsByMeasurementType = measurementTypes.associateWith { measurementType ->
-            matchingPatients.filter(measurementType.calculation::isEligible)
+    private fun populationFromDefinition(populationDefinition: PopulationDefinition, allEntries: List<ReferenceEntry>): Population {
+        val matchingEntries = allEntries.filter(populationDefinition.criteria)
+        val entriesByMeasurementType = measurementTypes.associateWith { measurementType ->
+            matchingEntries.filter(measurementType.calculation::isEligible)
         }
-        return Population(populationDefinition.name, patientsByMeasurementType)
+        return Population(populationDefinition.name, entriesByMeasurementType)
     }
 
-    private fun treatmentAnalysisForPatients(
-        treatment: TreatmentGroup, patients: List<DiagnosisEpisode>, populationsByName: Map<String, Population>
+    private fun treatmentAnalysisForEntries(
+        treatment: TreatmentGroup, entries: List<ReferenceEntry>, populationsByName: Map<String, Population>
     ): TreatmentAnalysis {
         val treatmentMeasurements = measurementTypes.associateWith { measurementType ->
-            val patientsWithTreatmentAndMeasurement = patients.filter(measurementType.calculation::isEligible)
+            val entriesWithTreatmentAndMeasurement = entries.filter(measurementType.calculation::isEligible)
             populationDefinitions.associate { (name, criteria) ->
-                val matchingPatients = patientsWithTreatmentAndMeasurement.filter(criteria)
-                val eligiblePopulationSize = populationsByName[name]!!.patientsByMeasurementType[measurementType]!!.size
-                name to measurementType.calculation.calculate(matchingPatients, eligiblePopulationSize)
+                val matchingEntries = entriesWithTreatmentAndMeasurement.filter(criteria)
+                val eligiblePopulationSize = populationsByName[name]!!.entriesByMeasurementType[measurementType]!!.size
+                name to measurementType.calculation.calculate(matchingEntries, eligiblePopulationSize)
             }
-
         }
         return TreatmentAnalysis(treatment, treatmentMeasurements)
     }
 
     private fun createPlotsForMeasurement(
-        allPatients: List<DiagnosisEpisode>, calculation: SurvivalCalculation, yAxisLabel: String
+        allEntries: List<ReferenceEntry>, calculation: SurvivalCalculation, yAxisLabel: String
     ): Map<String, Plot> {
-        val filteredPatients = allPatients.filter(calculation::isEligible).sortedBy {
+        val filteredEntries = allEntries.filter(calculation::isEligible).sortedBy {
             calculation.timeFunction(it)!!
         }
-        val groupedPatientsByPopulation = populationDefinitions.associate { definition ->
-            definition.name to filteredPatients.filter { definition.criteria(it) }
+        val groupedEntriesByPopulation = populationDefinitions.associate { definition ->
+            definition.name to filteredEntries.filter { definition.criteria(it) }
         }
         val plots = listOfNotNull(
-            SurvivalPlot.createSurvivalPlot(groupedPatientsByPopulation, calculation, yAxisLabel)?.let {
+            SurvivalPlot.createSurvivalPlot(groupedEntriesByPopulation, calculation, yAxisLabel)?.let {
                 "$yAxisLabel by population" to it
             },
-            SurvivalPlot.createSurvivalPlot(groupByWho(filteredPatients), calculation, yAxisLabel)?.let {
+            SurvivalPlot.createSurvivalPlot(groupByWho(filteredEntries), calculation, yAxisLabel)?.let {
                 "$yAxisLabel by WHO" to it
             }
         )
 
         val populationPlotsByTreatment = populationDefinitions.mapNotNull { definition ->
-            val patientsByTreatment = filteredPatients.filter { definition.criteria(it) }.groupBy {
-                it.episode.systemicTreatmentPlan!!.treatment.treatmentGroup.display
+            val entriesByTreatment = filteredEntries.filter { definition.criteria(it) }.groupBy {
+                TreatmentInterpreter(it.treatmentEpisodes).firstMetastaticSystemicTreatmentGroup()!!.display
             }
-            SurvivalPlot.createSurvivalPlot(patientsByTreatment, calculation, yAxisLabel)
+            SurvivalPlot.createSurvivalPlot(entriesByTreatment, calculation, yAxisLabel)
                 ?.let { "$yAxisLabel for group ${definition.name} by treatment" to it }
         }
 
         return (plots + populationPlotsByTreatment).toMap()
     }
 
-    private fun plotsForPatients(allPatients: List<DiagnosisEpisode>): Map<String, Plot> {
-        val pfsPlots = createPlotsForMeasurement(allPatients, PFS_CALCULATION, yAxisLabel = "PFS %")
-        val osPlots = createPlotsForMeasurement(allPatients, OS_CALCULATION, yAxisLabel = "OS %")
+    private fun plotsForEntries(allEntries: List<ReferenceEntry>): Map<String, Plot> {
+        val pfsPlots = createPlotsForMeasurement(allEntries, PFS_CALCULATION, yAxisLabel = "PFS %")
+        val osPlots = createPlotsForMeasurement(allEntries, OS_CALCULATION, yAxisLabel = "OS %")
         return pfsPlots + osPlots
     }
 
-    private fun groupByWho(patients: List<DiagnosisEpisode>) =
-        patients.groupBy { "WHO ${it.episode.whoStatusPreTreatmentStart}" }.filterKeys { it != "WHO null" }
+    private fun groupByWho(entries: List<ReferenceEntry>) =
+        entries.groupBy { "WHO ${it.whoAssessments.firstOrNull()?.whoStatus}" }.filterKeys { it != "WHO null" }
 }

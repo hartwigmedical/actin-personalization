@@ -55,7 +55,6 @@ class ModelTrainer:
             if hasattr(model, 'labtrans'):
                 state['labtrans'] = model.labtrans
             if hasattr(model.model, 'baseline_hazards_'):
-                print('baseline hazards')
                 state['baseline_hazards'] = model.model.baseline_hazards_
                 state['baseline_cumulative_hazards'] = model.model.baseline_cumulative_hazards_
 
@@ -274,5 +273,4 @@ class ModelTrainer:
             self.results[model_name]['holdout'] = holdout_metrics
 
         return self.results, self.trained_models
-
 

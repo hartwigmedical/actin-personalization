@@ -150,6 +150,6 @@ class LookupManager:
             'tumorLocation',
             # 'venousInvasionDescription',--> only present in very few cases (<10)
             'whoStatusPreTreatmentStart'
-        ]
+
         
 lookup_manager = LookupManager()

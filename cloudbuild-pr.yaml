@@ -1,6 +1,6 @@
 steps:
   - id: 'Maven build using cache'
-    name: 'maven:3.9.7'
+    name: 'maven:3.9.7-eclipse-temurin-17'
     entrypoint: mvn
     args: [ 'test' ]
 
