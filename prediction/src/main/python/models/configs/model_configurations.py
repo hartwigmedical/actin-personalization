@@ -1,7 +1,7 @@
 import importlib
 import json
 import os
-from models import *
+from models.survival_models import *
 from utils.settings import settings
 
 

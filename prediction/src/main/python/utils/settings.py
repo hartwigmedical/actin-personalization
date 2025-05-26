@@ -13,7 +13,7 @@ class Settings:
     hyperparam_tuning_number_combinations: int = 10
     add_risk_scores: bool = False
     save_models: bool = True
-    json_config_file: str = 'src/models/configs/model_hyperparams.json'
+    json_config_file: str = 'src/main/python/models/configs/model_hyperparams.json'
     db_name: str = 'actin_personalization_v2'
     view_name: str = 'knownPalliativeTreatedReference'
     db_config_path: str = '/home/jupyter/.my.cnf'
@@ -46,7 +46,7 @@ class Settings:
     
     def configure_model_settings(self) -> None:
         self.save_models = True
-        self.save_path = f'src/models/trained_models/{self.experiment_type}'
+        self.save_path = f'src/main/python/models/trained_models/{self.experiment_type}'
         if self.outcome.upper() == 'OS':
             self.time_points = [int(round(i * 365 / 4)) for i in range(1, 21)]
         else:

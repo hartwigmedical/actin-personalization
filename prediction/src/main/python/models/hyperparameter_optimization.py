@@ -5,7 +5,7 @@ from typing import List, Dict, Any
 
 from .configs.model_configurations import *
 from models.model_trainer import *
-from .survival_models import BaseSurvivalModel
+from .survival_models import BaseSurvivalModel, NNSurvivalModel
 
 
 def random_parameter_search(param_dict: Dict[str, List[Any]]) -> List[Dict[str, Any]]:
