@@ -12,6 +12,7 @@ import dill
 import os
 
 from typing import List, Dict, Tuple, Any, Optional, Callable
+from joblib import Parallel, delayed
 
 from ..utils.metrics import calculate_time_dependent_c_index, calculate_brier_score, calibration_assessment, calculate_time_dependent_auc
 from .survival_models import BaseSurvivalModel, NNSurvivalModel
@@ -24,6 +25,7 @@ class ModelTrainer:
         self.random_state = random_state
         self.results = dict()
         self.trained_models = dict()
+        self.feature_names: List[str] = []
         
         self.max_time = settings.max_time
 
@@ -38,32 +40,52 @@ class ModelTrainer:
 
         if issubclass(model_class, NNSurvivalModel):
             kwargs['input_size'] = input_size
-        
+   
         return model_class(**kwargs)
     
     def save_model(self, model: BaseSurvivalModel, model_name: str)-> None:
         if not os.path.exists(settings.save_path):
             os.makedirs(settings.save_path)
             
-        
-            
         model_file = os.path.join(settings.save_path, f"{settings.outcome}_{model_name}")
 
         if isinstance(model, NNSurvivalModel):
-            if hasattr(model, 'compute_baseline_hazards'):
-                model.compute_baseline_hazards()
-                print('compute baseline hazards')
-            state = {
-                'net_state': model.model.net.state_dict(),
-                'baseline_hazards': getattr(model.model, 'baseline_hazards_', None),
-                'baseline_cumulative_hazards': getattr(model.model, 'baseline_cumulative_hazards_', None)
-            }
+         
+            state = {'net_state': model.model.net.state_dict()}
+            if hasattr(model, 'labtrans'):
+                state['labtrans'] = model.labtrans
+            if hasattr(model.model, 'baseline_hazards_'):
+                state['baseline_hazards'] = model.model.baseline_hazards_
+                state['baseline_cumulative_hazards'] = model.model.baseline_cumulative_hazards_
+
             torch.save(state, model_file + ".pt")
             print(f"NN Model weights and baseline hazards for {model_name} saved to {model_file}.pt")
 
         else:
             with open(model_file + ".pkl", "wb") as f:
                 dill.dump(model, f)
+                
+    @staticmethod            
+    def _set_attention_indices(model: BaseSurvivalModel, feature_names: List[str]):
+        if not (isinstance(model, NNSurvivalModel) and
+                hasattr(model.net, 'attention')):
+            return
+
+        attn = model.net.attention
+        
+        attn.msi_index = feature_names.index('hasMsi')
+        attn.immuno_index = [
+            feature_names.index('systemicTreatmentPlan_pembrolizumab'),
+            feature_names.index('systemicTreatmentPlan_nivolumab'),
+        ]
+        
+        attn.ras_index = feature_names.index('hasRasMutation')
+        attn.panitumumab_index = feature_names.index('systemicTreatmentPlan_panitumumab')
+        
+        attn.treatment_indices = [
+            i for i, f in enumerate(feature_names)
+            if f.startswith('systemicTreatmentPlan_')
+        ]
     
     def _prepare_fold_data(
         self, 
@@ -160,40 +182,67 @@ class ModelTrainer:
 
         return results
     
+    def _run_one_fold(
+        self,
+        model_name: str,
+        model_template: BaseSurvivalModel,
+        fold_indices: Tuple[np.ndarray, np.ndarray],
+        X: pd.DataFrame,
+        y: pd.DataFrame,
+        encoded_columns: Dict[str, List[str]],
+    ) -> Dict[str, float]:
+        
+        X_tr, y_tr_struct, X_val, y_val_struct, y_val_df = \
+            self._prepare_fold_data(X, y, fold_indices)
+
+        model = self._initialize_model(model_template, input_size=X.shape[1])
+        ModelTrainer._set_attention_indices(model, self.feature_names)
+
+        if isinstance(model, NNSurvivalModel):
+            val_data = (X_val.values.astype('float32'), y_val_struct)
+            model.fit(X_tr, y_tr_struct, val_data=val_data)
+        else:
+            model.fit(X_tr, y_tr_struct)
+
+        metrics = self._evaluate_model(model, X_val, y_tr_struct, y_val_struct, model_name)
+        
+        return metrics
+    
     def train_and_evaluate(
         self, 
         X_train:  pd.DataFrame, y_train: pd.DataFrame, 
         X_test: pd.DataFrame, y_test: pd.DataFrame, 
         encoded_columns: Dict[str, List[str]], 
     ) -> Tuple[pd.DataFrame, Dict[str, BaseSurvivalModel]]:
+        self.feature_names = X_train.columns.tolist()
         folds = self.cross_validate(X_train, y_train, encoded_columns)
 
         for model_name, model_template in self.models.items():
             print(f"training model: {model_name}")
             model_metrics = {'cv': {'c_index': [], 'ibs': [], 'ce': [], 'auc': []}}
 
-            for fold_indices in folds:
-                X_fold_train, y_fold_train_structured, X_fold_val, y_fold_val_structured, y_fold_val_df = self._prepare_fold_data(
-                    X_train, y_train, fold_indices
-                )
-                model = self._initialize_model(model_template, input_size=X_train.shape[1])
+            cv_fold_results = Parallel(n_jobs=settings.n_jobs , backend="threading", verbose=10)(
+                delayed(self._run_one_fold)(
+                    model_name,
+                    model_template,
+                    fold_idx,
+                    X_train,
+                    y_train,
+                    encoded_columns)
+                for fold_idx in folds)
 
-                if isinstance(model, NNSurvivalModel):
-                    val_data = (X_fold_val.values.astype('float32'), y_fold_val_structured)
-                    model.fit(X_fold_train, y_fold_train_structured, val_data=val_data)
-                else:
-                    model.fit(X_fold_train, y_fold_train_structured)
-
-                metrics = self._evaluate_model(
-                   model, X_fold_val, y_fold_train_structured, y_fold_val_structured, model_name
-                )
-                for key, value in metrics.items():
-                    model_metrics['cv'][key].append(value)
-
-            self.results[model_name] = {key: np.nanmean(values) for key, values in model_metrics['cv'].items()}
-            print(f"{model_name} CV Results: {self.results[model_name]}")
+            mean_results = {
+                metric: np.mean([fold[metric] for fold in cv_fold_results])
+                for metric in cv_fold_results[0]
+            }
+            self.results[model_name] = mean_results
+            print(f"{model_name} CV Results: {mean_results}")
+            
             print("training final model")
             final_model = self._initialize_model(model_template, input_size=X_train.shape[1])
+            ModelTrainer._set_attention_indices(final_model,
+                                                    self.feature_names)
+            
             y_train_df = pd.DataFrame({'duration': y_train[settings.duration_col], 'event': y_train[settings.event_col]}, index=X_train.index)
             y_train_structured = Surv.from_dataframe('event', 'duration', y_train_df)
             y_test_df = pd.DataFrame({'duration': y_test[settings.duration_col], 'event': y_test[settings.event_col]}, index=X_test.index)
@@ -224,5 +273,4 @@ class ModelTrainer:
             self.results[model_name]['holdout'] = holdout_metrics
 
         return self.results, self.trained_models
-
 

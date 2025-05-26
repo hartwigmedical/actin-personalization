@@ -1,6 +1,6 @@
 # src/models/__init__.py
 from .survival_models import (
-    BaseSurvivalModel, CoxPHModel, AalenAdditiveModel, RandomSurvivalForestModel,
+    BaseSurvivalModel, CoxPHModel, RandomSurvivalForestModel,
     GradientBoostingSurvivalModel, NNSurvivalModel, DeepSurv, LogisticHazardModel,
     DeepHitModel, PCHazardModel, MTLRModel
 )
