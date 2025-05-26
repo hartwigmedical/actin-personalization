@@ -4,7 +4,6 @@ import os
 from models.survival_models import *
 from utils.settings import settings
 
-
 class ExperimentConfig:
     def __init__(self, config_file):
         self.config_file = config_file

@@ -11,7 +11,6 @@ class Settings:
     cross_val_n_splits: int = 5
     hyperparam_tuning_optimization_metric: str = 'auc'  # c_index, IBS, CE, auc
     hyperparam_tuning_number_combinations: int = 10
-    add_risk_scores: bool = False
     save_models: bool = True
     json_config_file: str = 'src/main/python/models/configs/model_hyperparams.json'
     db_name: str = 'actin_personalization_v2'
@@ -27,6 +26,8 @@ class Settings:
     time_points: Optional[List[int]] = None
     max_time: int = 1825
     input_size: int = 155  # This is updated in data_processing.py once it has X_train.shape[1].
+    use_gate: bool = True
+    n_jobs: int = 4 # depends on how many CPU's you have available
         
     def __post_init__(self):
         self.configure_data_settings()

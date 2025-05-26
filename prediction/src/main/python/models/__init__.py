@@ -4,7 +4,7 @@ from .configs.model_configurations import ExperimentConfig
 from .hyperparameter_optimization import random_parameter_search, hyperparameter_search
 from .model_trainer import ModelTrainer
 from .survival_models import (
-    BaseSurvivalModel, CoxPHModel, AalenAdditiveModel, RandomSurvivalForestModel,
+    BaseSurvivalModel, CoxPHModel, RandomSurvivalForestModel,
     GradientBoostingSurvivalModel, NNSurvivalModel, DeepSurv, LogisticHazardModel,
     DeepHitModel, PCHazardModel, MTLRModel
 )

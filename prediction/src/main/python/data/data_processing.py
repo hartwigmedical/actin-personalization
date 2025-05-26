@@ -1,14 +1,15 @@
 import pandas as pd
 import pymysql
+
 from sklearn.impute import KNNImputer
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
 from sklearn.preprocessing import MinMaxScaler, StandardScaler
-from utils.settings import settings
+
 from typing import List, Dict, Tuple, Any
 
+from utils.settings import settings
 from .lookups import lookup_manager
-
 
 class DataSplitter:
     def __init__(self, test_size: float=0.1, random_state: int=42) -> None:
@@ -39,11 +40,13 @@ class DataPreprocessor:
         self.data_dir = "data"
         self.encoded_columns = {}
 
-    def preprocess_data(self, features = lookup_manager.features) -> Tuple[pd.DataFrame, List[str], Dict[str, List[str]]]:
-
-        df = self.load_data()
-
+    def preprocess_data(self, features = lookup_manager.features, df = None) -> Tuple[pd.DataFrame, List[str], Dict[str, List[str]]]:
+        if df is None:
+            df = self.load_data()
+         
         df = df[features + [settings.duration_col, settings.event_col]]
+        df = df[~df["firstSystemicTreatmentAfterMetastaticDiagnosis"].str.upper().str.contains("NIVOLUMAB", na=False)]
+
         df = df[~df[lookup_manager.features].isna().all(axis=1)].copy()
         
         if settings.experiment_type == 'treatment_vs_no':
@@ -54,17 +57,14 @@ class DataPreprocessor:
         df = self.impute_knn(df, ['whoAssessmentAtMetastaticDiagnosis'], k=7)
         df = self.numerize(df, lookup_manager.lookup_dictionary)
         df = self.handle_missing_values(df)
-       
+
         df = self.encode_categorical(df)
-        
-        if settings.add_risk_scores:
-            df = self.add_kohne_score(df)
-        
+
         updated_features = [col for col in df.columns if col not in [settings.duration_col, settings.event_col]]
         
         # df = self.normalize(df, updated_features)
         df = self.standardize(df, updated_features)
-    
+        
         return df, updated_features, self.encoded_columns
 
     
@@ -121,7 +121,7 @@ class DataPreprocessor:
 
         return df
     
-    def group_treatments(self, df: pd.DataFrame, treatment_col: str = 'firstSystemicTreatmentAfterMetastaticDiagnosis') -> pd.DataFrame:
+    def group_treatments(self, df: pd.DataFrame, treatment_col: str = 'systemicTreatmentPlan') -> pd.DataFrame:
         df['treatment'] = df[treatment_col].apply(
             lambda x: 1 if pd.notnull(x) and str(x).strip() != '' else 0
         )
@@ -130,8 +130,7 @@ class DataPreprocessor:
     
     def parse_treatment(self, treatment: str) -> Dict[str, int]:
 
-        components = {"systemicTreatmentPlan_5-FU": 0, "systemicTreatmentPlan_oxaliplatin": 0, "systemicTreatmentPlan_irinotecan": 0, "systemicTreatmentPlan_bevacizumab": 0, "systemicTreatmentPlan_panitumab": 0, "systemicTreatmentPlan_pembrolizumab": 0, "systemicTreatmentPlan_nivolumab": 0
-                     }
+        components = {"systemicTreatmentPlan_5-FU": 0, "systemicTreatmentPlan_oxaliplatin": 0, "systemicTreatmentPlan_irinotecan": 0, "systemicTreatmentPlan_bevacizumab": 0, "systemicTreatmentPlan_panitumumab": 0, "systemicTreatmentPlan_pembrolizumab": 0, "systemicTreatmentPlan_nivolumab": 0}
 
         if pd.isna(treatment) or treatment.strip() == "":
             return components    
@@ -150,9 +149,9 @@ class DataPreprocessor:
         if "bevacizumab" in t or t.endswith("_b"):
             components["systemicTreatmentPlan_bevacizumab"] = 1
 
-        if "panitumab" in t or t.endswith("_p"):
-            components["systemicTreatmentPlan_panitumab"] = 1
-            
+        if "panitumumab" in t or t.endswith("_p"):
+            components["systemicTreatmentPlan_panitumumab"] = 1
+
         if "pembrolizumab" in t: 
             components["systemicTreatmentPlan_pembrolizumab"] = 1
         
@@ -166,7 +165,8 @@ class DataPreprocessor:
     def add_treatment_drugs(self, df: pd.DataFrame, treatment_col: str = "firstSystemicTreatmentAfterMetastaticDiagnosis") -> pd.DataFrame:
         treatment_components = df[treatment_col].apply(self.parse_treatment)
 
-        components_df = pd.DataFrame(treatment_components.tolist(), index=df.index)
+        components_df = pd.DataFrame(treatment_components.tolist(), index=df.index)         
+        components_df["hasTreatment"] = components_df.sum(axis=1).clip(upper=1)
 
         df = df.join(components_df)
         
@@ -216,6 +216,5 @@ class DataPreprocessor:
             and df[col].nunique() > 2  # exclude binary columns
         ]
         df[cols_to_standardize] = scaler.fit_transform(df[cols_to_standardize])
+        
         return df
-
-    

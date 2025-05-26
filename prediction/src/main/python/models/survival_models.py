@@ -3,13 +3,18 @@ import pandas as pd
 import torch
 import torch.nn as nn
 import torchtuples as tt
-from lifelines import AalenAdditiveFitter
-from pycox.models import CoxPH, LogisticHazard, DeepHitSingle, PCHazard, MTLR
-from scipy.interpolate import interp1d
+
 from sklearn.feature_selection import VarianceThreshold
+from sklearn.model_selection import train_test_split
+
 from sksurv.ensemble import RandomSurvivalForest, GradientBoostingSurvivalAnalysis
 from sksurv.linear_model import CoxPHSurvivalAnalysis
+
 from typing import Dict, Any, Optional, List
+from pycox.models import CoxPH, LogisticHazard, DeepHitSingle, PCHazard, MTLR
+from scipy.interpolate import interp1d
+
+from utils.settings import settings
 
 torch.manual_seed(0)
 
@@ -64,73 +69,12 @@ class CoxPHModel(BaseSurvivalModel):
 
     def predict(self, X: pd.DataFrame) -> np.ndarray:       
         return self.model.predict(X[self.selected_features])
-    
-class AalenAdditiveModel(BaseSurvivalModel):
-    def __init__(self, **kwargs: Dict[str, Any]):
-        super().__init__()
-        self.kwargs = kwargs
-        self.model = AalenAdditiveFitter(**self.kwargs)
-
-        self.selected_features = None
-
-    def fit(self, X: pd.DataFrame, y: pd.DataFrame) -> None:
-        X = self.drop_low_variance_features(X, threshold=self.drop_variance_threshold)
-        X = self.drop_highly_correlated_features(X, threshold=self.correlation_threshold)
-        
-        y_df = pd.DataFrame({'duration': y['duration'], 'event': y['event']})
-        X = X.reset_index(drop=True)
-        y_df = y_df.reset_index(drop=True)
-
-        df = pd.concat([X, y_df], axis=1)
-
-        self.model.fit(df, duration_col='duration', event_col='event')
-        self.selected_features = X.columns
-        
-    def predict_survival_function(self, X: pd.DataFrame, times: Optional[np.ndarray] = None) -> np.ndarray:
-        X = X[self.selected_features].copy()
-        survival_functions = self.model.predict_survival_function(X)
-        if times is not None:
-            surv_funcs = []
-            for i in range(survival_functions.shape[1]):
-                sf = survival_functions.iloc[:, i]
-                interpolator = interp1d(sf.index.values, sf.values, bounds_error=False, fill_value="extrapolate")
-                surv_funcs.append(interpolator(times))
-            return np.array(surv_funcs)
-        else:
-            return survival_functions
-
-    def predict(self, X: pd.DataFrame, durations: np.ndarray) -> np.ndarray:
-        X = X[self.selected_features].copy()
-
-        cumulative_coefs = self.model.cumulative_hazards_
-        coef_times = cumulative_coefs.index.values
-
-        if cumulative_coefs.empty:
-            return np.zeros(len(X))
-
-        interpolators = {
-            col: interp1d(coef_times, cumulative_coefs[col], bounds_error=False, fill_value="extrapolate")
-            for col in cumulative_coefs.columns
-        }
-
-        X_coefs = X.reindex(columns=cumulative_coefs.columns, fill_value=0)
-
-        min_time, max_time = coef_times[0], coef_times[-1]
-        durations = np.clip(durations, min_time, max_time)
-        durations = np.asarray(durations).flatten()
-
-        interpolated_coefs = np.column_stack([interpolators[col](durations)for col in cumulative_coefs.columns])
-
-        X_array = X_coefs.values
-        risk_scores = np.einsum('ij,ij->i', X_array, interpolated_coefs)
-
-        return risk_scores
 
 class RandomSurvivalForestModel(BaseSurvivalModel):
     def __init__(self, **kwargs: Dict[str, Any]):
         super().__init__()
         self.kwargs = kwargs
-        self.model = RandomSurvivalForest(**self.kwargs)
+        self.model = RandomSurvivalForest(n_jobs = settings.n_jobs, **self.kwargs)
 
     def fit(self, X: pd.DataFrame, y: pd.DataFrame) -> None:
         self.model.fit(X, y)
@@ -158,8 +102,13 @@ class GradientBoostingSurvivalModel(BaseSurvivalModel):
 
     
 class FeatureAttention(nn.Module):
-    def __init__(self, input_size: int):
+    def __init__(self, input_size: int, msi_index: int=None, immuno_index: List[int]=None, ras_index: int = None, panitumumab_index: int = None, treatment_indices: List[int]=None):
         super().__init__()
+        self.msi_index  = msi_index
+        self.immuno_index  = immuno_index or []
+        self.ras_index = ras_index
+        self.panitumumab_index = panitumumab_index
+        self.treatment_indices: List[int] = treatment_indices or []
         
         self.attn = nn.Sequential(
             nn.Linear(input_size, input_size),
@@ -168,14 +117,28 @@ class FeatureAttention(nn.Module):
             nn.Sigmoid()
         )
 
+    def _apply_gate(self, x):
+        if settings.use_gate:
+            if self.msi_index is not None and self.immuno_index:
+                msi_gate = x[:, self.msi_index].unsqueeze(1)
+                x[:, self.immuno_index] *= msi_gate
+            ras_gate = 1 - x[:, self.ras_index]
+            x[:, self.panitumumab_index] *= ras_gate
+            if self.treatment_indices:
+                mask = x[:, self.treatment_indices]
+                gate = (mask > 0).float()
+                x[:, self.treatment_indices] *= gate
+        return x
+
     def forward(self, x):
+        x = self._apply_gate(x)
         weights = self.attn(x)
         return x * weights
     
 class AttentionMLP(nn.Module):
-    def __init__(self, input_size, num_nodes, out_features, activation, batch_norm, dropout):
+    def __init__(self, input_size: int, num_nodes: List[int], out_features: int, activation, batch_norm: bool, dropout: float, msi_index: int = None, immuno_index: List[int] = None, ras_index: int = None, panitumumab_index: int = None, treatment_indices: List[int]=None):
         super().__init__()
-        self.attention = FeatureAttention(input_size)
+        self.attention = FeatureAttention(input_size, msi_index, immuno_index, ras_index, panitumumab_index, treatment_indices)
         self.mlp = tt.practical.MLPVanilla(
             in_features=input_size, num_nodes=num_nodes, out_features=out_features,
             activation=activation, batch_norm=batch_norm, dropout=dropout)
@@ -184,8 +147,6 @@ class AttentionMLP(nn.Module):
         x = self.attention(x)
         return self.mlp(x)
 
-
-    
 class NNSurvivalModel(BaseSurvivalModel):
     def __init__(
         self, 
@@ -203,6 +164,11 @@ class NNSurvivalModel(BaseSurvivalModel):
         activation: str = 'relu', 
         optimizer: str = 'Adam',
         use_attention: bool = False,
+        gate_msi_index = None, 
+        gate_immuno_index = None,
+        gate_ras_index = None, 
+        gate_panitumumab_index = None,
+        treatment_indices: List[int]=None,
         **kwargs: Dict[str, Any]
     ):
         super().__init__()
@@ -251,7 +217,12 @@ class NNSurvivalModel(BaseSurvivalModel):
                 out_features=self.num_durations,
                 activation=activation_fn, 
                 batch_norm=batch_norm, 
-                dropout=self.dropout
+                dropout=self.dropout, 
+                msi_index = gate_msi_index, 
+                immuno_index = gate_immuno_index, 
+                ras_index = gate_ras_index, 
+                panitumumab_index = gate_panitumumab_index, 
+                treatment_indices = treatment_indices
             )
         else:
             self.net = tt.practical.MLPVanilla(
@@ -263,7 +234,6 @@ class NNSurvivalModel(BaseSurvivalModel):
                 dropout=self.dropout
             )
         
-        
         if optimizer.lower() == "adam":
             self.optimizer = tt.optim.Adam(self.lr, weight_decay=weight_decay)
         elif optimizer.lower() == "rmsprop":
@@ -274,7 +244,7 @@ class NNSurvivalModel(BaseSurvivalModel):
         model_specific_kwargs = {k:v for k,v in self.kwargs.items() if k not in {
             'model_class', 'input_size', 'num_nodes', 'dropout', 'lr',
             'batch_size', 'epochs', 'num_durations', 'early_stopping_patience',
-            'batch_norm', 'weight_decay', 'activation', 'optimizer', 'use_attention'
+            'batch_norm', 'weight_decay', 'activation', 'optimizer', 'use_attention', 'gate_msi_index', 'gate_immuno_index', 'treatment_indices'
         }}
 
         self.model = model_class(self.net, self.optimizer, **model_specific_kwargs)
@@ -319,8 +289,7 @@ class NNSurvivalModel(BaseSurvivalModel):
 
         return [interp1d(surv.index.values, surv.iloc[:, i].values, bounds_error=False, fill_value='extrapolate') for i in range(surv.shape[1])]
 
-    def predict(self, X: pd.DataFrame) -> np.ndarray:
-        
+    def predict(self, X: pd.DataFrame) -> np.ndarray:        
         X_tensor = X.values.astype('float32')
         if hasattr(self.model, 'predict_risk'):
             risk_scores = self.model.predict_risk(X_tensor)
