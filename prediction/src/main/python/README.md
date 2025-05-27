@@ -61,26 +61,6 @@ Utility functions for evaluation metrics and other supporting operations.
 
 ---
 
-## 🚀 **Workflow**
-
-1. **Data Preparation**:  
-   Use the `data_processing.py` script to preprocess and split survival data.
-
-2. **Model Training**:  
-   Train models using the `train_and_evaluate` method in the `ModelTrainer` class.
-
-3. **Feature Selection**:  
-   Perform feature selection for CoxPH and Aalen Additive models.
-
-4. **Evaluation and Visualization**:
-    - Evaluate models using metrics like C-Index, IBS, CE, and AUC.
-    - Visualize survival curves and compare model performance.
-
-5. **Model Interpretation**:  
-   Use SHAP to interpret the trained models.
-
----
-
 ## 📥 **Loading Pretrained Models**
 
 You need to load the pretrained models into your `trained_models` directory, they can be found gs:
