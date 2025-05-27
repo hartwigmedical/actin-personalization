@@ -119,11 +119,12 @@ class FeatureAttention(nn.Module):
 
     def _apply_gate(self, x):
         if settings.use_gate:
-            if self.msi_index is not None and self.immuno_index:
+            if self.msi_index is not None and self.immuno_index is not None:
                 msi_gate = x[:, self.msi_index].unsqueeze(1)
                 x[:, self.immuno_index] *= msi_gate
-            ras_gate = 1 - x[:, self.ras_index]
-            x[:, self.panitumumab_index] *= ras_gate
+            if self.ras_index is not None and self.panitumumab_index is not None:
+                ras_gate = 1 - x[:, self.ras_index]
+                x[:, self.panitumumab_index] *= ras_gate
             if self.treatment_indices:
                 mask = x[:, self.treatment_indices]
                 gate = (mask > 0).float()

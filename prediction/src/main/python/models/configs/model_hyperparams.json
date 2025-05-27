@@ -4,18 +4,20 @@
             "class": "models.survival_models.DeepSurv",
             "kwargs": {
                 "num_nodes": [
-                    64
+                    128,
+                    64,
+                    32
                 ],
-                "batch_norm": true,
-                "dropout": 0.1,
-                "weight_decay": 0.001,
-                "lr": 0.01,
+                "batch_norm": false,
+                "dropout": 0.2,
+                "weight_decay": 0.0005,
+                "lr": 0.0005,
                 "activation": "elu",
                 "optimizer": "Adam",
-                "batch_size": 32,
+                "batch_size": 128,
                 "epochs": 50,
-                "early_stopping_patience": 30,
-                "input_size": 155
+                "early_stopping_patience": 20,
+                "input_size": 110
             }
         },
         "LogisticHazardModel": {

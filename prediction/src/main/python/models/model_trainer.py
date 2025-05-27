@@ -65,27 +65,42 @@ class ModelTrainer:
             with open(model_file + ".pkl", "wb") as f:
                 dill.dump(model, f)
                 
-    @staticmethod            
+    @staticmethod
     def _set_attention_indices(model: BaseSurvivalModel, feature_names: List[str]):
-        if not (isinstance(model, NNSurvivalModel) and
-                hasattr(model.net, 'attention')):
+        
+        if not (isinstance(model, NNSurvivalModel) and hasattr(model.net, 'attention')):
             return
 
         attn = model.net.attention
-        
-        attn.msi_index = feature_names.index('hasMsi')
-        attn.immuno_index = [
-            feature_names.index('systemicTreatmentPlan_pembrolizumab'),
-            feature_names.index('systemicTreatmentPlan_nivolumab'),
+
+        if 'hasMsi' in feature_names:
+            attn.msi_index = feature_names.index('hasMsi')
+        else:
+            attn.msi_index = None
+
+        immuno_cols = [
+            'systemicTreatmentPlan_pembrolizumab',
+            'systemicTreatmentPlan_nivolumab'
         ]
-        
-        attn.ras_index = feature_names.index('hasRasMutation')
-        attn.panitumumab_index = feature_names.index('systemicTreatmentPlan_panitumumab')
-        
-        attn.treatment_indices = [
+        attn.immuno_index = [feature_names.index(c) for c in immuno_cols if c in feature_names] or None
+
+        if 'hasRasMutation' in feature_names:
+            attn.ras_index = feature_names.index('hasRasMutation')
+        else:
+            attn.ras_index = None
+
+        if 'systemicTreatmentPlan_panitumumab' in feature_names:
+            attn.panitumumab_index = feature_names.index('systemicTreatmentPlan_panitumumab')
+        else:
+            attn.panitumumab_index = None
+
+        treatment_idxs = [
             i for i, f in enumerate(feature_names)
-            if f.startswith('systemicTreatmentPlan_')
+            if f.startswith('systemicTreatmentPlan_') or f == 'treatment'
         ]
+        
+        attn.treatment_indices = treatment_idxs if treatment_idxs else None
+
     
     def _prepare_fold_data(
         self, 
