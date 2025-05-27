@@ -5,7 +5,7 @@ from typing import List, Optional
 class Settings:
     #--------------------------------------------------------------------------------------------
     # User-configurable settings:
-    experiment_type: str = 'treatment_drug'  # Options: treatment_specific, treatment_vs_no, treatment_drug
+    experiment_type: str = 'treatment_vs_no'  # Options: treatment_specific, treatment_vs_no, treatment_drug
     outcome: str = 'OS'                          # "OS" or "PFS"
     
     cross_val_n_splits: int = 5
@@ -47,7 +47,7 @@ class Settings:
     
     def configure_model_settings(self) -> None:
         self.save_models = True
-        self.save_path = f'src/main/python/models/trained_models/{self.experiment_type}'
+        self.save_path = f'/data/patient_like_me/prediction/trained_models/{self.experiment_type}'
         if self.outcome.upper() == 'OS':
             self.time_points = [int(round(i * 365 / 4)) for i in range(1, 21)]
         else:

@@ -1,7 +1,6 @@
 # Predictive Survival Analysis Repository
 
-This repository implements predictive algorithms for survival analysis, specifically for **Overall Survival (OS)** and **Progression-Free
-Survival (PFS)**. It includes data preprocessing, model training, hyperparameter optimization, feature selection, and model interpretation.
+This repository implements predictive algorithms for survival analysis. It includes data preprocessing, model training, hyperparameter optimization, feature selection, and model interpretation.
 
 ---
 
@@ -11,11 +10,13 @@ Below is the organized structure of the repository, detailing the role of each f
 
 ### **Root Directory**
 
-| File/Folders                                      | Description                                                                                  |
-|---------------------------------------------------|----------------------------------------------------------------------------------------------|
-| `ACTIN-1393_Predictive_algorithms_pipeline.ipynb` | Main Jupyter Notebook for building, evaluating, and interpreting predictive survival models. |
-| `__init__.py`                                     | Makes the root directory importable as a package.                                            |
-| `requirements.txt`                                | Contains a list of all Python dependencies required to run the project.                      |
+| File/Folders                             | Description                                                                 |
+|------------------------------------------|-----------------------------------------------------------------------------|
+| `ACTIN-1659_predict_days.ipynb`          | Notebook for evaluating model performance in predicting survival days.     |
+| `predictive_algorithms_training.ipynb`   | End-to-end pipeline for training survival models.                         |
+| `predictive_algorithms_interpretation.ipynb` |  Interpretation of model predictions.                        |
+| `requirements.txt`                       | Lists Python dependencies required to run the repository.                  |
+| `__init__.py`                            | Marks the root directory as a Python package.                              |
 
 ---
 
@@ -35,18 +36,16 @@ Handles data preprocessing, splitting, and feature management.
 
 Contains implementations of survival models, hyperparameter optimization, and trained model artifacts.
 
-| File/Folder                                                  | Description                                                                             |
-|--------------------------------------------------------------|-----------------------------------------------------------------------------------------|
-| `hyperparameter_optimization.py`                             | Handles hyperparameter tuning using random search.                                      |
-| `model_trainer.py`                                           | Manages model training, cross-validation, and evaluation.                               |
-| `survival_models.py`                                         | Implements survival models, including CoxPH, Aalen Additive, and neural network models. |
-| `configs/`                                                   | Stores model and hyperparameter configurations.                                         |
-| ├── `hyperparameter_grids.py`                                | Defines the grid of hyperparameters for optimization.                                   |
-| ├── `model_configurations.py`                                | Contains the best model configurations.                                                 |
-| to be made by the code/copied by the user: `trained_models/` | Directory for storing trained model artifacts and evaluation results.                   |
-| ├── `OS_*` & `PFS_*` files                                   | Trained models for OS and PFS tasks (CoxPH, Aalen Additive, DeepHit, etc.).             |
-| ├── `OS_model_outcomes.csv`                                  | Performance metrics for OS models.                                                      |
-| ├── `PFS_model_outcomes.csv`                                 | Performance metrics for PFS models.                                                     |
+| File/Folder                          | Description                                                                 |
+|--------------------------------------|-----------------------------------------------------------------------------|
+| `hyperparameter_optimization.py`     | Performs hyperparameter search using random sampling.                       |
+| `model_trainer.py`                   | Main interface for model training, evaluation, and cross-validation.        |
+| `survival_models.py`                 | Defines model classes (CoxPH, Aalen Additive, DeepSurv, DeepHit, etc.).     |
+| `configs/`                           | Configuration files for model setup and tuning.                             |
+| └── `model_configurations.py`        | Loads and updates the best model configurations.                            |
+| └── `hyperparameter_grids.py`        | Defines hyperparameter grids used in optimization.                          |
+| `trained_models/`                    | Stores trained model files and performance reports (see below).             |
+| `__init__.py`                        | Initializes the models module.
 
 ---
 
@@ -54,11 +53,11 @@ Contains implementations of survival models, hyperparameter optimization, and tr
 
 Utility functions for evaluation metrics and other supporting operations.
 
-| File          | Description                                                                                      |
-|---------------|--------------------------------------------------------------------------------------------------|
-| `metrics.py`  | Defines metrics like C-Index, Integrated Brier Score, Calibration Error, and Time-Dependent AUC. |
-| `utils.py`    | Contains helper functions                                                                        |
-| `__init__.py` | Initializes the `utils` module.                                                                  |
+| File          | Description                                                                 |
+|---------------|-----------------------------------------------------------------------------|
+| `metrics.py`  | Implements evaluation metrics (C-Index, IBS, CE, AUC, etc.).               |
+| `settings.py` | Central settings used across the repository.                              |
+| `__init__.py` | Initializes the utils module.  
 
 ---
 

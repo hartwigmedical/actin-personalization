@@ -121,7 +121,7 @@ class DataPreprocessor:
 
         return df
     
-    def group_treatments(self, df: pd.DataFrame, treatment_col: str = 'systemicTreatmentPlan') -> pd.DataFrame:
+    def group_treatments(self, df: pd.DataFrame, treatment_col: str = 'firstSystemicTreatmentAfterMetastaticDiagnosis') -> pd.DataFrame:
         df['treatment'] = df[treatment_col].apply(
             lambda x: 1 if pd.notnull(x) and str(x).strip() != '' else 0
         )
