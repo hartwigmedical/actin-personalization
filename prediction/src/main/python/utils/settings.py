@@ -5,7 +5,7 @@ from typing import List, Optional
 class Settings:
     #--------------------------------------------------------------------------------------------
     # User-configurable settings:
-    experiment_type: str = 'treatment_vs_no'  # Options: treatment_specific, treatment_vs_no, treatment_drug
+    experiment_type: str = 'treatment_drug'  # Options: treatment_specific, treatment_vs_no, treatment_drug
     outcome: str = 'OS'                          # "OS" or "PFS"
     
     cross_val_n_splits: int = 5
