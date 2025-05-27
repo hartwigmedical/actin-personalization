@@ -59,10 +59,15 @@ class ExperimentConfig:
             if issubclass(model_class, NNSurvivalModel):
                 best_params['input_size'] = settings.input_size
                 
+            module_path = model_class.__module__
+            if module_path.startswith("src."):
+                module_path = module_path[len("src."):]
+
             config[key][model_name] = {
-                "class": f"{model_class.__module__}.{model_class.__name__}",
+                "class": f"{module_path}.{model_class.__name__}",
                 "kwargs": best_params
             }
+
 
         with open(settings.json_config_file, "w") as f:
             json.dump(config, f, indent=4)
