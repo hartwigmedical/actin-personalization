@@ -319,7 +319,7 @@ object TestReferenceEntryFactory {
     )
 
     private fun minimalPrimaryRadiotherapy() = PrimaryRadiotherapy(
-        daysBetweenDiagnosisAndStart = null, daysBetweenDiagnosisAndStop = null, type = RadiotherapyType.INTRA_OPERATIVE, totalDosage = null
+        daysBetweenDiagnosisAndStart = null, daysBetweenDiagnosisAndStop = null, type = null, totalDosage = null
     )
 
     private fun exhaustivePrimaryRadiotherapy() = PrimaryRadiotherapy(

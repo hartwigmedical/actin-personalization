@@ -285,7 +285,7 @@ class DatabaseWriter(private val context: DSLContext, private val connection: ja
             val dbRecord = context.newRecord(Tables.PRIMARYRADIOTHERAPY)
             dbRecord.from(data)
             dbRecord.set(Tables.PRIMARYRADIOTHERAPY.TREATMENTEPISODEID, treatmentEpisodeId)
-            dbRecord.set(Tables.PRIMARYRADIOTHERAPY.TYPE, data.type.name)
+            dbRecord.set(Tables.PRIMARYRADIOTHERAPY.TYPE, data.type?.name)
             dbRecord
         }
 

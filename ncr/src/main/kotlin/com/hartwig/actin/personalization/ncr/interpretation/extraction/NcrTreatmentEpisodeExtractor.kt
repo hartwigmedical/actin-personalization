@@ -182,14 +182,16 @@ object NcrTreatmentEpisodeExtractor {
     }
 
     private fun extractPrimaryRadiotherapy(startInt: Int?, stopInt: Int?, rtType: Int?, dosage: Double?): PrimaryRadiotherapy? {
-        return rtType?.let(NcrRadiotherapyTypeMapper::resolve)?.let { type ->
-            PrimaryRadiotherapy(
-                daysBetweenDiagnosisAndStart = startInt,
-                daysBetweenDiagnosisAndStop = stopInt,
-                type = type,
-                totalDosage = dosage
-            )
+        if (startInt == null && stopInt == null && rtType == null && dosage == null) {
+            return null
         }
+
+        return PrimaryRadiotherapy(
+            daysBetweenDiagnosisAndStart = startInt,
+            daysBetweenDiagnosisAndStop = stopInt,
+            type = NcrRadiotherapyTypeMapper.resolve(rtType),
+            totalDosage = dosage
+        )
     }
 
     private fun extractMetastasesRadiotherapies(ncrMetastaticRadiotherapy: NcrMetastaticRadiotherapy): List<MetastaticRadiotherapy> {

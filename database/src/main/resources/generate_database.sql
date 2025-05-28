@@ -227,7 +227,7 @@ CREATE TABLE `primaryRadiotherapy` (
     `treatmentEpisodeId` INT NOT NULL,
     `daysBetweenDiagnosisAndStart` INT,
     `daysBetweenDiagnosisAndStop` INT,
-    `type` VARCHAR(50) NOT NULL,
+    `type` VARCHAR(50),
     `totalDosage` DOUBLE,
     FOREIGN KEY (`treatmentEpisodeId`) REFERENCES `treatmentEpisode`(`id`),
     PRIMARY KEY (`id`)
