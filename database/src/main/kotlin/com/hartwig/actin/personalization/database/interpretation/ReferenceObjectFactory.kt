@@ -20,15 +20,16 @@ object ReferenceObjectFactory {
         val metastaticInterpreter = MetastaticInterpreter(entry.metastaticDiagnosis)
         val daysBetweenPrimaryAndMetastaticDiagnosis = metastaticInterpreter.daysBetweenPrimaryAndMetastaticDiagnosis()
         if (daysBetweenPrimaryAndMetastaticDiagnosis == null) {
-            LOGGER.warn { "Could not determine interval towards metastatic diagnosis for entry with source ID ${entry.sourceId}" }
+            LOGGER.warn { "  Could not determine interval towards metastatic diagnosis for entry with source ID ${entry.sourceId}" }
             return null
         }
 
         val treatmentInterpreter = TreatmentInterpreter(entry.treatmentEpisodes)
         if (!treatmentInterpreter.hasMetastaticTreatment()) {
-            LOGGER.warn { "No metastatic-at-start treatment episode found for entry with source ID ${entry.sourceId}" }
+            LOGGER.debug { "  No metastatic-at-start treatment episode found for entry with source ID ${entry.sourceId}" }
             return null
         }
+        
         val comorbidityInterpreter = ComorbidityInterpreter(entry.comorbidityAssessments)
         val whoInterpreter = WhoInterpreter(entry.whoAssessments)
         val asaInterpreter = AsaInterpreter(entry.asaAssessments)
