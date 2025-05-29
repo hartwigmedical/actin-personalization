@@ -22,7 +22,7 @@ class TnmInterpreterTest {
     private val metastaticTnm = TnmClassification(TnmT.T4A, TnmN.N2, TnmM.M1B)
 
     @Test
-    fun `Should pick metastatic when metastatic is M1`() {
+    fun `Should pick metastatic diagnosis when metastatic TNM is present and metastatic`() {
         val metastaticDiagnosis = TestDatamodelFactory.metastaticDiagnosis(
             clinicalTnmClassification = metastaticTnm,
             pathologicalTnmClassification = metastaticTnm
@@ -35,7 +35,7 @@ class TnmInterpreterTest {
     }
 
     @Test
-    fun `Should fall back to primary diagnosis when metastatic is M0`() {
+    fun `Should fall back to primary diagnosis when metastatic TNM is missing or non-metastatic`() {
         val metastaticDiagnosis = TestDatamodelFactory.metastaticDiagnosis(
             clinicalTnmClassification = nonMetastaticTnm,
             pathologicalTnmClassification = nonMetastaticTnm

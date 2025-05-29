@@ -10,14 +10,25 @@ class TnmInterpreter(private val primaryDiagnosis: PrimaryDiagnosis, private val
     private val metastaticTnmMSet = setOf(TnmM.M1, TnmM.M1A, TnmM.M1B, TnmM.M1C)
 
     fun clinicalTnm(): TnmClassification {
-        return metastaticDiagnosis.clinicalTnmClassification?.let { tnmClassification ->
-            if (metastaticTnmMSet.contains(tnmClassification.tnmM)) tnmClassification else null
-        } ?: primaryDiagnosis.clinicalTnmClassification
+        return if (isMetastaticDiagnosisTnmPresentAndMetastatic()) {
+            metastaticDiagnosis.clinicalTnmClassification!!
+        } else {
+            primaryDiagnosis.clinicalTnmClassification
+        }
     }
 
     fun pathologicalTnm(): TnmClassification? {
-        return metastaticDiagnosis.pathologicalTnmClassification?.let { tnmClassification ->
-            if (metastaticTnmMSet.contains(tnmClassification.tnmM)) tnmClassification else null
-        } ?: primaryDiagnosis.pathologicalTnmClassification
+        return if (isMetastaticDiagnosisTnmPresentAndMetastatic()) {
+            metastaticDiagnosis.pathologicalTnmClassification
+        } else {
+            primaryDiagnosis.pathologicalTnmClassification
+        }
+    }
+    
+    private fun isMetastaticDiagnosisTnmPresentAndMetastatic() : Boolean {
+        val hasMetastaticClinicalTnm = metastaticTnmMSet.contains(metastaticDiagnosis.clinicalTnmClassification?.tnmM)
+        val hasMetastaticPathologicalTnm = metastaticTnmMSet.contains(metastaticDiagnosis.pathologicalTnmClassification?.tnmM)
+        
+        return metastaticDiagnosis.clinicalTnmClassification != null && (hasMetastaticClinicalTnm || hasMetastaticPathologicalTnm)
     }
 }
