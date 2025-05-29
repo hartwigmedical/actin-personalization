@@ -6,11 +6,25 @@ import com.hartwig.actin.personalization.datamodel.assessment.LabMeasure
 import com.hartwig.actin.personalization.datamodel.assessment.LabMeasurement
 import com.hartwig.actin.personalization.datamodel.assessment.Unit
 import com.hartwig.actin.personalization.datamodel.assessment.WhoAssessment
+import com.hartwig.actin.personalization.datamodel.diagnosis.AnorectalVergeDistanceCategory
+import com.hartwig.actin.personalization.datamodel.diagnosis.BasisOfDiagnosis
+import com.hartwig.actin.personalization.datamodel.diagnosis.DifferentiationGrade
+import com.hartwig.actin.personalization.datamodel.diagnosis.ExtraMuralInvasionCategory
+import com.hartwig.actin.personalization.datamodel.diagnosis.LymphaticInvasionCategory
 import com.hartwig.actin.personalization.datamodel.diagnosis.Metastasis
 import com.hartwig.actin.personalization.datamodel.diagnosis.MetastaticDiagnosis
 import com.hartwig.actin.personalization.datamodel.diagnosis.NumberOfLiverMetastases
+import com.hartwig.actin.personalization.datamodel.diagnosis.PrimaryDiagnosis
+import com.hartwig.actin.personalization.datamodel.diagnosis.Sidedness
 import com.hartwig.actin.personalization.datamodel.diagnosis.TnmClassification
+import com.hartwig.actin.personalization.datamodel.diagnosis.TnmM
+import com.hartwig.actin.personalization.datamodel.diagnosis.TnmN
+import com.hartwig.actin.personalization.datamodel.diagnosis.TnmT
 import com.hartwig.actin.personalization.datamodel.diagnosis.TumorLocation
+import com.hartwig.actin.personalization.datamodel.diagnosis.TumorRegression
+import com.hartwig.actin.personalization.datamodel.diagnosis.TumorStage
+import com.hartwig.actin.personalization.datamodel.diagnosis.TumorType
+import com.hartwig.actin.personalization.datamodel.diagnosis.VenousInvasionDescription
 import com.hartwig.actin.personalization.datamodel.outcome.ProgressionMeasure
 import com.hartwig.actin.personalization.datamodel.outcome.ProgressionMeasureFollowUpEvent
 import com.hartwig.actin.personalization.datamodel.outcome.ProgressionMeasureType
@@ -64,11 +78,59 @@ object TestDatamodelFactory {
         )
     }
 
+    fun primaryDiagnosis(
+        basisOfDiagnosis: BasisOfDiagnosis = BasisOfDiagnosis.CLINICAL_ONLY_INVESTIGATION,
+        hasDoublePrimaryTumor: Boolean = false,
+        primaryTumorType: TumorType = TumorType.CRC_ADENOCARCINOMA,
+        primaryTumorLocation: TumorLocation = TumorLocation.COECUM,
+        sidedness: Sidedness? = null,
+        anorectalVergeDistanceCategory: AnorectalVergeDistanceCategory? = null,
+        mesorectalFasciaIsClear: Boolean? = null,
+        distanceToMesorectalFasciaMm: Int? = null,
+        differentiationGrade: DifferentiationGrade? = null,
+        clinicalTnmClassification: TnmClassification = TnmClassification(TnmT.T1, TnmN.N0, TnmM.M0),
+        pathologicalTnmClassification: TnmClassification? = null,
+        clinicalTumorStage: TumorStage = TumorStage.II,
+        pathologicalTumorStage: TumorStage = TumorStage.II,
+        investigatedLymphNodesCount: Int? = null,
+        positiveLymphNodesCount: Int? = null,
+        presentedWithIleus: Boolean? = null,
+        presentedWithPerforation: Boolean? = null,
+        venousInvasionDescription: VenousInvasionDescription? = null,
+        lymphaticInvasionCategory: LymphaticInvasionCategory? = null,
+        extraMuralInvasionCategory: ExtraMuralInvasionCategory? = null,
+        tumorRegression: TumorRegression? = null
+    ): PrimaryDiagnosis {
+        return PrimaryDiagnosis(
+            basisOfDiagnosis = basisOfDiagnosis,
+            hasDoublePrimaryTumor = hasDoublePrimaryTumor,
+            primaryTumorType = primaryTumorType,
+            primaryTumorLocation = primaryTumorLocation,
+            sidedness = sidedness,
+            anorectalVergeDistanceCategory = anorectalVergeDistanceCategory,
+            mesorectalFasciaIsClear = mesorectalFasciaIsClear,
+            distanceToMesorectalFasciaMm = distanceToMesorectalFasciaMm,
+            differentiationGrade = differentiationGrade,
+            clinicalTnmClassification = clinicalTnmClassification,
+            pathologicalTnmClassification = pathologicalTnmClassification,
+            clinicalTumorStage = clinicalTumorStage,
+            pathologicalTumorStage = pathologicalTumorStage,
+            investigatedLymphNodesCount = investigatedLymphNodesCount,
+            positiveLymphNodesCount = positiveLymphNodesCount,
+            presentedWithIleus = presentedWithIleus,
+            presentedWithPerforation = presentedWithPerforation,
+            venousInvasionDescription = venousInvasionDescription,
+            lymphaticInvasionCategory = lymphaticInvasionCategory,
+            extraMuralInvasionCategory = extraMuralInvasionCategory,
+            tumorRegression = tumorRegression
+        )
+    }
+
     fun metastaticDiagnosis(
         isMetachronous: Boolean = false,
         metastases: List<Metastasis> = emptyList(),
         numberOfLiverMetastases: NumberOfLiverMetastases? = null,
-        maximumSizeOfLiverMetastasesMm: Int? = null,
+        maximumSizeOfLiverMetastasisMm: Int? = null,
         clinicalTnmClassification: TnmClassification? = null,
         pathologicalTnmClassification: TnmClassification? = null,
         investigatedLymphNodesCount: Int? = null,
@@ -78,7 +140,7 @@ object TestDatamodelFactory {
             isMetachronous = isMetachronous,
             metastases = metastases,
             numberOfLiverMetastases = numberOfLiverMetastases,
-            maximumSizeOfLiverMetastasisMm = maximumSizeOfLiverMetastasesMm,
+            maximumSizeOfLiverMetastasisMm = maximumSizeOfLiverMetastasisMm,
             clinicalTnmClassification = clinicalTnmClassification,
             pathologicalTnmClassification = pathologicalTnmClassification,
             investigatedLymphNodesCount = investigatedLymphNodesCount,
