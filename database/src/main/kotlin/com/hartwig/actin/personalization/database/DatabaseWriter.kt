@@ -28,25 +28,25 @@ class DatabaseWriter(private val context: DSLContext, private val connection: ja
         writeRecords("reference object", indexedEntries, ::referenceObjectsFromEntry)
         writeRecords("survival measurement", indexedEntries, ::survivalMeasurementFromEntry)
         writeRecords("prior tumor", indexedEntries, ::priorTumorFromEntry)
-        writeRecords("primary diagnosis", indexedEntries, ::primaryDiagnosisFromTumor)
+        writeRecords("primary diagnosis", indexedEntries, ::primaryDiagnosisFromEntry)
         val indexedMetastaticDiagnoses = writeRecordsAndReturnIndexedList(
             "metastatic diagnosis",
             indexedEntries,
             Tables.METASTATICDIAGNOSIS,
-            ::metastaticDiagnosisFromTumor
+            ::metastaticDiagnosisFromEntry
         )
         writeRecords("metastasis", indexedMetastaticDiagnoses, ::metastasesFromMetastaticDiagnosis)
-        writeRecords("who assessment", indexedEntries, ::whoAssessmentsFromTumor)
-        writeRecords("asa assessment", indexedEntries, ::asaAssessmentsFromTumor)
-        writeRecords("comorbidity assessment", indexedEntries, ::comorbidityAssessmentsFromTumor)
-        writeRecords("molecular result", indexedEntries, ::molecularResultsFromTumor)
-        writeRecords("lab measurement", indexedEntries, ::labMeasurementsFromTumor)
+        writeRecords("who assessment", indexedEntries, ::whoAssessmentsFromEntry)
+        writeRecords("asa assessment", indexedEntries, ::asaAssessmentsFromEntry)
+        writeRecords("comorbidity assessment", indexedEntries, ::comorbidityAssessmentsFromEntry)
+        writeRecords("molecular result", indexedEntries, ::molecularResultsFromEntry)
+        writeRecords("lab measurement", indexedEntries, ::labMeasurementsFromEntry)
 
         val indexedTreatmentEpisodes = writeRecordsAndReturnIndexedList(
             "treatment episode",
             indexedEntries,
             Tables.TREATMENTEPISODE,
-            ::treatmentEpisodesFromTumor
+            ::treatmentEpisodesFromEntry
         )
         writeRecords("gastroenterology resection", indexedTreatmentEpisodes, ::gastroenterologyResectionsFromTreatmentEpisode)
         writeRecords("primary surgery", indexedTreatmentEpisodes, ::primarySurgeriesFromTreatmentEpisode)
@@ -149,7 +149,7 @@ class DatabaseWriter(private val context: DSLContext, private val connection: ja
             dbRecord
         }
 
-    private fun primaryDiagnosisFromTumor(entryId: Int, entry: ReferenceEntry) =
+    private fun primaryDiagnosisFromEntry(entryId: Int, entry: ReferenceEntry) =
         listOf(entry.primaryDiagnosis).map { primaryDiagnosis ->
             val dbRecord = context.newRecord(Tables.PRIMARYDIAGNOSIS)
             dbRecord.from(primaryDiagnosis)
@@ -174,13 +174,19 @@ class DatabaseWriter(private val context: DSLContext, private val connection: ja
             dbRecord
         }
 
-    private fun metastaticDiagnosisFromTumor(entryId: Int, entry: ReferenceEntry) =
+    private fun metastaticDiagnosisFromEntry(entryId: Int, entry: ReferenceEntry) =
         entry.metastaticDiagnosis.let {
             val dbRecord = context.newRecord(Tables.METASTATICDIAGNOSIS)
             with(entry.metastaticDiagnosis) {
                 dbRecord.from(this)
                 dbRecord.set(Tables.METASTATICDIAGNOSIS.ENTRYID, entryId)
                 dbRecord.set(Tables.METASTATICDIAGNOSIS.NUMBEROFLIVERMETASTASES, this.numberOfLiverMetastases?.name)
+                dbRecord.set(Tables.METASTATICDIAGNOSIS.CLINICALTNMT, this.clinicalTnmClassification?.tnmT?.name)
+                dbRecord.set(Tables.METASTATICDIAGNOSIS.CLINICALTNMN, this.clinicalTnmClassification?.tnmN?.name)
+                dbRecord.set(Tables.METASTATICDIAGNOSIS.CLINICALTNMM, this.clinicalTnmClassification?.tnmM?.name)
+                dbRecord.set(Tables.METASTATICDIAGNOSIS.PATHOLOGICALTNMT, this.pathologicalTnmClassification?.tnmT?.name)
+                dbRecord.set(Tables.METASTATICDIAGNOSIS.PATHOLOGICALTNMN, this.pathologicalTnmClassification?.tnmN?.name)
+                dbRecord.set(Tables.METASTATICDIAGNOSIS.PATHOLOGICALTNMM, this.pathologicalTnmClassification?.tnmM?.name)
                 listOf(this to dbRecord)
             }
         }
@@ -194,7 +200,7 @@ class DatabaseWriter(private val context: DSLContext, private val connection: ja
             dbRecord
         }
 
-    private fun whoAssessmentsFromTumor(entryId: Int, entry: ReferenceEntry) =
+    private fun whoAssessmentsFromEntry(entryId: Int, entry: ReferenceEntry) =
         entry.whoAssessments.map { data ->
             val dbRecord = context.newRecord(Tables.WHOASSESSMENT)
             dbRecord.from(data)
@@ -202,7 +208,7 @@ class DatabaseWriter(private val context: DSLContext, private val connection: ja
             dbRecord
         }
 
-    private fun asaAssessmentsFromTumor(entryId: Int, entry: ReferenceEntry) =
+    private fun asaAssessmentsFromEntry(entryId: Int, entry: ReferenceEntry) =
         entry.asaAssessments.map { data ->
             val dbRecord = context.newRecord(Tables.ASAASSESSMENT)
             dbRecord.from(data)
@@ -211,17 +217,17 @@ class DatabaseWriter(private val context: DSLContext, private val connection: ja
             dbRecord
         }
 
-    private fun comorbidityAssessmentsFromTumor(entryId: Int, entry: ReferenceEntry) =
+    private fun comorbidityAssessmentsFromEntry(entryId: Int, entry: ReferenceEntry) =
         entry.comorbidityAssessments.map {
             extractSimpleRecord(Tables.COMORBIDITYASSESSMENT, it, "entryId", entryId)
         }
 
-    private fun molecularResultsFromTumor(entryId: Int, entry: ReferenceEntry) =
+    private fun molecularResultsFromEntry(entryId: Int, entry: ReferenceEntry) =
         entry.molecularResults.map {
             extractSimpleRecord(Tables.MOLECULARRESULT, it, "entryId", entryId)
         }
 
-    private fun labMeasurementsFromTumor(entryId: Int, entry: ReferenceEntry) =
+    private fun labMeasurementsFromEntry(entryId: Int, entry: ReferenceEntry) =
         entry.labMeasurements.map { data ->
             val dbRecord = context.newRecord(Tables.LABMEASUREMENT)
             dbRecord.from(data)
@@ -230,7 +236,7 @@ class DatabaseWriter(private val context: DSLContext, private val connection: ja
             dbRecord
         }
 
-    private fun treatmentEpisodesFromTumor(entryId: Int, entry: ReferenceEntry) =
+    private fun treatmentEpisodesFromEntry(entryId: Int, entry: ReferenceEntry) =
         entry.treatmentEpisodes.map { data ->
             val dbRecord = context.newRecord(Tables.TREATMENTEPISODE)
             dbRecord.from(data)
