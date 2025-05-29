@@ -142,7 +142,7 @@ object TestReferenceEntryFactory {
         primaryTumorLocation = TumorLocation.DESCENDING_COLON,
         differentiationGrade = null,
         clinicalTnmClassification = TnmClassification(tnmT = null, tnmN = null, tnmM = null),
-        pathologicalTnmClassification = TnmClassification(tnmT = null, tnmN = null, tnmM = null),
+        pathologicalTnmClassification = null,
         clinicalTumorStage = TumorStage.II,
         pathologicalTumorStage = TumorStage.IV,
         investigatedLymphNodesCount = null,

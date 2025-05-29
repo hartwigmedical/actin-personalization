@@ -259,7 +259,7 @@ object TestNcrRecordFactory {
             ct = "0",
             cn = null,
             cm = null,
-            pt = "0",
+            pt = null,
             pn = null,
             pm = null,
             cstadium = "2",

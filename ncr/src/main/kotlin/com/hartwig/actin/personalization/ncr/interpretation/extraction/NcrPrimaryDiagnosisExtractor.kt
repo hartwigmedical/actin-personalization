@@ -40,8 +40,7 @@ object NcrPrimaryDiagnosisExtractor {
             differentiationGrade = NcrDifferentiationGradeMapper.resolve(diagnosis.primaryDiagnosis.diffgrad),
             clinicalTnmClassification = NcrTnmClassificationExtractor.extractClinical(diagnosis)
                 ?: throw IllegalStateException("Clinical TNM shouldn't be missing for primary diagnosis"),
-            pathologicalTnmClassification = NcrTnmClassificationExtractor.extractPathological(diagnosis)
-                ?: throw IllegalStateException("Pathological TNM shouldn't be missing for primary diagnosis"),
+            pathologicalTnmClassification = NcrTnmClassificationExtractor.extractPathological(diagnosis),
             clinicalTumorStage = NcrTumorStageMapper.resolve(diagnosis.primaryDiagnosis.cstadium!!),
             pathologicalTumorStage = NcrTumorStageMapper.resolve(diagnosis.primaryDiagnosis.pstadium!!),
             investigatedLymphNodesCount = diagnosis.primaryDiagnosis.ondLymf,
