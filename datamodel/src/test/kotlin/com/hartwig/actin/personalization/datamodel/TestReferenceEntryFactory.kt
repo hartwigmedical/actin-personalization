@@ -183,6 +183,8 @@ object TestReferenceEntryFactory {
         metastases = emptyList(),
         numberOfLiverMetastases = null,
         maximumSizeOfLiverMetastasisMm = null,
+        clinicalTnmClassification = null,
+        pathologicalTnmClassification = null,
         investigatedLymphNodesCount = null,
         positiveLymphNodesCount = null
     )
@@ -200,6 +202,8 @@ object TestReferenceEntryFactory {
         ),
         numberOfLiverMetastases = NumberOfLiverMetastases.MULTIPLE_BUT_EXACT_NUMBER_UNKNOWN,
         maximumSizeOfLiverMetastasisMm = 10,
+        clinicalTnmClassification = TnmClassification(tnmT = null, tnmN = null, tnmM = TnmM.M1),
+        pathologicalTnmClassification = TnmClassification(tnmT = null, tnmN = null, tnmM = TnmM.M1),
         investigatedLymphNodesCount = 10,
         positiveLymphNodesCount = 10
     )

@@ -18,6 +18,8 @@ object NcrMetastaticDiagnosisExtractor {
             metastases = extractMetastases(metastatic),
             numberOfLiverMetastases = NcrNumberOfLiverMetastasesMapper.resolve(metastatic.metastaticDiagnosis.metaLeverAantal),
             maximumSizeOfLiverMetastasisMm = metastatic.metastaticDiagnosis.metaLeverAfm.takeIf { it != 999 },
+            clinicalTnmClassification = NcrTnmClassificationExtractor.extractClinical(metastatic),
+            pathologicalTnmClassification = NcrTnmClassificationExtractor.extractPathological(metastatic),
             investigatedLymphNodesCount = metastatic.primaryDiagnosis.ondLymf,
             positiveLymphNodesCount = metastatic.primaryDiagnosis.posLymf
         )

@@ -2,6 +2,8 @@ package com.hartwig.actin.personalization.ncr.interpretation.extraction
 
 import com.hartwig.actin.personalization.datamodel.diagnosis.Metastasis
 import com.hartwig.actin.personalization.datamodel.diagnosis.NumberOfLiverMetastases
+import com.hartwig.actin.personalization.datamodel.diagnosis.TnmClassification
+import com.hartwig.actin.personalization.datamodel.diagnosis.TnmM
 import com.hartwig.actin.personalization.datamodel.diagnosis.TumorLocation
 import com.hartwig.actin.personalization.ncr.datamodel.TestNcrRecordFactory
 import org.assertj.core.api.Assertions.assertThat
@@ -35,8 +37,10 @@ class NcrMetastaticDiagnosisExtractorTest {
             )
             assertThat(numberOfLiverMetastases).isEqualTo(NumberOfLiverMetastases.FIVE_OR_MORE)
             assertThat(maximumSizeOfLiverMetastasisMm).isEqualTo(15)
-            assertThat(investigatedLymphNodesCount).isEqualTo(3)
-            assertThat(positiveLymphNodesCount).isEqualTo(1)
+            assertThat(clinicalTnmClassification).isNull()
+            assertThat(pathologicalTnmClassification).isEqualTo(TnmClassification(tnmT = null, tnmN = null, tnmM = TnmM.M1))
+            assertThat(investigatedLymphNodesCount).isEqualTo(4)
+            assertThat(positiveLymphNodesCount).isEqualTo(2)
         }
     }
 }

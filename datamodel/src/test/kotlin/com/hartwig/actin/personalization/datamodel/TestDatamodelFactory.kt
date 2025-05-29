@@ -9,6 +9,7 @@ import com.hartwig.actin.personalization.datamodel.assessment.WhoAssessment
 import com.hartwig.actin.personalization.datamodel.diagnosis.Metastasis
 import com.hartwig.actin.personalization.datamodel.diagnosis.MetastaticDiagnosis
 import com.hartwig.actin.personalization.datamodel.diagnosis.NumberOfLiverMetastases
+import com.hartwig.actin.personalization.datamodel.diagnosis.TnmClassification
 import com.hartwig.actin.personalization.datamodel.diagnosis.TumorLocation
 import com.hartwig.actin.personalization.datamodel.outcome.ProgressionMeasure
 import com.hartwig.actin.personalization.datamodel.outcome.ProgressionMeasureFollowUpEvent
@@ -68,6 +69,8 @@ object TestDatamodelFactory {
         metastases: List<Metastasis> = emptyList(),
         numberOfLiverMetastases: NumberOfLiverMetastases? = null,
         maximumSizeOfLiverMetastasesMm: Int? = null,
+        clinicalTnmClassification: TnmClassification? = null,
+        pathologicalTnmClassification: TnmClassification? = null,
         investigatedLymphNodesCount: Int? = null,
         positiveLymphNodesCount: Int? = null
     ): MetastaticDiagnosis {
@@ -76,6 +79,8 @@ object TestDatamodelFactory {
             metastases = metastases,
             numberOfLiverMetastases = numberOfLiverMetastases,
             maximumSizeOfLiverMetastasisMm = maximumSizeOfLiverMetastasesMm,
+            clinicalTnmClassification = clinicalTnmClassification,
+            pathologicalTnmClassification = pathologicalTnmClassification,
             investigatedLymphNodesCount = investigatedLymphNodesCount,
             positiveLymphNodesCount = positiveLymphNodesCount
         )
