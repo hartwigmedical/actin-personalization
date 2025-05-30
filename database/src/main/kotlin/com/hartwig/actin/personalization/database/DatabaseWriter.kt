@@ -306,12 +306,13 @@ class DatabaseWriter(private val context: DSLContext, private val connection: ja
 
     
     private fun systemicTreatmentDrugFromSystemicTreatment(systemicTreatmentId: Int, systemicTreatment: SystemicTreatment) =
-        systemicTreatment.schemes.mapIndexed { scheme, drugTreatments ->
+        systemicTreatment.schemes.mapIndexed { index, drugTreatments ->
+            val schemeNr = index + 1
             drugTreatments.map { drugTreatment ->
                 val dbRecord = context.newRecord(Tables.SYSTEMICTREATMENTDRUG)
                 dbRecord.from(drugTreatment)
                 dbRecord.set(Tables.SYSTEMICTREATMENTDRUG.SYSTEMICTREATMENTID, systemicTreatmentId)
-                dbRecord.set(Tables.SYSTEMICTREATMENTDRUG.SCHEME, scheme)
+                dbRecord.set(Tables.SYSTEMICTREATMENTDRUG.SCHEME, schemeNr)
                 dbRecord
             }
         }.flatten()
