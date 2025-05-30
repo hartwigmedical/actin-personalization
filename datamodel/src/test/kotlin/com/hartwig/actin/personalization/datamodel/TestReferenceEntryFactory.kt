@@ -38,6 +38,7 @@ import com.hartwig.actin.personalization.datamodel.outcome.SurvivalMeasurement
 import com.hartwig.actin.personalization.datamodel.treatment.AnastomoticLeakageAfterSurgery
 import com.hartwig.actin.personalization.datamodel.treatment.CircumferentialResectionMargin
 import com.hartwig.actin.personalization.datamodel.treatment.Drug
+import com.hartwig.actin.personalization.datamodel.treatment.DrugTreatment
 import com.hartwig.actin.personalization.datamodel.treatment.GastroenterologyResection
 import com.hartwig.actin.personalization.datamodel.treatment.GastroenterologyResectionType
 import com.hartwig.actin.personalization.datamodel.treatment.HipecTreatment
@@ -55,8 +56,6 @@ import com.hartwig.actin.personalization.datamodel.treatment.SurgeryTechnique
 import com.hartwig.actin.personalization.datamodel.treatment.SurgeryType
 import com.hartwig.actin.personalization.datamodel.treatment.SurgeryUrgency
 import com.hartwig.actin.personalization.datamodel.treatment.SystemicTreatment
-import com.hartwig.actin.personalization.datamodel.treatment.SystemicTreatmentDrug
-import com.hartwig.actin.personalization.datamodel.treatment.SystemicTreatmentScheme
 import com.hartwig.actin.personalization.datamodel.treatment.Treatment
 import com.hartwig.actin.personalization.datamodel.treatment.TreatmentEpisode
 import com.hartwig.actin.personalization.datamodel.treatment.TreatmentIntent
@@ -343,24 +342,14 @@ object TestReferenceEntryFactory {
     )
 
     private fun minimalSystemicTreatment() = SystemicTreatment(
-        daysBetweenDiagnosisAndStart = null,
-        daysBetweenDiagnosisAndStop = null,
-        treatment = Treatment.CAPECITABINE_BEVACIZUMAB,
+        treatment = Treatment.OTHER,
         schemes = emptyList()
     )
 
-    private fun minimalSystemicTreatmentScheme() = SystemicTreatmentScheme(
-        minDaysBetweenDiagnosisAndStart = null,
-        maxDaysBetweenDiagnosisAndStart = null,
-        minDaysBetweenDiagnosisAndStop = null,
-        maxDaysBetweenDiagnosisAndStop = null,
-        components = emptyList()
-    )
-
-    private fun minimalSystemicTreatmentDrug() = SystemicTreatmentDrug(
+    private fun minimalSystemicDrugScheme() = DrugTreatment(
         daysBetweenDiagnosisAndStart = null,
         daysBetweenDiagnosisAndStop = null,
-        drug = Drug.EXTERNAL_RADIOTHERAPY_WITH_SENSITIZER,
+        drug = Drug.CAPECITABINE,
         numberOfCycles = null,
         intent = null,
         drugTreatmentIsOngoing = null,
@@ -368,10 +357,10 @@ object TestReferenceEntryFactory {
         isAdministeredPostSurgery = null
     )
 
-    private fun exhaustiveSystemicTreatmentDrug() = SystemicTreatmentDrug(
+    private fun exhaustiveSystemicDrugScheme() = DrugTreatment(
         daysBetweenDiagnosisAndStart = 10,
         daysBetweenDiagnosisAndStop = 20,
-        drug = Drug.EXTERNAL_RADIOTHERAPY_WITH_SENSITIZER,
+        drug = Drug.BEVACIZUMAB,
         numberOfCycles = 10,
         intent = TreatmentIntent.MAINTENANCE,
         drugTreatmentIsOngoing = true,
@@ -379,28 +368,18 @@ object TestReferenceEntryFactory {
         isAdministeredPostSurgery = false
     )
 
-    private fun exhaustiveSystemicTreatmentScheme() = SystemicTreatmentScheme(
-        minDaysBetweenDiagnosisAndStart = 10,
-        maxDaysBetweenDiagnosisAndStart = 20,
-        minDaysBetweenDiagnosisAndStop = 30,
-        maxDaysBetweenDiagnosisAndStop = 40,
-        components = listOf(minimalSystemicTreatmentDrug(), exhaustiveSystemicTreatmentDrug())
-    )
-
     private fun exhaustiveSystemicTreatment() = SystemicTreatment(
-        daysBetweenDiagnosisAndStart = 10,
-        daysBetweenDiagnosisAndStop = 20,
         treatment = Treatment.CAPECITABINE_BEVACIZUMAB,
-        schemes = listOf(minimalSystemicTreatmentScheme(), exhaustiveSystemicTreatmentScheme())
+        schemes = listOf(listOf(minimalSystemicDrugScheme(), exhaustiveSystemicDrugScheme()), listOf(minimalSystemicDrugScheme()))
     )
 
     private fun minimalResponseMeasure() = ResponseMeasure(
-        daysSinceDiagnosis = null, 
+        daysSinceDiagnosis = null,
         response = ResponseType.CR
     )
 
     private fun exhaustiveResponseMeasure() = ResponseMeasure(
-        daysSinceDiagnosis = 10, 
+        daysSinceDiagnosis = 10,
         response = ResponseType.MR
     )
 

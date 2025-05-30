@@ -6,7 +6,6 @@ import com.hartwig.actin.personalization.datamodel.diagnosis.MetastaticDiagnosis
 import com.hartwig.actin.personalization.datamodel.diagnosis.TumorLocation
 import com.hartwig.actin.personalization.datamodel.treatment.Drug
 import com.hartwig.actin.personalization.datamodel.treatment.SystemicTreatment
-import com.hartwig.actin.personalization.datamodel.treatment.SystemicTreatmentScheme
 import com.hartwig.actin.personalization.datamodel.treatment.TreatmentEpisode
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.jooq.DSLContext
@@ -61,15 +60,8 @@ class DatabaseWriter(private val context: DSLContext, private val connection: ja
             Tables.SYSTEMICTREATMENT,
             ::systemicTreatmentsFromTreatmentEpisode
         )
-
-        val indexedSystemicTreatmentSchemes = writeRecordsAndReturnIndexedList(
-            "systemic treatment scheme",
-            indexedSystemicTreatments,
-            Tables.SYSTEMICTREATMENTSCHEME,
-            ::systemicTreatmentSchemesFromSystemicTreatment
-        )
-
-        writeRecords("systemic treatment drug", indexedSystemicTreatmentSchemes, ::systemicTreatmentDrugFromSystemicTreatmentScheme)
+        
+        writeRecords("systemic treatment drug", indexedSystemicTreatments, ::systemicTreatmentDrugFromSystemicTreatment)
         writeRecords("response measure", indexedTreatmentEpisodes, ::responseMeasuresFromTreatmentEpisode)
         writeRecords("progression measure", indexedTreatmentEpisodes, ::progressionMeasuresFromTreatmentEpisode)
 
@@ -312,18 +304,17 @@ class DatabaseWriter(private val context: DSLContext, private val connection: ja
             systemicTreatment to dbRecord
         }
 
-    private fun systemicTreatmentSchemesFromSystemicTreatment(systemicTreatmentId: Int, systemicTreatment: SystemicTreatment) =
-        systemicTreatment.schemes.map { systemicTreatmentScheme ->
-            val dbRecord = context.newRecord(Tables.SYSTEMICTREATMENTSCHEME)
-            dbRecord.from(systemicTreatmentScheme)
-            dbRecord.set(Tables.SYSTEMICTREATMENTSCHEME.SYSTEMICTREATMENTID, systemicTreatmentId)
-            systemicTreatmentScheme to dbRecord
-        }
-
-    private fun systemicTreatmentDrugFromSystemicTreatmentScheme(schemeId: Int, scheme: SystemicTreatmentScheme) =
-        scheme.components.map {
-            extractSimpleRecord(Tables.SYSTEMICTREATMENTDRUG, it, "systemicTreatmentSchemeId", schemeId)
-        }
+    
+    private fun systemicTreatmentDrugFromSystemicTreatment(systemicTreatmentId: Int, systemicTreatment: SystemicTreatment) =
+        systemicTreatment.schemes.mapIndexed { scheme, drugTreatments ->
+            drugTreatments.map { drugTreatment ->
+                val dbRecord = context.newRecord(Tables.SYSTEMICTREATMENTDRUG)
+                dbRecord.from(drugTreatment)
+                dbRecord.set(Tables.SYSTEMICTREATMENTDRUG.SYSTEMICTREATMENTID, systemicTreatmentId)
+                dbRecord.set(Tables.SYSTEMICTREATMENTDRUG.SCHEME, scheme)
+                dbRecord
+            }
+        }.flatten()
 
     private fun responseMeasuresFromTreatmentEpisode(treatmentEpisodeId: Int, treatmentEpisode: TreatmentEpisode) =
         treatmentEpisode.responseMeasures.map { data ->

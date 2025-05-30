@@ -6,6 +6,7 @@ import com.hartwig.actin.personalization.datamodel.outcome.ProgressionMeasureTyp
 import com.hartwig.actin.personalization.datamodel.outcome.ResponseMeasure
 import com.hartwig.actin.personalization.datamodel.outcome.ResponseType
 import com.hartwig.actin.personalization.datamodel.treatment.Drug
+import com.hartwig.actin.personalization.datamodel.treatment.DrugTreatment
 import com.hartwig.actin.personalization.datamodel.treatment.GastroenterologyResection
 import com.hartwig.actin.personalization.datamodel.treatment.GastroenterologyResectionType
 import com.hartwig.actin.personalization.datamodel.treatment.HipecTreatment
@@ -21,8 +22,6 @@ import com.hartwig.actin.personalization.datamodel.treatment.ReasonRefrainmentFr
 import com.hartwig.actin.personalization.datamodel.treatment.SurgeryRadicality
 import com.hartwig.actin.personalization.datamodel.treatment.SurgeryType
 import com.hartwig.actin.personalization.datamodel.treatment.SystemicTreatment
-import com.hartwig.actin.personalization.datamodel.treatment.SystemicTreatmentDrug
-import com.hartwig.actin.personalization.datamodel.treatment.SystemicTreatmentScheme
 import com.hartwig.actin.personalization.datamodel.treatment.Treatment
 import com.hartwig.actin.personalization.datamodel.treatment.TreatmentEpisode
 import com.hartwig.actin.personalization.datamodel.treatment.TreatmentIntent
@@ -135,102 +134,82 @@ class NcrTreatmentEpisodeExtractorTest {
 
     private fun expectedFollowup2SystemicTreatment(): SystemicTreatment {
         return SystemicTreatment(
-            daysBetweenDiagnosisAndStart = 100,
-            daysBetweenDiagnosisAndStop = 780,
             treatment = Treatment.FOLFOXIRI_B,
             schemes = listOf(
-                SystemicTreatmentScheme(
-                    minDaysBetweenDiagnosisAndStart = 100,
-                    maxDaysBetweenDiagnosisAndStart = 400,
-                    minDaysBetweenDiagnosisAndStop = 180,
-                    maxDaysBetweenDiagnosisAndStop = 480,
-                    components = listOf(
-                        SystemicTreatmentDrug(
-                            daysBetweenDiagnosisAndStart = 100,
-                            daysBetweenDiagnosisAndStop = 180,
-                            drug = Drug.OXALIPLATIN,
-                            numberOfCycles = 1,
-                            intent = null,
-                            drugTreatmentIsOngoing = false,
-                            isAdministeredPreSurgery = true,
-                            isAdministeredPostSurgery = false
-                        ),
-                        SystemicTreatmentDrug(
-                            daysBetweenDiagnosisAndStart = 200,
-                            daysBetweenDiagnosisAndStop = 280,
-                            drug = Drug.BEVACIZUMAB,
-                            numberOfCycles = 2,
-                            intent = null,
-                            drugTreatmentIsOngoing = false,
-                            isAdministeredPreSurgery = false,
-                            isAdministeredPostSurgery = true
-                        ),
-                        SystemicTreatmentDrug(
-                            daysBetweenDiagnosisAndStart = 300,
-                            daysBetweenDiagnosisAndStop = 380,
-                            drug = Drug.IRINOTECAN,
-                            numberOfCycles = 3,
-                            intent = null,
-                            drugTreatmentIsOngoing = false,
-                            isAdministeredPreSurgery = true,
-                            isAdministeredPostSurgery = true
-                        ),
-                        SystemicTreatmentDrug(
-                            daysBetweenDiagnosisAndStart = 400,
-                            daysBetweenDiagnosisAndStop = 480,
-                            drug = Drug.FLUOROURACIL,
-                            numberOfCycles = null,
-                            intent = TreatmentIntent.SENSITIZER,
-                            drugTreatmentIsOngoing = null,
-                            isAdministeredPreSurgery = false,
-                            isAdministeredPostSurgery = false
-                        )
+                listOf(
+                    DrugTreatment(
+                        daysBetweenDiagnosisAndStart = 100,
+                        daysBetweenDiagnosisAndStop = 180,
+                        drug = Drug.OXALIPLATIN,
+                        numberOfCycles = 1,
+                        intent = null,
+                        drugTreatmentIsOngoing = false,
+                        isAdministeredPreSurgery = true,
+                        isAdministeredPostSurgery = false
+                    ),
+                    DrugTreatment(
+                        daysBetweenDiagnosisAndStart = 200,
+                        daysBetweenDiagnosisAndStop = 280,
+                        drug = Drug.BEVACIZUMAB,
+                        numberOfCycles = 2,
+                        intent = null,
+                        drugTreatmentIsOngoing = false,
+                        isAdministeredPreSurgery = false,
+                        isAdministeredPostSurgery = true
+                    ),
+                    DrugTreatment(
+                        daysBetweenDiagnosisAndStart = 300,
+                        daysBetweenDiagnosisAndStop = 380,
+                        drug = Drug.IRINOTECAN,
+                        numberOfCycles = 3,
+                        intent = null,
+                        drugTreatmentIsOngoing = false,
+                        isAdministeredPreSurgery = true,
+                        isAdministeredPostSurgery = true
+                    ),
+                    DrugTreatment(
+                        daysBetweenDiagnosisAndStart = 400,
+                        daysBetweenDiagnosisAndStop = 480,
+                        drug = Drug.FLUOROURACIL,
+                        numberOfCycles = null,
+                        intent = TreatmentIntent.SENSITIZER,
+                        drugTreatmentIsOngoing = null,
+                        isAdministeredPreSurgery = false,
+                        isAdministeredPostSurgery = false
                     )
                 ),
-                SystemicTreatmentScheme(
-                    minDaysBetweenDiagnosisAndStart = 500,
-                    maxDaysBetweenDiagnosisAndStart = 600,
-                    minDaysBetweenDiagnosisAndStop = 580,
-                    maxDaysBetweenDiagnosisAndStop = 680,
-                    components = listOf(
-                        SystemicTreatmentDrug(
-                            daysBetweenDiagnosisAndStart = 500,
-                            daysBetweenDiagnosisAndStop = 580,
-                            drug = Drug.CAPECITABINE,
-                            numberOfCycles = null,
-                            intent = TreatmentIntent.MAINTENANCE,
-                            drugTreatmentIsOngoing = null,
-                            isAdministeredPreSurgery = false,
-                            isAdministeredPostSurgery = false
-                        ),
-                        SystemicTreatmentDrug(
-                            daysBetweenDiagnosisAndStart = 600,
-                            daysBetweenDiagnosisAndStop = 680,
-                            drug = Drug.IRINOTECAN,
-                            numberOfCycles = null,
-                            intent = null,
-                            drugTreatmentIsOngoing = true,
-                            isAdministeredPreSurgery = null,
-                            isAdministeredPostSurgery = null
-                        )
+                listOf(
+                    DrugTreatment(
+                        daysBetweenDiagnosisAndStart = 500,
+                        daysBetweenDiagnosisAndStop = 580,
+                        drug = Drug.CAPECITABINE,
+                        numberOfCycles = null,
+                        intent = TreatmentIntent.MAINTENANCE,
+                        drugTreatmentIsOngoing = null,
+                        isAdministeredPreSurgery = false,
+                        isAdministeredPostSurgery = false
+                    ),
+                    DrugTreatment(
+                        daysBetweenDiagnosisAndStart = 600,
+                        daysBetweenDiagnosisAndStop = 680,
+                        drug = Drug.IRINOTECAN,
+                        numberOfCycles = null,
+                        intent = null,
+                        drugTreatmentIsOngoing = true,
+                        isAdministeredPreSurgery = null,
+                        isAdministeredPostSurgery = null
                     )
                 ),
-                SystemicTreatmentScheme(
-                    minDaysBetweenDiagnosisAndStart = 700,
-                    maxDaysBetweenDiagnosisAndStart = 700,
-                    minDaysBetweenDiagnosisAndStop = 780,
-                    maxDaysBetweenDiagnosisAndStop = 780,
-                    components = listOf(
-                        SystemicTreatmentDrug(
-                            daysBetweenDiagnosisAndStart = 700,
-                            daysBetweenDiagnosisAndStop = 780,
-                            drug = Drug.TEGAFUR_OR_GIMERACIL_OR_OTERACIL,
-                            numberOfCycles = null,
-                            intent = null,
-                            drugTreatmentIsOngoing = null,
-                            isAdministeredPreSurgery = false,
-                            isAdministeredPostSurgery = false
-                        )
+                listOf(
+                    DrugTreatment(
+                        daysBetweenDiagnosisAndStart = 700,
+                        daysBetweenDiagnosisAndStop = 780,
+                        drug = Drug.TEGAFUR_OR_GIMERACIL_OR_OTERACIL,
+                        numberOfCycles = null,
+                        intent = null,
+                        drugTreatmentIsOngoing = null,
+                        isAdministeredPreSurgery = false,
+                        isAdministeredPostSurgery = false
                     )
                 )
             )

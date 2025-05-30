@@ -12,9 +12,9 @@ class TreatmentInterpreterTest {
 
     @Test
     fun `Should determine state about existence and timing of metastatic treatment`() {
-        val noEpisodeInterpreter = TreatmentInterpreter(emptyList())
-        assertThat(noEpisodeInterpreter.hasMetastaticTreatment()).isFalse()
-        assertThat(noEpisodeInterpreter.isMetastaticPriorToMetastaticTreatmentDecision()).isFalse()
+        val noTreatmentInterpreter = TreatmentInterpreter(emptyList())
+        assertThat(noTreatmentInterpreter.hasMetastaticTreatment()).isFalse()
+        assertThat(noTreatmentInterpreter.isMetastaticPriorToMetastaticTreatmentDecision()).isFalse()
 
         val noMetastaticTreatmentInterpreter =
             TreatmentInterpreter(listOf(TestDatamodelFactory.treatmentEpisode(metastaticPresence = MetastaticPresence.ABSENT)))
@@ -30,6 +30,23 @@ class TreatmentInterpreterTest {
             TreatmentInterpreter(listOf(TestDatamodelFactory.treatmentEpisode(metastaticPresence = MetastaticPresence.AT_PROGRESSION)))
         assertThat(progressionMetastaticTreatmentInterpreter.hasMetastaticTreatment()).isTrue()
         assertThat(progressionMetastaticTreatmentInterpreter.isMetastaticPriorToMetastaticTreatmentDecision()).isFalse()
+
+        val multipleTreatmentInterpreter =
+            TreatmentInterpreter(listOf(TestDatamodelFactory.treatmentEpisode(metastaticPresence = MetastaticPresence.ABSENT),
+                TestDatamodelFactory.treatmentEpisode(metastaticPresence = MetastaticPresence.AT_START)))
+        assertThat(multipleTreatmentInterpreter.hasMetastaticTreatment()).isTrue()
+        assertThat(multipleTreatmentInterpreter.isMetastaticPriorToMetastaticTreatmentDecision()).isTrue()
+    }
+    
+    @Test
+    fun `Should determine start of metastatic systemic treatment`() {
+        val noTreatmentInterpreter = TreatmentInterpreter(emptyList())
+        assertThat(noTreatmentInterpreter.determineMetastaticSystemicTreatmentStart()).isNull()
+        
+//        val treatment1 = TestDatamodelFactory.treatmentEpisode(metastaticPresence = MetastaticPresence.AT_START, 
+//            systemicTreatments = listOf(TestDatamodelFactory.systemicTreatment())
+//        )
+        
     }
 
     @Test

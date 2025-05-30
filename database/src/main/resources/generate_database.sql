@@ -1,5 +1,7 @@
 SET FOREIGN_KEY_CHECKS = 0;
- 
+  
+DROP TABLE IF EXISTS `systemicTreatmentScheme`;
+
 DROP TABLE IF EXISTS `entry`;
 CREATE TABLE `entry` (
     `id` INT NOT NULL,
@@ -254,29 +256,16 @@ DROP TABLE IF EXISTS `systemicTreatment`;
 CREATE TABLE `systemicTreatment` (
     `id` INT NOT NULL,
     `treatmentEpisodeId` INT NOT NULL,
-    `daysBetweenDiagnosisAndStart` INT,
-    `daysBetweenDiagnosisAndStop` INT,
     `treatment` VARCHAR(50) NOT NULL,
     FOREIGN KEY (`treatmentEpisodeId`) REFERENCES `treatmentEpisode`(`id`),
-    PRIMARY KEY (`id`)
-);
-
-DROP TABLE IF EXISTS `systemicTreatmentScheme`;
-CREATE TABLE `systemicTreatmentScheme` (
-    `id` INT NOT NULL,
-    `systemicTreatmentId` INT NOT NULL,
-    `minDaysBetweenDiagnosisAndStart` INT,
-    `maxDaysBetweenDiagnosisAndStart` INT,
-    `minDaysBetweenDiagnosisAndStop` INT,
-    `maxDaysBetweenDiagnosisAndStop` INT,
-    FOREIGN KEY (`systemicTreatmentId`) REFERENCES `systemicTreatment`(`id`),
     PRIMARY KEY (`id`)
 );
 
 DROP TABLE IF EXISTS `systemicTreatmentDrug`;
 CREATE TABLE `systemicTreatmentDrug` (
     `id` INT NOT NULL AUTO_INCREMENT,
-    `systemicTreatmentSchemeId` INT NOT NULL,
+    `systemicTreatmentId` INT NOT NULL,
+    `scheme` INT NOT NULL,
     `daysBetweenDiagnosisAndStart` INT,
     `daysBetweenDiagnosisAndStop` INT,
     `drug` VARCHAR(50) NOT NULL,
@@ -285,7 +274,7 @@ CREATE TABLE `systemicTreatmentDrug` (
     `drugTreatmentIsOngoing` BOOL,
     `isAdministeredPreSurgery` BOOL,
     `isAdministeredPostSurgery` BOOL,
-    FOREIGN KEY (`systemicTreatmentSchemeId`) REFERENCES `systemicTreatmentScheme`(`id`),
+    FOREIGN KEY (`systemicTreatmentId`) REFERENCES `systemicTreatment`(`id`),
     PRIMARY KEY (`id`)
 );
 

@@ -17,8 +17,8 @@ enum class Treatment(val drugs: Set<Drug>?, val display: String, val treatmentGr
     FLUOROURACIL_BEVACIZUMAB(setOf(Drug.FLUOROURACIL, Drug.BEVACIZUMAB), "Fluorouracil-B", TreatmentGroup.CAPECITABINE_B_OR_FLUOROURACIL_B),
     IRINOTECAN(setOf(Drug.IRINOTECAN), "Irinotecan", TreatmentGroup.IRINOTECAN),
     NIVOLUMAB(setOf(Drug.NIVOLUMAB), "Nivolumab", TreatmentGroup.NIVOLUMAB),
-    OTHER(null, "Other", TreatmentGroup.OTHER),
-    PEMBROLIZUMAB(setOf(Drug.PEMBROLIZUMAB), "Pembrolizumab", TreatmentGroup.PEMBROLIZUMAB);
+    PEMBROLIZUMAB(setOf(Drug.PEMBROLIZUMAB), "Pembrolizumab", TreatmentGroup.PEMBROLIZUMAB),
+    OTHER(null, "Other", TreatmentGroup.OTHER);
     companion object {
         private val plansByDrugSet = Treatment.entries.filterNot { it.drugs == null }.associateBy(Treatment::drugs)
 

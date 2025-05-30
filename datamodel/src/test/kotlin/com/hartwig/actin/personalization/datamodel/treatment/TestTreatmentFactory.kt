@@ -30,10 +30,12 @@ object TestTreatmentFactory {
         val systemicTreatments = systemicTreatment?.let {
             listOf(
                 SystemicTreatment(
-                    daysBetweenDiagnosisAndStart = daysBetweenDiagnosisAndSystemicTreatmentStart,
-                    daysBetweenDiagnosisAndStop = null,
                     treatment = systemicTreatment,
-                    schemes = emptyList()
+                    schemes = listOf(
+                        listOf(
+                            TestDatamodelFactory.drugTreatment(daysBetweenDiagnosisAndStart = daysBetweenDiagnosisAndSystemicTreatmentStart)
+                        )
+                    )
                 )
             )
         } ?: emptyList()

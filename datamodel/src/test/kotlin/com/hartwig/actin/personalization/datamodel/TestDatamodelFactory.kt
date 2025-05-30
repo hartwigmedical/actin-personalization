@@ -29,6 +29,9 @@ import com.hartwig.actin.personalization.datamodel.outcome.ProgressionMeasure
 import com.hartwig.actin.personalization.datamodel.outcome.ProgressionMeasureFollowUpEvent
 import com.hartwig.actin.personalization.datamodel.outcome.ProgressionMeasureType
 import com.hartwig.actin.personalization.datamodel.outcome.ResponseMeasure
+import com.hartwig.actin.personalization.datamodel.treatment.Drug
+import com.hartwig.actin.personalization.datamodel.treatment.DrugScheme
+import com.hartwig.actin.personalization.datamodel.treatment.DrugTreatment
 import com.hartwig.actin.personalization.datamodel.treatment.GastroenterologyResection
 import com.hartwig.actin.personalization.datamodel.treatment.HipecTreatment
 import com.hartwig.actin.personalization.datamodel.treatment.MetastaticPresence
@@ -38,7 +41,9 @@ import com.hartwig.actin.personalization.datamodel.treatment.PrimaryRadiotherapy
 import com.hartwig.actin.personalization.datamodel.treatment.PrimarySurgery
 import com.hartwig.actin.personalization.datamodel.treatment.ReasonRefrainmentFromTreatment
 import com.hartwig.actin.personalization.datamodel.treatment.SystemicTreatment
+import com.hartwig.actin.personalization.datamodel.treatment.Treatment
 import com.hartwig.actin.personalization.datamodel.treatment.TreatmentEpisode
+import com.hartwig.actin.personalization.datamodel.treatment.TreatmentIntent
 
 object TestDatamodelFactory {
 
@@ -177,6 +182,38 @@ object TestDatamodelFactory {
             systemicTreatments = systemicTreatments,
             responseMeasures = responseMeasures,
             progressionMeasures = progressionMeasures
+        )
+    }
+
+    fun systemicTreatment(
+        treatment: Treatment = Treatment.OTHER,
+        schemes: List<DrugScheme> = emptyList()
+    ): SystemicTreatment {
+        return SystemicTreatment(
+            treatment = treatment,
+            schemes = schemes
+        )
+    }
+
+    fun drugTreatment(
+        daysBetweenDiagnosisAndStart: Int? = null,
+        daysBetweenDiagnosisAndStop: Int? = null,
+        drug: Drug = Drug.CAPECITABINE,
+        numberOfCycles: Int? = null,
+        intent: TreatmentIntent? = null,
+        drugTreatmentIsOngoing: Boolean? = null,
+        isAdministeredPreSurgery: Boolean? = null,
+        isAdministeredPostSurgery: Boolean? = null
+    ): DrugTreatment {
+        return DrugTreatment(
+            daysBetweenDiagnosisAndStart = daysBetweenDiagnosisAndStart,
+            daysBetweenDiagnosisAndStop = daysBetweenDiagnosisAndStop,
+            drug = drug,
+            numberOfCycles = numberOfCycles,
+            intent = intent,
+            drugTreatmentIsOngoing = drugTreatmentIsOngoing,
+            isAdministeredPreSurgery = isAdministeredPreSurgery,
+            isAdministeredPostSurgery = isAdministeredPostSurgery
         )
     }
 

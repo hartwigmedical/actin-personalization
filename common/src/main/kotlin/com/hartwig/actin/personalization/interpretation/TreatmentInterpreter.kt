@@ -19,7 +19,8 @@ class TreatmentInterpreter(private val treatmentEpisodes: List<TreatmentEpisode>
     }
 
     fun determineMetastaticSystemicTreatmentStart(): Int? {
-        return extractMetastaticTreatmentEpisode()?.systemicTreatments?.mapNotNull { it.daysBetweenDiagnosisAndStart }?.minOfOrNull { it }
+        return extractMetastaticTreatmentEpisode()?.systemicTreatments?.mapNotNull { determineDaysBetweenDiagnosisAndStart(it) }
+            ?.minOfOrNull { it }
     }
 
     fun hasPostMetastaticTreatmentWithSystemicTreatmentOnly(): Boolean {
@@ -99,10 +100,14 @@ class TreatmentInterpreter(private val treatmentEpisodes: List<TreatmentEpisode>
 
     fun firstMetastaticSystemicTreatmentDuration(): Int? {
         val firstSystemicTreatment = extractFirstMetastaticSystemicTreatment() ?: return null
-        if (firstSystemicTreatment.daysBetweenDiagnosisAndStart == null || firstSystemicTreatment.daysBetweenDiagnosisAndStop == null) {
-            return null
+        val treatmentStart = determineDaysBetweenDiagnosisAndStart(firstSystemicTreatment)
+        val treatmentStop = determineDaysBetweenDiagnosisAndStop(firstSystemicTreatment)
+
+        return if (treatmentStart == null || treatmentStop == null) {
+            null
+        } else {
+            treatmentStart - treatmentStop
         }
-        return firstSystemicTreatment.daysBetweenDiagnosisAndStop!! - firstSystemicTreatment.daysBetweenDiagnosisAndStart!!
     }
 
     fun hasProgressionEventAfterMetastaticSystemicTreatmentStart(): Boolean? {
@@ -127,11 +132,11 @@ class TreatmentInterpreter(private val treatmentEpisodes: List<TreatmentEpisode>
 
     private fun firstProgressionAfterSystemicTreatmentStart(treatmentEpisode: TreatmentEpisode): ProgressionMeasure? {
         val systemicTreatment = treatmentEpisode.systemicTreatments.firstOrNull() ?: return null
-        val startOfTreatment = systemicTreatment.daysBetweenDiagnosisAndStart
+        val startOfTreatment = determineDaysBetweenDiagnosisAndStart(systemicTreatment)
 
         return treatmentEpisode.progressionMeasures
             .filter { it.type == ProgressionMeasureType.PROGRESSION }
-            .filter { startOfTreatment == null || it.daysSinceDiagnosis?.let { it > startOfTreatment } ?: false }
+            .filter { startOfTreatment == null || it.daysSinceDiagnosis?.let { days -> days > startOfTreatment } ?: false }
             .sortedBy { it.daysSinceDiagnosis }
             .firstOrNull()
     }
@@ -148,5 +153,13 @@ class TreatmentInterpreter(private val treatmentEpisodes: List<TreatmentEpisode>
 
     private fun extractFirstMetastaticSystemicTreatment(): SystemicTreatment? {
         return extractMetastaticTreatmentEpisode()?.systemicTreatments?.firstOrNull()
+    }
+
+    private fun determineDaysBetweenDiagnosisAndStart(systemicTreatment: SystemicTreatment): Int? {
+        return systemicTreatment.schemes.flatten().mapNotNull { it.daysBetweenDiagnosisAndStart }.minOfOrNull { it }
+    }
+
+    private fun determineDaysBetweenDiagnosisAndStop(systemicTreatment: SystemicTreatment): Int? {
+        return systemicTreatment.schemes.flatten().mapNotNull { it.daysBetweenDiagnosisAndStop }.maxOfOrNull { it }
     }
 }

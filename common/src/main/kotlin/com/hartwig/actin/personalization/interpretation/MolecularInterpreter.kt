@@ -31,5 +31,4 @@ class MolecularInterpreter(
             .filter { it.daysSinceDiagnosis <= maxDaysSinceDiagnosis }
             .maxByOrNull { it.daysSinceDiagnosis }
     }
-
 }
