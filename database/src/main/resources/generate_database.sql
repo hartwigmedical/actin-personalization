@@ -1,7 +1,5 @@
 SET FOREIGN_KEY_CHECKS = 0;
   
-DROP TABLE IF EXISTS `systemicTreatmentScheme`;
-
 DROP TABLE IF EXISTS `entry`;
 CREATE TABLE `entry` (
     `id` INT NOT NULL,
