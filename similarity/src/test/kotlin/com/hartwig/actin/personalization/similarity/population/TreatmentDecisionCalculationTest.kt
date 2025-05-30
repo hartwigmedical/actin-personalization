@@ -9,7 +9,7 @@ private const val ELIGIBLE_SUB_POPULATION_SIZE = 100
 
 class TreatmentDecisionCalculationTest {
 
-    private val entry = TestReferenceEntryFactory.minimalReferenceEntry()
+    private val entry = TestReferenceEntryFactory.minimal()
     
     @Test
     fun `Should evaluate all reference entries as eligible`() {

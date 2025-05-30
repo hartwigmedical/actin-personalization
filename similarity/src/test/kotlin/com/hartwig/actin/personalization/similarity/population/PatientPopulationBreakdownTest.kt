@@ -1,8 +1,8 @@
 package com.hartwig.actin.personalization.similarity.population
 
-import com.hartwig.actin.personalization.datamodel.TestDatamodelFactory
 import com.hartwig.actin.personalization.datamodel.treatment.Treatment
 import com.hartwig.actin.personalization.datamodel.treatment.TreatmentGroup
+import com.hartwig.actin.personalization.similarity.SimilarityTestFactory
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
@@ -10,7 +10,7 @@ class PatientPopulationBreakdownTest {
 
     @Test
     fun `Should analyze treatments for each sub-population`() {
-        val fluorouracilEntry = TestDatamodelFactory.entry(
+        val fluorouracilEntry = SimilarityTestFactory.createEntry(
             ageAtDiagnosis = 50,
             isAlive = false,
             daysBetweenDiagnosisAndSurvivalMeasurement = 300,
@@ -18,7 +18,7 @@ class PatientPopulationBreakdownTest {
             daysBetweenDiagnosisAndProgression = 70,
             hasProgressionEvent = true
         )
-        val capecitabineEntry = TestDatamodelFactory.entry(
+        val capecitabineEntry = SimilarityTestFactory.createEntry(
             ageAtDiagnosis = 50,
             isAlive = false,
             daysBetweenDiagnosisAndSurvivalMeasurement = 350,
@@ -26,7 +26,7 @@ class PatientPopulationBreakdownTest {
             hasProgressionEvent = true,
             daysBetweenDiagnosisAndProgression = null
         )
-        val capoxEntry = TestDatamodelFactory.entry(
+        val capoxEntry = SimilarityTestFactory.createEntry(
             ageAtDiagnosis = 85,
             isAlive = false,
             daysBetweenDiagnosisAndSurvivalMeasurement = 400,

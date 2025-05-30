@@ -58,7 +58,7 @@ class DatabaseWriterTest {
 
     @Test
     fun `Should insert empty reference entry`() {
-        val entries = listOf(TestReferenceEntryFactory.emptyReferenceEntry())
+        val entries = listOf(TestReferenceEntryFactory.empty())
 
         writer.writeAllToDb(entries)
         compareEntries(entries)
@@ -66,7 +66,7 @@ class DatabaseWriterTest {
 
     @Test
     fun `Should insert minimal reference entry`() {
-        val records = listOf(TestReferenceEntryFactory.minimalReferenceEntry())
+        val records = listOf(TestReferenceEntryFactory.minimal())
 
         writer.writeAllToDb(records)
         compareEntries(records)
@@ -74,7 +74,7 @@ class DatabaseWriterTest {
 
     @Test
     fun `Should insert exhaustive reference entry`() {
-        val entries = listOf(TestReferenceEntryFactory.exhaustiveReferenceEntry())
+        val entries = listOf(TestReferenceEntryFactory.exhaustive())
 
         writer.writeAllToDb(entries)
         compareEntries(entries)
@@ -248,9 +248,9 @@ class DatabaseWriterTest {
         assertThat(record.get(table.CLINICALTNMT) ?: null).isEqualTo(expected.clinicalTnmClassification.tnmT?.name)
         assertThat(record.get(table.CLINICALTNMN) ?: null).isEqualTo(expected.clinicalTnmClassification.tnmN?.name)
         assertThat(record.get(table.CLINICALTNMM) ?: null).isEqualTo(expected.clinicalTnmClassification.tnmM?.name)
-        assertThat(record.get(table.PATHOLOGICALTNMT) ?: null).isEqualTo(expected.pathologicalTnmClassification.tnmT?.name)
-        assertThat(record.get(table.PATHOLOGICALTNMN) ?: null).isEqualTo(expected.pathologicalTnmClassification.tnmN?.name)
-        assertThat(record.get(table.PATHOLOGICALTNMM) ?: null).isEqualTo(expected.pathologicalTnmClassification.tnmM?.name)
+        assertThat(record.get(table.PATHOLOGICALTNMT) ?: null).isEqualTo(expected.pathologicalTnmClassification?.tnmT?.name)
+        assertThat(record.get(table.PATHOLOGICALTNMN) ?: null).isEqualTo(expected.pathologicalTnmClassification?.tnmN?.name)
+        assertThat(record.get(table.PATHOLOGICALTNMM) ?: null).isEqualTo(expected.pathologicalTnmClassification?.tnmM?.name)
         assertThat(record.get(table.CLINICALTUMORSTAGE) ?: null).isEqualTo(expected.clinicalTumorStage.name)
         assertThat(record.get(table.PATHOLOGICALTUMORSTAGE) ?: null).isEqualTo(expected.pathologicalTumorStage.name)
         assertThat(record.get(table.INVESTIGATEDLYMPHNODESCOUNT) ?: null).isEqualTo(expected.investigatedLymphNodesCount)
@@ -324,7 +324,6 @@ class DatabaseWriterTest {
         assertThat(record.get(table.HASRENALDISEASE)).isEqualTo(expected.hasRenalDisease)
         assertThat(record.get(table.HASLIVERDISEASE)).isEqualTo(expected.hasLiverDisease)
         assertThat(record.get(table.HASULCERDISEASE)).isEqualTo(expected.hasUlcerDisease)
-
     }
 
     private fun compareMolecularResult(record: MolecularresultRecord, expected: MolecularResult) {

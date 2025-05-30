@@ -29,7 +29,6 @@ import com.hartwig.actin.personalization.datamodel.outcome.ProgressionMeasure
 import com.hartwig.actin.personalization.datamodel.outcome.ProgressionMeasureFollowUpEvent
 import com.hartwig.actin.personalization.datamodel.outcome.ProgressionMeasureType
 import com.hartwig.actin.personalization.datamodel.outcome.ResponseMeasure
-import com.hartwig.actin.personalization.datamodel.outcome.SurvivalMeasurement
 import com.hartwig.actin.personalization.datamodel.treatment.GastroenterologyResection
 import com.hartwig.actin.personalization.datamodel.treatment.HipecTreatment
 import com.hartwig.actin.personalization.datamodel.treatment.MetastaticPresence
@@ -38,52 +37,10 @@ import com.hartwig.actin.personalization.datamodel.treatment.MetastaticSurgery
 import com.hartwig.actin.personalization.datamodel.treatment.PrimaryRadiotherapy
 import com.hartwig.actin.personalization.datamodel.treatment.PrimarySurgery
 import com.hartwig.actin.personalization.datamodel.treatment.ReasonRefrainmentFromTreatment
-import com.hartwig.actin.personalization.datamodel.treatment.SurgeryType
 import com.hartwig.actin.personalization.datamodel.treatment.SystemicTreatment
-import com.hartwig.actin.personalization.datamodel.treatment.TestTreatmentFactory
-import com.hartwig.actin.personalization.datamodel.treatment.Treatment
 import com.hartwig.actin.personalization.datamodel.treatment.TreatmentEpisode
 
 object TestDatamodelFactory {
-
-    fun entry(
-        ageAtDiagnosis: Int = 75,
-        isAlive: Boolean = false,
-        daysBetweenDiagnosisAndSurvivalMeasurement: Int = 100,
-        metastaticPresenceUnderSystemicTreatment: MetastaticPresence = MetastaticPresence.AT_START,
-        systemicTreatment: Treatment? = null,
-        systemicTreatmentStart: Int? = null,
-        primarySurgeryType: SurgeryType? = null,
-        daysBetweenDiagnosisAndProgression: Int? = null,
-        hasProgressionEvent: Boolean? = null
-    ): ReferenceEntry {
-        val treatmentEpisode = TestTreatmentFactory.create(
-            metastaticPresence = metastaticPresenceUnderSystemicTreatment,
-            systemicTreatment = systemicTreatment,
-            daysBetweenDiagnosisAndSystemicTreatmentStart = systemicTreatmentStart,
-            primarySurgeryType = primarySurgeryType,
-            daysBetweenDiagnosisAndProgression = daysBetweenDiagnosisAndProgression,
-            hasProgressionEvent = hasProgressionEvent
-        )
-
-        return entry(ageAtDiagnosis, isAlive, daysBetweenDiagnosisAndSurvivalMeasurement, treatmentEpisode)
-    }
-
-    fun entry(
-        ageAtDiagnosis: Int = 75,
-        isAlive: Boolean = true,
-        daysBetweenDiagnosisAndSurvivalMeasurement: Int = 100,
-        treatmentEpisode: TreatmentEpisode? = null
-    ): ReferenceEntry {
-        return TestReferenceEntryFactory.minimalReferenceEntry().copy(
-            ageAtDiagnosis = ageAtDiagnosis,
-            latestSurvivalMeasurement = SurvivalMeasurement(
-                daysSinceDiagnosis = daysBetweenDiagnosisAndSurvivalMeasurement,
-                isAlive = isAlive
-            ),
-            treatmentEpisodes = treatmentEpisode?.let { listOf(it) } ?: emptyList()
-        )
-    }
 
     fun primaryDiagnosis(
         basisOfDiagnosis: BasisOfDiagnosis = BasisOfDiagnosis.CLINICAL_ONLY_INVESTIGATION,

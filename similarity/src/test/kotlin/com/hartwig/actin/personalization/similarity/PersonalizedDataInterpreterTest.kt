@@ -1,6 +1,5 @@
 package com.hartwig.actin.personalization.similarity
 
-import com.hartwig.actin.personalization.datamodel.TestDatamodelFactory
 import com.hartwig.actin.personalization.datamodel.treatment.MetastaticPresence
 import com.hartwig.actin.personalization.datamodel.treatment.SurgeryType
 import com.hartwig.actin.personalization.datamodel.treatment.Treatment
@@ -11,19 +10,19 @@ class PersonalizedDataInterpreterTest {
 
     @Test
     fun `Should create interpreter with filtered and grouped reference entries`() {
-        val fluorouracilEntry = TestDatamodelFactory.entry(systemicTreatment = Treatment.FLUOROURACIL)
-        val capecitabineEntry = TestDatamodelFactory.entry(systemicTreatment = Treatment.CAPECITABINE)
-        val capoxEntry = TestDatamodelFactory.entry(systemicTreatment = Treatment.CAPOX)
+        val fluorouracilEntry = SimilarityTestFactory.createEntry(systemicTreatment = Treatment.FLUOROURACIL)
+        val capecitabineEntry = SimilarityTestFactory.createEntry(systemicTreatment = Treatment.CAPECITABINE)
+        val capoxEntry = SimilarityTestFactory.createEntry(systemicTreatment = Treatment.CAPOX)
 
         val entries = listOf(
             fluorouracilEntry,
-            TestDatamodelFactory.entry(
+            SimilarityTestFactory.createEntry(
                 systemicTreatment = Treatment.FLUOROURACIL,
                 metastaticPresenceUnderSystemicTreatment = MetastaticPresence.AT_PROGRESSION
             ),
-            TestDatamodelFactory.entry(systemicTreatment = Treatment.OTHER),
-            TestDatamodelFactory.entry(systemicTreatment = null),
-            TestDatamodelFactory.entry(systemicTreatment = Treatment.FLUOROURACIL, primarySurgeryType = SurgeryType.NOS_OR_OTHER),
+            SimilarityTestFactory.createEntry(systemicTreatment = Treatment.OTHER),
+            SimilarityTestFactory.createEntry(systemicTreatment = null),
+            SimilarityTestFactory.createEntry(systemicTreatment = Treatment.FLUOROURACIL, primarySurgeryType = SurgeryType.NOS_OR_OTHER),
             capecitabineEntry,
             capoxEntry
         )

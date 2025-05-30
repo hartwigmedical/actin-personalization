@@ -1,17 +1,22 @@
 package com.hartwig.actin.personalization.datamodel
 
+import com.hartwig.actin.personalization.datamodel.assessment.AsaAssessment
 import com.hartwig.actin.personalization.datamodel.assessment.AsaClassification
 import com.hartwig.actin.personalization.datamodel.assessment.ComorbidityAssessment
 import com.hartwig.actin.personalization.datamodel.assessment.LabMeasure
+import com.hartwig.actin.personalization.datamodel.assessment.LabMeasurement
 import com.hartwig.actin.personalization.datamodel.assessment.MolecularResult
 import com.hartwig.actin.personalization.datamodel.assessment.Unit
+import com.hartwig.actin.personalization.datamodel.assessment.WhoAssessment
 import com.hartwig.actin.personalization.datamodel.diagnosis.AnorectalVergeDistanceCategory
 import com.hartwig.actin.personalization.datamodel.diagnosis.BasisOfDiagnosis
 import com.hartwig.actin.personalization.datamodel.diagnosis.DifferentiationGrade
 import com.hartwig.actin.personalization.datamodel.diagnosis.ExtraMuralInvasionCategory
 import com.hartwig.actin.personalization.datamodel.diagnosis.LymphaticInvasionCategory
 import com.hartwig.actin.personalization.datamodel.diagnosis.Metastasis
+import com.hartwig.actin.personalization.datamodel.diagnosis.MetastaticDiagnosis
 import com.hartwig.actin.personalization.datamodel.diagnosis.NumberOfLiverMetastases
+import com.hartwig.actin.personalization.datamodel.diagnosis.PrimaryDiagnosis
 import com.hartwig.actin.personalization.datamodel.diagnosis.PriorTumor
 import com.hartwig.actin.personalization.datamodel.diagnosis.Sidedness
 import com.hartwig.actin.personalization.datamodel.diagnosis.TnmClassification
@@ -24,6 +29,7 @@ import com.hartwig.actin.personalization.datamodel.diagnosis.TumorRegression
 import com.hartwig.actin.personalization.datamodel.diagnosis.TumorStage
 import com.hartwig.actin.personalization.datamodel.diagnosis.TumorType
 import com.hartwig.actin.personalization.datamodel.diagnosis.VenousInvasionDescription
+import com.hartwig.actin.personalization.datamodel.outcome.ProgressionMeasure
 import com.hartwig.actin.personalization.datamodel.outcome.ProgressionMeasureFollowUpEvent
 import com.hartwig.actin.personalization.datamodel.outcome.ProgressionMeasureType
 import com.hartwig.actin.personalization.datamodel.outcome.ResponseMeasure
@@ -57,7 +63,7 @@ import com.hartwig.actin.personalization.datamodel.treatment.TreatmentIntent
 
 object TestReferenceEntryFactory {
 
-    fun emptyReferenceEntry() = ReferenceEntry(
+    fun empty() = ReferenceEntry(
         source = ReferenceSource.INTERNAL,
         sourceId = 1,
         diagnosisYear = 1971,
@@ -75,7 +81,7 @@ object TestReferenceEntryFactory {
         treatmentEpisodes = emptyList()
     )
 
-    fun minimalReferenceEntry() = ReferenceEntry(
+    fun minimal() = ReferenceEntry(
         source = ReferenceSource.INTERNAL,
         sourceId = 2,
         diagnosisYear = 1966,
@@ -93,7 +99,7 @@ object TestReferenceEntryFactory {
         treatmentEpisodes = listOf(minimalTreatmentEpisode())
     )
 
-    fun exhaustiveReferenceEntry() = ReferenceEntry(
+    fun exhaustive() = ReferenceEntry(
         source = ReferenceSource.INTERNAL,
         sourceId = 2,
         diagnosisYear = 1961,
@@ -129,7 +135,7 @@ object TestReferenceEntryFactory {
         systemicDrugsReceived = listOf(Drug.IMATINIB, Drug.TEGAFUR)
     )
 
-    private fun minimalPrimaryDiagnosis() = TestDatamodelFactory.primaryDiagnosis(
+    private fun minimalPrimaryDiagnosis() = PrimaryDiagnosis(
         basisOfDiagnosis = BasisOfDiagnosis.HISTOLOGICAL_CONFIRMATION,
         hasDoublePrimaryTumor = false,
         primaryTumorType = TumorType.CRC_OTHER,
@@ -172,7 +178,7 @@ object TestReferenceEntryFactory {
         distanceToMesorectalFasciaMm = 2
     )
 
-    private fun minimalMetastaticDiagnosis() = TestDatamodelFactory.metastaticDiagnosis(
+    private fun minimalMetastaticDiagnosis() = MetastaticDiagnosis(
         isMetachronous = false,
         metastases = emptyList(),
         numberOfLiverMetastases = null,
@@ -183,7 +189,7 @@ object TestReferenceEntryFactory {
         positiveLymphNodesCount = null
     )
 
-    private fun exhaustiveMetastaticDiagnosis() = TestDatamodelFactory.metastaticDiagnosis(
+    private fun exhaustiveMetastaticDiagnosis() = MetastaticDiagnosis(
         isMetachronous = true,
         metastases = listOf(
             Metastasis(
@@ -202,12 +208,12 @@ object TestReferenceEntryFactory {
         positiveLymphNodesCount = 10
     )
 
-    private fun minimalWhoAssessment() = TestDatamodelFactory.whoAssessment(
+    private fun minimalWhoAssessment() = WhoAssessment(
         daysSinceDiagnosis = 2,
         whoStatus = 2
     )
 
-    private fun minimalAsaAssessment() = TestDatamodelFactory.asaAssessment(
+    private fun minimalAsaAssessment() = AsaAssessment(
         daysSinceDiagnosis = 2,
         classification = AsaClassification.V
     )
@@ -252,7 +258,7 @@ object TestReferenceEntryFactory {
         hasKrasG12CMutation = false
     )
 
-    private fun minimalLabMeasurement() = TestDatamodelFactory.labMeasurement(
+    private fun minimalLabMeasurement() = LabMeasurement(
         daysSinceDiagnosis = 0,
         name = LabMeasure.CARCINOEMBRYONIC_ANTIGEN,
         value = 10.0,
@@ -261,7 +267,7 @@ object TestReferenceEntryFactory {
         isPostSurgical = null
     )
 
-    private fun exhaustiveLabMeasurement() = TestDatamodelFactory.labMeasurement(
+    private fun exhaustiveLabMeasurement() = LabMeasurement(
         daysSinceDiagnosis = 10,
         name = LabMeasure.CARCINOEMBRYONIC_ANTIGEN,
         value = 10.0,
@@ -398,13 +404,13 @@ object TestReferenceEntryFactory {
         response = ResponseType.MR
     )
 
-    private fun minimalProgressionMeasure() = TestDatamodelFactory.progressionMeasure(
+    private fun minimalProgressionMeasure() = ProgressionMeasure(
         daysSinceDiagnosis = null,
         type = ProgressionMeasureType.PROGRESSION,
         followUpEvent = null
     )
 
-    private fun exhaustiveProgressionMeasure() = TestDatamodelFactory.progressionMeasure(
+    private fun exhaustiveProgressionMeasure() = ProgressionMeasure(
         daysSinceDiagnosis = 10,
         type = ProgressionMeasureType.CENSOR,
         followUpEvent = ProgressionMeasureFollowUpEvent.DISTANT_AND_POSSIBLY_REGIONAL_OR_LOCAL
