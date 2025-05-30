@@ -28,8 +28,14 @@ import com.hartwig.actin.personalization.datamodel.diagnosis.VenousInvasionDescr
 import com.hartwig.actin.personalization.datamodel.outcome.ProgressionMeasure
 import com.hartwig.actin.personalization.datamodel.outcome.ProgressionMeasureFollowUpEvent
 import com.hartwig.actin.personalization.datamodel.outcome.ProgressionMeasureType
+import com.hartwig.actin.personalization.datamodel.outcome.ResponseMeasure
 import com.hartwig.actin.personalization.datamodel.outcome.SurvivalMeasurement
+import com.hartwig.actin.personalization.datamodel.treatment.GastroenterologyResection
+import com.hartwig.actin.personalization.datamodel.treatment.HipecTreatment
 import com.hartwig.actin.personalization.datamodel.treatment.MetastaticPresence
+import com.hartwig.actin.personalization.datamodel.treatment.MetastaticRadiotherapy
+import com.hartwig.actin.personalization.datamodel.treatment.MetastaticSurgery
+import com.hartwig.actin.personalization.datamodel.treatment.PrimaryRadiotherapy
 import com.hartwig.actin.personalization.datamodel.treatment.PrimarySurgery
 import com.hartwig.actin.personalization.datamodel.treatment.ReasonRefrainmentFromTreatment
 import com.hartwig.actin.personalization.datamodel.treatment.SurgeryType
@@ -185,6 +191,34 @@ object TestDatamodelFactory {
             unit = unit,
             isPreSurgical = isPreSurgical,
             isPostSurgical = isPostSurgical
+        )
+    }
+
+    fun treatmentEpisode(
+        metastaticPresence: MetastaticPresence = MetastaticPresence.ABSENT,
+        reasonRefrainmentFromTreatment: ReasonRefrainmentFromTreatment = ReasonRefrainmentFromTreatment.NOT_APPLICABLE,
+        gastroenterologyResections: List<GastroenterologyResection> = emptyList(),
+        primarySurgeries: List<PrimarySurgery> = emptyList(),
+        metastaticSurgeries: List<MetastaticSurgery> = emptyList(),
+        hipecTreatments: List<HipecTreatment> = emptyList(),
+        primaryRadiotherapies: List<PrimaryRadiotherapy> = emptyList(),
+        metastaticRadiotherapies: List<MetastaticRadiotherapy> = emptyList(),
+        systemicTreatments: List<SystemicTreatment> = emptyList(),
+        responseMeasures: List<ResponseMeasure> = emptyList(),
+        progressionMeasures: List<ProgressionMeasure> = emptyList()
+    ): TreatmentEpisode {
+        return TreatmentEpisode(
+            metastaticPresence = metastaticPresence,
+            reasonRefrainmentFromTreatment = reasonRefrainmentFromTreatment,
+            gastroenterologyResections = gastroenterologyResections,
+            primarySurgeries = primarySurgeries,
+            metastaticSurgeries = metastaticSurgeries,
+            hipecTreatments = hipecTreatments,
+            primaryRadiotherapies = primaryRadiotherapies,
+            metastaticRadiotherapies = metastaticRadiotherapies,
+            systemicTreatments = systemicTreatments,
+            responseMeasures = responseMeasures,
+            progressionMeasures = progressionMeasures
         )
     }
 

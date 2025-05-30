@@ -429,6 +429,7 @@ CREATE TABLE `reference` (
     `hasHadMetastaticRadiotherapy` BOOL NOT NULL,
     
     `hasHadSystemicTreatmentPriorToMetastaticDiagnosis` BOOL NOT NULL,
+    `isMetastaticPriorToMetastaticTreatmentDecision` BOOL NOT NULL,
     `reasonRefrainmentFromTreatment` VARCHAR(255) NOT NULL,
     `daysBetweenMetastaticDiagnosisAndTreatmentStart` INT,  
     `systemicTreatmentsAfterMetastaticDiagnosis` INT,

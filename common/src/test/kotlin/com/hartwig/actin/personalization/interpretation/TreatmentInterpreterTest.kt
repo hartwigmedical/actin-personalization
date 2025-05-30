@@ -2,6 +2,7 @@ package com.hartwig.actin.personalization.interpretation
 
 import com.hartwig.actin.personalization.datamodel.TestDatamodelFactory
 import com.hartwig.actin.personalization.datamodel.outcome.ProgressionMeasureType
+import com.hartwig.actin.personalization.datamodel.treatment.MetastaticPresence
 import com.hartwig.actin.personalization.datamodel.treatment.Treatment
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -9,9 +10,27 @@ import org.junit.jupiter.api.Test
 class TreatmentInterpreterTest {
 
     @Test
+    fun `Should determine whether metastatic treatment episode exists`() {
+        val noEpisodeInterpreter = TreatmentInterpreter(emptyList())
+        assertThat(noEpisodeInterpreter.hasMetastaticTreatment()).isFalse()
+
+        val noMetastaticTreatmentInterpreter =
+            TreatmentInterpreter(listOf(TestDatamodelFactory.treatmentEpisode(metastaticPresence = MetastaticPresence.ABSENT)))
+        assertThat(noMetastaticTreatmentInterpreter.hasMetastaticTreatment()).isFalse()
+
+        val startMetastaticTreatmentInterpreter =
+            TreatmentInterpreter(listOf(TestDatamodelFactory.treatmentEpisode(metastaticPresence = MetastaticPresence.AT_START)))
+        assertThat(startMetastaticTreatmentInterpreter.hasMetastaticTreatment()).isTrue()
+        
+        val progressionMetastaticTreatmentInterpreter =
+            TreatmentInterpreter(listOf(TestDatamodelFactory.treatmentEpisode(metastaticPresence = MetastaticPresence.AT_PROGRESSION)))
+        assertThat(progressionMetastaticTreatmentInterpreter.hasMetastaticTreatment()).isTrue()
+    }
+
+    @Test
     fun `Should determine whether progression has occurred`() {
         val interpreter = TreatmentInterpreter(listOf(TestDatamodelFactory.treatmentEpisode(systemicTreatment = Treatment.CAPOX)))
-        
+
         assertThat(interpreter.hasProgressionEventAfterMetastaticSystemicTreatmentStart()).isFalse()
     }
 
@@ -26,7 +45,7 @@ class TreatmentInterpreterTest {
             )
 
         val interpreter = TreatmentInterpreter(listOf(treatmentEpisode))
-        
+
         assertThat(interpreter.hasProgressionEventAfterMetastaticSystemicTreatmentStart()).isFalse()
     }
 

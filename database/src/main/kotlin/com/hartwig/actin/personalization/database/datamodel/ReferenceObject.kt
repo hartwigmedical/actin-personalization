@@ -18,7 +18,6 @@ import com.hartwig.actin.personalization.datamodel.diagnosis.TumorRegression
 import com.hartwig.actin.personalization.datamodel.diagnosis.TumorStage
 import com.hartwig.actin.personalization.datamodel.diagnosis.TumorType
 import com.hartwig.actin.personalization.datamodel.diagnosis.VenousInvasionDescription
-import org.w3c.dom.events.MutationEvent
 
 data class ReferenceObject(
     val source: ReferenceSource,
@@ -121,6 +120,7 @@ data class ReferenceObject(
     val hasHadMetastaticRadiotherapy: Boolean,
 
     val hasHadSystemicTreatmentPriorToMetastaticDiagnosis: Boolean,
+    val isMetastaticPriorToMetastaticTreatmentDecision: Boolean,
     val reasonRefrainmentFromTreatment: String?,
     val daysBetweenMetastaticDiagnosisAndTreatmentStart: Int?,
     val systemicTreatmentsAfterMetastaticDiagnosis: Int?,

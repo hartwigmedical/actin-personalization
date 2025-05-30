@@ -27,7 +27,7 @@ object ReferenceObjectFactory {
 
         val treatmentInterpreter = TreatmentInterpreter(entry.treatmentEpisodes)
         if (!treatmentInterpreter.hasMetastaticTreatment()) {
-            LOGGER.debug { "  No metastatic-at-start treatment episode found for entry with source ID ${entry.sourceId}" }
+            LOGGER.warn { "  No metastatic treatment episode found for entry with source ID ${entry.sourceId}" }
             return null
         }
         
@@ -157,6 +157,7 @@ object ReferenceObjectFactory {
             hasHadMetastaticRadiotherapy = treatmentInterpreter.hasMetastaticRadiotherapy(),
 
             hasHadSystemicTreatmentPriorToMetastaticDiagnosis = treatmentInterpreter.hasSystemicTreatmentPriorToMetastaticTreatment(),
+            isMetastaticPriorToMetastaticTreatmentDecision = treatmentInterpreter.isMetastaticPriorToMetastaticTreatmentDecision(),
             reasonRefrainmentFromTreatment = treatmentInterpreter.reasonRefrainmentFromTreatment(),
             daysBetweenMetastaticDiagnosisAndTreatmentStart = daysBetweenMetastaticDiagnosisAndTreatmentStart,
             systemicTreatmentsAfterMetastaticDiagnosis = treatmentInterpreter.metastaticSystemicTreatmentCount(),
