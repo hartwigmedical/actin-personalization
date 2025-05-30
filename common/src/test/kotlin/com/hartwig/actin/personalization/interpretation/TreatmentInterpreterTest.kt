@@ -3,6 +3,7 @@ package com.hartwig.actin.personalization.interpretation
 import com.hartwig.actin.personalization.datamodel.TestDatamodelFactory
 import com.hartwig.actin.personalization.datamodel.outcome.ProgressionMeasureType
 import com.hartwig.actin.personalization.datamodel.treatment.MetastaticPresence
+import com.hartwig.actin.personalization.datamodel.treatment.TestTreatmentFactory
 import com.hartwig.actin.personalization.datamodel.treatment.Treatment
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -10,26 +11,30 @@ import org.junit.jupiter.api.Test
 class TreatmentInterpreterTest {
 
     @Test
-    fun `Should determine whether metastatic treatment episode exists`() {
+    fun `Should determine state about existence and timing of metastatic treatment`() {
         val noEpisodeInterpreter = TreatmentInterpreter(emptyList())
         assertThat(noEpisodeInterpreter.hasMetastaticTreatment()).isFalse()
+        assertThat(noEpisodeInterpreter.isMetastaticPriorToMetastaticTreatmentDecision()).isFalse()
 
         val noMetastaticTreatmentInterpreter =
             TreatmentInterpreter(listOf(TestDatamodelFactory.treatmentEpisode(metastaticPresence = MetastaticPresence.ABSENT)))
         assertThat(noMetastaticTreatmentInterpreter.hasMetastaticTreatment()).isFalse()
+        assertThat(noMetastaticTreatmentInterpreter.isMetastaticPriorToMetastaticTreatmentDecision()).isFalse()
 
         val startMetastaticTreatmentInterpreter =
             TreatmentInterpreter(listOf(TestDatamodelFactory.treatmentEpisode(metastaticPresence = MetastaticPresence.AT_START)))
         assertThat(startMetastaticTreatmentInterpreter.hasMetastaticTreatment()).isTrue()
+        assertThat(startMetastaticTreatmentInterpreter.isMetastaticPriorToMetastaticTreatmentDecision()).isTrue()
         
         val progressionMetastaticTreatmentInterpreter =
             TreatmentInterpreter(listOf(TestDatamodelFactory.treatmentEpisode(metastaticPresence = MetastaticPresence.AT_PROGRESSION)))
         assertThat(progressionMetastaticTreatmentInterpreter.hasMetastaticTreatment()).isTrue()
+        assertThat(progressionMetastaticTreatmentInterpreter.isMetastaticPriorToMetastaticTreatmentDecision()).isFalse()
     }
 
     @Test
     fun `Should determine whether progression has occurred`() {
-        val interpreter = TreatmentInterpreter(listOf(TestDatamodelFactory.treatmentEpisode(systemicTreatment = Treatment.CAPOX)))
+        val interpreter = TreatmentInterpreter(listOf(TestTreatmentFactory.create(systemicTreatment = Treatment.CAPOX)))
 
         assertThat(interpreter.hasProgressionEventAfterMetastaticSystemicTreatmentStart()).isFalse()
     }
@@ -37,7 +42,7 @@ class TreatmentInterpreterTest {
     @Test
     fun `Should ignore progression events prior to systemic treatment start`() {
         val treatmentEpisode =
-            TestDatamodelFactory.treatmentEpisode(
+            TestTreatmentFactory.create(
                 systemicTreatment = Treatment.CAPOX,
                 daysBetweenDiagnosisAndSystemicTreatmentStart = 10,
                 hasProgressionEvent = true,
@@ -52,7 +57,7 @@ class TreatmentInterpreterTest {
     @Test
     fun `Should return first progression measure when multiple after treatment start`() {
         val treatmentEpisodeWithMultipleProgression =
-            TestDatamodelFactory.treatmentEpisode(
+            TestTreatmentFactory.create(
                 systemicTreatment = Treatment.CAPOX,
                 daysBetweenDiagnosisAndSystemicTreatmentStart = 10
             ).copy(

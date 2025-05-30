@@ -40,6 +40,7 @@ import com.hartwig.actin.personalization.datamodel.treatment.PrimarySurgery
 import com.hartwig.actin.personalization.datamodel.treatment.ReasonRefrainmentFromTreatment
 import com.hartwig.actin.personalization.datamodel.treatment.SurgeryType
 import com.hartwig.actin.personalization.datamodel.treatment.SystemicTreatment
+import com.hartwig.actin.personalization.datamodel.treatment.TestTreatmentFactory
 import com.hartwig.actin.personalization.datamodel.treatment.Treatment
 import com.hartwig.actin.personalization.datamodel.treatment.TreatmentEpisode
 
@@ -56,7 +57,7 @@ object TestDatamodelFactory {
         daysBetweenDiagnosisAndProgression: Int? = null,
         hasProgressionEvent: Boolean? = null
     ): ReferenceEntry {
-        val treatmentEpisode = treatmentEpisode(
+        val treatmentEpisode = TestTreatmentFactory.create(
             metastaticPresence = metastaticPresenceUnderSystemicTreatment,
             systemicTreatment = systemicTreatment,
             daysBetweenDiagnosisAndSystemicTreatmentStart = systemicTreatmentStart,
@@ -218,59 +219,6 @@ object TestDatamodelFactory {
             metastaticRadiotherapies = metastaticRadiotherapies,
             systemicTreatments = systemicTreatments,
             responseMeasures = responseMeasures,
-            progressionMeasures = progressionMeasures
-        )
-    }
-
-    fun treatmentEpisode(
-        metastaticPresence: MetastaticPresence = MetastaticPresence.AT_START,
-        systemicTreatment: Treatment? = null,
-        daysBetweenDiagnosisAndSystemicTreatmentStart: Int? = null,
-        primarySurgeryType: SurgeryType? = null,
-        hasProgressionEvent: Boolean? = null,
-        daysBetweenDiagnosisAndProgression: Int? = null
-    ): TreatmentEpisode {
-        val primarySurgeries = primarySurgeryType?.let {
-            listOf(
-                PrimarySurgery(
-                    daysSinceDiagnosis = null,
-                    type = it,
-                    technique = null,
-                    urgency = null,
-                    radicality = null,
-                    circumferentialResectionMargin = null,
-                    anastomoticLeakageAfterSurgery = null,
-                    hospitalizationDurationDays = null
-                )
-            )
-        } ?: emptyList()
-
-        val systemicTreatments = systemicTreatment?.let {
-            listOf(
-                SystemicTreatment(
-                    daysBetweenDiagnosisAndStart = daysBetweenDiagnosisAndSystemicTreatmentStart,
-                    daysBetweenDiagnosisAndStop = null,
-                    treatment = systemicTreatment,
-                    schemes = emptyList()
-                )
-            )
-        } ?: emptyList()
-
-        val progressionMeasures = hasProgressionEvent?.let { hasEvent ->
-            if (hasEvent) listOf(progressionMeasure(daysSinceDiagnosis = daysBetweenDiagnosisAndProgression)) else emptyList()
-        } ?: emptyList()
-
-        return TreatmentEpisode(
-            metastaticPresence = metastaticPresence,
-            reasonRefrainmentFromTreatment = ReasonRefrainmentFromTreatment.NOT_APPLICABLE,
-            gastroenterologyResections = emptyList(),
-            primarySurgeries = primarySurgeries,
-            metastaticSurgeries = emptyList(),
-            hipecTreatments = emptyList(),
-            primaryRadiotherapies = emptyList(),
-            metastaticRadiotherapies = emptyList(),
-            systemicTreatments = systemicTreatments,
-            responseMeasures = emptyList(),
             progressionMeasures = progressionMeasures
         )
     }

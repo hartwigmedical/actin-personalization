@@ -1,6 +1,7 @@
 package com.hartwig.actin.personalization.similarity
 
 import com.hartwig.actin.personalization.datamodel.TestDatamodelFactory
+import com.hartwig.actin.personalization.datamodel.treatment.TestTreatmentFactory
 import com.hartwig.actin.personalization.datamodel.treatment.Treatment
 import com.hartwig.actin.personalization.similarity.population.MeasurementType
 import com.hartwig.actin.personalization.similarity.report.ReportWriter
@@ -19,7 +20,7 @@ class TestPersonalizationReportWriterApplication {
             (1..1000 step 10)
                 .map {
                     val treatmentEpisode =
-                        TestDatamodelFactory.treatmentEpisode(systemicTreatment = Treatment.FOLFOX, daysBetweenDiagnosisAndProgression = it)
+                        TestTreatmentFactory.create(systemicTreatment = Treatment.FOLFOX, daysBetweenDiagnosisAndProgression = it)
                     TestDatamodelFactory.entry(treatmentEpisode = treatmentEpisode)
                 }
         )

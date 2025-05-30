@@ -14,12 +14,12 @@ class TreatmentInterpreter(private val treatmentEpisodes: List<TreatmentEpisode>
         return extractMetastaticTreatmentEpisode() != null
     }
 
-    fun determineMetastaticSystemicTreatmentStart(): Int? {
-        return extractMetastaticTreatmentEpisode()?.systemicTreatments?.mapNotNull { it.daysBetweenDiagnosisAndStart }?.minOfOrNull { it }
-    }
-
     fun isMetastaticPriorToMetastaticTreatmentDecision(): Boolean {
         return extractMetastaticTreatmentEpisode()?.let { it.metastaticPresence == MetastaticPresence.AT_START } ?: false
+    }
+
+    fun determineMetastaticSystemicTreatmentStart(): Int? {
+        return extractMetastaticTreatmentEpisode()?.systemicTreatments?.mapNotNull { it.daysBetweenDiagnosisAndStart }?.minOfOrNull { it }
     }
 
     fun hasPostMetastaticTreatmentWithSystemicTreatmentOnly(): Boolean {
