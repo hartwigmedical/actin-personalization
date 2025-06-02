@@ -16,6 +16,9 @@ class Settings:
     db_name: str = 'actin_personalization_v2'
     view_name: str = 'knownPalliativeTreatedReference'
     db_config_path: str = '/home/jupyter/.my.cnf'
+    
+    standardize: bool = True
+    normalize: bool = False
   
     #--------------------------------------------------------------------------------------------
     # Derived or computed settings:
@@ -25,7 +28,7 @@ class Settings:
     save_path: Optional[str] = None
     time_points: Optional[List[int]] = None
     max_time: int = 1825
-    input_size: int = 155  # This is updated in data_processing.py once it has X_train.shape[1].
+    input_size: int = 101  # This is updated in data_processing.py once it has X_train.shape[1].
     use_gate: bool = True
     n_jobs: int = 4 # depends on how many CPU's you have available
         
