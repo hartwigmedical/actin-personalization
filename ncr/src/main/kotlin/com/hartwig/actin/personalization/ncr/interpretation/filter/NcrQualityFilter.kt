@@ -27,12 +27,13 @@ object NcrQualityFilter {
         val allTreatments = tumorRecords.map { it.treatment }
 
         val hasRealTreatment = allTreatments.any { treatment ->
-            treatment.systemicTreatment.chemo == 1 ||
-                    treatment.systemicTreatment.target == 1 ||
+            treatment.systemicTreatment.chemo != 0 ||
+                    treatment.systemicTreatment.target != 0 ||
+                    treatment.systemicTreatment.systCode1 != null ||
                     treatment.primarySurgery.chir == 1 ||
                     treatment.metastaticSurgery.metaChirInt1 != null ||
-                    treatment.primaryRadiotherapy.rt == 1 ||
-                    treatment.primaryRadiotherapy.chemort == 1 ||
+                    treatment.primaryRadiotherapy.rt != 0 ||
+                    treatment.primaryRadiotherapy.chemort != 0 ||
                     treatment.metastaticRadiotherapy.metaRtCode1 != null ||
                     treatment.gastroenterologyResection.mdlRes == 1 ||
                     treatment.hipec.hipec == 1
