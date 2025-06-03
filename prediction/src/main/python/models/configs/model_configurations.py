@@ -68,7 +68,7 @@ class ExperimentConfig:
                 "kwargs": best_params
             }
 
-
+        
         with open(settings.json_config_file, "w") as f:
             json.dump(config, f, indent=4)
 

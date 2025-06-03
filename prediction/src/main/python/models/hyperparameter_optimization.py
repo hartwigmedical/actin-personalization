@@ -82,7 +82,10 @@ def hyperparameter_search(
                     best_params = params
                     best_model_trained = trained_models[model_name]
 
+        if best_params is not None:
+            best_params['use_attention'] = use_attention
         best_models[model_name] = (best_model_trained, best_params)
+
         print(f"Best params for {model_name}: {best_params} with auc={best_score}")
         
         ExperimentConfig.update_model_hyperparams({model_name: (best_model_trained, best_params)})

@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 import pymysql
 
 from sklearn.impute import KNNImputer
@@ -7,6 +8,7 @@ from sklearn.preprocessing import LabelEncoder
 from sklearn.preprocessing import MinMaxScaler, StandardScaler
 
 from typing import List, Dict, Tuple, Any
+import joblib
 
 from utils.settings import settings
 from .lookups import lookup_manager
@@ -39,8 +41,24 @@ class DataPreprocessor:
         self.db_name = db_name
         self.data_dir = "data"
         self.encoded_columns = {}
+       
+        try:
+            self.scaler = joblib.load(f"{settings.save_path}/preprocessor/standard_scaler.pkl")
+        except:
+            self.scaler = None
+            
+        try:
+            self.minmax_scaler = joblib.load(f"{settings.save_path}/preprocessor/minmax_scaler.pkl")
+        except:
+            self.minmax_scaler = None
+            
+        try:
+            with open(f"{settings.save_path}/preprocessor/label_encodings.json", "r") as f:
+                self.encoded_columns = json.load(f)
+        except:
+            self.encoded_columns = {}
 
-    def preprocess_data(self, features = lookup_manager.features, df = None) -> Tuple[pd.DataFrame, List[str], Dict[str, List[str]]]:
+    def preprocess_data(self, features = lookup_manager.features, df = None, fit=True) -> Tuple[pd.DataFrame, List[str], Dict[str, List[str]]]:
         if df is None:
             df = self.load_data()
          
@@ -62,8 +80,10 @@ class DataPreprocessor:
 
         updated_features = [col for col in df.columns if col not in [settings.duration_col, settings.event_col]]
         
-        # df = self.normalize(df, updated_features)
-        df = self.standardize(df, updated_features)
+        if settings.normalize:
+            df = self.normalize(df, updated_features, fit=fit)
+        if settings.standardize:
+            df = self.standardize(df, updated_features, fit=fit)
         
         return df, updated_features, self.encoded_columns
 
@@ -78,8 +98,6 @@ class DataPreprocessor:
         df = pd.read_sql(f"SELECT * FROM {settings.view_name}", db_connection)
     
         db_connection.close()
-        if settings.event_col == "isAlive":
-            df[settings.event_col] = 1 - df["isAlive"]
         
         return df.dropna(subset=[settings.duration_col, settings.event_col]).copy()
 
@@ -181,8 +199,10 @@ class DataPreprocessor:
         for col in categorical_cols:
             if df[col].nunique() == 2:
                 le = LabelEncoder()
+             
                 df[col] = le.fit_transform(df[col].astype(str))
-                self.encoded_columns[col] = le.classes_
+                self.encoded_columns[col] = le.classes_.tolist()
+                
             else:
                 dummies = pd.get_dummies(df[col], prefix=col, dummy_na=False)
                 df = pd.concat([df.drop(columns=[col]), dummies], axis=1)
@@ -194,27 +214,40 @@ class DataPreprocessor:
         """
         Normalize numerical features to a range of [0, 1].
         """
-        scaler = MinMaxScaler()
+       
         cols_to_normalize = [
             col for col in features
             if pd.api.types.is_numeric_dtype(df[col]) and col not in [settings.event_col, settings.duration_col]
         ]
-        df[cols_to_normalize] = scaler.fit_transform(df[cols_to_normalize])
+        if self.minmax_scaler is not None and not fit:
+            df[cols_to_standardize] = self.scaler.transform(df[cols_to_standardize])
+        else:
+            self.minmax_scaler = MinMaxScaler()
+            df[cols_to_standardize] = self.scaler.fit_transform(df[cols_to_standardize])
+            if settings.save_models:
+                joblib.dump(self.minmax_scaler, f"{settings.save_path}/preprocessor/minmax_scaler.pkl")
+        
         return df
 
-    def standardize(self, df: pd.DataFrame, features: List[str]) -> pd.DataFrame:
+    def standardize(self, df: pd.DataFrame, features: List[str], fit=True) -> pd.DataFrame:
         """
         Standardize continuous numerical features to have a mean of 0 and standard deviation of 1.
         Binary or nearly binary columns (<=2 unique values) are not standardized.
         """
-        scaler = StandardScaler()
         cols_to_standardize = [
             col for col in features
             if col != 'ncrId'
             if pd.api.types.is_numeric_dtype(df[col])
             and col not in [settings.event_col, settings.duration_col]
-            and df[col].nunique() > 2  # exclude binary columns
+            and df[col].nunique() > 2
         ]
-        df[cols_to_standardize] = scaler.fit_transform(df[cols_to_standardize])
+        
+        if self.scaler is not None and not fit:
+            df[cols_to_standardize] = self.scaler.transform(df[cols_to_standardize])
+        else:
+            self.scaler = StandardScaler()
+            df[cols_to_standardize] = self.scaler.fit_transform(df[cols_to_standardize])
+            if settings.save_models:
+                joblib.dump(self.scaler, f"{settings.save_path}/preprocessor/standard_scaler.pkl")
         
         return df
