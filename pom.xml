@@ -12,6 +12,7 @@
         <module>datamodel</module>
         <module>common</module>
         <module>ncr</module>
+        <module>prediction</module>
         <module>similarity</module>
         <module>database</module>
         <module>weka-demo</module>
@@ -132,6 +133,11 @@
             <dependency>
                 <groupId>com.hartwig.actin.personalization</groupId>
                 <artifactId>ncr</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.hartwig.actin.personalization</groupId>
+                <artifactId>prediction</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
