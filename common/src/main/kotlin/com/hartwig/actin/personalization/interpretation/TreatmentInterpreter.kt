@@ -42,40 +42,40 @@ class TreatmentInterpreter(private val treatmentEpisodes: List<TreatmentEpisode>
         return extractMetastaticTreatmentEpisode()?.reasonRefrainmentFromTreatment?.name
     }
 
-    fun hasPrimarySurgeryPriorToMetastaticTreatment(): Boolean {
-        return extractPreMetastaticTreatmentEpisodes().any { it.primarySurgeries.isNotEmpty() }
+    fun hasPrimarySurgeryPriorToMetastaticTreatment(metastaticTreatmentStartDays: Int?): Boolean {
+        return hasEventPrior(metastaticTreatmentStartDays, chooseList = { it.primarySurgeries }, daysExtractor = { surgery -> surgery.daysSinceDiagnosis })
     }
 
-    fun hasPrimarySurgeryDuringMetastaticTreatment(): Boolean {
-        return extractMetastaticTreatmentEpisode()?.primarySurgeries?.isNotEmpty() ?: return false
+    fun hasPrimarySurgeryDuringMetastaticTreatment(metastaticTreatmentStartDays: Int?): Boolean {
+        return hasEventDuring(metastaticTreatmentStartDays, chooseList = { it.primarySurgeries }, daysExtractor = { surgery -> surgery.daysSinceDiagnosis })
     }
 
-    fun hasGastroenterologySurgeryPriorToMetastaticTreatment(): Boolean {
-        return extractPreMetastaticTreatmentEpisodes().any { it.gastroenterologyResections.isNotEmpty() }
+    fun hasGastroenterologySurgeryPriorToMetastaticTreatment(metastaticTreatmentStartDays: Int?): Boolean {
+        return hasEventPrior(metastaticTreatmentStartDays, chooseList = { it.gastroenterologyResections }, daysExtractor = { resection -> resection.daysSinceDiagnosis })
     }
 
-    fun hasGastroenterologySurgeryDuringMetastaticTreatment(): Boolean {
-        return extractMetastaticTreatmentEpisode()?.gastroenterologyResections?.isNotEmpty() ?: return false
+    fun hasGastroenterologySurgeryDuringMetastaticTreatment(metastaticTreatmentStartDays: Int?): Boolean {
+        return hasEventDuring(metastaticTreatmentStartDays, chooseList = { it.gastroenterologyResections }, daysExtractor = { resection -> resection.daysSinceDiagnosis })
     }
 
-    fun hasHipecPriorToMetastaticTreatment(): Boolean {
-        return extractPreMetastaticTreatmentEpisodes().any { it.hipecTreatments.isNotEmpty() }
+    fun hasHipecPriorToMetastaticTreatment(metastaticTreatmentStartDays: Int?): Boolean {
+        return hasEventPrior(metastaticTreatmentStartDays, chooseList = { it.hipecTreatments }, daysExtractor = { hipec -> hipec.daysSinceDiagnosis })
     }
 
-    fun hasHipecDuringMetastaticTreatment(): Boolean {
-        return extractMetastaticTreatmentEpisode()?.hipecTreatments?.isNotEmpty() ?: return false
+    fun hasHipecDuringMetastaticTreatment(metastaticTreatmentStartDays: Int?): Boolean {
+        return hasEventDuring(metastaticTreatmentStartDays, chooseList = { it.hipecTreatments }, daysExtractor = { hipec -> hipec.daysSinceDiagnosis })
     }
 
-    fun hasPrimaryRadiotherapyPriorToMetastaticTreatment(): Boolean {
-        return extractPreMetastaticTreatmentEpisodes().any { it.primaryRadiotherapies.isNotEmpty() }
+    fun hasPrimaryRadiotherapyPriorToMetastaticTreatment(metastaticTreatmentStartDays: Int?): Boolean {
+        return hasEventPrior(metastaticTreatmentStartDays, chooseList = { it.primaryRadiotherapies }, daysExtractor = { rt -> rt.daysBetweenDiagnosisAndStart })
     }
 
-    fun hasPrimaryRadiotherapyDuringMetastaticTreatment(): Boolean {
-        return extractMetastaticTreatmentEpisode()?.primaryRadiotherapies?.isNotEmpty() ?: return false
+    fun hasPrimaryRadiotherapyDuringMetastaticTreatment(metastaticTreatmentStartDays: Int?): Boolean {
+        return hasEventDuring(metastaticTreatmentStartDays, chooseList = { it.primaryRadiotherapies }, daysExtractor = { rt -> rt.daysBetweenDiagnosisAndStart })
     }
 
-    fun hasSystemicTreatmentPriorToMetastaticTreatment(): Boolean {
-        return extractPreMetastaticTreatmentEpisodes().any { it.systemicTreatments.isNotEmpty() }
+    fun hasSystemicTreatmentPriorToMetastaticTreatment(metastaticTreatmentStartDays: Int?): Boolean {
+        return hasEventPrior(metastaticTreatmentStartDays, chooseList = { it.systemicTreatments }, daysExtractor = { systemic -> determineDaysBetweenDiagnosisAndStart(systemic) })
     }
 
     fun hasMetastaticSurgery(): Boolean {
@@ -129,6 +129,34 @@ class TreatmentInterpreter(private val treatmentEpisodes: List<TreatmentEpisode>
 
         return firstProgressionAfterSystemicTreatmentStart(metastaticTreatmentEpisode)?.daysSinceDiagnosis
     }
+
+    private fun <T> hasEventPrior(
+        metastaticTreatmentStartDays: Int?,
+        chooseList: (TreatmentEpisode) -> List<T>,
+        daysExtractor: (T) -> Int?
+    ): Boolean {
+        if (extractPreMetastaticTreatmentEpisodes().any { chooseList(it).isNotEmpty() }) return true
+        val episode = extractMetastaticTreatmentEpisode() ?: return false
+        val start = metastaticTreatmentStartDays ?: return false
+
+        return chooseList(episode).any { element ->
+            daysExtractor(element)?.let { it < start } ?: false
+        }
+    }
+
+    private fun <T> hasEventDuring(
+        metastaticTreatmentStartDays: Int?,
+        chooseList: (TreatmentEpisode) -> List<T>,
+        daysExtractor: (T) -> Int?
+    ): Boolean {
+        val episode = extractMetastaticTreatmentEpisode() ?: return false
+        val start = metastaticTreatmentStartDays ?: return false
+
+        return chooseList(episode).any { element ->
+            daysExtractor(element)?.let { it >= start } ?: false
+        }
+    }
+
 
     private fun firstProgressionAfterSystemicTreatmentStart(treatmentEpisode: TreatmentEpisode): ProgressionMeasure? {
         val systemicTreatment = treatmentEpisode.systemicTreatments.firstOrNull() ?: return null
