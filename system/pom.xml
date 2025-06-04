@@ -16,7 +16,11 @@
     <dependencies>
         <dependency>
             <groupId>com.hartwig.actin.personalization</groupId>
-            <artifactId>database</artifactId>
+            <artifactId>ncr</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.hartwig.actin.personalization</groupId>
+            <artifactId>prediction</artifactId>
         </dependency>
         <dependency>
             <groupId>com.hartwig.actin.personalization</groupId>
@@ -24,8 +28,9 @@
         </dependency>
         <dependency>
             <groupId>com.hartwig.actin.personalization</groupId>
-            <artifactId>ncr</artifactId>
+            <artifactId>database</artifactId>
         </dependency>
+        
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
