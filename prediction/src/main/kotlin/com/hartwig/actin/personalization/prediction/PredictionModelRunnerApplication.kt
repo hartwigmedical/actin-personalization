@@ -1,6 +1,8 @@
 package com.hartwig.actin.personalization.prediction
 
 import ai.djl.repository.zoo.Criteria
+import com.hartwig.actin.personalization.prediction.datamodel.PredictorInput
+import com.hartwig.actin.personalization.prediction.datamodel.PredictorOutput
 import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlin.io.path.Path
 
@@ -17,7 +19,7 @@ class PredictionModelRunnerApplication {
             .setTypes(PredictorInput::class.java, PredictorOutput::class.java)
             .optModelPath(path)
             .build()
-
+        
         val model = criteria.loadModel()
         
         val predictor = model.newPredictor()
@@ -26,14 +28,6 @@ class PredictionModelRunnerApplication {
         val output = predictor.predict(input)
         logger.info { output }
     }
-}
-
-class PredictorInput() {
-
-}
-
-class PredictorOutput() {
-
 }
 
 fun main() {
