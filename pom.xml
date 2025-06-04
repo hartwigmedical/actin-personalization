@@ -43,6 +43,7 @@
         <mysqlconnector.version>9.2.0</mysqlconnector.version>
         <itext.version>7.2.4</itext.version>
         <kandy-lets-plot.version>0.7.0</kandy-lets-plot.version>
+        <pytoch-engine.version>0.33.0</pytoch-engine.version>
         <google.artifactregistry.version>2.1.0</google.artifactregistry.version>
 
         <junit-jupiter.version>5.10.3</junit-jupiter.version>
@@ -201,14 +202,19 @@
                 <version>${jooq.version}</version>
             </dependency>
             <dependency>
+                <groupId>com.mysql</groupId>
+                <artifactId>mysql-connector-j</artifactId>
+                <version>${mysqlconnector.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>info.picocli</groupId>
                 <artifactId>picocli</artifactId>
                 <version>${picocli.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.mysql</groupId>
-                <artifactId>mysql-connector-j</artifactId>
-                <version>${mysqlconnector.version}</version>
+                <groupId>ai.djl.pytorch</groupId>
+                <artifactId>pytorch-engine</artifactId>
+                <version>${pytoch-engine.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.itextpdf</groupId>
