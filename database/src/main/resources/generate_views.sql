@@ -15,6 +15,7 @@ CREATE OR REPLACE VIEW palliativeReference AS (
         AND hasHadPrimaryRadiotherapyDuringMetastaticTreatment = 0
         AND hasHadMetastaticSurgery = 0
         AND hasHadMetastaticRadiotherapy = 0
+        AND (systemicTreatmentsAfterMetastaticDiagnosis = 0 OR firstSystemicTreatmentAfterMetastaticDiagnosis IS NOT NULL)
 );
 
 CREATE OR REPLACE VIEW knownPalliativeTreatedReference AS (

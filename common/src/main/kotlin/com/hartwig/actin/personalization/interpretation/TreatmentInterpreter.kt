@@ -135,12 +135,14 @@ class TreatmentInterpreter(private val treatmentEpisodes: List<TreatmentEpisode>
         chooseList: (TreatmentEpisode) -> List<T>,
         daysExtractor: (T) -> Int?
     ): Boolean {
-        if (extractPreMetastaticTreatmentEpisodes().any { chooseList(it).isNotEmpty() }) return true
         val episode = extractMetastaticTreatmentEpisode() ?: return false
-        val start = metastaticTreatmentStartDays ?: return false
+
+        if (extractPreMetastaticTreatmentEpisodes().any { chooseList(it).isNotEmpty() }) { return true }
+
+        if (metastaticTreatmentStartDays == null) { return chooseList(episode).isNotEmpty() }
 
         return chooseList(episode).any { element ->
-            daysExtractor(element)?.let { it < start } ?: false
+            daysExtractor(element)?.let { it < metastaticTreatmentStartDays } ?: false
         }
     }
 
@@ -150,11 +152,10 @@ class TreatmentInterpreter(private val treatmentEpisodes: List<TreatmentEpisode>
         daysExtractor: (T) -> Int?
     ): Boolean {
         val episode = extractMetastaticTreatmentEpisode() ?: return false
-        val start = metastaticTreatmentStartDays ?: return false
 
-        return chooseList(episode).any { element ->
-            daysExtractor(element)?.let { it >= start } ?: false
-        }
+        if (metastaticTreatmentStartDays == null) { return chooseList(episode).isNotEmpty() }
+
+        return chooseList(episode).any { element -> daysExtractor(element)?.let { it >= metastaticTreatmentStartDays } ?: false }
     }
 
 
