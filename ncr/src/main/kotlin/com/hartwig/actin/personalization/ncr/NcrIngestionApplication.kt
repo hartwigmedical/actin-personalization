@@ -25,8 +25,11 @@ class NcrIngestionApplication : Callable<Int> {
 
             LOGGER.info { "Reading NCR dataset from $ncrFile" }
             val ncrRecords = NcrDataReader.read(ncrFile)
+            LOGGER.info { " Read ${ncrRecords.size} records" }
+
+            LOGGER.info { "Creating reference entries for NCR" }
             val referenceEntries = ReferenceEntryFactory(NcrQualityFilter(logFilteredRecords = logFilteredRecords)).create(ncrRecords)
-            LOGGER.info { " Created ${referenceEntries.size} reference entry records from ${ncrRecords.size} NCR records" }
+            LOGGER.info { " Created ${referenceEntries.size} reference entry records NCR records" }
 
             LOGGER.info { "Writing serialized reference entries to $outputFile" }
             ReferenceEntryJson.write(referenceEntries, outputFile)

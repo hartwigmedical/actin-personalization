@@ -8,15 +8,16 @@ class NcrQualityFilter(private val logFilteredRecords: Boolean) {
     private val logger = KotlinLogging.logger {}
 
     fun run(records: List<NcrRecord>): List<NcrRecord> {
-        val filtered = records.groupBy { it.identification.keyNkr }.values.map { patientRecords ->
+        val cleaned = records.groupBy { it.identification.keyNkr }.values.map { patientRecords ->
             patientRecords.groupBy { it.identification.keyZid }.entries.filter { isReliableTumorRecordSet(it) }.map { it.value }.flatten()
         }.flatten()
         
-        val removed = records.size - filtered.count()
+        val filteredRecords = records - cleaned.toSet()
+        val filteredTumors = filteredRecords.map { it.identification.keyZid }.toSet()
         
-        logger.info { " $removed records removed after filtering " }
+        logger.info { " ${filteredRecords.size} records belonging to ${filteredTumors.size} tumors removed after filtering " }
         
-        return filtered
+        return cleaned
     }
 
     private fun isReliableTumorRecordSet(tumorRecordsPerId: Map.Entry<Int, List<NcrRecord>>): Boolean {
