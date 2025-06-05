@@ -20,10 +20,6 @@
         </dependency>
         <dependency>
             <groupId>com.hartwig.actin.personalization</groupId>
-            <artifactId>prediction</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.hartwig.actin.personalization</groupId>
             <artifactId>similarity</artifactId>
         </dependency>
         <dependency>
