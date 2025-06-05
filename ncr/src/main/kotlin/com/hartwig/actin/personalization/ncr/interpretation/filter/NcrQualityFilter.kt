@@ -26,7 +26,7 @@ class NcrQualityFilter(private val logFilteredRecords: Boolean) {
     private fun hasValidTreatmentData(tumorRecordsPerId: Map.Entry<Int, List<NcrRecord>>): Boolean {
         val allTreatments = tumorRecordsPerId.value.map { it.treatment }
 
-        val hasInvalidTreatment = allTreatments.any { treatment ->
+        val hasAtLeastOneInvalidTreatment = allTreatments.any { treatment ->
             treatment.tumgerichtTher == 1 &&
                     treatment.systemicTreatment.chemo == 0 &&
                     treatment.systemicTreatment.target == 0 &&
@@ -39,11 +39,11 @@ class NcrQualityFilter(private val logFilteredRecords: Boolean) {
                     (treatment.hipec.hipec == null || treatment.hipec.hipec == 0)
         }
 
-        if (hasInvalidTreatment) {
+        if (hasAtLeastOneInvalidTreatment) {
             log("Invalid treatment data found for set of NCR tumor records with ID: ${tumorRecordsPerId.key}")
         }
 
-        return !hasInvalidTreatment
+        return !hasAtLeastOneInvalidTreatment
     }
 
     private fun log(message: String) {
