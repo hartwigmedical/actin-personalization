@@ -3,51 +3,52 @@ package com.hartwig.actin.personalization.ncr.interpretation.filter
 import com.hartwig.actin.personalization.ncr.datamodel.NcrRecord
 import io.github.oshai.kotlinlogging.KotlinLogging
 
-object NcrQualityFilter {
+class NcrQualityFilter(private val logFilteredRecords: Boolean) {
 
-    private val LOGGER = KotlinLogging.logger {}
-    
-    fun isReliableTumorRecordSet(tumorRecords: List<NcrRecord>): Boolean {
-        val hasSingleUniqueTumorId = hasSingleUniqueTumorId(tumorRecords)
-        val hasValidTreatmentData = hasValidTreatmentData(tumorRecords)
+    private val logger = KotlinLogging.logger {}
+
+    fun run(records: List<NcrRecord>): List<NcrRecord> {
+        val filtered = records.groupBy { it.identification.keyNkr }.values.map { patientRecords ->
+            patientRecords.groupBy { it.identification.keyZid }.entries.filter { isReliableTumorRecordSet(it) }.map { it.value }.flatten()
+        }.flatten()
         
-        return hasSingleUniqueTumorId && hasValidTreatmentData
-    }
-
-    private fun hasSingleUniqueTumorId(tumorRecords: List<NcrRecord>): Boolean {
-        val tumorIds = tumorRecords.map { it.identification.keyZid }.toSet()
-        val hasUniqueTumorId = tumorIds.size == 1
-        if (!hasUniqueTumorId) {
-            LOGGER.warn { " Multiple tumor IDs found for single set of tumor records: $tumorIds" }
-        }
-        return hasUniqueTumorId
-    }
-
-    private fun hasValidTreatmentData(tumorRecords: List<NcrRecord>): Boolean {
-        val allTreatments = tumorRecords.map { it.treatment }
-
-        val hasRealTreatment = allTreatments.any { treatment ->
-            treatment.systemicTreatment.chemo != 0 ||
-                    treatment.systemicTreatment.target != 0 ||
-                    treatment.systemicTreatment.systCode1 != null ||
-                    treatment.primarySurgery.chir == 1 ||
-                    treatment.metastaticSurgery.metaChirInt1 != null ||
-                    treatment.primaryRadiotherapy.rt != 0 ||
-                    treatment.primaryRadiotherapy.chemort != 0 ||
-                    treatment.metastaticRadiotherapy.metaRtCode1 != null ||
-                    treatment.gastroenterologyResection.mdlRes == 1 ||
-                    treatment.hipec.hipec == 1
-        }
-
-        val hasValidTreatmentData = !allTreatments.any { it.tumgerichtTher == 1 } || hasRealTreatment
-        if (!hasValidTreatmentData) {
-            LOGGER.warn { " Invalid treatment data found for set of NCR tumor records with ID: ${tumorId(tumorRecords)}" }
-        }
+        val removed = records.size - filtered.count()
         
-        return hasValidTreatmentData
+        logger.info { " $removed records removed after filtering " }
+        
+        return filtered
     }
 
-    private fun tumorId(tumorRecords: List<NcrRecord>) : Int {
-        return tumorRecords.map { it.identification.keyZid }.first()
+    private fun isReliableTumorRecordSet(tumorRecordsPerId: Map.Entry<Int, List<NcrRecord>>): Boolean {
+        return hasValidTreatmentData(tumorRecordsPerId)
+    }
+
+    private fun hasValidTreatmentData(tumorRecordsPerId: Map.Entry<Int, List<NcrRecord>>): Boolean {
+        val allTreatments = tumorRecordsPerId.value.map { it.treatment }
+
+        val hasInvalidTreatment = allTreatments.any { treatment ->
+            treatment.tumgerichtTher == 1 &&
+                    treatment.systemicTreatment.chemo == 0 &&
+                    treatment.systemicTreatment.target == 0 &&
+                    treatment.primaryRadiotherapy.rt == 0 &&
+                    treatment.metastaticSurgery.metaChirInt1 == null &&
+                    treatment.metastaticRadiotherapy.metaRtCode1 == null &&
+                    (treatment.primarySurgery.chir == null || treatment.primarySurgery.chir == 0) &&
+                    (treatment.primaryRadiotherapy.chemort == null || treatment.primaryRadiotherapy.chemort == 0) &&
+                    (treatment.gastroenterologyResection.mdlRes == null || treatment.gastroenterologyResection.mdlRes == 0) &&
+                    (treatment.hipec.hipec == null || treatment.hipec.hipec == 0)
+        }
+
+        if (hasInvalidTreatment) {
+            log("Invalid treatment data found for set of NCR tumor records with ID: ${tumorRecordsPerId.key}")
+        }
+
+        return !hasInvalidTreatment
+    }
+
+    private fun log(message: String) {
+        if (logFilteredRecords) {
+            logger.warn { " $message" }
+        }
     }
 }

@@ -517,7 +517,7 @@ object TestNcrRecordFactory {
                 metaChirRad3 = null
             ),
             primaryRadiotherapy = NcrPrimaryRadiotherapy(
-                rt = 6,
+                rt = 0,
                 chemort = null,
                 rtType1 = null,
                 rtType2 = null,

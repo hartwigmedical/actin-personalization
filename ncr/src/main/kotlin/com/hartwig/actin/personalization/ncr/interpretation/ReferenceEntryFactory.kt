@@ -7,10 +7,12 @@ import com.hartwig.actin.personalization.ncr.interpretation.filter.NcrQualityFil
 
 import java.util.stream.Collectors
 
-object ReferenceEntryFactory {
+class ReferenceEntryFactory(private val filter: NcrQualityFilter) {
     
     fun create(records: List<NcrRecord>): List<ReferenceEntry> {
-        return records.groupBy { it.identification.keyNkr }.values.parallelStream()
+        val filtered = filter.run(records)
+        
+        return filtered.groupBy { it.identification.keyNkr }.values.parallelStream()
             .map { patientRecords -> createReferenceEntriesForPatient(patientRecords) }
             .collect(Collectors.toList())
             .flatten()
@@ -18,7 +20,6 @@ object ReferenceEntryFactory {
 
     private fun createReferenceEntriesForPatient(patientRecords: List<NcrRecord>): List<ReferenceEntry> {
         return patientRecords.groupBy { it.identification.keyZid }.values.parallelStream()
-            .filter { tumorRecords -> NcrQualityFilter.isReliableTumorRecordSet(tumorRecords) }
             .map { tumorRecords -> NcrReferenceEntryExtractor.extract(tumorRecords) }
             .collect(Collectors.toList())
     }
