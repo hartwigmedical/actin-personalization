@@ -16,15 +16,15 @@
     <dependencies>
         <dependency>
             <groupId>com.hartwig.actin.personalization</groupId>
+            <artifactId>database</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.hartwig.actin.personalization</groupId>
             <artifactId>ncr</artifactId>
         </dependency>
         <dependency>
             <groupId>com.hartwig.actin.personalization</groupId>
             <artifactId>similarity</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.hartwig.actin.personalization</groupId>
-            <artifactId>database</artifactId>
         </dependency>
         
         <dependency>
