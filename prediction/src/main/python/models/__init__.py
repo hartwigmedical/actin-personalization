@@ -8,3 +8,4 @@ from .survival_models import (
     GradientBoostingSurvivalModel, NNSurvivalModel, DeepSurv, LogisticHazardModel,
     DeepHitModel, PCHazardModel, MTLRModel
 )
+from .predictor import *

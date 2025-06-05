@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 import pymysql
+import json
 
 from sklearn.impute import KNNImputer
 from sklearn.model_selection import train_test_split
@@ -36,27 +37,31 @@ class DataSplitter:
         return X_train, X_test, y_train, y_test
 
 class DataPreprocessor:
-    def __init__(self, db_config_path: str, db_name: str) -> None:
+    def __init__(self, db_config_path: str = settings.db_config_path, db_name: str = settings.db_name) -> None:
         self.db_config_path = db_config_path
         self.db_name = db_name
         self.data_dir = "data"
-        self.encoded_columns = {}
-       
+
+        try:
+            with open(f"{settings.save_path}/preprocessor/preprocessing_config.json", "r") as f:
+                config = json.load(f)
+                self.medians = config.get("medians", {})
+                self.encoded_columns = config.get("encoded_columns", {})
+        except:
+            self.medians = {}
+            self.encoded_columns = {}
+
         try:
             self.scaler = joblib.load(f"{settings.save_path}/preprocessor/standard_scaler.pkl")
         except:
-            self.scaler = None
+            self.scaler = None 
             
         try:
             self.minmax_scaler = joblib.load(f"{settings.save_path}/preprocessor/minmax_scaler.pkl")
         except:
             self.minmax_scaler = None
             
-        try:
-            with open(f"{settings.save_path}/preprocessor/label_encodings.json", "r") as f:
-                self.encoded_columns = json.load(f)
-        except:
-            self.encoded_columns = {}
+    
 
     def preprocess_data(self, features = lookup_manager.features, df = None, fit=True) -> Tuple[pd.DataFrame, List[str], Dict[str, List[str]]]:
         if df is None:
@@ -74,7 +79,7 @@ class DataPreprocessor:
 
         df = self.impute_knn(df, ['whoAssessmentAtMetastaticDiagnosis'], k=7)
         df = self.numerize(df, lookup_manager.lookup_dictionary)
-        df = self.handle_missing_values(df)
+        df = self.handle_missing_values(df, fit=fit)
 
         df = self.encode_categorical(df)
 
@@ -123,19 +128,23 @@ class DataPreprocessor:
                 df[column] = df[column].map(lookup)
         return df
     
-    def handle_missing_values(self, df: pd.DataFrame) -> pd.DataFrame:
-        """
-        Handle missing values in the DataFrame.
-        - For numerical columns, fill NaN with median and add an indicator column.
-        """
+    def handle_missing_values(self, df: pd.DataFrame, fit: bool=True) -> pd.DataFrame:
+      
         numerical_cols = df.select_dtypes(include=['float64', 'int64']).columns.tolist()
         numerical_cols = [col for col in numerical_cols if col not in [settings.event_col, settings.duration_col]]
 
         for col in numerical_cols:
-            df[col] = df[col].fillna(df[col].median())
+            if fit:
+                median_value = df[col].median()
+                self.medians[col] = median_value
+               
+            else:
+                median_value = self.medians.get(col, 0)  
+            df[col] = df[col].fillna(median_value)
 
         if settings.duration_col in df.columns:
             df = df[df[settings.duration_col] > 0].copy() 
+        
 
         return df
     
@@ -195,18 +204,35 @@ class DataPreprocessor:
     def encode_categorical(self, df: pd.DataFrame) -> pd.DataFrame:
         categorical_cols = df.select_dtypes(include=['object', 'category']).columns.tolist()
         categorical_cols = [col for col in categorical_cols if col not in [settings.event_col, settings.duration_col]]
-
         for col in categorical_cols:
-            if df[col].nunique() == 2:
-                le = LabelEncoder()
-             
-                df[col] = le.fit_transform(df[col].astype(str))
-                self.encoded_columns[col] = le.classes_.tolist()
-                
+            if self.encoded_columns and col in self.encoded_columns:
+                categories = self.encoded_columns[col]
+                if len(categories) == 2:
+                    df[col] = df[col].astype(str)
+                    df[col] = df[col].map({categories[0]: 0, categories[1]: 1}).fillna(0).astype(int)
+                else:  
+                    dummies = pd.get_dummies(df[col], prefix=col, dummy_na=False)
+                    for dummy_col in categories:
+                        if dummy_col not in dummies.columns:
+                            dummies[dummy_col] = 0
+                    dummies = dummies[categories]
+                    df = pd.concat([df.drop(columns=[col]), dummies], axis=1)
             else:
-                dummies = pd.get_dummies(df[col], prefix=col, dummy_na=False)
-                df = pd.concat([df.drop(columns=[col]), dummies], axis=1)
-                self.encoded_columns[col] = list(dummies.columns)
+                if df[col].nunique() == 2:
+                    le = LabelEncoder()
+                    df[col] = le.fit_transform(df[col].astype(str))
+                    self.encoded_columns[col] = le.classes_.tolist()
+                else:
+                    dummies = pd.get_dummies(df[col], prefix=col, dummy_na=False)
+                    df = pd.concat([df.drop(columns=[col]), dummies], axis=1)
+                    self.encoded_columns[col] = list(dummies.columns)
+
+                with open(f"{settings.save_path}/preprocessor/preprocessing_config.json", "w") as f:
+                    json.dump({
+                        "medians": self.medians,
+                        "encoded_columns": self.encoded_columns
+                    }, f)
+
                 
         return df
 
@@ -219,35 +245,41 @@ class DataPreprocessor:
             col for col in features
             if pd.api.types.is_numeric_dtype(df[col]) and col not in [settings.event_col, settings.duration_col]
         ]
+        
         if self.minmax_scaler is not None and not fit:
-            df[cols_to_standardize] = self.scaler.transform(df[cols_to_standardize])
+            df[cols_to_normalize] = self.scaler.transform(df[cols_to_normalize])
         else:
             self.minmax_scaler = MinMaxScaler()
-            df[cols_to_standardize] = self.scaler.fit_transform(df[cols_to_standardize])
+            df[cols_to_normalize] = self.scaler.fit_transform(df[cols_to_normalize])
             if settings.save_models:
                 joblib.dump(self.minmax_scaler, f"{settings.save_path}/preprocessor/minmax_scaler.pkl")
         
         return df
+    
+    def standardize(self, df: pd.DataFrame, features: List[str], fit: bool = True) -> pd.DataFrame:
+        if fit:
+            cols_to_standardize = [
+                col for col in features
+                if pd.api.types.is_numeric_dtype(df[col])
+                and col not in [settings.event_col, settings.duration_col]
+                and df[col].nunique() > 2
+            ]
 
-    def standardize(self, df: pd.DataFrame, features: List[str], fit=True) -> pd.DataFrame:
-        """
-        Standardize continuous numerical features to have a mean of 0 and standard deviation of 1.
-        Binary or nearly binary columns (<=2 unique values) are not standardized.
-        """
-        cols_to_standardize = [
-            col for col in features
-            if col != 'ncrId'
-            if pd.api.types.is_numeric_dtype(df[col])
-            and col not in [settings.event_col, settings.duration_col]
-            and df[col].nunique() > 2
-        ]
-        
-        if self.scaler is not None and not fit:
-            df[cols_to_standardize] = self.scaler.transform(df[cols_to_standardize])
-        else:
             self.scaler = StandardScaler()
             df[cols_to_standardize] = self.scaler.fit_transform(df[cols_to_standardize])
+
             if settings.save_models:
                 joblib.dump(self.scaler, f"{settings.save_path}/preprocessor/standard_scaler.pkl")
-        
-        return df
+            return df
+
+        else:
+            if self.scaler is None:
+                raise RuntimeError(f"No pre‐fitted StandardScaler found at {settings.save_path}/preprocessor/standard_scaler.pkl")
+                
+            trained_cols = list(self.scaler.feature_names_in_)
+            cols_to_transform = [col for col in trained_cols if col in df.columns]
+
+            if not cols_to_transform:
+                return df
+            df[cols_to_transform] = self.scaler.transform(df[cols_to_transform])
+            return df

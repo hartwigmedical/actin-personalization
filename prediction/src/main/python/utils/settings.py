@@ -45,12 +45,12 @@ class Settings:
         else:
             self.event_col = 'hadProgressionEvent'
             self.duration_col = 'daysBetweenTreatmentStartAndProgression'
-            if self.experiment_type == 'treatment_vs_no' or self.experiment_type == 'treatment_drug':
-                warnings.warn(f"experiment type: {self.experiment_type}, but outcome is {self.outcome}", UserWarning)
+            self.view_name = 'knownPalliativeTreatedReference'
     
     def configure_model_settings(self) -> None:
         self.save_models = True
-        self.save_path = f'/data/patient_like_me/prediction/trained_models/{self.experiment_type}'
+        if self.save_path is None:
+            self.save_path = f'/data/patient_like_me/prediction/trained_models/{self.experiment_type}'
         if self.outcome.upper() == 'OS':
             self.time_points = [int(round(i * 365 / 4)) for i in range(1, 21)]
         else:
