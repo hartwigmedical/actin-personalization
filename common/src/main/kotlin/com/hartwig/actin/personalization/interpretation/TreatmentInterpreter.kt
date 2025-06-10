@@ -80,13 +80,13 @@ class TreatmentInterpreter(private val treatmentEpisodes: List<TreatmentEpisode>
     fun hasPrimaryRadiotherapyPriorToMetastaticTreatment(): Boolean {
         return hasEventPriorToMetastaticTreatment(
             chooseList = { it.primaryRadiotherapies },
-            daysExtractor = { rt -> rt.daysBetweenDiagnosisAndStart })
+            daysExtractor = { rt -> rt.daysBetweenDiagnosisAndStop ?: rt.daysBetweenDiagnosisAndStart })
     }
 
     fun hasPrimaryRadiotherapyDuringMetastaticTreatment(): Boolean {
         return hasEventDuringMetastaticTreatment(
             chooseList = { it.primaryRadiotherapies },
-            daysExtractor = { rt -> rt.daysBetweenDiagnosisAndStart })
+            daysExtractor = { rt -> rt.daysBetweenDiagnosisAndStop ?: rt.daysBetweenDiagnosisAndStart })
     }
 
     fun hasSystemicTreatmentPriorToMetastaticTreatment(): Boolean {
