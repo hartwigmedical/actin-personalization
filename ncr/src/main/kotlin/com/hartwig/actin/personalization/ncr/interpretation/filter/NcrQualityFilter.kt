@@ -29,15 +29,15 @@ class NcrQualityFilter(private val logFilteredRecords: Boolean) {
 
         val hasAtLeastOneInvalidTreatment = allTreatments.any { treatment ->
             treatment.tumgerichtTher == 1 &&
-                    treatment.systemicTreatment.chemo == 0 &&
-                    treatment.systemicTreatment.target == 0 &&
-                    treatment.primaryRadiotherapy.rt == 0 &&
-                    treatment.metastaticSurgery.metaChirInt1 == null &&
-                    treatment.metastaticRadiotherapy.metaRtCode1 == null &&
                     (treatment.primarySurgery.chir == null || treatment.primarySurgery.chir == 0) &&
+                    treatment.primaryRadiotherapy.rt == 0 &&
                     (treatment.primaryRadiotherapy.chemort == null || treatment.primaryRadiotherapy.chemort == 0) &&
                     (treatment.gastroenterologyResection.mdlRes == null || treatment.gastroenterologyResection.mdlRes == 0) &&
-                    (treatment.hipec.hipec == null || treatment.hipec.hipec == 0)
+                    (treatment.hipec.hipec == null || treatment.hipec.hipec == 0) &&
+                    treatment.systemicTreatment.chemo == 0 &&
+                    treatment.systemicTreatment.target == 0 &&
+                    treatment.metastaticSurgery.metaChirInt1 == null &&
+                    treatment.metastaticRadiotherapy.metaRtCode1 == null
         }
 
         if (hasAtLeastOneInvalidTreatment) {
