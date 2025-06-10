@@ -10,8 +10,8 @@ java -cp actin.jar com.hartwig.actin.personalization.ncr.NcrIngestionApplication
    -output_file /path/to/output_reference_entry.json
 ```
 
-In addition, the NCR inspection application can be used to display an overview of an NCR dataset. This application requires Java 17+ and can
-be run as follows:
+In addition, the NCR inspection application can be used to generate an overview of an NCR dataset on command line. This application requires
+Java 17+ and can be run as follows:
 
 ```
 java -cp actin.jar com.hartwig.actin.personalization.ncr.NcrInspectionApplication \
