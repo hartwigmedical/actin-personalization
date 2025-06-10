@@ -12,7 +12,7 @@ java -cp actin-personalizaton.jar com.hartwig.actin.personalization.database.Per
    -db_user ${sql_user} -db_pass ${sql_pass} -db_url ${sql_url}
 ```
 
-The `reference_entry_json` should be created from single or multiple input sources, see for example [NCR](../ncr).
+The `reference_entry_json` should be created from single or multiple input sources, see for example [NCR Ingestion](../ncr).
 
 ### Creation of the flattened reference table
 
@@ -56,5 +56,20 @@ the `reference` table:
     - has not had metastatic radiotherapy
 - `knownPalliativeTreatedReference` containing all entries in palliative setting that received a known treatment, with following conditions:
     - first systemic treatment after metastatic diagnosis is known and not `OTHER`
+
+
+### Progression-Free Survival (PFS) - TODO (KD) Review
+
+A patient's PFS is the time between the start of their treatment and disease progression or death.
+Some reference patients may not experience an event before the time of the last follow-up, in which case they are marked
+"censored" and we do not know their true PFS.
+Each `Episode` has a list of PFS measures with dates, each of which can represent progression, death, or censorship.
+The episode's PFS measures are summarized in two fields of the systemic treatment plan:
+* `hadProgressionEvent`: This indicates whether a patient experienced a progression event during a study.
+  `false` here means the patient was censored.
+* `observedPfsDays`: This is the number of days for which a patient is known to have been progression-free.
+  * For patients that had a progression event, this is the time between treatment start and the first event.
+  * For patients with no event, this is time between treatment start and the last time they were marked as censored.
+
 
  
