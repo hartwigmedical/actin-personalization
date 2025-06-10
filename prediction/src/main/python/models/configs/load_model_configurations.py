@@ -25,7 +25,6 @@ class ExperimentConfig:
     def load_model_configs(self):
         config_dict = self.get_config()
         model_configs = {}
-        print("Loaded configuration:", config_dict)
         for model_name, setting in config_dict.items():
             class_path = setting.get("class")
             module_name, class_name = class_path.rsplit('.', 1)

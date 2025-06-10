@@ -3,7 +3,7 @@ from itertools import product
 from utils.settings import settings
 from typing import List, Dict, Any
 
-from .configs.model_configurations import *
+from .configs.load_model_configurations import *
 from models.model_trainer import *
 from .survival_models import BaseSurvivalModel, NNSurvivalModel
 
