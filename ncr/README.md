@@ -30,7 +30,8 @@ and potentially multiple followup episodes per patient. The datamodel collected 
 The ingestion application starts with filtering NCR records that are for whatever reason considered unreliable. Individual episodes are
 checked for reliability and tumor entries are filtered in entirety if a single episode for that tumor fails any reliability check.
 
-The parameter `-log-filtered-records` can be passed to log all filtered records via commandline with a reference to the tumor id (`key_zid`)
+The parameter `-log-filtered-records` can be passed to log all filtered records via command line with a reference to the tumor
+id (`key_zid`)
 
 The following records are deemed unreliable and are removed prior to ingestion:
 
@@ -85,8 +86,8 @@ The following assumptions are made about the NCR data _but are currently not exp
 
 ### Data dropped from NCR
 
-- For various fields relevant for primary diagnosis, the data is only taken from DIA episodes and ignored from further episodes (even if it
-  differs between DIA and VERB episodes):
+- For various fields relevant for primary diagnosis, the data is only taken from DIA episodes and ignored from further episodes (even if
+  they differ between DIA and VERB episodes):
     - `diag_basis`: basis of diagnosis
     - `mrf_afst`: distance to mesorectal fascia
     - `diffgrad`: differentiation grade
@@ -102,7 +103,7 @@ The following assumptions are made about the NCR data _but are currently not exp
     - `deelname_studie` (has participated in trial?) is dropped since it is too abstract (not clear what trial, or even what kind of trial (
       surgery. systemic trial etc.)).
 
-Finally, the `stadium` field is considered irrelevant and dropped (typically the worst of clinical and pathological stage).
+Finally, the `stadium` field is considered irrelevant and dropped (it is typically the worst of clinical and pathological stage).
 
 ### Data issues in NCR
 
