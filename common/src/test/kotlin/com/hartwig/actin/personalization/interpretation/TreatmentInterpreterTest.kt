@@ -33,6 +33,7 @@ class TreatmentInterpreterTest {
 
         val multipleTreatmentInterpreter =
             TreatmentInterpreter(listOf(TestDatamodelFactory.treatmentEpisode(metastaticPresence = MetastaticPresence.ABSENT),
+                TestDatamodelFactory.treatmentEpisode(metastaticPresence = MetastaticPresence.AT_PROGRESSION),
                 TestDatamodelFactory.treatmentEpisode(metastaticPresence = MetastaticPresence.AT_START)))
         assertThat(multipleTreatmentInterpreter.hasMetastaticTreatment()).isTrue()
         assertThat(multipleTreatmentInterpreter.isMetastaticPriorToMetastaticTreatmentDecision()).isTrue()
