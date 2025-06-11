@@ -10,6 +10,7 @@ from sklearn.preprocessing import MinMaxScaler, StandardScaler
 
 from typing import List, Dict, Tuple, Any
 import joblib
+import warnings
 
 from utils.settings import settings
 from .lookups import lookup_manager
@@ -37,58 +38,73 @@ class DataSplitter:
         return X_train, X_test, y_train, y_test
 
 class DataPreprocessor:
-    def __init__(self, db_config_path: str = settings.db_config_path, db_name: str = settings.db_name) -> None:
+    def __init__(self, db_config_path: str = settings.db_config_path, db_name: str = settings.db_name, fit: bool = True) -> None:
         self.db_config_path = db_config_path
         self.db_name = db_name
         self.data_dir = "data"
+        self.fit = fit
+        
+        if not self.fit:
+            try:
+                with open(f"{settings.save_path}/preprocessor/preprocessing_config.json", "r") as f:
+                    config = json.load(f)
+                    self.medians = config.get("medians", {})
+                    self.encoded_columns = config.get("encoded_columns", {})
+            except Exception as e:
+                warnings.warn(f"Failed to load preprocessing_config.json: {e}")
+                self.medians = {}
+                self.encoded_columns = {}
 
-        try:
-            with open(f"{settings.save_path}/preprocessor/preprocessing_config.json", "r") as f:
-                config = json.load(f)
-                self.medians = config.get("medians", {})
-                self.encoded_columns = config.get("encoded_columns", {})
-        except:
+            try:
+                self.scaler = joblib.load(f"{settings.save_path}/preprocessor/standard_scaler.pkl")
+            except Exception as e:
+                warnings.warn(f"Failed to load StandardScaler: {e}")
+                self.scaler = None
+
+            try:
+                self.minmax_scaler = joblib.load(f"{settings.save_path}/preprocessor/minmax_scaler.pkl")
+            except Exception as e:
+                warnings.warn(f"Failed to load MinMaxScaler: {e}")
+                self.minmax_scaler = None
+                
+                
+        else:
             self.medians = {}
             self.encoded_columns = {}
-
-        try:
-            self.scaler = joblib.load(f"{settings.save_path}/preprocessor/standard_scaler.pkl")
-        except:
             self.scaler = None 
-            
-        try:
-            self.minmax_scaler = joblib.load(f"{settings.save_path}/preprocessor/minmax_scaler.pkl")
-        except:
             self.minmax_scaler = None
-            
+
     
 
-    def preprocess_data(self, features = lookup_manager.features, df = None, fit=True) -> Tuple[pd.DataFrame, List[str], Dict[str, List[str]]]:
+    def preprocess_data(self, features = lookup_manager.features, df = None) -> Tuple[pd.DataFrame, List[str], Dict[str, List[str]]]:
         if df is None:
             df = self.load_data()
-         
+                
         df = df[features + [settings.duration_col, settings.event_col]]
-        df = df[~df["firstSystemicTreatmentAfterMetastaticDiagnosis"].str.upper().str.contains("NIVOLUMAB", na=False)]
 
-        df = df[~df[lookup_manager.features].isna().all(axis=1)].copy()
+        df = df[~df["firstSystemicTreatmentAfterMetastaticDiagnosis"].str.upper().str.contains("NIVOLUMAB", na=False)]
         
+        df = df[~df[lookup_manager.features].isna().all(axis=1)].copy()
+
         if settings.experiment_type == 'treatment_vs_no':
             df = self.group_treatments(df)
         elif settings.experiment_type == 'treatment_drug':
             df = self.add_treatment_drugs(df)
+            
 
         df = self.impute_knn(df, ['whoAssessmentAtMetastaticDiagnosis'], k=7)
+        
         df = self.numerize(df, lookup_manager.lookup_dictionary)
-        df = self.handle_missing_values(df, fit=fit)
 
-        df = self.encode_categorical(df)
+        df = self.handle_missing_values(df)
+        
+        df = self.auto_cast_object_columns(df)
+        df = self.encode_categorical(df) 
 
         updated_features = [col for col in df.columns if col not in [settings.duration_col, settings.event_col]]
         
-        if settings.normalize:
-            df = self.normalize(df, updated_features, fit=fit)
         if settings.standardize:
-            df = self.standardize(df, updated_features, fit=fit)
+            df = self.standardize(df, updated_features)
         
         return df, updated_features, self.encoded_columns
 
@@ -128,13 +144,13 @@ class DataPreprocessor:
                 df[column] = df[column].map(lookup)
         return df
     
-    def handle_missing_values(self, df: pd.DataFrame, fit: bool=True) -> pd.DataFrame:
+    def handle_missing_values(self, df: pd.DataFrame) -> pd.DataFrame:
       
         numerical_cols = df.select_dtypes(include=['float64', 'int64']).columns.tolist()
         numerical_cols = [col for col in numerical_cols if col not in [settings.event_col, settings.duration_col]]
 
         for col in numerical_cols:
-            if fit:
+            if self.fit:
                 median_value = df[col].median()
                 self.medians[col] = median_value
                
@@ -200,64 +216,69 @@ class DataPreprocessor:
         df = df.drop(columns = [treatment_col], axis = 1)
 
         return df
+    
+    def auto_cast_object_columns(self, df: pd.DataFrame) -> pd.DataFrame:
+        for col in df.select_dtypes(include='object').columns:
+            try:
+                df[col] = pd.to_numeric(df[col], errors='raise')
+            except Exception:
+                unique_vals = df[col].dropna().unique()
+                if set(unique_vals).issubset({'0', '1', 0, 1, True, False}):
+                    df[col] = df[col].astype(float)
+                else:
+                    continue  
+
+        return df
 
     def encode_categorical(self, df: pd.DataFrame) -> pd.DataFrame:
         categorical_cols = df.select_dtypes(include=['object', 'category']).columns.tolist()
         categorical_cols = [col for col in categorical_cols if col not in [settings.event_col, settings.duration_col]]
+          
         for col in categorical_cols:
             if self.encoded_columns and col in self.encoded_columns:
-                categories = self.encoded_columns[col]
-                if len(categories) == 2:
-                    df[col] = df[col].astype(str)
-                    df[col] = df[col].map({categories[0]: 0, categories[1]: 1}).fillna(0).astype(int)
-                else:  
+                encoding_info = self.encoded_columns[col]
+                if encoding_info["type"] == "label":
+                    classes = encoding_info["classes"]
+                    mapping = {label: idx for idx, label in enumerate(classes)}
+                    df[col] = df[col].astype(str).map(mapping).fillna(0).astype(int)
+
+                elif encoding_info["type"] == "onehot":
+                    expected_dummies = encoding_info["columns"]
                     dummies = pd.get_dummies(df[col], prefix=col, dummy_na=False)
-                    for dummy_col in categories:
+                    for dummy_col in expected_dummies:
                         if dummy_col not in dummies.columns:
                             dummies[dummy_col] = 0
-                    dummies = dummies[categories]
+                    dummies = dummies[expected_dummies]
                     df = pd.concat([df.drop(columns=[col]), dummies], axis=1)
+             
             else:
-                if df[col].nunique() == 2:
+                if df[col].nunique(dropna=False) == 2:
                     le = LabelEncoder()
                     df[col] = le.fit_transform(df[col].astype(str))
-                    self.encoded_columns[col] = le.classes_.tolist()
+                    self.encoded_columns[col] = {
+                        "type": "label",
+                        "classes": le.classes_.tolist()
+                    }
                 else:
                     dummies = pd.get_dummies(df[col], prefix=col, dummy_na=False)
                     df = pd.concat([df.drop(columns=[col]), dummies], axis=1)
-                    self.encoded_columns[col] = list(dummies.columns)
-
-                with open(f"{settings.save_path}/preprocessor/preprocessing_config.json", "w") as f:
-                    json.dump({
-                        "medians": self.medians,
-                        "encoded_columns": self.encoded_columns
-                    }, f)
+                    self.encoded_columns[col] = {
+                        "type": "onehot",
+                        "columns": list(dummies.columns)
+                    } 
+              
+        if self.fit:
+            with open(f"{settings.save_path}/preprocessor/preprocessing_config.json", "w") as f:  
+                json.dump({
+                    "medians": self.medians,
+                    "encoded_columns": self.encoded_columns
+                }, f)
 
                 
         return df
-
-    def normalize(self, df: pd.DataFrame, features: List[str]) -> pd.DataFrame:
-        """
-        Normalize numerical features to a range of [0, 1].
-        """
-       
-        cols_to_normalize = [
-            col for col in features
-            if pd.api.types.is_numeric_dtype(df[col]) and col not in [settings.event_col, settings.duration_col]
-        ]
-        
-        if self.minmax_scaler is not None and not fit:
-            df[cols_to_normalize] = self.scaler.transform(df[cols_to_normalize])
-        else:
-            self.minmax_scaler = MinMaxScaler()
-            df[cols_to_normalize] = self.scaler.fit_transform(df[cols_to_normalize])
-            if settings.save_models:
-                joblib.dump(self.minmax_scaler, f"{settings.save_path}/preprocessor/minmax_scaler.pkl")
-        
-        return df
     
-    def standardize(self, df: pd.DataFrame, features: List[str], fit: bool = True) -> pd.DataFrame:
-        if fit:
+    def standardize(self, df: pd.DataFrame, features: List[str]) -> pd.DataFrame:
+        if self.fit:
             cols_to_standardize = [
                 col for col in features
                 if pd.api.types.is_numeric_dtype(df[col])
@@ -277,9 +298,8 @@ class DataPreprocessor:
                 raise RuntimeError(f"No pre‐fitted StandardScaler found at {settings.save_path}/preprocessor/standard_scaler.pkl")
                 
             trained_cols = list(self.scaler.feature_names_in_)
-            cols_to_transform = [col for col in trained_cols if col in df.columns]
+            df = df.assign(**{c: 0.0 for c in trained_cols if c not in df.columns})
+            
+            df.loc[:, trained_cols] = self.scaler.transform(df[trained_cols])
 
-            if not cols_to_transform:
-                return df
-            df[cols_to_transform] = self.scaler.transform(df[cols_to_transform])
             return df

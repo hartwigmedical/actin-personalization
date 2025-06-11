@@ -12,7 +12,6 @@ def load_model(trained_path: str, model_type: str = "DeepSurv_attention"):
     loaded_configs = config_mgr.load_model_configs()
     
     model_class, model_kwargs = loaded_configs[model_type]
-    print(model_class, model_kwargs)
     
     model = model_class(**model_kwargs)
 
@@ -32,17 +31,16 @@ def load_model(trained_path: str, model_type: str = "DeepSurv_attention"):
     return model 
 
 def predict_treatment_scenarios(patient_data: dict, trained_path: str, valid_treatment_combinations: dict) -> dict:
-
-    patient_df = pd.DataFrame([patient_data])
     
-    preprocessor = DataPreprocessor()
-    processed_df, updated_features, _ = preprocessor.preprocess_data(df=patient_df, fit=False)
+    patient_df = pd.DataFrame([patient_data])
 
+    preprocessor = DataPreprocessor(fit=False)
+    processed_df, updated_features, _ = preprocessor.preprocess_data(df=patient_df)
+    
     model = load_model(trained_path)
 
     X_base = processed_df.drop(columns=[c for c in [settings.event_col, settings.duration_col, "sourceId"] if c in processed_df.columns], errors="ignore")
-    print(list(X_base.columns))
-    
+
     treatment_cols = [c for c in X_base.columns if c.startswith("systemicTreatmentPlan")]
 
     time_grid = None
@@ -54,13 +52,17 @@ def predict_treatment_scenarios(patient_data: dict, trained_path: str, valid_tre
                 X_base[col] = val
 
         X_base["hasTreatment"] = (X_base[treatment_cols].sum(axis=1) > 0).astype(int)
+        print("⚠️ Any NaNs in X_base?", X_base.isna().any().any())
+        print("⚠️ Any inf in X_base?", (X_base == float("inf")).any().any())
+        print("🧪 Max value in X_base:", X_base.max().max())
+        print("🧪 Min value in X_base:", X_base.min().min())
+        print("🧪 Input shape:", X_base.shape)
+
+        print(X_base.iloc[0].to_dict())
 
         surv_fns = model.predict_survival_function(X_base)
         sf = surv_fns[0] 
         
-        surv_fns = model.predict_survival_function(X_base)
-        sf = surv_fns[0]
-
         survival_dict[label] = {
             "time_grid": sf.x.astype(float).tolist(),
             "survival_probs": sf.y.astype(float).tolist()

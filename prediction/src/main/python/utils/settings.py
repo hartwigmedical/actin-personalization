@@ -18,8 +18,6 @@ class Settings:
     db_config_path: str = '/home/jupyter/.my.cnf'
     
     standardize: bool = True
-    normalize: bool = False
-  
     #--------------------------------------------------------------------------------------------
     # Derived or computed settings:
     event_col: Optional[str] = None

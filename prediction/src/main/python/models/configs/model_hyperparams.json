@@ -562,7 +562,7 @@
                 "batch_size": 32,
                 "epochs": 500,
                 "early_stopping_patience": 50,
-                "input_size": 101,
+                "input_size": 102,
                 "use_attention": true
             }
         },
