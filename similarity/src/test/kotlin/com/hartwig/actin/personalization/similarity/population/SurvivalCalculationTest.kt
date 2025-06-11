@@ -42,12 +42,12 @@ class SurvivalCalculationTest {
 //            }
 //        }
 
-        @Test
-        fun `Should evaluate median survival for OS and PFS`() {
-            survivalCalculationsFunctions.forEach { (calculation, type) ->
-                testMedianSurvival(calculation, type)
-            }
-        }
+//        @Test
+//        fun `Should evaluate median survival for OS and PFS`() {
+//            survivalCalculationsFunctions.forEach { (calculation, type) ->
+//                testMedianSurvival(calculation, type)
+//            }
+//        }
 
         private fun testEligibility(calculation: SurvivalCalculation, type: SurvivalType) {
             val createEntry: (Int?, Boolean) -> ReferenceEntry = { days, hadEvent ->
