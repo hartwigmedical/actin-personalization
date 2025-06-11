@@ -24,24 +24,19 @@ object ReferenceObjectFactory {
             LOGGER.warn { "  Could not determine interval towards metastatic diagnosis for entry with source ID ${entry.sourceId}" }
             return null
         }
-
-        val treatmentInterpreter = TreatmentInterpreter(entry.treatmentEpisodes)
-        if (!treatmentInterpreter.hasMetastaticTreatment()) {
-            LOGGER.warn { "  No metastatic treatment episode found for entry with source ID ${entry.sourceId}" }
-            return null
-        }
         
         val comorbidityInterpreter = ComorbidityInterpreter(entry.comorbidityAssessments)
         val whoInterpreter = WhoInterpreter(entry.whoAssessments)
         val asaInterpreter = AsaInterpreter(entry.asaAssessments)
         val labInterpreter = LabInterpreter(entry.labMeasurements)
         val molecularInterpreter = MolecularInterpreter(entry.molecularResults)
-
+        val treatmentInterpreter = TreatmentInterpreter(entry.treatmentEpisodes)
+        
         val survivalSincePrimaryDiagnosis = entry.latestSurvivalMeasurement.daysSinceDiagnosis
         val daysBetweenPrimaryDiagnosisAndTreatmentStart = treatmentInterpreter.determineMetastaticSystemicTreatmentStart()
         val daysBetweenMetastaticDiagnosisAndTreatmentStart =
-            daysBetweenPrimaryDiagnosisAndTreatmentStart?.let { daysBetweenPrimaryAndMetastaticDiagnosis - it }
-        
+            daysBetweenPrimaryDiagnosisAndTreatmentStart?.let { it - daysBetweenPrimaryAndMetastaticDiagnosis }
+
         val tnmInterpreter = TnmInterpreter(entry.primaryDiagnosis, entry.metastaticDiagnosis)
 
         return ReferenceObject(
@@ -49,7 +44,7 @@ object ReferenceObjectFactory {
             sourceId = entry.sourceId,
             diagnosisYear = entry.diagnosisYear,
             ageAtDiagnosis = entry.ageAtDiagnosis,
-            ageAtMetastaticDiagnosis = entry.ageAtDiagnosis + ((daysBetweenPrimaryAndMetastaticDiagnosis/365.0).roundToInt()),
+            ageAtMetastaticDiagnosis = entry.ageAtDiagnosis + ((daysBetweenPrimaryAndMetastaticDiagnosis / 365.0).roundToInt()),
             sex = entry.sex,
 
             hadSurvivalEvent = !entry.latestSurvivalMeasurement.isAlive,
@@ -85,21 +80,35 @@ object ReferenceObjectFactory {
             extraMuralInvasionCategory = entry.primaryDiagnosis.extraMuralInvasionCategory,
             tumorRegression = entry.primaryDiagnosis.tumorRegression,
 
-            charlsonComorbidityIndex = comorbidityInterpreter.mostRecentCharlsonComorbidityIndexPriorTo(daysBetweenPrimaryAndMetastaticDiagnosis),
+            charlsonComorbidityIndex = comorbidityInterpreter.mostRecentCharlsonComorbidityIndexPriorTo(
+                daysBetweenPrimaryAndMetastaticDiagnosis
+            ),
             hasAids = comorbidityInterpreter.mostRecentHasAidsPriorTo(daysBetweenPrimaryAndMetastaticDiagnosis),
-            hasCongestiveHeartFailure = comorbidityInterpreter.mostRecentHasCongestiveHeartFailurePriorTo(daysBetweenPrimaryAndMetastaticDiagnosis),
+            hasCongestiveHeartFailure = comorbidityInterpreter.mostRecentHasCongestiveHeartFailurePriorTo(
+                daysBetweenPrimaryAndMetastaticDiagnosis
+            ),
             hasCollagenosis = comorbidityInterpreter.mostRecentHasCollagenosisPriorTo(daysBetweenPrimaryAndMetastaticDiagnosis),
             hasCopd = comorbidityInterpreter.mostRecentHasCopdPriorTo(daysBetweenPrimaryAndMetastaticDiagnosis),
-            hasCerebrovascularDisease = comorbidityInterpreter.mostRecentHasCerebrovascularDiseasePriorTo(daysBetweenPrimaryAndMetastaticDiagnosis),
+            hasCerebrovascularDisease = comorbidityInterpreter.mostRecentHasCerebrovascularDiseasePriorTo(
+                daysBetweenPrimaryAndMetastaticDiagnosis
+            ),
             hasDementia = comorbidityInterpreter.mostRecentHasDementiaPriorTo(daysBetweenPrimaryAndMetastaticDiagnosis),
             hasDiabetesMellitus = comorbidityInterpreter.mostRecentHasDiabetesMellitusPriorTo(daysBetweenPrimaryAndMetastaticDiagnosis),
-            hasDiabetesMellitusWithEndOrganDamage = comorbidityInterpreter.mostRecentHasDiabetesMellitusWithEndOrganDamagePriorTo(daysBetweenPrimaryAndMetastaticDiagnosis),
+            hasDiabetesMellitusWithEndOrganDamage = comorbidityInterpreter.mostRecentHasDiabetesMellitusWithEndOrganDamagePriorTo(
+                daysBetweenPrimaryAndMetastaticDiagnosis
+            ),
             hasOtherMalignancy = comorbidityInterpreter.mostRecentHasOtherMalignancyPriorTo(daysBetweenPrimaryAndMetastaticDiagnosis),
-            hasOtherMetastaticSolidTumor = comorbidityInterpreter.mostRecentHasOtherMetastaticSolidTumorPriorTo(daysBetweenPrimaryAndMetastaticDiagnosis),
+            hasOtherMetastaticSolidTumor = comorbidityInterpreter.mostRecentHasOtherMetastaticSolidTumorPriorTo(
+                daysBetweenPrimaryAndMetastaticDiagnosis
+            ),
             hasMyocardialInfarct = comorbidityInterpreter.mostRecentHasMyocardialInfarctPriorTo(daysBetweenPrimaryAndMetastaticDiagnosis),
             hasMildLiverDisease = comorbidityInterpreter.mostRecentHasMildLiverDiseasePriorTo(daysBetweenPrimaryAndMetastaticDiagnosis),
-            hasHemiplegiaOrParaplegia = comorbidityInterpreter.mostRecentHasHemiplegiaOrParaplegiaPriorTo(daysBetweenPrimaryAndMetastaticDiagnosis),
-            hasPeripheralVascularDisease = comorbidityInterpreter.mostRecentHasPeripheralVascularDiseasePriorTo(daysBetweenPrimaryAndMetastaticDiagnosis),
+            hasHemiplegiaOrParaplegia = comorbidityInterpreter.mostRecentHasHemiplegiaOrParaplegiaPriorTo(
+                daysBetweenPrimaryAndMetastaticDiagnosis
+            ),
+            hasPeripheralVascularDisease = comorbidityInterpreter.mostRecentHasPeripheralVascularDiseasePriorTo(
+                daysBetweenPrimaryAndMetastaticDiagnosis
+            ),
             hasRenalDisease = comorbidityInterpreter.mostRecentHasRenalDiseasePriorTo(daysBetweenPrimaryAndMetastaticDiagnosis),
             hasLiverDisease = comorbidityInterpreter.mostRecentHasLiverDiseasePriorTo(daysBetweenPrimaryAndMetastaticDiagnosis),
             hasUlcerDisease = comorbidityInterpreter.mostRecentHasUlcerDiseasePriorTo(daysBetweenPrimaryAndMetastaticDiagnosis),
@@ -144,25 +153,25 @@ object ReferenceObjectFactory {
             hasRasMutation = molecularInterpreter.mostRecentHasRasMutationPriorTo(daysBetweenPrimaryAndMetastaticDiagnosis),
             hasKrasG12CMutation = molecularInterpreter.mostRecentHasKrasG12CMutationPriorTo(daysBetweenPrimaryAndMetastaticDiagnosis),
 
-            hasHadPrimarySurgeryPriorToMetastaticTreatment = treatmentInterpreter.hasPrimarySurgeryPriorToMetastaticTreatment(daysBetweenPrimaryDiagnosisAndTreatmentStart),
-            hasHadPrimarySurgeryDuringMetastaticTreatment = treatmentInterpreter.hasPrimarySurgeryDuringMetastaticTreatment(daysBetweenPrimaryDiagnosisAndTreatmentStart),
-            hasHadGastroenterologySurgeryPriorToMetastaticTreatment = treatmentInterpreter.hasGastroenterologySurgeryPriorToMetastaticTreatment(daysBetweenPrimaryDiagnosisAndTreatmentStart),
-            hasHadGastroenterologySurgeryDuringMetastaticTreatment = treatmentInterpreter.hasGastroenterologySurgeryDuringMetastaticTreatment(daysBetweenPrimaryDiagnosisAndTreatmentStart),
-            hasHadHipecPriorToMetastaticTreatment = treatmentInterpreter.hasHipecPriorToMetastaticTreatment(daysBetweenPrimaryDiagnosisAndTreatmentStart),
-            hasHadHipecDuringMetastaticTreatment = treatmentInterpreter.hasHipecDuringMetastaticTreatment(daysBetweenPrimaryDiagnosisAndTreatmentStart),
-            hasHadPrimaryRadiotherapyPriorToMetastaticTreatment = treatmentInterpreter.hasPrimaryRadiotherapyPriorToMetastaticTreatment(daysBetweenPrimaryDiagnosisAndTreatmentStart),
-            hasHadPrimaryRadiotherapyDuringMetastaticTreatment = treatmentInterpreter.hasPrimaryRadiotherapyDuringMetastaticTreatment(daysBetweenPrimaryDiagnosisAndTreatmentStart),
+            hasHadPrimarySurgeryPriorToMetastaticTreatment = treatmentInterpreter.hasPrimarySurgeryPriorToMetastaticTreatment(),
+            hasHadPrimarySurgeryDuringMetastaticTreatment = treatmentInterpreter.hasPrimarySurgeryDuringMetastaticTreatment(),
+            hasHadGastroenterologySurgeryPriorToMetastaticTreatment = treatmentInterpreter.hasGastroenterologySurgeryPriorToMetastaticTreatment(),
+            hasHadGastroenterologySurgeryDuringMetastaticTreatment = treatmentInterpreter.hasGastroenterologySurgeryDuringMetastaticTreatment(),
+            hasHadHipecPriorToMetastaticTreatment = treatmentInterpreter.hasHipecPriorToMetastaticTreatment(),
+            hasHadHipecDuringMetastaticTreatment = treatmentInterpreter.hasHipecDuringMetastaticTreatment(),
+            hasHadPrimaryRadiotherapyPriorToMetastaticTreatment = treatmentInterpreter.hasPrimaryRadiotherapyPriorToMetastaticTreatment(),
+            hasHadPrimaryRadiotherapyDuringMetastaticTreatment = treatmentInterpreter.hasPrimaryRadiotherapyDuringMetastaticTreatment(),
 
             hasHadMetastaticSurgery = treatmentInterpreter.hasMetastaticSurgery(),
             hasHadMetastaticRadiotherapy = treatmentInterpreter.hasMetastaticRadiotherapy(),
 
-            hasHadSystemicTreatmentPriorToMetastaticTreatment = treatmentInterpreter.hasSystemicTreatmentPriorToMetastaticTreatment(daysBetweenPrimaryDiagnosisAndTreatmentStart),
+            hasHadSystemicTreatmentPriorToMetastaticTreatment = treatmentInterpreter.hasSystemicTreatmentPriorToMetastaticTreatment(),
             isMetastaticPriorToMetastaticTreatmentDecision = treatmentInterpreter.isMetastaticPriorToMetastaticTreatmentDecision(),
-            reasonRefrainmentFromTreatment = treatmentInterpreter.reasonRefrainmentFromTreatment(),
+            reasonRefrainmentFromTreatment = treatmentInterpreter.reasonRefrainmentFromMetastaticTreatment(),
             daysBetweenMetastaticDiagnosisAndTreatmentStart = daysBetweenMetastaticDiagnosisAndTreatmentStart,
             systemicTreatmentsAfterMetastaticDiagnosis = treatmentInterpreter.metastaticSystemicTreatmentCount(),
             firstSystemicTreatmentAfterMetastaticDiagnosis = treatmentInterpreter.firstMetastaticSystemicTreatment()?.display,
-            firstSystemicTreatmentDurationDays = treatmentInterpreter.firstMetastaticSystemicTreatmentDuration(),
+            firstSystemicTreatmentDurationDays = treatmentInterpreter.firstMetastaticSystemicTreatmentDurationDays(),
             hadProgressionEvent = treatmentInterpreter.hasProgressionEventAfterMetastaticSystemicTreatmentStart(),
             daysBetweenTreatmentStartAndProgression = treatmentInterpreter.daysBetweenProgressionAndMetastaticSystemicTreatmentStart()
         )

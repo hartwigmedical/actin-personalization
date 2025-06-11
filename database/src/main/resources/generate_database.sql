@@ -419,7 +419,7 @@ CREATE TABLE `reference` (
     `isMetastaticPriorToMetastaticTreatmentDecision` BOOL NOT NULL,
     `reasonRefrainmentFromTreatment` VARCHAR(255) NOT NULL,
     `daysBetweenMetastaticDiagnosisAndTreatmentStart` INT,  
-    `systemicTreatmentsAfterMetastaticDiagnosis` INT,
+    `systemicTreatmentsAfterMetastaticDiagnosis` INT NOT NULL,
     `firstSystemicTreatmentAfterMetastaticDiagnosis` VARCHAR(255),
     `firstSystemicTreatmentDurationDays` DOUBLE,
     `hadProgressionEvent` BOOL,
