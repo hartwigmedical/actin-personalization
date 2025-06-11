@@ -52,14 +52,7 @@ def predict_treatment_scenarios(patient_data: dict, trained_path: str, valid_tre
                 X_base[col] = val
 
         X_base["hasTreatment"] = (X_base[treatment_cols].sum(axis=1) > 0).astype(int)
-        print("⚠️ Any NaNs in X_base?", X_base.isna().any().any())
-        print("⚠️ Any inf in X_base?", (X_base == float("inf")).any().any())
-        print("🧪 Max value in X_base:", X_base.max().max())
-        print("🧪 Min value in X_base:", X_base.min().min())
-        print("🧪 Input shape:", X_base.shape)
-
-        print(X_base.iloc[0].to_dict())
-
+    
         surv_fns = model.predict_survival_function(X_base)
         sf = surv_fns[0] 
         

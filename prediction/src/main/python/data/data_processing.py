@@ -5,8 +5,7 @@ import json
 
 from sklearn.impute import KNNImputer
 from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import LabelEncoder
-from sklearn.preprocessing import MinMaxScaler, StandardScaler
+from sklearn.preprocessing import LabelEncoder, StandardScaler
 
 from typing import List, Dict, Tuple, Any
 import joblib
@@ -60,19 +59,11 @@ class DataPreprocessor:
             except Exception as e:
                 warnings.warn(f"Failed to load StandardScaler: {e}")
                 self.scaler = None
-
-            try:
-                self.minmax_scaler = joblib.load(f"{settings.save_path}/preprocessor/minmax_scaler.pkl")
-            except Exception as e:
-                warnings.warn(f"Failed to load MinMaxScaler: {e}")
-                self.minmax_scaler = None
-                
                 
         else:
             self.medians = {}
             self.encoded_columns = {}
             self.scaler = None 
-            self.minmax_scaler = None
 
     
 
