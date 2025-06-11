@@ -9,16 +9,16 @@ class ReferenceObjectFactoryTest {
     
     @Test
     fun `Should create object for empty reference entry`() {
-        assertThat(ReferenceObjectFactory.create(TestReferenceEntryFactory.emptyReferenceEntry())).isNotNull()
+        assertThat(ReferenceObjectFactory.create(TestReferenceEntryFactory.empty())).isNotNull()
     }
 
     @Test
     fun `Should create object for minimal reference entry`() {
-        assertThat(ReferenceObjectFactory.create(TestReferenceEntryFactory.minimalReferenceEntry())).isNotNull()
+        assertThat(ReferenceObjectFactory.create(TestReferenceEntryFactory.minimal())).isNotNull()
     }
 
     @Test
     fun `Should create object for exhaustive reference entry`() {
-        assertThat(ReferenceObjectFactory.create(TestReferenceEntryFactory.exhaustiveReferenceEntry())).isNotNull()
+        assertThat(ReferenceObjectFactory.create(TestReferenceEntryFactory.exhaustive())).isNotNull()
     }
 }

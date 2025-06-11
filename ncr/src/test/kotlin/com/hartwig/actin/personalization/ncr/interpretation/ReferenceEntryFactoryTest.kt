@@ -1,23 +1,26 @@
 package com.hartwig.actin.personalization.ncr.interpretation
 
 import com.hartwig.actin.personalization.ncr.datamodel.TestNcrRecordFactory
+import com.hartwig.actin.personalization.ncr.interpretation.filter.NcrQualityFilter
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
 class ReferenceEntryFactoryTest {
 
+    private val factory = ReferenceEntryFactory(NcrQualityFilter(logFilteredRecords = true))
+    
     @Test
     fun `Should create record for minimal NCR input`() {
         val records = TestNcrRecordFactory.minimalEntryRecords()
 
-        assertThat(ReferenceEntryFactory.create(records)).hasSize(1)
+        assertThat(factory.create(records)).hasSize(1)
     }
 
     @Test
     fun `Should create record for minimal NCR diagnosis and followup record`() {
         val records = listOf(TestNcrRecordFactory.minimalDiagnosisRecord(), TestNcrRecordFactory.minimalFollowupRecord())
 
-        assertThat(ReferenceEntryFactory.create(records)).hasSize(1)
+        assertThat(factory.create(records)).hasSize(1)
     }
 
     @Test
@@ -28,7 +31,7 @@ class ReferenceEntryFactoryTest {
             TestNcrRecordFactory.properFollowupRecord2()
         )
 
-        assertThat(ReferenceEntryFactory.create(records)).hasSize(1)
+        assertThat(factory.create(records)).hasSize(1)
     }
 
     @Test
@@ -49,6 +52,6 @@ class ReferenceEntryFactoryTest {
             baseRecord6.copy(identification = baseRecord6.identification.copy(keyNkr = 2, keyZid = 3))
         )
 
-        assertThat(ReferenceEntryFactory.create(records)).hasSize(3)
+        assertThat(factory.create(records)).hasSize(3)
     }
 }

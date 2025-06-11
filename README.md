@@ -1,33 +1,15 @@
 # ACTIN Personalization
 
-Repo containing various algos for personalization of treatment prediction.
+ACTIN-personalization is a system for ingesting and standardizing reference data with the purpose to create models for treatment decision
+personalization for the next patient. In addition to the core datamodel and source mappings to this datamodel, this repo contains the logic
+that creates the prediction models along with various analysis notebooks.
 
-### High-level Data Structure
+More details on the following modules are available from the links below:
 
-A `ReferencePatient` contains basic information and a list of tumor entries, each of which has a `Diagnosis` and a list
-of `Episode`s.
-Each episode includes an assessment of the tumor at that time and a treatment plan, captured in the
-`systemicTreatmentPlan` field.
-
-### Treatment Extraction
-
-A `Treatment` is determined for treatment plan where possible by:
-1. Identifying the set of drugs used in the initial treatment scheme.
-2. Identifying the set of follow-up drugs used in all subsequent schemes.
-3. If the set of follow-up drugs includes any new drugs that aren't allowed substitutions, assign `Treatment.OTHER`.
-   Otherwise, identify the treatment represented by the initial drug set.
-
-This allows some drugs to be dropped after the initial cycle while still using the initial drug set for treatment assignment.
-
-### Progression-Free Survival (PFS)
-
-A patient's PFS is the time between the start of their treatment and disease progression or death.
-Some reference patients may not experience an event before the time of the last follow-up, in which case they are marked
-"censored" and we do not know their true PFS.
-Each `Episode` has a list of PFS measures with dates, each of which can represent progression, death, or censorship.
-The episode's PFS measures are summarized in two fields of the systemic treatment plan:
-* `hadProgressionEvent`: This indicates whether a patient experienced a progression event during a study.
-  `false` here means the patient was censored.
-* `observedPfsDays`: This is the number of days for which a patient is known to have been progression-free.
-    * For patients that had a progression event, this is the time between treatment start and the first event.
-    * For patients with no event, this is time between treatment start and the last time they were marked as censored.
+| Module                   | Description                                                                                                |
+|--------------------------|------------------------------------------------------------------------------------------------------------|
+| [Datamodel](datamodel)   | The definition of the common reference entry datamodel used by personalization                             | 
+| [Database](database)     | Code to write the common datamodel to MySQL including creating a flattened view for models to use          |
+| [NCR](ncr)               | Logic to inspect and convert NCR-specific data to the common personalization datamodel                     | 
+| [Prediction](prediction) | Module containing the logic to create the actual predictive algorithms                                     |
+| [Similarity](similarity) | A module providing basic patient-like-me functionality, to compare a new patient with a reference database |

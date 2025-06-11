@@ -16,7 +16,7 @@ data class PrimaryDiagnosis(
 
     val differentiationGrade: DifferentiationGrade?,
     val clinicalTnmClassification: TnmClassification,
-    val pathologicalTnmClassification: TnmClassification,
+    val pathologicalTnmClassification: TnmClassification?,
     val clinicalTumorStage: TumorStage,
     val pathologicalTumorStage: TumorStage,
     val investigatedLymphNodesCount: Int?,

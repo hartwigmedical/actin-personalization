@@ -10,9 +10,9 @@ class ReferenceEntryJsonTest {
 
     private val entries =
         listOf(
-            TestReferenceEntryFactory.emptyReferenceEntry(),
-            TestReferenceEntryFactory.minimalReferenceEntry(),
-            TestReferenceEntryFactory.exhaustiveReferenceEntry()
+            TestReferenceEntryFactory.empty(),
+            TestReferenceEntryFactory.minimal(),
+            TestReferenceEntryFactory.exhaustive()
         )
 
     @Test

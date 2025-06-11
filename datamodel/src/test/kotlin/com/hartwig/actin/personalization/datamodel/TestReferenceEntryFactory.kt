@@ -38,6 +38,7 @@ import com.hartwig.actin.personalization.datamodel.outcome.SurvivalMeasurement
 import com.hartwig.actin.personalization.datamodel.treatment.AnastomoticLeakageAfterSurgery
 import com.hartwig.actin.personalization.datamodel.treatment.CircumferentialResectionMargin
 import com.hartwig.actin.personalization.datamodel.treatment.Drug
+import com.hartwig.actin.personalization.datamodel.treatment.DrugTreatment
 import com.hartwig.actin.personalization.datamodel.treatment.GastroenterologyResection
 import com.hartwig.actin.personalization.datamodel.treatment.GastroenterologyResectionType
 import com.hartwig.actin.personalization.datamodel.treatment.HipecTreatment
@@ -55,15 +56,13 @@ import com.hartwig.actin.personalization.datamodel.treatment.SurgeryTechnique
 import com.hartwig.actin.personalization.datamodel.treatment.SurgeryType
 import com.hartwig.actin.personalization.datamodel.treatment.SurgeryUrgency
 import com.hartwig.actin.personalization.datamodel.treatment.SystemicTreatment
-import com.hartwig.actin.personalization.datamodel.treatment.SystemicTreatmentDrug
-import com.hartwig.actin.personalization.datamodel.treatment.SystemicTreatmentScheme
 import com.hartwig.actin.personalization.datamodel.treatment.Treatment
 import com.hartwig.actin.personalization.datamodel.treatment.TreatmentEpisode
 import com.hartwig.actin.personalization.datamodel.treatment.TreatmentIntent
 
 object TestReferenceEntryFactory {
 
-    fun emptyReferenceEntry() = ReferenceEntry(
+    fun empty() = ReferenceEntry(
         source = ReferenceSource.INTERNAL,
         sourceId = 1,
         diagnosisYear = 1971,
@@ -81,7 +80,7 @@ object TestReferenceEntryFactory {
         treatmentEpisodes = emptyList()
     )
 
-    fun minimalReferenceEntry() = ReferenceEntry(
+    fun minimal() = ReferenceEntry(
         source = ReferenceSource.INTERNAL,
         sourceId = 2,
         diagnosisYear = 1966,
@@ -99,7 +98,7 @@ object TestReferenceEntryFactory {
         treatmentEpisodes = listOf(minimalTreatmentEpisode())
     )
 
-    fun exhaustiveReferenceEntry() = ReferenceEntry(
+    fun exhaustive() = ReferenceEntry(
         source = ReferenceSource.INTERNAL,
         sourceId = 2,
         diagnosisYear = 1961,
@@ -142,7 +141,7 @@ object TestReferenceEntryFactory {
         primaryTumorLocation = TumorLocation.DESCENDING_COLON,
         differentiationGrade = null,
         clinicalTnmClassification = TnmClassification(tnmT = null, tnmN = null, tnmM = null),
-        pathologicalTnmClassification = TnmClassification(tnmT = null, tnmN = null, tnmM = null),
+        pathologicalTnmClassification = null,
         clinicalTumorStage = TumorStage.II,
         pathologicalTumorStage = TumorStage.IV,
         investigatedLymphNodesCount = null,
@@ -183,6 +182,8 @@ object TestReferenceEntryFactory {
         metastases = emptyList(),
         numberOfLiverMetastases = null,
         maximumSizeOfLiverMetastasisMm = null,
+        clinicalTnmClassification = null,
+        pathologicalTnmClassification = null,
         investigatedLymphNodesCount = null,
         positiveLymphNodesCount = null
     )
@@ -200,6 +201,8 @@ object TestReferenceEntryFactory {
         ),
         numberOfLiverMetastases = NumberOfLiverMetastases.MULTIPLE_BUT_EXACT_NUMBER_UNKNOWN,
         maximumSizeOfLiverMetastasisMm = 10,
+        clinicalTnmClassification = TnmClassification(tnmT = null, tnmN = null, tnmM = TnmM.M1),
+        pathologicalTnmClassification = TnmClassification(tnmT = null, tnmN = null, tnmM = TnmM.M1),
         investigatedLymphNodesCount = 10,
         positiveLymphNodesCount = 10
     )
@@ -319,7 +322,7 @@ object TestReferenceEntryFactory {
     )
 
     private fun minimalPrimaryRadiotherapy() = PrimaryRadiotherapy(
-        daysBetweenDiagnosisAndStart = null, daysBetweenDiagnosisAndStop = null, type = RadiotherapyType.INTRA_OPERATIVE, totalDosage = null
+        daysBetweenDiagnosisAndStart = null, daysBetweenDiagnosisAndStop = null, type = null, totalDosage = null
     )
 
     private fun exhaustivePrimaryRadiotherapy() = PrimaryRadiotherapy(
@@ -339,24 +342,14 @@ object TestReferenceEntryFactory {
     )
 
     private fun minimalSystemicTreatment() = SystemicTreatment(
-        daysBetweenDiagnosisAndStart = null,
-        daysBetweenDiagnosisAndStop = null,
-        treatment = Treatment.CAPECITABINE_BEVACIZUMAB,
+        treatment = Treatment.OTHER,
         schemes = emptyList()
     )
 
-    private fun minimalSystemicTreatmentScheme() = SystemicTreatmentScheme(
-        minDaysBetweenDiagnosisAndStart = null,
-        maxDaysBetweenDiagnosisAndStart = null,
-        minDaysBetweenDiagnosisAndStop = null,
-        maxDaysBetweenDiagnosisAndStop = null,
-        components = emptyList()
-    )
-
-    private fun minimalSystemicTreatmentDrug() = SystemicTreatmentDrug(
+    private fun minimalSystemicDrugScheme() = DrugTreatment(
         daysBetweenDiagnosisAndStart = null,
         daysBetweenDiagnosisAndStop = null,
-        drug = Drug.EXTERNAL_RADIOTHERAPY_WITH_SENSITIZER,
+        drug = Drug.CAPECITABINE,
         numberOfCycles = null,
         intent = null,
         drugTreatmentIsOngoing = null,
@@ -364,10 +357,10 @@ object TestReferenceEntryFactory {
         isAdministeredPostSurgery = null
     )
 
-    private fun exhaustiveSystemicTreatmentDrug() = SystemicTreatmentDrug(
+    private fun exhaustiveSystemicDrugScheme() = DrugTreatment(
         daysBetweenDiagnosisAndStart = 10,
         daysBetweenDiagnosisAndStop = 20,
-        drug = Drug.EXTERNAL_RADIOTHERAPY_WITH_SENSITIZER,
+        drug = Drug.BEVACIZUMAB,
         numberOfCycles = 10,
         intent = TreatmentIntent.MAINTENANCE,
         drugTreatmentIsOngoing = true,
@@ -375,31 +368,25 @@ object TestReferenceEntryFactory {
         isAdministeredPostSurgery = false
     )
 
-    private fun exhaustiveSystemicTreatmentScheme() = SystemicTreatmentScheme(
-        minDaysBetweenDiagnosisAndStart = 10,
-        maxDaysBetweenDiagnosisAndStart = 20,
-        minDaysBetweenDiagnosisAndStop = 30,
-        maxDaysBetweenDiagnosisAndStop = 40,
-        components = listOf(minimalSystemicTreatmentDrug(), exhaustiveSystemicTreatmentDrug())
-    )
-
     private fun exhaustiveSystemicTreatment() = SystemicTreatment(
-        daysBetweenDiagnosisAndStart = 10,
-        daysBetweenDiagnosisAndStop = 20,
         treatment = Treatment.CAPECITABINE_BEVACIZUMAB,
-        schemes = listOf(minimalSystemicTreatmentScheme(), exhaustiveSystemicTreatmentScheme())
+        schemes = listOf(listOf(minimalSystemicDrugScheme(), exhaustiveSystemicDrugScheme()), listOf(minimalSystemicDrugScheme()))
     )
 
     private fun minimalResponseMeasure() = ResponseMeasure(
-        daysSinceDiagnosis = null, response = ResponseType.CR
+        daysSinceDiagnosis = null,
+        response = ResponseType.CR
     )
 
     private fun exhaustiveResponseMeasure() = ResponseMeasure(
-        daysSinceDiagnosis = 10, response = ResponseType.MR
+        daysSinceDiagnosis = 10,
+        response = ResponseType.MR
     )
 
     private fun minimalProgressionMeasure() = ProgressionMeasure(
-        daysSinceDiagnosis = null, type = ProgressionMeasureType.PROGRESSION, followUpEvent = null
+        daysSinceDiagnosis = null,
+        type = ProgressionMeasureType.PROGRESSION,
+        followUpEvent = null
     )
 
     private fun exhaustiveProgressionMeasure() = ProgressionMeasure(

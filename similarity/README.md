@@ -1,4 +1,4 @@
-## Similarity
+## ACTIN-Personalization - Similarity
 
 This module supports estimating patient Progression-Free Survival (PFS) based on similar reference patients.
 

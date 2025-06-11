@@ -9,6 +9,9 @@ data class MetastaticDiagnosis(
     val numberOfLiverMetastases: NumberOfLiverMetastases?,
     val maximumSizeOfLiverMetastasisMm: Int?,
 
+    val clinicalTnmClassification: TnmClassification?,
+    val pathologicalTnmClassification: TnmClassification?,
+
     val investigatedLymphNodesCount: Int?,
     val positiveLymphNodesCount: Int?
 )

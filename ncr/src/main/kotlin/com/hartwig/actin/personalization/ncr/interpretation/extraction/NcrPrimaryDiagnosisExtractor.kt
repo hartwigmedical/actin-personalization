@@ -2,7 +2,6 @@ package com.hartwig.actin.personalization.ncr.interpretation.extraction
 
 import com.hartwig.actin.personalization.datamodel.diagnosis.PrimaryDiagnosis
 import com.hartwig.actin.personalization.datamodel.diagnosis.Sidedness
-import com.hartwig.actin.personalization.datamodel.diagnosis.TnmClassification
 import com.hartwig.actin.personalization.datamodel.diagnosis.TumorLocation
 import com.hartwig.actin.personalization.ncr.datamodel.NcrRecord
 import com.hartwig.actin.personalization.ncr.interpretation.NcrFunctions
@@ -12,9 +11,6 @@ import com.hartwig.actin.personalization.ncr.interpretation.mapping.NcrBooleanMa
 import com.hartwig.actin.personalization.ncr.interpretation.mapping.NcrDifferentiationGradeMapper
 import com.hartwig.actin.personalization.ncr.interpretation.mapping.NcrExtraMuralInvasionCategoryMapper
 import com.hartwig.actin.personalization.ncr.interpretation.mapping.NcrLymphaticInvasionCategoryMapper
-import com.hartwig.actin.personalization.ncr.interpretation.mapping.NcrTnmMMapper
-import com.hartwig.actin.personalization.ncr.interpretation.mapping.NcrTnmNMapper
-import com.hartwig.actin.personalization.ncr.interpretation.mapping.NcrTnmTMapper
 import com.hartwig.actin.personalization.ncr.interpretation.mapping.NcrTumorLocationMapper
 import com.hartwig.actin.personalization.ncr.interpretation.mapping.NcrTumorRegressionMapper
 import com.hartwig.actin.personalization.ncr.interpretation.mapping.NcrTumorStageMapper
@@ -42,8 +38,9 @@ object NcrPrimaryDiagnosisExtractor {
             distanceToMesorectalFasciaMm = distanceToMesorectalFasciaMm,
 
             differentiationGrade = NcrDifferentiationGradeMapper.resolve(diagnosis.primaryDiagnosis.diffgrad),
-            clinicalTnmClassification = extractClinicalTnmClassification(diagnosis),
-            pathologicalTnmClassification = extractPathologicalTnmClassification(diagnosis),
+            clinicalTnmClassification = NcrTnmClassificationExtractor.extractClinical(diagnosis)
+                ?: throw IllegalStateException("Clinical TNM shouldn't be missing for primary diagnosis"),
+            pathologicalTnmClassification = NcrTnmClassificationExtractor.extractPathological(diagnosis),
             clinicalTumorStage = NcrTumorStageMapper.resolve(diagnosis.primaryDiagnosis.cstadium!!),
             pathologicalTumorStage = NcrTumorStageMapper.resolve(diagnosis.primaryDiagnosis.pstadium!!),
             investigatedLymphNodesCount = diagnosis.primaryDiagnosis.ondLymf,
@@ -55,22 +52,6 @@ object NcrPrimaryDiagnosisExtractor {
             lymphaticInvasionCategory = NcrLymphaticInvasionCategoryMapper.resolve(diagnosis.clinicalCharacteristics.lymfInvas),
             extraMuralInvasionCategory = NcrExtraMuralInvasionCategoryMapper.resolve(diagnosis.clinicalCharacteristics.emi),
             tumorRegression = NcrTumorRegressionMapper.resolve(diagnosis.clinicalCharacteristics.tumregres)
-        )
-    }
-
-    private fun extractClinicalTnmClassification(record: NcrRecord): TnmClassification {
-        return extractTnmClassification(record.primaryDiagnosis.ct, record.primaryDiagnosis.cn, record.primaryDiagnosis.cm)
-    }
-
-    private fun extractPathologicalTnmClassification(record: NcrRecord): TnmClassification {
-        return extractTnmClassification(record.primaryDiagnosis.pt, record.primaryDiagnosis.pn, record.primaryDiagnosis.pm)
-    }
-
-    private fun extractTnmClassification(tCode: String?, nCode: String?, mCode: String?): TnmClassification {
-        return TnmClassification(
-            tnmT = NcrTnmTMapper.resolveNullable(tCode),
-            tnmN = NcrTnmNMapper.resolveNullable(nCode),
-            tnmM = NcrTnmMMapper.resolveNullable(mCode)
         )
     }
 

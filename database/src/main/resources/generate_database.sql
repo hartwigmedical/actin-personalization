@@ -1,5 +1,5 @@
 SET FOREIGN_KEY_CHECKS = 0;
- 
+  
 DROP TABLE IF EXISTS `entry`;
 CREATE TABLE `entry` (
     `id` INT NOT NULL,
@@ -73,6 +73,12 @@ CREATE TABLE `metastaticDiagnosis` (
     `isMetachronous` BOOL NOT NULL,
     `numberOfLiverMetastases` VARCHAR(50),
     `maximumSizeOfLiverMetastasisMm` INT,
+    `clinicalTnmT` VARCHAR(50),
+    `clinicalTnmN` VARCHAR(50),
+    `clinicalTnmM` VARCHAR(50),
+    `pathologicalTnmT` VARCHAR(50),
+    `pathologicalTnmN` VARCHAR(50),
+    `pathologicalTnmM` VARCHAR(50),
     `investigatedLymphNodesCount` INT,
     `positiveLymphNodesCount` INT,
     FOREIGN KEY (`entryId`) REFERENCES `entry`(`id`),
@@ -227,7 +233,7 @@ CREATE TABLE `primaryRadiotherapy` (
     `treatmentEpisodeId` INT NOT NULL,
     `daysBetweenDiagnosisAndStart` INT,
     `daysBetweenDiagnosisAndStop` INT,
-    `type` VARCHAR(50) NOT NULL,
+    `type` VARCHAR(50),
     `totalDosage` DOUBLE,
     FOREIGN KEY (`treatmentEpisodeId`) REFERENCES `treatmentEpisode`(`id`),
     PRIMARY KEY (`id`)
@@ -248,29 +254,16 @@ DROP TABLE IF EXISTS `systemicTreatment`;
 CREATE TABLE `systemicTreatment` (
     `id` INT NOT NULL,
     `treatmentEpisodeId` INT NOT NULL,
-    `daysBetweenDiagnosisAndStart` INT,
-    `daysBetweenDiagnosisAndStop` INT,
     `treatment` VARCHAR(50) NOT NULL,
     FOREIGN KEY (`treatmentEpisodeId`) REFERENCES `treatmentEpisode`(`id`),
-    PRIMARY KEY (`id`)
-);
-
-DROP TABLE IF EXISTS `systemicTreatmentScheme`;
-CREATE TABLE `systemicTreatmentScheme` (
-    `id` INT NOT NULL,
-    `systemicTreatmentId` INT NOT NULL,
-    `minDaysBetweenDiagnosisAndStart` INT,
-    `maxDaysBetweenDiagnosisAndStart` INT,
-    `minDaysBetweenDiagnosisAndStop` INT,
-    `maxDaysBetweenDiagnosisAndStop` INT,
-    FOREIGN KEY (`systemicTreatmentId`) REFERENCES `systemicTreatment`(`id`),
     PRIMARY KEY (`id`)
 );
 
 DROP TABLE IF EXISTS `systemicTreatmentDrug`;
 CREATE TABLE `systemicTreatmentDrug` (
     `id` INT NOT NULL AUTO_INCREMENT,
-    `systemicTreatmentSchemeId` INT NOT NULL,
+    `systemicTreatmentId` INT NOT NULL,
+    `scheme` INT NOT NULL,
     `daysBetweenDiagnosisAndStart` INT,
     `daysBetweenDiagnosisAndStop` INT,
     `drug` VARCHAR(50) NOT NULL,
@@ -279,7 +272,7 @@ CREATE TABLE `systemicTreatmentDrug` (
     `drugTreatmentIsOngoing` BOOL,
     `isAdministeredPreSurgery` BOOL,
     `isAdministeredPostSurgery` BOOL,
-    FOREIGN KEY (`systemicTreatmentSchemeId`) REFERENCES `systemicTreatmentScheme`(`id`),
+    FOREIGN KEY (`systemicTreatmentId`) REFERENCES `systemicTreatment`(`id`),
     PRIMARY KEY (`id`)
 );
 
@@ -327,6 +320,7 @@ CREATE TABLE `reference` (
     `sourceId` INT NOT NULL,
     `diagnosisYear` INT NOT NULL,
     `ageAtDiagnosis` INT NOT NULL,
+    `ageAtMetastaticDiagnosis` INT NOT NULL,
     `sex` VARCHAR(50) NOT NULL,
     
     `hadSurvivalEvent` BOOL NOT NULL,
@@ -361,8 +355,28 @@ CREATE TABLE `reference` (
     `lymphaticInvasionCategory` VARCHAR(50),
     `extraMuralInvasionCategory` VARCHAR(50),
     `tumorRegression` VARCHAR(50),
+
+    `charlsonComorbidityIndex` INT,
+    `hasAids` BOOL,
+    `hasCongestiveHeartFailure` BOOL,
+    `hasCollagenosis` BOOL,
+    `hasCopd` BOOL,
+    `hasCerebrovascularDisease` BOOL,
+    `hasDementia` BOOL,
+    `hasDiabetesMellitus` BOOL,
+    `hasDiabetesMellitusWithEndOrganDamage` BOOL,
+    `hasOtherMalignancy` BOOL,
+    `hasOtherMetastaticSolidTumor` BOOL,
+    `hasMyocardialInfarct` BOOL,
+    `hasMildLiverDisease` BOOL,
+    `hasHemiplegiaOrParaplegia` BOOL,
+    `hasPeripheralVascularDisease` BOOL,
+    `hasRenalDisease` BOOL,
+    `hasLiverDisease` BOOL,
+    `hasUlcerDisease` BOOL,
   
     `daysBetweenPrimaryAndMetastaticDiagnosis` INT NOT NULL,
+    `isMetachronous` BOOL NOT NULL,
     `hasLiverOrIntrahepaticBileDuctMetastases` BOOL NOT NULL,
     `numberOfLiverMetastases` VARCHAR(50),
     `maximumSizeOfLiverMetastasisMm` INT,
@@ -382,22 +396,30 @@ CREATE TABLE `reference` (
     `carcinoembryonicAntigenAtMetastaticDiagnosis` DOUBLE,
     `albumineAtMetastaticDiagnosis` DOUBLE,
     `neutrophilsAbsoluteAtMetastaticDiagnosis` DOUBLE,
+
+    `hasMsi` BOOL,
+    `hasBrafMutation` BOOL,
+    `hasBrafV600EMutation` BOOL,
+    `hasRasMutation` BOOL,
+    `hasKrasG12CMutation` BOOL,
     
-    `hasHadPrimarySurgeryPriorToMetastaticDiagnosis` BOOL NOT NULL,
-    `hasHadPrimarySurgeryAfterMetastaticDiagnosis` BOOL NOT NULL,
-    `hasHadGastroenterologySurgeryPriorToMetastaticDiagnosis` BOOL NOT NULL,
-    `hasHadGastroenterologySurgeryAfterMetastaticDiagnosis` BOOL NOT NULL,
-    `hasHadHipecPriorToMetastaticDiagnosis` BOOL NOT NULL,
-    `hasHadHipecAfterMetastaticDiagnosis` BOOL NOT NULL,
-    `hasHadPrimaryRadiotherapyPriorToMetastaticDiagnosis` BOOL NOT NULL,
-    `hasHadPrimaryRadiotherapyAfterMetastaticDiagnosis` BOOL NOT NULL,
+    `hasHadPrimarySurgeryPriorToMetastaticTreatment` BOOL NOT NULL,
+    `hasHadPrimarySurgeryDuringMetastaticTreatment` BOOL NOT NULL,
+    `hasHadGastroenterologySurgeryPriorToMetastaticTreatment` BOOL NOT NULL,
+    `hasHadGastroenterologySurgeryDuringMetastaticTreatment` BOOL NOT NULL,
+    `hasHadHipecPriorToMetastaticTreatment` BOOL NOT NULL,
+    `hasHadHipecDuringMetastaticTreatment` BOOL NOT NULL,
+    `hasHadPrimaryRadiotherapyPriorToMetastaticTreatment` BOOL NOT NULL,
+    `hasHadPrimaryRadiotherapyDuringMetastaticTreatment` BOOL NOT NULL,
     
     `hasHadMetastaticSurgery` BOOL NOT NULL,
     `hasHadMetastaticRadiotherapy` BOOL NOT NULL,
     
-    `hasHadSystemicTreatmentPriorToMetastaticDiagnosis` BOOL NOT NULL,
+    `hasHadSystemicTreatmentPriorToMetastaticTreatment` BOOL NOT NULL,
+    `isMetastaticPriorToMetastaticTreatmentDecision` BOOL NOT NULL,
+    `reasonRefrainmentFromTreatment` VARCHAR(255) NOT NULL,
     `daysBetweenMetastaticDiagnosisAndTreatmentStart` INT,  
-    `systemicTreatmentsAfterMetastaticDiagnosis` INT,
+    `systemicTreatmentsAfterMetastaticDiagnosis` INT NOT NULL,
     `firstSystemicTreatmentAfterMetastaticDiagnosis` VARCHAR(255),
     `firstSystemicTreatmentDurationDays` DOUBLE,
     `hadProgressionEvent` BOOL,

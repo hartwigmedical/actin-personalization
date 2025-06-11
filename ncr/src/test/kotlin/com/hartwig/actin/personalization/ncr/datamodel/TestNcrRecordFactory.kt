@@ -49,7 +49,7 @@ object TestNcrRecordFactory {
             .copy(clinicalCharacteristics = minimalClinicalCharacteristics())
             .copy(molecularCharacteristics = minimalMolecularCharacteristics())
             .copy(priorMalignancies = minimalPriorMalignancies())
-            .copy(primaryDiagnosis = baseRecord.primaryDiagnosis.copy(morfCat = null))
+            .copy(primaryDiagnosis = properPrimaryDiagnosisForMetastaticEpisode())
             .copy(metastaticDiagnosis = minimalMetastaticDiagnosis())
             .copy(comorbidities = minimalComorbidities())
             .copy(labValues = properFollowup1LabValues())
@@ -72,7 +72,7 @@ object TestNcrRecordFactory {
             .copy(clinicalCharacteristics = minimalClinicalCharacteristics())
             .copy(molecularCharacteristics = minimalMolecularCharacteristics())
             .copy(priorMalignancies = minimalPriorMalignancies())
-            .copy(primaryDiagnosis = baseRecord.primaryDiagnosis.copy(morfCat = null))
+            .copy(primaryDiagnosis = properPrimaryDiagnosisForMetastaticEpisode())
             .copy(comorbidities = minimalComorbidities())
             .copy(labValues = minimalLabValues())
             .copy(treatment = properFollowup2Treatment())
@@ -256,7 +256,7 @@ object TestNcrRecordFactory {
             morfCat = 1,
             diagBasis = 1,
             diffgrad = 2,
-            ct = null,
+            ct = "0",
             cn = null,
             cm = null,
             pt = null,
@@ -281,6 +281,21 @@ object TestNcrRecordFactory {
             stadium = "III",
             ondLymf = 3,
             posLymf = 1
+        )
+    }
+
+    private fun properPrimaryDiagnosisForMetastaticEpisode(): NcrPrimaryDiagnosis {
+        return minimalPrimaryDiagnosis().copy(
+            morfCat = null,
+            ct = null,
+            cn = null,
+            cm = null,
+            pt = null,
+            pn = null,
+            pm = "1",
+            stadium = "IV",
+            ondLymf = 4,
+            posLymf = 2
         )
     }
 
@@ -502,7 +517,7 @@ object TestNcrRecordFactory {
                 metaChirRad3 = null
             ),
             primaryRadiotherapy = NcrPrimaryRadiotherapy(
-                rt = 6,
+                rt = 0,
                 chemort = null,
                 rtType1 = null,
                 rtType2 = null,

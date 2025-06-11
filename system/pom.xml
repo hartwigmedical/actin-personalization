@@ -20,12 +20,13 @@
         </dependency>
         <dependency>
             <groupId>com.hartwig.actin.personalization</groupId>
-            <artifactId>similarity</artifactId>
+            <artifactId>ncr</artifactId>
         </dependency>
         <dependency>
             <groupId>com.hartwig.actin.personalization</groupId>
-            <artifactId>ncr</artifactId>
+            <artifactId>similarity</artifactId>
         </dependency>
+        
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>

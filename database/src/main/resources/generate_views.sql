@@ -1,20 +1,22 @@
-CREATE OR REPLACE VIEW palliativeIntents AS (
+CREATE OR REPLACE VIEW palliativeReference AS (
 
-SELECT *
-FROM distantMetastasesOverview
-WHERE hasHadPriorSystemicTherapy = 0 
-   AND (clinicalTnmM LIKE 'M1%' OR pathologicalTnmM LIKE 'M1%' OR clinicalTumorStage LIKE 'IV%' OR pathologicalTumorStage LIKE 'IV%')
-   AND surgeriesPrimary IS NULL
-   AND surgeriesMetastatic IS NULL
-   AND surgeriesGastroenterology IS NULL
-   AND hadHipec = 0 
-   AND radiotherapiesPrimary IS NULL
-   AND radiotherapiesMetastatic IS NULL
+    SELECT *
+    FROM reference
+    WHERE hasHadSystemicTreatmentPriorToMetastaticTreatment = 0
+        AND isMetastaticPriorToMetastaticTreatmentDecision = 1
+        AND (clinicalTnmM LIKE 'M1%' OR pathologicalTnmM LIKE 'M1%' OR clinicalTumorStage LIKE 'IV%' OR pathologicalTumorStage LIKE 'IV%')
+        AND hasHadPrimarySurgeryDuringMetastaticTreatment = 0
+        AND hasHadPrimaryRadiotherapyDuringMetastaticTreatment = 0
+        AND hasHadGastroenterologySurgeryDuringMetastaticTreatment = 0
+        AND hasHadHipecDuringMetastaticTreatment = 0
+        AND hasHadMetastaticSurgery = 0
+        AND hasHadMetastaticRadiotherapy = 0
+        AND (systemicTreatmentsAfterMetastaticDiagnosis = 0 OR firstSystemicTreatmentAfterMetastaticDiagnosis IS NOT NULL)
 );
 
-CREATE OR REPLACE VIEW knownPalliativeTreatments AS (
+CREATE OR REPLACE VIEW knownPalliativeTreatedReference AS (
 
-SELECT *
-FROM palliativeIntents
-WHERE treatment IS NOT NULL AND treatment != 'OTHER'
+    SELECT *
+    FROM palliativeReference
+    WHERE firstSystemicTreatmentAfterMetastaticDiagnosis IS NOT NULL AND firstSystemicTreatmentAfterMetastaticDiagnosis != 'OTHER'
 );

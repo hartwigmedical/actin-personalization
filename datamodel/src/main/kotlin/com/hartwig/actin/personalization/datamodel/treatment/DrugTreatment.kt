@@ -3,7 +3,7 @@ package com.hartwig.actin.personalization.datamodel.treatment
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class SystemicTreatmentDrug(
+data class DrugTreatment(
     val daysBetweenDiagnosisAndStart: Int?,
     val daysBetweenDiagnosisAndStop: Int?,
     val drug: Drug,
