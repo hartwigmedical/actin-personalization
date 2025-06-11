@@ -4,6 +4,8 @@ ACTIN-personalization is a system for ingesting and standardizing reference data
 personalization for the next patient. In addition to the core datamodel and source mappings to this datamodel, this repo contains the logic
 that creates the prediction models along with various analysis notebooks.
 
+![Personalization Schematic](./system/src/main/resources/personalization_schematic.png)
+
 More details on the following modules are available from the links below:
 
 | Module                   | Description                                                                                                |
