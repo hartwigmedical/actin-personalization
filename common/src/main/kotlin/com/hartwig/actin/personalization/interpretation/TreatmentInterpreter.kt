@@ -10,35 +10,16 @@ import com.hartwig.actin.personalization.datamodel.treatment.TreatmentGroup
 
 class TreatmentInterpreter(private val treatmentEpisodes: List<TreatmentEpisode>) {
 
-    fun hasMetastaticTreatment(): Boolean {
-        return extractMetastaticTreatmentEpisode() != null
-    }
-
     fun isMetastaticPriorToMetastaticTreatmentDecision(): Boolean {
-        return extractMetastaticTreatmentEpisode()?.let { it.metastaticPresence == MetastaticPresence.AT_START } ?: false
+        return extractMetastaticTreatmentEpisode().metastaticPresence == MetastaticPresence.AT_START
     }
 
     fun determineMetastaticSystemicTreatmentStart(): Int? {
         return extractFirstMetastaticSystemicTreatment()?.let { determineDaysBetweenDiagnosisAndStart(it) }
     }
 
-    fun hasPostMetastaticTreatmentWithSystemicTreatmentOnly(): Boolean {
-        val metastaticTreatmentEpisode = extractMetastaticTreatmentEpisode() ?: return false
-
-        return with(metastaticTreatmentEpisode) {
-            metastaticPresence == MetastaticPresence.AT_START &&
-                    systemicTreatments.isNotEmpty() &&
-                    gastroenterologyResections.isEmpty() &&
-                    primarySurgeries.isEmpty() &&
-                    metastaticSurgeries.isEmpty() &&
-                    hipecTreatments.isEmpty() &&
-                    primaryRadiotherapies.isEmpty() &&
-                    metastaticRadiotherapies.isEmpty()
-        }
-    }
-
-    fun reasonRefrainmentFromTreatment(): String? {
-        return extractMetastaticTreatmentEpisode()?.reasonRefrainmentFromTreatment?.name
+    fun reasonRefrainmentFromMetastaticTreatment(): String {
+        return extractMetastaticTreatmentEpisode().reasonRefrainmentFromTreatment.name
     }
 
     fun hasPrimarySurgeryPriorToMetastaticTreatment(): Boolean {
@@ -96,15 +77,15 @@ class TreatmentInterpreter(private val treatmentEpisodes: List<TreatmentEpisode>
     }
 
     fun hasMetastaticSurgery(): Boolean {
-        return extractMetastaticTreatmentEpisode()?.metastaticSurgeries?.isNotEmpty() ?: return false
+        return extractMetastaticTreatmentEpisode().metastaticSurgeries.isNotEmpty()
     }
 
     fun hasMetastaticRadiotherapy(): Boolean {
-        return extractMetastaticTreatmentEpisode()?.metastaticRadiotherapies?.isNotEmpty() ?: return false
+        return extractMetastaticTreatmentEpisode().metastaticRadiotherapies.isNotEmpty()
     }
 
-    fun metastaticSystemicTreatmentCount(): Int? {
-        return extractMetastaticTreatmentEpisode()?.systemicTreatments?.size ?: return null
+    fun metastaticSystemicTreatmentCount(): Int {
+        return extractMetastaticTreatmentEpisode().systemicTreatments.size
     }
 
     fun firstMetastaticSystemicTreatment(): Treatment? {
@@ -127,24 +108,56 @@ class TreatmentInterpreter(private val treatmentEpisodes: List<TreatmentEpisode>
         }
     }
 
+    fun hasPostMetastaticTreatmentWithSystemicTreatmentOnly(): Boolean {
+        val isMetastaticPriorToMetastaticTreatmentDecision = isMetastaticPriorToMetastaticTreatmentDecision()
+        val hasSystemicTreatment = firstMetastaticSystemicTreatment() != null
+
+        val hasGastroenterologyResectionDuringMetastaticTreatment = hasGastroenterologySurgeryDuringMetastaticTreatment()
+        val hasPrimarySurgeryDuringMetastaticTreatment = hasPrimarySurgeryDuringMetastaticTreatment()
+        val hasMetastaticSurgery = hasMetastaticSurgery()
+        val hasHipecDuringMetastaticTreatment = hasHipecDuringMetastaticTreatment()
+        val hasPrimaryRadiotherapyDuringMetastaticTreatment = hasPrimaryRadiotherapyDuringMetastaticTreatment()
+        val hasMetastaticRadiotherapy = hasMetastaticRadiotherapy()
+
+        val hasOtherInterventionDuringMetastaticTreatment =
+            hasGastroenterologyResectionDuringMetastaticTreatment || hasPrimarySurgeryDuringMetastaticTreatment ||
+                    hasMetastaticSurgery || hasHipecDuringMetastaticTreatment ||
+                    hasPrimaryRadiotherapyDuringMetastaticTreatment || hasMetastaticRadiotherapy
+
+        return isMetastaticPriorToMetastaticTreatmentDecision && hasSystemicTreatment && !hasOtherInterventionDuringMetastaticTreatment
+    }
+
     fun hasProgressionEventAfterMetastaticSystemicTreatmentStart(): Boolean? {
-        val metastaticTreatmentEpisode = extractMetastaticTreatmentEpisode() ?: return null
-        return firstProgressionAfterSystemicTreatmentStart(metastaticTreatmentEpisode) != null
+        val systemicTreatmentStart = determineMetastaticSystemicTreatmentStart() ?: return null
+
+        return firstProgressionAfterSpecificMoment(
+            treatmentEpisode = extractMetastaticTreatmentEpisode(),
+            minDaysSinceDiagnosis = systemicTreatmentStart
+        ) != null
     }
 
     fun daysBetweenProgressionAndMetastaticSystemicTreatmentStart(): Int? {
-        val metastaticTreatmentEpisode = extractMetastaticTreatmentEpisode() ?: return null
-        val treatmentStart = determineMetastaticSystemicTreatmentStart() ?: return null
+        val systemicTreatmentStart = determineMetastaticSystemicTreatmentStart() ?: return null
+        val progression = daysBetweenProgressionAndPrimaryDiagnosis() ?: return null
 
-        val progression = firstProgressionAfterSystemicTreatmentStart(metastaticTreatmentEpisode)?.daysSinceDiagnosis ?: return null
-
-        return progression - treatmentStart
+        return progression - systemicTreatmentStart
     }
 
     fun daysBetweenProgressionAndPrimaryDiagnosis(): Int? {
-        val metastaticTreatmentEpisode = extractMetastaticTreatmentEpisode() ?: return null
+        val systemicTreatmentStart = determineMetastaticSystemicTreatmentStart() ?: return null
+        
+        return firstProgressionAfterSpecificMoment(
+            treatmentEpisode = extractMetastaticTreatmentEpisode(),
+            minDaysSinceDiagnosis = systemicTreatmentStart
+        )?.daysSinceDiagnosis
+    }
 
-        return firstProgressionAfterSystemicTreatmentStart(metastaticTreatmentEpisode)?.daysSinceDiagnosis
+    private fun firstProgressionAfterSpecificMoment(treatmentEpisode: TreatmentEpisode, minDaysSinceDiagnosis: Int): ProgressionMeasure? {
+        return treatmentEpisode.progressionMeasures
+            .filter { it.type == ProgressionMeasureType.PROGRESSION }
+            .filter { it.daysSinceDiagnosis?.let { days -> days > minDaysSinceDiagnosis } ?: false }
+            .sortedBy { it.daysSinceDiagnosis }
+            .firstOrNull()
     }
 
     private fun <T> hasEventPriorToMetastaticTreatment(chooseList: (TreatmentEpisode) -> List<T>, daysExtractor: (T) -> Int?): Boolean {
@@ -153,7 +166,7 @@ class TreatmentInterpreter(private val treatmentEpisodes: List<TreatmentEpisode>
         }
 
         val metastaticTreatmentStartDays = determineMetastaticSystemicTreatmentStart()
-        val metastaticEpisode = extractMetastaticTreatmentEpisode() ?: return false
+        val metastaticEpisode = extractMetastaticTreatmentEpisode()
 
         if (metastaticTreatmentStartDays == null) {
             return chooseList(metastaticEpisode).isNotEmpty()
@@ -166,7 +179,7 @@ class TreatmentInterpreter(private val treatmentEpisodes: List<TreatmentEpisode>
 
     private fun <T> hasEventDuringMetastaticTreatment(chooseList: (TreatmentEpisode) -> List<T>, daysExtractor: (T) -> Int?): Boolean {
         val metastaticTreatmentStartDays = determineMetastaticSystemicTreatmentStart()
-        val metastaticEpisode = extractMetastaticTreatmentEpisode() ?: return false
+        val metastaticEpisode = extractMetastaticTreatmentEpisode()
 
         if (metastaticTreatmentStartDays == null) {
             return chooseList(metastaticEpisode).isNotEmpty()
@@ -175,22 +188,18 @@ class TreatmentInterpreter(private val treatmentEpisodes: List<TreatmentEpisode>
         return chooseList(metastaticEpisode).any { element -> daysExtractor(element)?.let { it >= metastaticTreatmentStartDays } ?: false }
     }
 
+    private fun extractMetastaticTreatmentEpisode(): TreatmentEpisode {
+        val metastaticEpisodes =
+            treatmentEpisodes.filter {
+                it.metastaticPresence == MetastaticPresence.AT_START ||
+                        it.metastaticPresence == MetastaticPresence.AT_PROGRESSION
+            }
 
-    private fun firstProgressionAfterSystemicTreatmentStart(treatmentEpisode: TreatmentEpisode): ProgressionMeasure? {
-        val systemicTreatment = treatmentEpisode.systemicTreatments.firstOrNull() ?: return null
-        val startOfTreatment = determineDaysBetweenDiagnosisAndStart(systemicTreatment)
+        if (metastaticEpisodes.size != 1) {
+            throw IllegalStateException("There should be exactly one metastatic treatment episode")
+        }
 
-        return treatmentEpisode.progressionMeasures
-            .filter { it.type == ProgressionMeasureType.PROGRESSION }
-            .filter { startOfTreatment == null || it.daysSinceDiagnosis?.let { days -> days > startOfTreatment } ?: false }
-            .sortedBy { it.daysSinceDiagnosis }
-            .firstOrNull()
-    }
-
-
-    private fun extractMetastaticTreatmentEpisode(): TreatmentEpisode? {
-        return treatmentEpisodes.firstOrNull { it.metastaticPresence == MetastaticPresence.AT_START }
-            ?: treatmentEpisodes.firstOrNull { it.metastaticPresence == MetastaticPresence.AT_PROGRESSION }
+        return metastaticEpisodes.first()
     }
 
     private fun extractPreMetastaticTreatmentEpisodes(): List<TreatmentEpisode> {
@@ -198,7 +207,7 @@ class TreatmentInterpreter(private val treatmentEpisodes: List<TreatmentEpisode>
     }
 
     private fun extractFirstMetastaticSystemicTreatment(): SystemicTreatment? {
-        return extractMetastaticTreatmentEpisode()?.systemicTreatments?.firstOrNull()
+        return extractMetastaticTreatmentEpisode().systemicTreatments.firstOrNull()
     }
 
     private fun determineDaysBetweenDiagnosisAndStart(systemicTreatment: SystemicTreatment): Int? {

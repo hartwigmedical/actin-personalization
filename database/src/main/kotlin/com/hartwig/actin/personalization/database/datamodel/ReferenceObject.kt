@@ -121,9 +121,9 @@ data class ReferenceObject(
 
     val hasHadSystemicTreatmentPriorToMetastaticTreatment: Boolean,
     val isMetastaticPriorToMetastaticTreatmentDecision: Boolean,
-    val reasonRefrainmentFromTreatment: String?,
+    val reasonRefrainmentFromTreatment: String,
     val daysBetweenMetastaticDiagnosisAndTreatmentStart: Int?,
-    val systemicTreatmentsAfterMetastaticDiagnosis: Int?,
+    val systemicTreatmentsAfterMetastaticDiagnosis: Int,
     val firstSystemicTreatmentAfterMetastaticDiagnosis: String?,
     val firstSystemicTreatmentDurationDays: Int?,
     val hadProgressionEvent: Boolean?,

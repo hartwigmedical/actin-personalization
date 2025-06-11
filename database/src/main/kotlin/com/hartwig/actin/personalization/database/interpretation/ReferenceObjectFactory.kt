@@ -24,19 +24,14 @@ object ReferenceObjectFactory {
             LOGGER.warn { "  Could not determine interval towards metastatic diagnosis for entry with source ID ${entry.sourceId}" }
             return null
         }
-
-        val treatmentInterpreter = TreatmentInterpreter(entry.treatmentEpisodes)
-        if (!treatmentInterpreter.hasMetastaticTreatment()) {
-            LOGGER.warn { "  No metastatic treatment episode found for entry with source ID ${entry.sourceId}" }
-            return null
-        }
-
+        
         val comorbidityInterpreter = ComorbidityInterpreter(entry.comorbidityAssessments)
         val whoInterpreter = WhoInterpreter(entry.whoAssessments)
         val asaInterpreter = AsaInterpreter(entry.asaAssessments)
         val labInterpreter = LabInterpreter(entry.labMeasurements)
         val molecularInterpreter = MolecularInterpreter(entry.molecularResults)
-
+        val treatmentInterpreter = TreatmentInterpreter(entry.treatmentEpisodes)
+        
         val survivalSincePrimaryDiagnosis = entry.latestSurvivalMeasurement.daysSinceDiagnosis
         val daysBetweenPrimaryDiagnosisAndTreatmentStart = treatmentInterpreter.determineMetastaticSystemicTreatmentStart()
         val daysBetweenMetastaticDiagnosisAndTreatmentStart =
@@ -172,7 +167,7 @@ object ReferenceObjectFactory {
 
             hasHadSystemicTreatmentPriorToMetastaticTreatment = treatmentInterpreter.hasSystemicTreatmentPriorToMetastaticTreatment(),
             isMetastaticPriorToMetastaticTreatmentDecision = treatmentInterpreter.isMetastaticPriorToMetastaticTreatmentDecision(),
-            reasonRefrainmentFromTreatment = treatmentInterpreter.reasonRefrainmentFromTreatment(),
+            reasonRefrainmentFromTreatment = treatmentInterpreter.reasonRefrainmentFromMetastaticTreatment(),
             daysBetweenMetastaticDiagnosisAndTreatmentStart = daysBetweenMetastaticDiagnosisAndTreatmentStart,
             systemicTreatmentsAfterMetastaticDiagnosis = treatmentInterpreter.metastaticSystemicTreatmentCount(),
             firstSystemicTreatmentAfterMetastaticDiagnosis = treatmentInterpreter.firstMetastaticSystemicTreatment()?.display,

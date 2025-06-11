@@ -3,58 +3,81 @@ package com.hartwig.actin.personalization.interpretation
 import com.hartwig.actin.personalization.datamodel.TestDatamodelFactory
 import com.hartwig.actin.personalization.datamodel.outcome.ProgressionMeasureType
 import com.hartwig.actin.personalization.datamodel.treatment.MetastaticPresence
+import com.hartwig.actin.personalization.datamodel.treatment.ReasonRefrainmentFromTreatment
 import com.hartwig.actin.personalization.datamodel.treatment.TestTreatmentFactory
 import com.hartwig.actin.personalization.datamodel.treatment.Treatment
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 
 class TreatmentInterpreterTest {
 
+    private val noTreatment = TestDatamodelFactory.treatmentEpisode(
+        metastaticPresence = MetastaticPresence.AT_START,
+        reasonRefrainmentFromTreatment = ReasonRefrainmentFromTreatment.WISH_OR_REFUSAL_FROM_PATIENT_OR_FAMILY
+    )
+    private val noTreatmentInterpreter = TreatmentInterpreter(listOf(noTreatment))
+
+    private val systemicOnlyTreatment = TestDatamodelFactory.treatmentEpisode(
+        metastaticPresence = MetastaticPresence.AT_START,
+        systemicTreatments = listOf(
+            TestDatamodelFactory.systemicTreatment(
+                schemes = listOf(
+                    listOf(
+                        TestDatamodelFactory.drugTreatment(daysBetweenDiagnosisAndStart = null),
+                        TestDatamodelFactory.drugTreatment(daysBetweenDiagnosisAndStart = 240)
+                    ),
+                    listOf(
+                        TestDatamodelFactory.drugTreatment(daysBetweenDiagnosisAndStart = 180),
+                        TestDatamodelFactory.drugTreatment(daysBetweenDiagnosisAndStart = null)
+                    )
+                )
+            )
+        )
+    )
+    private val systemicOnlyInterpreter = TreatmentInterpreter(listOf(systemicOnlyTreatment))
+
     @Test
-    fun `Should determine state about existence and timing of metastatic treatment`() {
-        val noTreatmentInterpreter = TreatmentInterpreter(emptyList())
-        assertThat(noTreatmentInterpreter.hasMetastaticTreatment()).isFalse()
-        assertThat(noTreatmentInterpreter.isMetastaticPriorToMetastaticTreatmentDecision()).isFalse()
-
-        val noMetastaticTreatmentInterpreter =
-            TreatmentInterpreter(listOf(TestDatamodelFactory.treatmentEpisode(metastaticPresence = MetastaticPresence.ABSENT)))
-        assertThat(noMetastaticTreatmentInterpreter.hasMetastaticTreatment()).isFalse()
-        assertThat(noMetastaticTreatmentInterpreter.isMetastaticPriorToMetastaticTreatmentDecision()).isFalse()
-
+    fun `Should determine timing of metastatic treatment`() {
         val startMetastaticTreatmentInterpreter =
             TreatmentInterpreter(listOf(TestDatamodelFactory.treatmentEpisode(metastaticPresence = MetastaticPresence.AT_START)))
-        assertThat(startMetastaticTreatmentInterpreter.hasMetastaticTreatment()).isTrue()
         assertThat(startMetastaticTreatmentInterpreter.isMetastaticPriorToMetastaticTreatmentDecision()).isTrue()
         
-        val progressionMetastaticTreatmentInterpreter =
-            TreatmentInterpreter(listOf(TestDatamodelFactory.treatmentEpisode(metastaticPresence = MetastaticPresence.AT_PROGRESSION)))
-        assertThat(progressionMetastaticTreatmentInterpreter.hasMetastaticTreatment()).isTrue()
-        assertThat(progressionMetastaticTreatmentInterpreter.isMetastaticPriorToMetastaticTreatmentDecision()).isFalse()
+        val noMetastaticTreatmentInterpreter =
+            TreatmentInterpreter(
+                listOf(
+                    TestDatamodelFactory.treatmentEpisode(metastaticPresence = MetastaticPresence.ABSENT),
+                    TestDatamodelFactory.treatmentEpisode(metastaticPresence = MetastaticPresence.AT_PROGRESSION)
+                )
+            )
+        assertThat(noMetastaticTreatmentInterpreter.isMetastaticPriorToMetastaticTreatmentDecision()).isFalse()
 
         val multipleTreatmentInterpreter =
-            TreatmentInterpreter(listOf(TestDatamodelFactory.treatmentEpisode(metastaticPresence = MetastaticPresence.ABSENT),
-                TestDatamodelFactory.treatmentEpisode(metastaticPresence = MetastaticPresence.AT_PROGRESSION),
-                TestDatamodelFactory.treatmentEpisode(metastaticPresence = MetastaticPresence.AT_START)))
-        assertThat(multipleTreatmentInterpreter.hasMetastaticTreatment()).isTrue()
+            TreatmentInterpreter(
+                listOf(
+                    TestDatamodelFactory.treatmentEpisode(metastaticPresence = MetastaticPresence.ABSENT),
+                    TestDatamodelFactory.treatmentEpisode(metastaticPresence = MetastaticPresence.AT_START)
+                )
+            )
         assertThat(multipleTreatmentInterpreter.isMetastaticPriorToMetastaticTreatmentDecision()).isTrue()
     }
-    
+
+    @Test
+    fun `Should throw exception with two metastatic treatment episodes`() {
+        val exceptionInterpreter = TreatmentInterpreter(listOf(noTreatment, systemicOnlyTreatment))
+        assertThrows<IllegalStateException> { exceptionInterpreter.determineMetastaticSystemicTreatmentStart() }
+    }
+
     @Test
     fun `Should determine start of metastatic systemic treatment`() {
-        val noTreatmentInterpreter = TreatmentInterpreter(emptyList())
         assertThat(noTreatmentInterpreter.determineMetastaticSystemicTreatmentStart()).isNull()
-        
-//        val treatment1 = TestDatamodelFactory.treatmentEpisode(metastaticPresence = MetastaticPresence.AT_START, 
-//            systemicTreatments = listOf(TestDatamodelFactory.systemicTreatment())
-//        )
-        
+        assertThat(systemicOnlyInterpreter.determineMetastaticSystemicTreatmentStart()).isEqualTo(180)
     }
 
     @Test
     fun `Should determine whether progression has occurred`() {
-        val interpreter = TreatmentInterpreter(listOf(TestTreatmentFactory.create(systemicTreatment = Treatment.CAPOX)))
-
-        assertThat(interpreter.hasProgressionEventAfterMetastaticSystemicTreatmentStart()).isFalse()
+        assertThat(noTreatmentInterpreter.hasProgressionEventAfterMetastaticSystemicTreatmentStart()).isNull()
+        assertThat(systemicOnlyInterpreter.hasProgressionEventAfterMetastaticSystemicTreatmentStart()).isFalse()
     }
 
     @Test
