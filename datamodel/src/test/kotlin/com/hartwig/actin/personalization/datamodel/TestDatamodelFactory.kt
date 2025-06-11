@@ -29,17 +29,27 @@ import com.hartwig.actin.personalization.datamodel.outcome.ProgressionMeasure
 import com.hartwig.actin.personalization.datamodel.outcome.ProgressionMeasureFollowUpEvent
 import com.hartwig.actin.personalization.datamodel.outcome.ProgressionMeasureType
 import com.hartwig.actin.personalization.datamodel.outcome.ResponseMeasure
+import com.hartwig.actin.personalization.datamodel.treatment.AnastomoticLeakageAfterSurgery
+import com.hartwig.actin.personalization.datamodel.treatment.CircumferentialResectionMargin
 import com.hartwig.actin.personalization.datamodel.treatment.Drug
 import com.hartwig.actin.personalization.datamodel.treatment.DrugScheme
 import com.hartwig.actin.personalization.datamodel.treatment.DrugTreatment
 import com.hartwig.actin.personalization.datamodel.treatment.GastroenterologyResection
+import com.hartwig.actin.personalization.datamodel.treatment.GastroenterologyResectionType
 import com.hartwig.actin.personalization.datamodel.treatment.HipecTreatment
 import com.hartwig.actin.personalization.datamodel.treatment.MetastaticPresence
 import com.hartwig.actin.personalization.datamodel.treatment.MetastaticRadiotherapy
+import com.hartwig.actin.personalization.datamodel.treatment.MetastaticRadiotherapyType
 import com.hartwig.actin.personalization.datamodel.treatment.MetastaticSurgery
+import com.hartwig.actin.personalization.datamodel.treatment.MetastaticSurgeryType
 import com.hartwig.actin.personalization.datamodel.treatment.PrimaryRadiotherapy
 import com.hartwig.actin.personalization.datamodel.treatment.PrimarySurgery
+import com.hartwig.actin.personalization.datamodel.treatment.RadiotherapyType
 import com.hartwig.actin.personalization.datamodel.treatment.ReasonRefrainmentFromTreatment
+import com.hartwig.actin.personalization.datamodel.treatment.SurgeryRadicality
+import com.hartwig.actin.personalization.datamodel.treatment.SurgeryTechnique
+import com.hartwig.actin.personalization.datamodel.treatment.SurgeryType
+import com.hartwig.actin.personalization.datamodel.treatment.SurgeryUrgency
 import com.hartwig.actin.personalization.datamodel.treatment.SystemicTreatment
 import com.hartwig.actin.personalization.datamodel.treatment.Treatment
 import com.hartwig.actin.personalization.datamodel.treatment.TreatmentEpisode
@@ -182,6 +192,77 @@ object TestDatamodelFactory {
             systemicTreatments = systemicTreatments,
             responseMeasures = responseMeasures,
             progressionMeasures = progressionMeasures
+        )
+    }
+
+    fun gastroenterologyResection(
+        daysSinceDiagnosis: Int? = null,
+        resectionType: GastroenterologyResectionType = GastroenterologyResectionType.ABLATION
+    ): GastroenterologyResection {
+        return GastroenterologyResection(daysSinceDiagnosis = daysSinceDiagnosis, resectionType = resectionType)
+    }
+
+    fun primarySurgery(
+        daysSinceDiagnosis: Int? = null,
+        type: SurgeryType = SurgeryType.TOTAL_COLECTOMY,
+        technique: SurgeryTechnique? = null,
+        urgency: SurgeryUrgency? = null,
+        radicality: SurgeryRadicality? = null,
+        circumferentialResectionMargin: CircumferentialResectionMargin? = null,
+        anastomoticLeakageAfterSurgery: AnastomoticLeakageAfterSurgery? = null,
+        hospitalizationDurationDays: Int? = null
+    ): PrimarySurgery {
+        return PrimarySurgery(
+            daysSinceDiagnosis = daysSinceDiagnosis,
+            type = type,
+            technique = technique,
+            urgency = urgency,
+            radicality = radicality,
+            circumferentialResectionMargin = circumferentialResectionMargin,
+            anastomoticLeakageAfterSurgery = anastomoticLeakageAfterSurgery,
+            hospitalizationDurationDays = hospitalizationDurationDays
+        )
+    }
+
+    fun metastaticSurgery(
+        daysSinceDiagnosis: Int? = null,
+        type: MetastaticSurgeryType = MetastaticSurgeryType.METASTASECTOMY_PERITONEUM,
+        radicality: SurgeryRadicality? = null
+    ): MetastaticSurgery {
+        return MetastaticSurgery(
+            daysSinceDiagnosis = daysSinceDiagnosis,
+            type = type,
+            radicality = radicality
+        )
+    }
+
+    fun hipecTreatment(daysSinceDiagnosis: Int = 0): HipecTreatment {
+        return HipecTreatment(daysSinceDiagnosis = daysSinceDiagnosis)
+    }
+
+    fun primaryRadiotherapy(
+        daysBetweenDiagnosisAndStart: Int? = null,
+        daysBetweenDiagnosisAndStop: Int? = null,
+        type: RadiotherapyType? = null,
+        totalDosage: Double? = null
+    ): PrimaryRadiotherapy {
+        return PrimaryRadiotherapy(
+            daysBetweenDiagnosisAndStart = daysBetweenDiagnosisAndStart,
+            daysBetweenDiagnosisAndStop = daysBetweenDiagnosisAndStop,
+            type = type,
+            totalDosage = totalDosage
+        )
+    }
+
+    fun metastaticRadiotherapy(
+        daysBetweenDiagnosisAndStart: Int? = null,
+        daysBetweenDiagnosisAndStop: Int? = null,
+        type: MetastaticRadiotherapyType = MetastaticRadiotherapyType.RADIOTHERAPY_ON_BONE_METASTASES,
+    ): MetastaticRadiotherapy {
+        return MetastaticRadiotherapy(
+            daysBetweenDiagnosisAndStart = daysBetweenDiagnosisAndStart,
+            daysBetweenDiagnosisAndStop = daysBetweenDiagnosisAndStop,
+            type = type
         )
     }
 

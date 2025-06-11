@@ -104,7 +104,7 @@ class TreatmentInterpreter(private val treatmentEpisodes: List<TreatmentEpisode>
         return if (treatmentStart == null || treatmentStop == null) {
             null
         } else {
-            treatmentStop - treatmentStart
+            1 + treatmentStop - treatmentStart
         }
     }
 
@@ -145,7 +145,7 @@ class TreatmentInterpreter(private val treatmentEpisodes: List<TreatmentEpisode>
 
     fun daysBetweenProgressionAndPrimaryDiagnosis(): Int? {
         val systemicTreatmentStart = determineMetastaticSystemicTreatmentStart() ?: return null
-        
+
         return firstProgressionAfterSpecificMoment(
             treatmentEpisode = extractMetastaticTreatmentEpisode(),
             minDaysSinceDiagnosis = systemicTreatmentStart
@@ -172,9 +172,7 @@ class TreatmentInterpreter(private val treatmentEpisodes: List<TreatmentEpisode>
             return chooseList(metastaticEpisode).isNotEmpty()
         }
 
-        return chooseList(metastaticEpisode).any { element ->
-            daysExtractor(element)?.let { it < metastaticTreatmentStartDays } ?: false
-        }
+        return chooseList(metastaticEpisode).any { element -> daysExtractor(element)?.let { it < metastaticTreatmentStartDays } ?: true }
     }
 
     private fun <T> hasEventDuringMetastaticTreatment(chooseList: (TreatmentEpisode) -> List<T>, daysExtractor: (T) -> Int?): Boolean {
@@ -185,7 +183,7 @@ class TreatmentInterpreter(private val treatmentEpisodes: List<TreatmentEpisode>
             return chooseList(metastaticEpisode).isNotEmpty()
         }
 
-        return chooseList(metastaticEpisode).any { element -> daysExtractor(element)?.let { it >= metastaticTreatmentStartDays } ?: false }
+        return chooseList(metastaticEpisode).any { element -> daysExtractor(element)?.let { it >= metastaticTreatmentStartDays } ?: true }
     }
 
     private fun extractMetastaticTreatmentEpisode(): TreatmentEpisode {
