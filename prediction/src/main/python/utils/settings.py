@@ -13,7 +13,7 @@ class Settings:
     hyperparam_tuning_number_combinations: int = 10
     save_models: bool = True
     json_config_file: str = 'src/main/python/models/configs/model_hyperparams.json'
-    db_name: str = 'actin_personalization_v2'
+    db_name: str = 'actin_personalization'
     view_name: str = 'knownPalliativeTreatedReference'
     db_config_path: str = '/home/jupyter/.my.cnf'
     
