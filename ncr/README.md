@@ -23,7 +23,7 @@ java -cp actin.jar com.hartwig.actin.personalization.ncr.NcrInspectionApplicatio
 The NCR data is organized by patient, then by tumor. Data is collected per episode with at least a DIA (diagnosis) episode for every tumor,
 and potentially multiple followup episodes per patient. The datamodel collected is identical per episode.
 
-![NCR Datamodel Schematic](/src/main/resources/ncr_datamodel_schematic.png)
+![NCR Datamodel Schematic](./src/main/resources/ncr_datamodel_schematic.png)
 
 ### Filtering NCR data
 
