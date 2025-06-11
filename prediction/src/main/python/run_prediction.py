@@ -1,9 +1,14 @@
-import sys
 import json
 import argparse
-import pandas as pd
+
 from utils.settings import settings
 from models.predictor import *
+
+import logging
+
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
+logger = logging.getLogger(__name__)
+
 
 def apply_settings_from_args(args):
     settings.outcome = args.outcome or 'OS'
@@ -18,6 +23,8 @@ def apply_settings_from_args(args):
     settings.configure_data_settings()
     settings.configure_model_settings()
     
+    logger.info(f"Configured settings with outcome={settings.outcome}, trained_path={settings.save_path}")
+    
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("input_path", help="Path to input JSON file")
@@ -27,28 +34,37 @@ def main():
     parser.add_argument("--treatment_config", help="Path to treatment combination JSON")
     args = parser.parse_args()
     
+    logger.info("Starting treatment prediction script")
     apply_settings_from_args(args)
 
     try:
+        logger.info(f"Loading patient data from {args.input_path}")
         with open(args.input_path, 'r') as f:
             patient_data = json.load(f)
     except Exception as e:
-        raise RuntimeError(f"Failed to load input data: {e}")
+        logger.error(f"Failed to load input data: {e}")
+        raise
 
     try:
+        logger.info(f"Loading treatment configuration from {args.treatment_config}")
         with open(args.treatment_config, 'r') as f:
             treatment_config = json.load(f)
     except Exception as e:
-        raise RuntimeError(f"Failed to load treatment config: {e}")
-
+        logger.error(f"Failed to load treatment config: {e}")
+        raise
+    
+    logger.info("Running predictions...")
     result = predict_treatment_scenarios(
         patient_data=patient_data,
         trained_path=args.trained_path,
         valid_treatment_combinations=treatment_config
     )
-
+    
+    logger.info(f"Saving results to {args.output_path}")
     with open(args.output_path, 'w') as f:
         json.dump(result, f)
+        
+    logger.info("Prediction script completed successfully")
 
 if __name__ == "__main__":
     main()
