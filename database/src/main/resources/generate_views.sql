@@ -2,7 +2,7 @@ CREATE OR REPLACE VIEW palliativeReference AS (
 
     SELECT *
     FROM reference
-    WHERE hasHadSystemicTreatmentPriorToMetastaticTreatment= 0
+    WHERE hasHadSystemicTreatmentPriorToMetastaticTreatment = 0
         AND isMetastaticPriorToMetastaticTreatmentDecision = 1
         AND (clinicalTnmM LIKE 'M1%' OR pathologicalTnmM LIKE 'M1%' OR clinicalTumorStage LIKE 'IV%' OR pathologicalTumorStage LIKE 'IV%')
         AND hasHadPrimarySurgeryDuringMetastaticTreatment = 0

@@ -40,7 +40,7 @@ object ReferenceObjectFactory {
         val survivalSincePrimaryDiagnosis = entry.latestSurvivalMeasurement.daysSinceDiagnosis
         val daysBetweenPrimaryDiagnosisAndTreatmentStart = treatmentInterpreter.determineMetastaticSystemicTreatmentStart()
         val daysBetweenMetastaticDiagnosisAndTreatmentStart =
-            daysBetweenPrimaryDiagnosisAndTreatmentStart?.let { daysBetweenPrimaryAndMetastaticDiagnosis - it }
+            daysBetweenPrimaryDiagnosisAndTreatmentStart?.let { it - daysBetweenPrimaryAndMetastaticDiagnosis }
 
         val tnmInterpreter = TnmInterpreter(entry.primaryDiagnosis, entry.metastaticDiagnosis)
 

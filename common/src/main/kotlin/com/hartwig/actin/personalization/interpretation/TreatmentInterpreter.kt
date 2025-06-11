@@ -123,7 +123,7 @@ class TreatmentInterpreter(private val treatmentEpisodes: List<TreatmentEpisode>
         return if (treatmentStart == null || treatmentStop == null) {
             null
         } else {
-            treatmentStart - treatmentStop
+            treatmentStop - treatmentStart
         }
     }
 
