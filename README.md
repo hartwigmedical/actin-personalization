@@ -1,4 +1,4 @@
-# ACTIN Personalization
+# ACTIN-Personalization
 
 ACTIN-personalization is a system for ingesting and standardizing reference data with the purpose to create models for treatment decision
 personalization for the next patient. In addition to the core datamodel and source mappings to this datamodel, this repo contains the logic
