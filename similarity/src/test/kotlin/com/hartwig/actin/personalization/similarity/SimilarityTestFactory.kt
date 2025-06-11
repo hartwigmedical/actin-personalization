@@ -5,7 +5,6 @@ import com.hartwig.actin.personalization.datamodel.TestReferenceEntryFactory
 import com.hartwig.actin.personalization.datamodel.outcome.SurvivalMeasurement
 import com.hartwig.actin.personalization.datamodel.treatment.MetastaticPresence
 import com.hartwig.actin.personalization.datamodel.treatment.SurgeryType
-import com.hartwig.actin.personalization.datamodel.treatment.TestTreatmentFactory
 import com.hartwig.actin.personalization.datamodel.treatment.Treatment
 import com.hartwig.actin.personalization.datamodel.treatment.TreatmentEpisode
 

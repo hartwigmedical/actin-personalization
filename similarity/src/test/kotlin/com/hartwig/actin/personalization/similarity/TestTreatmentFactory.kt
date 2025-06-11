@@ -1,6 +1,12 @@
-package com.hartwig.actin.personalization.datamodel.treatment
+package com.hartwig.actin.personalization.similarity
 
 import com.hartwig.actin.personalization.datamodel.TestDatamodelFactory
+import com.hartwig.actin.personalization.datamodel.treatment.MetastaticPresence
+import com.hartwig.actin.personalization.datamodel.treatment.PrimarySurgery
+import com.hartwig.actin.personalization.datamodel.treatment.SurgeryType
+import com.hartwig.actin.personalization.datamodel.treatment.SystemicTreatment
+import com.hartwig.actin.personalization.datamodel.treatment.Treatment
+import com.hartwig.actin.personalization.datamodel.treatment.TreatmentEpisode
 
 object TestTreatmentFactory {
 
