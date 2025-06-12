@@ -65,7 +65,6 @@ class DataPreprocessor:
             self.encoded_columns = {}
             self.scaler = None 
 
-    
 
     def preprocess_data(self, features = lookup_manager.features, df = None) -> Tuple[pd.DataFrame, List[str], Dict[str, List[str]]]:
         if df is None:
@@ -81,22 +80,21 @@ class DataPreprocessor:
             df = self.group_treatments(df)
         elif settings.experiment_type == 'treatment_drug':
             df = self.add_treatment_drugs(df)
-            
 
         df = self.impute_knn(df, ['whoAssessmentAtMetastaticDiagnosis'], k=7)
         
         df = self.numerize(df, lookup_manager.lookup_dictionary)
-
-        df = self.handle_missing_values(df)
         
         df = self.auto_cast_object_columns(df)
+        df = self.handle_missing_values(df)
+        
         df = self.encode_categorical(df) 
 
         updated_features = [col for col in df.columns if col not in [settings.duration_col, settings.event_col]]
         
         if settings.standardize:
             df = self.standardize(df, updated_features)
-        
+       
         return df, updated_features, self.encoded_columns
 
     
@@ -137,7 +135,7 @@ class DataPreprocessor:
     
     def handle_missing_values(self, df: pd.DataFrame) -> pd.DataFrame:
       
-        numerical_cols = df.select_dtypes(include=['float64', 'int64']).columns.tolist()
+        numerical_cols = df.select_dtypes(include=['float64', 'int64', 'bool']).columns.tolist()
         numerical_cols = [col for col in numerical_cols if col not in [settings.event_col, settings.duration_col]]
 
         for col in numerical_cols:
@@ -222,8 +220,13 @@ class DataPreprocessor:
         return df
 
     def encode_categorical(self, df: pd.DataFrame) -> pd.DataFrame:
+        for col, encoding_info in self.encoded_columns.items():
+            if encoding_info["type"] == "onehot" and col in df.columns:
+                df[col] = df[col].astype('object')
+                
         categorical_cols = df.select_dtypes(include=['object', 'category']).columns.tolist()
         categorical_cols = [col for col in categorical_cols if col not in [settings.event_col, settings.duration_col]]
+
           
         for col in categorical_cols:
             if self.encoded_columns and col in self.encoded_columns:
@@ -232,15 +235,22 @@ class DataPreprocessor:
                     classes = encoding_info["classes"]
                     mapping = {label: idx for idx, label in enumerate(classes)}
                     df[col] = df[col].astype(str).map(mapping).fillna(0).astype(int)
+                    
 
                 elif encoding_info["type"] == "onehot":
                     expected_dummies = encoding_info["columns"]
-                    dummies = pd.get_dummies(df[col], prefix=col, dummy_na=False)
-                    for dummy_col in expected_dummies:
-                        if dummy_col not in dummies.columns:
-                            dummies[dummy_col] = 0
-                    dummies = dummies[expected_dummies]
+                    if df[col].isnull().all():
+                        dummies = pd.DataFrame({dummy_col: [0] * len(df) for dummy_col in expected_dummies}, index=df.index)
+                    else:
+                        dummies = pd.get_dummies(df[col], prefix=col, dummy_na=False)
+                        for dummy_col in expected_dummies:
+                            if dummy_col not in dummies.columns:
+                                dummies[dummy_col] = 0
+                        dummies = dummies[expected_dummies]
+
                     df = pd.concat([df.drop(columns=[col]), dummies], axis=1)
+           
+
              
             else:
                 if df[col].nunique(dropna=False) == 2:

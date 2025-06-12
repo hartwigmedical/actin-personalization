@@ -461,7 +461,7 @@
                 "batch_size": 128,
                 "epochs": 50,
                 "early_stopping_patience": 20,
-                "input_size": 101,
+                "input_size": 102,
                 "use_attention": false
             }
         },
@@ -478,7 +478,7 @@
                 "early_stopping_patience": 20,
                 "optimizer": "RMSprop",
                 "epochs": 50,
-                "input_size": 101,
+                "input_size": 102,
                 "use_attention": false
             }
         },
@@ -499,7 +499,7 @@
                 "batch_size": 128,
                 "epochs": 500,
                 "early_stopping_patience": 30,
-                "input_size": 101,
+                "input_size": 102,
                 "use_attention": false
             }
         },
@@ -517,7 +517,7 @@
                 "batch_size": 64,
                 "epochs": 500,
                 "early_stopping_patience": 50,
-                "input_size": 101,
+                "input_size": 102,
                 "use_attention": false
             }
         },
@@ -533,7 +533,7 @@
                 "batch_size": 128,
                 "epochs": 100,
                 "early_stopping_patience": 30,
-                "input_size": 101,
+                "input_size": 102,
                 "use_attention": false
             }
         },
@@ -579,7 +579,7 @@
                 "early_stopping_patience": 20,
                 "optimizer": "RMSprop",
                 "epochs": 100,
-                "input_size": 101,
+                "input_size": 102,
                 "use_attention": true
             }
         },
@@ -600,7 +600,7 @@
                 "batch_size": 128,
                 "epochs": 50,
                 "early_stopping_patience": 30,
-                "input_size": 101,
+                "input_size": 102,
                 "use_attention": true
             }
         },
@@ -618,7 +618,7 @@
                 "batch_size": 64,
                 "epochs": 200,
                 "early_stopping_patience": 50,
-                "input_size": 101,
+                "input_size": 102,
                 "use_attention": true
             }
         },
@@ -636,7 +636,7 @@
                 "batch_size": 32,
                 "epochs": 500,
                 "early_stopping_patience": 20,
-                "input_size": 101,
+                "input_size": 102,
                 "use_attention": true
             }
         },
