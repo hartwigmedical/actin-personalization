@@ -6,7 +6,7 @@ class Settings:
     #--------------------------------------------------------------------------------------------
     # User-configurable settings:
     experiment_type: str = 'treatment_drug'  # Options: treatment_specific, treatment_vs_no, treatment_drug
-    outcome: str = 'OS'                          # "OS" or "PFS"
+    outcome: str = 'PFS'                          # "OS" or "PFS"
     
     cross_val_n_splits: int = 5
     hyperparam_tuning_optimization_metric: str = 'auc'  # c_index, IBS, CE, auc

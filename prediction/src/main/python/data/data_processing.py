@@ -23,7 +23,7 @@ class DataSplitter:
         """
         Split the data into training and test sets, stratified by treatment type and censoring status.
         """
-        if settings.event_col in y.dtype.names:
+        if isinstance(y, np.ndarray) and settings.event_col in y.dtype.names:
             stratify_labels = y[settings.event_col].astype(str)
         else:
             stratify_labels = None

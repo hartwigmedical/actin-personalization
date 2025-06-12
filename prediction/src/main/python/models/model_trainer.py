@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 
-from sklearn.model_selection import StratifiedKFold
+from sklearn.model_selection import StratifiedKFold, KFold
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import MinMaxScaler
 
@@ -30,9 +30,14 @@ class ModelTrainer:
         self.max_time = settings.max_time
 
     def cross_validate(self, X: pd.DataFrame, y: pd.DataFrame, encoded_columns: Dict[str, List[str]]) -> List[Tuple[np.ndarray, np.ndarray]]:
-        skf = StratifiedKFold(n_splits=self.n_splits, shuffle=True, random_state=self.random_state)
-      
-        return list(skf.split(X, y[settings.event_col].astype(str)))
+        if settings.event_col in y.dtype.names:
+            splitter = StratifiedKFold(n_splits=self.n_splits, shuffle=True, random_state=self.random_state)
+            return list(splitter.split(X, y[settings.event_col].astype(str)))
+        else:
+            splitter = KFold(n_splits=self.n_splits, shuffle=True, random_state=self.random_state)
+            return list(splitter.split(X))
+        
+        return list(skf.split(X, stratify_labels))
     
     def _initialize_model(self, model_template: BaseSurvivalModel, input_size: Optional[int] = None) -> BaseSurvivalModel:
         model_class = type(model_template)
