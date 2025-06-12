@@ -183,10 +183,10 @@ class DataPreprocessor:
         if "iri" in t:
             components["systemicTreatmentPlan_irinotecan"] = 1
 
-        if "bevacizumab" in t or t.endswith("_b"):
+        if "bevacizumab" in t or t.endswith("-b"):
             components["systemicTreatmentPlan_bevacizumab"] = 1
 
-        if "panitumumab" in t or t.endswith("_p"):
+        if "panitumumab" in t or t.endswith("-p"):
             components["systemicTreatmentPlan_panitumumab"] = 1
 
         if "pembrolizumab" in t: 
