@@ -662,5 +662,6 @@
                 "max_features": "log2"
             }
         }
-    }
+    },
+    "treatment_drug_PFS": {}
 }

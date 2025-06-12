@@ -194,10 +194,16 @@ class ModelTrainer:
         )
 
         results['c_index'] = calculate_time_dependent_c_index(predictions, y_val_structured['duration'], y_val_structured['event'], times)
-        results['ibs'] = calculate_brier_score(y_train_structured, y_val_structured, predictions, times)
         results['ce'] = calibration_assessment(predictions, y_val_structured, times)
-
-        auc_times, mean_auc = calculate_time_dependent_auc(y_train_structured, y_val_structured, auc_input, times)
+        
+        max_train_time = float(y_train_structured["duration"].max())  - 1e-5
+        safe_times = times[times < (max_train_time)]
+        y_val_clipped = y_val_structured.copy()
+        y_val_clipped["duration"] = np.minimum(y_val_clipped["duration"], max_train_time)
+        
+        results['ibs'] = calculate_brier_score(y_train_structured, y_val_clipped, predictions, safe_times)
+        
+        _, mean_auc = calculate_time_dependent_auc(y_train_structured,y_val_clipped,auc_input,safe_times)
         results['auc'] = mean_auc
 
         return results
@@ -212,8 +218,7 @@ class ModelTrainer:
         encoded_columns: Dict[str, List[str]],
     ) -> Dict[str, float]:
         
-        X_tr, y_tr_struct, X_val, y_val_struct, y_val_df = \
-            self._prepare_fold_data(X, y, fold_indices)
+        X_tr, y_tr_struct, X_val, y_val_struct, y_val_df = self._prepare_fold_data(X, y, fold_indices)
 
         model = self._initialize_model(model_template, input_size=X.shape[1])
         ModelTrainer._set_attention_indices(model, self.feature_names)
