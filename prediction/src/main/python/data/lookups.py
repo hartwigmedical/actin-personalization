@@ -169,7 +169,6 @@ class LookupManager:
             'hasBrafV600EMutation',
             'hasRasMutation',
             'hasKrasG12CMutation',
-
         ]
         
 lookup_manager = LookupManager()

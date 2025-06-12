@@ -38,7 +38,7 @@ def predict_treatment_scenarios(patient_data: dict, trained_path: str, valid_tre
     processed_df, updated_features, _ = preprocessor.preprocess_data(df=patient_df)
     
     model = load_model(trained_path)
-
+ 
     X_base = processed_df.drop(columns=[c for c in [settings.event_col, settings.duration_col, "sourceId"] if c in processed_df.columns], errors="ignore")
 
     treatment_cols = [c for c in X_base.columns if c.startswith("systemicTreatmentPlan")]

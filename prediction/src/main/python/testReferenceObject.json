@@ -19,7 +19,7 @@
   "primaryTumorLocation": "SIGMOID",
   "sidedness": "LEFT",
   "anorectalVergeDistanceCategory": null,
-  "mesorectalFasciaIsClear": 0,
+  "mesorectalFasciaIsClear": null,
   "distanceToMesorectalFasciaMm": 0.0,
   "differentiationGrade": "GRADE_2_OR_MODERATELY_DIFFERENTIATED",
   "clinicalTnmT": "T3",
