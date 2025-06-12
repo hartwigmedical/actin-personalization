@@ -23,7 +23,7 @@ class DataSplitter:
         """
         Split the data into training and test sets, stratified by treatment type and censoring status.
         """
-        if settings.event_col:
+        if settings.event_col in y.dtype.names:
             stratify_labels = y[settings.event_col].astype(str)
         else:
             stratify_labels = None
@@ -45,7 +45,7 @@ class DataPreprocessor:
         
         if not self.fit:
             try:
-                with open(f"{settings.save_path}/preprocessor/preprocessing_config.json", "r") as f:
+                with open(f"{settings.save_path}/{settings.outcome}_preprocessor/preprocessing_config.json", "r") as f:
                     config = json.load(f)
                     self.medians = config.get("medians", {})
                     self.encoded_columns = config.get("encoded_columns", {})
@@ -55,7 +55,7 @@ class DataPreprocessor:
                 self.encoded_columns = {}
 
             try:
-                self.scaler = joblib.load(f"{settings.save_path}/preprocessor/standard_scaler.pkl")
+                self.scaler = joblib.load(f"{settings.save_path}/{settings.outcome}_preprocessor/standard_scaler.pkl")
             except Exception as e:
                 warnings.warn(f"Failed to load StandardScaler: {e}")
                 self.scaler = None
@@ -69,7 +69,7 @@ class DataPreprocessor:
     def preprocess_data(self, features = lookup_manager.features, df = None) -> Tuple[pd.DataFrame, List[str], Dict[str, List[str]]]:
         if df is None:
             df = self.load_data()
-                
+                            
         df = df[features + [settings.duration_col, settings.event_col]]
 
         df = df[~df["firstSystemicTreatmentAfterMetastaticDiagnosis"].str.upper().str.contains("NIVOLUMAB", na=False)]
@@ -131,6 +131,7 @@ class DataPreprocessor:
         for column, lookup in lookup_dictionary.items():
             if column in df.columns:
                 df[column] = df[column].map(lookup)
+                
         return df
     
     def handle_missing_values(self, df: pd.DataFrame) -> pd.DataFrame:
@@ -146,10 +147,13 @@ class DataPreprocessor:
             else:
                 median_value = self.medians.get(col, 0)  
             df[col] = df[col].fillna(median_value)
+        # Check for duplicate column names
+        duplicate_cols = df.columns[df.columns.duplicated()].tolist()
+        if duplicate_cols:
+            raise ValueError(f"Duplicate columns found in DataFrame: {duplicate_cols}")
 
         if settings.duration_col in df.columns:
             df = df[df[settings.duration_col] > 0].copy() 
-        
 
         return df
     
@@ -158,6 +162,7 @@ class DataPreprocessor:
             lambda x: 1 if pd.notnull(x) and str(x).strip() != '' else 0
         )
         df = df.drop(columns = [treatment_col])
+        
         return df
     
     def parse_treatment(self, treatment: str) -> Dict[str, int]:
@@ -190,7 +195,6 @@ class DataPreprocessor:
         if "nivolumab" in t: 
             components["systemicTreatmentPlan_nivolumab"] = 1
             
-
         return components
 
 
@@ -249,8 +253,6 @@ class DataPreprocessor:
                         dummies = dummies[expected_dummies]
 
                     df = pd.concat([df.drop(columns=[col]), dummies], axis=1)
-           
-
              
             else:
                 if df[col].nunique(dropna=False) == 2:
@@ -269,13 +271,12 @@ class DataPreprocessor:
                     } 
               
         if self.fit:
-            with open(f"{settings.save_path}/preprocessor/preprocessing_config.json", "w") as f:  
+            with open(f"{settings.save_path}/{settings.outcome}_preprocessor/preprocessing_config.json", "w") as f:  
                 json.dump({
                     "medians": self.medians,
                     "encoded_columns": self.encoded_columns
                 }, f)
 
-                
         return df
     
     def standardize(self, df: pd.DataFrame, features: List[str]) -> pd.DataFrame:
@@ -291,12 +292,12 @@ class DataPreprocessor:
             df[cols_to_standardize] = self.scaler.fit_transform(df[cols_to_standardize])
 
             if settings.save_models:
-                joblib.dump(self.scaler, f"{settings.save_path}/preprocessor/standard_scaler.pkl")
+                joblib.dump(self.scaler, f"{settings.save_path}/{settings.outcome}_preprocessor/standard_scaler.pkl")
             return df
 
         else:
             if self.scaler is None:
-                raise RuntimeError(f"No pre‐fitted StandardScaler found at {settings.save_path}/preprocessor/standard_scaler.pkl")
+                raise RuntimeError(f"No pre‐fitted StandardScaler found at {settings.save_path}/{settings.outcome}_preprocessor/standard_scaler.pkl")
                 
             trained_cols = list(self.scaler.feature_names_in_)
             df = df.assign(**{c: 0.0 for c in trained_cols if c not in df.columns})
