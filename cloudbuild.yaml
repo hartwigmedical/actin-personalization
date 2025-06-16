@@ -13,9 +13,9 @@ steps:
     args:
       - -c
       - |
-        pip install -r src/main/python/requirements.txt
+        pip install -r prediction/src/main/python/requirements.txt
         pip install pytest
-        pytest src/test/python
+        pytest prediction/src/test/python
 
 options:
   machineType: 'E2_HIGHCPU_8'
