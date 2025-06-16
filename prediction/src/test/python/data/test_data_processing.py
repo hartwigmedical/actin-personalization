@@ -5,65 +5,62 @@ import json
 import os
 
 from data.data_processing import DataPreprocessor
-from python.utils.testSettings import test_settings
+from utils.settings import Settings
+
+test_settings = Settings(outcome="OS", save_models=False)
+
+@pytest.fixture(scope="function")
+def dp() -> DataPreprocessor:
+    return DataPreprocessor(settings=test_settings, fit=False)
 
 class TestDataPreprocessor:
-    @pytest.fixture(scope="class")
-    def test_df(self):
-        path = os.path.join(os.path.dirname(__file__), "testReferenceObject.json")
-        with open(path) as f:
-            data = json.load(f)
-        return pd.DataFrame([data])
-
-    @pytest.fixture(scope="class")
-    def dp(self):
-        return DataPreprocessor(dp_settings=test_settings, fit=False)
-
     @pytest.mark.parametrize("treatment,expected", [
         ("FOLFOX", {"systemicTreatmentPlan_5-FU": 1, "systemicTreatmentPlan_oxaliplatin": 1, "systemicTreatmentPlan_irinotecan": 0, "systemicTreatmentPlan_bevacizumab": 0, "systemicTreatmentPlan_panitumumab": 0, "systemicTreatmentPlan_pembrolizumab": 0, "systemicTreatmentPlan_nivolumab": 0}),
-        ("FOLFIRI_B", {"systemicTreatmentPlan_5-FU": 1, "systemicTreatmentPlan_oxaliplatin": 0, "systemicTreatmentPlan_irinotecan": 1, "systemicTreatmentPlan_bevacizumab": 1, "systemicTreatmentPlan_panitumumab": 0, "systemicTreatmentPlan_pembrolizumab": 0, "systemicTreatmentPlan_nivolumab": 0}),
+        ("FOLFIRI-B", {"systemicTreatmentPlan_5-FU": 1, "systemicTreatmentPlan_oxaliplatin": 0, "systemicTreatmentPlan_irinotecan": 1, "systemicTreatmentPlan_bevacizumab": 1, "systemicTreatmentPlan_panitumumab": 0, "systemicTreatmentPlan_pembrolizumab": 0, "systemicTreatmentPlan_nivolumab": 0}),
         ("", {"systemicTreatmentPlan_5-FU": 0, "systemicTreatmentPlan_oxaliplatin": 0, "systemicTreatmentPlan_irinotecan": 0, "systemicTreatmentPlan_bevacizumab": 0, "systemicTreatmentPlan_panitumumab": 0, "systemicTreatmentPlan_pembrolizumab": 0, "systemicTreatmentPlan_nivolumab": 0}),
     ])
+
     def test_parse_treatment(self, dp, treatment, expected):
-        result = dp.parse_treatment(treatment)
-        assert result == expected
+        assert dp.parse_treatment(treatment) == expected
 
-    def test_group_treatments(self, dp):
-        df = pd.DataFrame({"firstSystemicTreatmentAfterMetastaticDiagnosis": ["FOLFOX", "", None]})
-        df = dp.group_treatments(df)
-        assert "treatment" in df.columns
-        assert list(df["treatment"]) == [1, 0, 0]
-
-    def test_handle_missing_values_sets_and_uses_median(self, dp):
+    def test_group_treatments(self, dp: DataPreprocessor):
         df = pd.DataFrame({
-            "foo": [1.0, 2.0, np.nan, 4.0],
-            test_settings.duration_col: [1, 2, 3, 4],
-            test_settings.event_col: [1, 1, 0, 1]
+            "firstSystemicTreatmentAfterMetastaticDiagnosis": ["FOLFOX", "", None]
         })
-        dp.fit = True
-        df = dp.handle_missing_values(df)
-        assert not df["foo"].isnull().any()
-        assert "foo" in dp.medians
+        result = dp.group_treatments(df)
+        assert "treatment" in result.columns
+        assert result["treatment"].tolist() == [1, 0, 0]
+
+    def test_handle_missing_values(self):
+        dp = DataPreprocessor(settings=test_settings, fit=True)
+        df = pd.DataFrame({
+            "ageAtMetastaticDiagnosis": [65, 70, np.nan, 60],
+            test_settings.duration_col: [100, 200, 300, 400],
+            test_settings.event_col: [1, 0, 1, 1]
+        })
+        result = dp.handle_missing_values(df)
+        assert not result["ageAtMetastaticDiagnosis"].isnull().any()
+        assert "ageAtMetastaticDiagnosis" in dp.medians
 
     def test_knn_imputation_fills_na(self, dp):
         df = pd.DataFrame({"whoAssessmentAtMetastaticDiagnosis": [1.0, None, 3.0, None]})
         df = dp.impute_knn(df, ["whoAssessmentAtMetastaticDiagnosis"], k=2)
         assert not df["whoAssessmentAtMetastaticDiagnosis"].isnull().any()
 
-
     def test_encode_categorical_creates_dummies(self, dp):
-        df = pd.DataFrame({"color": ["red", "blue", "green", "red"]})
-        df[test_settings.duration_col] = [1, 2, 3, 4]
-        df[test_settings.event_col] = [0, 1, 1, 0]
-        print(test_settings.save_models)
-        df_encoded = dp.encode_categorical(df)
-        assert any("color_" in col for col in df_encoded.columns)
-
-    def test_auto_cast_object_columns(self, dp):
         df = pd.DataFrame({
-            "bool_as_object": ["1", "0", "1"],
-            "float_as_str": ["1.0", "2.0", "3.0"]
+            "primaryTumorLocation": ["RECTUM", "SIGMOID_COLON", "RECTUM", "COECUM"],
+            test_settings.duration_col: [120, 300, 250, 190],
+            test_settings.event_col: [1, 0, 1, 1]
         })
-        df_cast = dp.auto_cast_object_columns(df)
-        assert df_cast["bool_as_object"].dtype in [np.float64, np.int64]
-        assert df_cast["float_as_str"].dtype in [np.float64, np.int64]
+        result = dp.encode_categorical(df)
+        assert any(col.startswith("primaryTumorLocation_") for col in result.columns)
+
+    def test_auto_cast_object_columns(self, dp: DataPreprocessor):
+        df = pd.DataFrame({
+            "hasDiabetesMellitus": ["1", "0", "1"],
+            "lactateDehydrogenaseAtMetastaticDiagnosis": ["180.0", "200.0", "190.0"]
+        })
+        result = dp.auto_cast_object_columns(df)
+        assert pd.api.types.is_numeric_dtype(result["hasDiabetesMellitus"])
+        assert pd.api.types.is_numeric_dtype(result["lactateDehydrogenaseAtMetastaticDiagnosis"])

@@ -44,7 +44,7 @@ class DataPreprocessor:
         self.db_name = self.settings.db_name
         self.data_dir = "data"
         self.fit = fit
-        
+
         if not self.fit:
             try:
                 with open(f"{self.settings.save_path}/{self.settings.outcome}_preprocessor/preprocessing_config.json", "r") as f:
@@ -226,6 +226,7 @@ class DataPreprocessor:
         return df
 
     def encode_categorical(self, df: pd.DataFrame) -> pd.DataFrame:
+
         for col, encoding_info in self.encoded_columns.items():
             if encoding_info["type"] == "onehot" and col in df.columns:
                 df[col] = df[col].astype('object')

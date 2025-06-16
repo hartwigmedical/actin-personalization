@@ -46,7 +46,6 @@ class Settings:
             self.view_name = 'knownPalliativeTreatedReference'
     
     def configure_model_settings(self) -> None:
-        self.save_models = True
         if self.save_path is None:
             self.save_path = f'/data/patient_like_me/prediction/trained_models/{self.experiment_type}'
         if self.outcome.upper() == 'OS':
