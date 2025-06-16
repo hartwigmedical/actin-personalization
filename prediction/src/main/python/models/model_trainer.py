@@ -16,23 +16,25 @@ from joblib import Parallel, delayed
 
 from .survival_models import BaseSurvivalModel, NNSurvivalModel
 from utils.metrics import calculate_time_dependent_c_index, calculate_brier_score, calibration_assessment, calculate_time_dependent_auc
-from utils.settings import settings
+from utils.settings import config_settings
 
 class ModelTrainer:
-    def __init__(self, models: Dict[str, BaseSurvivalModel], random_state: int = 42):
+    def __init__(self, models: Dict[str, BaseSurvivalModel], settings = config_settings, random_state: int = 42):
+        self.settings = settings
         self.models = models
-        self.n_splits = settings.cross_val_n_splits
+        self.n_splits = self.settings.cross_val_n_splits
         self.random_state = random_state
         self.results = dict()
         self.trained_models = dict()
         self.feature_names: List[str] = []
         
-        self.max_time = settings.max_time
+        
+        self.max_time = self.settings.max_time
 
     def cross_validate(self, X: pd.DataFrame, y: pd.DataFrame, encoded_columns: Dict[str, List[str]]) -> List[Tuple[np.ndarray, np.ndarray]]:
-        if settings.event_col in y.dtype.names:
+        if self.settings.event_col in y.dtype.names:
             splitter = StratifiedKFold(n_splits=self.n_splits, shuffle=True, random_state=self.random_state)
-            return list(splitter.split(X, y[settings.event_col].astype(str)))
+            return list(splitter.split(X, y[self.settings.event_col].astype(str)))
         else:
             splitter = KFold(n_splits=self.n_splits, shuffle=True, random_state=self.random_state)
             return list(splitter.split(X))
@@ -49,10 +51,10 @@ class ModelTrainer:
         return model_class(**kwargs)
     
     def save_model(self, model: BaseSurvivalModel, model_name: str)-> None:
-        if not os.path.exists(settings.save_path):
-            os.makedirs(settings.save_path)
+        if not os.path.exists(self.settings.save_path):
+            os.makedirs(self.settings.save_path)
             
-        model_file = os.path.join(settings.save_path, f"{settings.outcome}_{model_name}")
+        model_file = os.path.join(self.settings.save_path, f"{self.settings.outcome}_{model_name}")
 
         if isinstance(model, NNSurvivalModel):
          
@@ -116,7 +118,7 @@ class ModelTrainer:
         train_idx, val_idx = indices
         X_train, X_val = X.iloc[train_idx], X.iloc[val_idx]
 
-        y_df = pd.DataFrame({'duration': y[settings.duration_col], 'event': y[settings.event_col]}, index=X.index)
+        y_df = pd.DataFrame({'duration': y[self.settings.duration_col], 'event': y[self.settings.event_col]}, index=X.index)
         y_train_df, y_val_df = y_df.iloc[train_idx], y_df.iloc[val_idx]
 
         y_train_structured = Surv.from_dataframe('event', 'duration', y_train_df)
@@ -246,7 +248,7 @@ class ModelTrainer:
             print(f"training model: {model_name}")
             model_metrics = {'cv': {'c_index': [], 'ibs': [], 'ce': [], 'auc': []}}
 
-            cv_fold_results = Parallel(n_jobs=settings.n_jobs , backend="threading", verbose=10)(
+            cv_fold_results = Parallel(n_jobs=self.settings.n_jobs , backend="threading", verbose=10)(
                 delayed(self._run_one_fold)(
                     model_name,
                     model_template,
@@ -268,9 +270,9 @@ class ModelTrainer:
             ModelTrainer._set_attention_indices(final_model,
                                                     self.feature_names)
             
-            y_train_df = pd.DataFrame({'duration': y_train[settings.duration_col], 'event': y_train[settings.event_col]}, index=X_train.index)
+            y_train_df = pd.DataFrame({'duration': y_train[self.settings.duration_col], 'event': y_train[self.settings.event_col]}, index=X_train.index)
             y_train_structured = Surv.from_dataframe('event', 'duration', y_train_df)
-            y_test_df = pd.DataFrame({'duration': y_test[settings.duration_col], 'event': y_test[settings.event_col]}, index=X_test.index)
+            y_test_df = pd.DataFrame({'duration': y_test[self.settings.duration_col], 'event': y_test[self.settings.event_col]}, index=X_test.index)
             y_test_structured = Surv.from_dataframe('event', 'duration', y_test_df)
 
             if isinstance(final_model, NNSurvivalModel):
@@ -289,7 +291,7 @@ class ModelTrainer:
                final_model, X_test, y_train_structured, y_test_structured, model_name
             )
             
-            if settings.save_models:
+            if self.settings.save_models:
                 self.save_model(final_model, model_name)
                 
             print(f"{model_name} Hold-Out Results: {holdout_metrics}")

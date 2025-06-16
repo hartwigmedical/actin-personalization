@@ -3,11 +3,11 @@ import pandas as pd
 import os
 import dill
 from data.data_processing import DataPreprocessor
-from utils.settings import settings
+from utils.settings import config_settings
 
 from models import *
 
-def load_model(trained_path: str, model_type: str = "DeepSurv_attention"):
+def load_model(trained_path: str, model_type: str = "DeepSurv_attention", settings=config_settings):
     config_mgr = ExperimentConfig("/data/repos/actin-personalization/prediction/src/main/python/models/configs/model_hyperparams.json")
     loaded_configs = config_mgr.load_model_configs()
     
@@ -30,11 +30,11 @@ def load_model(trained_path: str, model_type: str = "DeepSurv_attention"):
     
     return model 
 
-def predict_treatment_scenarios(patient_data: dict, trained_path: str, valid_treatment_combinations: dict) -> dict:
+def predict_treatment_scenarios(patient_data: dict, trained_path: str, valid_treatment_combinations: dict, settings =config_settings) -> dict:
     
     patient_df = pd.DataFrame([patient_data])
 
-    preprocessor = DataPreprocessor(fit=False)
+    preprocessor = DataPreprocessor(dp_settings=settings, fit=False)
     processed_df, updated_features, _ = preprocessor.preprocess_data(df=patient_df)
     
     model = load_model(trained_path)

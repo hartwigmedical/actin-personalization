@@ -11,12 +11,12 @@ from typing import List, Dict, Tuple, Any
 import joblib
 import warnings
 
-from utils.settings import settings
+from utils.settings import config_settings
 from .lookups import lookup_manager
 
 class DataSplitter:
-    def __init__(self, ds_settings=settings, test_size: float=0.1, random_state: int=42) -> None:
-        self.settings = ds_settings
+    def __init__(self, settings=config_settings, test_size: float=0.1, random_state: int=42) -> None:
+        self.settings = settings
         self.test_size = test_size
         self.random_state = random_state
 
@@ -38,8 +38,8 @@ class DataSplitter:
         return X_train, X_test, y_train, y_test
 
 class DataPreprocessor:
-    def __init__(self, dp_settings=settings, fit: bool = True) -> None:
-        self.settings = dp_settings
+    def __init__(self, settings=config_settings, fit: bool = True) -> None:
+        self.settings = settings
         self.db_config_path = self.settings.db_config_path
         self.db_name = self.settings.db_name
         self.data_dir = "data"

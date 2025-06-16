@@ -11,7 +11,7 @@ class Settings:
     cross_val_n_splits: int = 5
     hyperparam_tuning_optimization_metric: str = 'auc'  # c_index, IBS, CE, auc
     hyperparam_tuning_number_combinations: int = 5
-    save_models: bool = True
+    save_models: bool = False
     json_config_file: str = 'src/main/python/models/configs/model_hyperparams.json'
     db_name: str = 'actin_personalization'
     view_name: str = 'knownPalliativeTreatedReference'
@@ -55,4 +55,4 @@ class Settings:
             self.time_points = [int(round(i * 365 / 4)) for i in range(1, 13)]
             self.max_time = 1095
 
-settings = Settings()
+config_settings = Settings()

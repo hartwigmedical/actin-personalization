@@ -2,12 +2,14 @@ import importlib
 import json
 import os
 from models.survival_models import *
-from utils.settings import settings
+from utils.settings import config_settings
 
 class ExperimentConfig:
-    def __init__(self, config_file):
+    def __init__(self, config_file, settings=config_settings):
         self.config_file = config_file
         self.configs = self._load_configs()
+        
+        self.settings = settings
 
     def _load_configs(self):
         with open(self.config_file, 'r') as f:
@@ -15,10 +17,10 @@ class ExperimentConfig:
         return configs
     
     def get_config(self):
-        key = f"{settings.experiment_type}_{settings.outcome}"
+        key = f"{self.settings.experiment_type}_{self.settings.outcome}"
         if key not in self.configs:
             raise ValueError(
-                f"No configuration found for experiment type '{settings.experiment_type}' and outcome '{settings.outcome}'."
+                f"No configuration found for experiment type '{self.settings.experiment_type}' and outcome '{self.settings.outcome}'."
             )
         return self.configs[key]
 
@@ -33,7 +35,7 @@ class ExperimentConfig:
             kwargs = setting.get("kwargs", {})
             if issubclass(model_class, NNSurvivalModel):
                 if 'input_size' not in kwargs:
-                    kwargs['input_size'] = settings.input_size
+                    kwargs['input_size'] = self.settings.input_size
             model_configs[model_name] = (model_class, kwargs)
        
         return model_configs
@@ -41,13 +43,13 @@ class ExperimentConfig:
     @staticmethod
     def update_model_hyperparams(best_models: dict) -> None:
         
-        if os.path.exists(settings.json_config_file):
-            with open(settings.json_config_file, "r") as f:
+        if os.path.exists(self.settings.json_config_file):
+            with open(self.settings.json_config_file, "r") as f:
                 config = json.load(f)
         else:
             config = {}
 
-        key = f"{settings.experiment_type}_{settings.outcome}"
+        key = f"{self.settings.experiment_type}_{self.settings.outcome}"
         if key not in config:
             config[key] = {}
 
@@ -56,7 +58,7 @@ class ExperimentConfig:
                 continue
             model_class = model_instance if isinstance(model_instance, type) else type(model_instance)
             if issubclass(model_class, NNSurvivalModel):
-                best_params['input_size'] = settings.input_size
+                best_params['input_size'] = self.settings.input_size
                 
             module_path = model_class.__module__
             if module_path.startswith("src."):
@@ -68,7 +70,7 @@ class ExperimentConfig:
             }
 
         
-        with open(settings.json_config_file, "w") as f:
+        with open(self.settings.json_config_file, "w") as f:
             json.dump(config, f, indent=4)
 
-        print(f"Updated model hyperparameters saved to '{settings.json_config_file}' under key '{key}'.")
+        print(f"Updated model hyperparameters saved to '{self.settings.json_config_file}' under key '{key}'.")
