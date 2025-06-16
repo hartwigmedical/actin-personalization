@@ -1,23 +1,29 @@
-import pytest
-import pandas as pd
 import numpy as np
-
+import pandas as pd
+import pytest
 from data.data_processing import DataPreprocessor
 from utils.settings import Settings
 
 test_settings = Settings(outcome="OS", save_models=False)
 
+
 @pytest.fixture(scope="function")
 def dp() -> DataPreprocessor:
     return DataPreprocessor(settings=test_settings, fit=False)
 
+
 class TestDataPreprocessor:
     @pytest.mark.parametrize("treatment,expected", [
-        ("FOLFOX", {"systemicTreatmentPlan_5-FU": 1, "systemicTreatmentPlan_oxaliplatin": 1, "systemicTreatmentPlan_irinotecan": 0, "systemicTreatmentPlan_bevacizumab": 0, "systemicTreatmentPlan_panitumumab": 0, "systemicTreatmentPlan_pembrolizumab": 0, "systemicTreatmentPlan_nivolumab": 0}),
-        ("FOLFIRI-B", {"systemicTreatmentPlan_5-FU": 1, "systemicTreatmentPlan_oxaliplatin": 0, "systemicTreatmentPlan_irinotecan": 1, "systemicTreatmentPlan_bevacizumab": 1, "systemicTreatmentPlan_panitumumab": 0, "systemicTreatmentPlan_pembrolizumab": 0, "systemicTreatmentPlan_nivolumab": 0}),
-        ("", {"systemicTreatmentPlan_5-FU": 0, "systemicTreatmentPlan_oxaliplatin": 0, "systemicTreatmentPlan_irinotecan": 0, "systemicTreatmentPlan_bevacizumab": 0, "systemicTreatmentPlan_panitumumab": 0, "systemicTreatmentPlan_pembrolizumab": 0, "systemicTreatmentPlan_nivolumab": 0}),
+        ("FOLFOX", {"systemicTreatmentPlan_5-FU": 1, "systemicTreatmentPlan_oxaliplatin": 1, "systemicTreatmentPlan_irinotecan": 0,
+                    "systemicTreatmentPlan_bevacizumab": 0, "systemicTreatmentPlan_panitumumab": 0,
+                    "systemicTreatmentPlan_pembrolizumab": 0, "systemicTreatmentPlan_nivolumab": 0}),
+        ("FOLFIRI-B", {"systemicTreatmentPlan_5-FU": 1, "systemicTreatmentPlan_oxaliplatin": 0, "systemicTreatmentPlan_irinotecan": 1,
+                       "systemicTreatmentPlan_bevacizumab": 1, "systemicTreatmentPlan_panitumumab": 0,
+                       "systemicTreatmentPlan_pembrolizumab": 0, "systemicTreatmentPlan_nivolumab": 0}),
+        ("", {"systemicTreatmentPlan_5-FU": 0, "systemicTreatmentPlan_oxaliplatin": 0, "systemicTreatmentPlan_irinotecan": 0,
+              "systemicTreatmentPlan_bevacizumab": 0, "systemicTreatmentPlan_panitumumab": 0, "systemicTreatmentPlan_pembrolizumab": 0,
+              "systemicTreatmentPlan_nivolumab": 0}),
     ])
-
     def test_parse_treatment(self, dp, treatment, expected):
         assert dp.parse_treatment(treatment) == expected
 
