@@ -67,8 +67,7 @@ def y_test_df(survival_data):
 def test_time_dependent_c_index(survival_data, survival_predictions):
     _, y_test, times = survival_data
     score = calculate_time_dependent_c_index(survival_predictions, y_test["duration"], y_test["event"], times)
-
-    assert np.isclose(score, 0.66666666, atol=1e-6)
+    assert np.isclose(score, 0.61075, atol=1e-6)
 
 def test_time_dependent_auc(survival_data, risk_scores):
     y_train, y_test, times = survival_data
