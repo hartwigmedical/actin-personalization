@@ -10,6 +10,8 @@ steps:
 #  - id: 'Python tests'
 #    name: 'python:3.11'
 #    entrypoint: bash
+#    env:
+#      - PYTHONPATH=prediction/src/main/python
 #    args:
 #      - -c
 #      - |
