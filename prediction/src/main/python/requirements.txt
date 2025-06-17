@@ -83,7 +83,7 @@ stack-data==0.6.3
 sympy==1.13.3
 texttable==1.7.0
 threadpoolctl==3.6.0
-torch==2.2.2+cpu
+torch==2.2.2
 torchtuples==0.2.2
 tornado==6.5.1
 tqdm==4.67.1
