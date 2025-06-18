@@ -1,8 +1,10 @@
 steps:
-  - id: 'Maven build using cache'
-    name: 'maven:3.9.7-eclipse-temurin-17'
+  - id: 'Maven build, test and deploy'
+    name: 'europe-west4-docker.pkg.dev/actin-build/build-registry-docker/actin-build-agent:2.0.0'
     entrypoint: mvn
     args: [ 'test' ]
+    env:
+      - MAVEN_OPTS=-Dmaven.repo.local=/.m2/repository
 
   - id: 'Python tests'
     name: 'python:3.11'
