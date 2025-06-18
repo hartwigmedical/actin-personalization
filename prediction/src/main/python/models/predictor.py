@@ -1,14 +1,12 @@
-import torch
 import pandas as pd
-import os
-import dill
+import torch
 from data.data_processing import DataPreprocessor
+from models import *
 from utils.settings import config_settings
 
-from models import *
 
 def load_model(trained_path: str, model_type: str = "DeepSurv_attention", settings=config_settings):
-    config_mgr = ExperimentConfig("/data/repos/actin-personalization/prediction/src/main/python/models/configs/model_hyperparams.json")
+    config_mgr = ExperimentConfig("./prediction/src/main/python/models/configs/model_hyperparams.json")
     loaded_configs = config_mgr.load_model_configs()
     
     model_class, model_kwargs = loaded_configs[model_type]
