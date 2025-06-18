@@ -43,7 +43,7 @@ The pipeline is designed to run on **Python 3.11**. To get started:
 
 If Python 3.11 is not yet available on your machine (e.g., in a VM), install it manually:
 
-```
+```bash
 sudo apt update
 sudo apt install -y wget build-essential libssl-dev zlib1g-dev \
   libncurses5-dev libreadline-dev libsqlite3-dev libbz2-dev \
