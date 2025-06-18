@@ -59,20 +59,20 @@ sudo make altinstall
 ```
 
 ### 2. Create and activate a virtual environment
-```
+```bash
 python3.11 -m venv /path/to/your/env/prediction_3_11
 source /path/to/your/env/prediction_3_11/bin/activate
 ```
 
 ### 3. Install required packages
 Install all required dependencies using the requirements.txt in the main code folder:
-```
+```bash
 pip install -r prediction/src/main/python/requirements.txt
 ```
 
 ### 4. (Optional) Add the environment to JupyterLab
 If you're working in Jupyter and want the new environment to show up:
-```
+```bash
 pip install ipykernel
 python -m ipykernel install --user --name=prediction_3_11 --display-name "Python 3.11 (prediction)"
 ```
@@ -86,7 +86,7 @@ Tests for the python pipeline are located in:
 
 We use `pytest` to run all tests. Here's an example command to test all available tests:
 
-```
+```bash
 cd path/to/actin-personalization
 PYTHONPATH=prediction/src/main/python python3.11 -m pytest prediction/src/test/python/utils/test_metrics.py
 ```
