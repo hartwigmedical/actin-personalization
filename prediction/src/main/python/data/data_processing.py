@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 import pymysql
 import json
+import os
 
 from sklearn.impute import KNNImputer
 from sklearn.model_selection import train_test_split
@@ -310,6 +311,6 @@ class DataPreprocessor:
             trained_cols = list(self.scaler.feature_names_in_)
             df = df.assign(**{c: 0.0 for c in trained_cols if c not in df.columns})
             
-            df.loc[:, trained_cols] = self.scaler.transform(df[trained_cols])
+            df[trained_cols] = pd.DataFrame(self.scaler.transform(df[trained_cols]), index=df.index, columns=trained_cols)
 
             return df
