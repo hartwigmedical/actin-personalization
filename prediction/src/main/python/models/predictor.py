@@ -34,7 +34,7 @@ def predict_treatment_scenarios(patient_data: dict, trained_path: str, valid_tre
     
     patient_df = pd.DataFrame([patient_data])
 
-    preprocessor = DataPreprocessor(dp_settings=settings, fit=False)
+    preprocessor = DataPreprocessor(settings, fit=False)
     processed_df, updated_features, _ = preprocessor.preprocess_data(df=patient_df)
     
     model = load_model(trained_path)

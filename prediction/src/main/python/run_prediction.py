@@ -1,7 +1,7 @@
 import json
 import argparse
 
-from utils.settings import settings
+from utils.settings import config_settings
 from models.predictor import *
 
 import logging
@@ -11,19 +11,19 @@ logger = logging.getLogger(__name__)
 
 
 def apply_settings_from_args(args):
-    settings.outcome = args.outcome or 'OS'
-    settings.save_path = args.trained_path or settings.save_path
+    config_settings.outcome = args.outcome or 'OS'
+    config_settings.save_path = args.trained_path or config_settings.save_path
 
-    settings.experiment_type = 'treatment_drug'
-    settings.standardize = True
-    settings.normalize = False
-    settings.use_gate = True
-    settings.save_models = False
+    config_settings.experiment_type = 'treatment_drug'
+    config_settings.standardize = True
+    config_settings.normalize = False
+    config_settings.use_gate = True
+    config_settings.save_models = False
 
-    settings.configure_data_settings()
-    settings.configure_model_settings()
+    config_settings.configure_data_settings()
+    config_settings.configure_model_settings()
     
-    logger.info(f"Configured settings with outcome={settings.outcome}, trained_path={settings.save_path}")
+    logger.info(f"Configured settings with outcome={config_settings.outcome}, trained_path={config_settings.save_path}")
     
 def main():
     parser = argparse.ArgumentParser()
