@@ -1,5 +1,5 @@
 steps:
-  - id: 'Maven build, test and deploy'
+  - id: 'Maven build and test using cache'
     name: 'europe-west4-docker.pkg.dev/actin-build/build-registry-docker/actin-build-agent:2.0.0'
     entrypoint: mvn
     args: [ 'test' ]
