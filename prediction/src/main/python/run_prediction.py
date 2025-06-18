@@ -1,7 +1,7 @@
 import json
 import argparse
 
-from utils.settings import config_settings
+from utils.settings import Settings
 from models.predictor import *
 
 import logging
@@ -11,31 +11,31 @@ logger = logging.getLogger(__name__)
 
 
 def apply_settings_from_args(args):
-    config_settings.outcome = args.outcome or 'OS'
-    config_settings.save_path = args.trained_path or config_settings.save_path
-
-    config_settings.experiment_type = 'treatment_drug'
-    config_settings.standardize = True
-    config_settings.normalize = False
-    config_settings.use_gate = True
-    config_settings.save_models = False
-
-    config_settings.configure_data_settings()
-    config_settings.configure_model_settings()
+    settings = Settings()
     
-    logger.info(f"Configured settings with outcome={config_settings.outcome}, trained_path={config_settings.save_path}")
+    settings.save_path = args.trained_path
+    settings.experiment_type = 'treatment_drug'
+    settings.standardize = True
+    settings.normalize = False
+    settings.use_gate = True
+    settings.save_models = False
+
+    settings.configure_data_settings()
+    settings.configure_model_settings()
+
+    logger.info(f"Configured settings with outcome={settings.outcome}, trained_path={settings.save_path}")
+    return settings
     
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("input_path", help="Path to input JSON file")
     parser.add_argument("output_path", help="Path to output JSON file")
     parser.add_argument("--trained_path", help= "Path to folder that contains trained model + preprocessors")
-    parser.add_argument("--outcome", choices=["OS", "PFS"], help="Prediction outcome")
     parser.add_argument("--treatment_config", help="Path to treatment combination JSON")
     args = parser.parse_args()
     
     logger.info("Starting treatment prediction script")
-    apply_settings_from_args(args)
+    settings = apply_settings_from_args(args)
 
     try:
         logger.info(f"Loading patient data from {args.input_path}")
@@ -57,7 +57,8 @@ def main():
     result = predict_treatment_scenarios(
         patient_data=patient_data,
         trained_path=args.trained_path,
-        valid_treatment_combinations=treatment_config
+        valid_treatment_combinations=treatment_config, 
+        settings=settings
     )
     
     logger.info(f"Saving results to {args.output_path}")

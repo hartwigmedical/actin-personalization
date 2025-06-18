@@ -38,16 +38,21 @@ class DataSplitter:
         return X_train, X_test, y_train, y_test
 
 class DataPreprocessor:
-    def __init__(self, settings=config_settings, fit: bool = True) -> None:
+    def __init__(self, settings=config_settings, fit: bool = True, preprocessor_path=True) -> None:
         self.settings = settings
         self.db_config_path = self.settings.db_config_path
         self.db_name = self.settings.db_name
         self.data_dir = "data"
         self.fit = fit
+        
+        if preprocessor_path:
+            self.preprocessor_path = os.path.join(self.settings.save_path, f"{self.settings.outcome}_preprocessor")
+        else:
+            self.preprocessor_path = self.settings.save_path
 
         if not self.fit:
             try:
-                with open(f"{self.settings.save_path}/{self.settings.outcome}_preprocessor/preprocessing_config.json", "r") as f:
+                with open(f"{self.preprocessor_path}/preprocessing_config.json", "r") as f:
                     config = json.load(f)
                     self.medians = config.get("medians", {})
                     self.encoded_columns = config.get("encoded_columns", {})
@@ -57,7 +62,7 @@ class DataPreprocessor:
                 self.encoded_columns = {}
 
             try:
-                self.scaler = joblib.load(f"{self.settings.save_path}/{self.settings.outcome}_preprocessor/standard_scaler.pkl")
+                self.scaler = joblib.load(f"{self.preprocessor_path}/standard_scaler.pkl", "r")
             except Exception as e:
                 warnings.warn(f"Failed to load StandardScaler: {e}")
                 self.scaler = None
