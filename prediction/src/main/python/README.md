@@ -84,7 +84,7 @@ To generate survival predictions for a single patient using a pretrained model, 
 |----------------------|------------------------------------------------------------------------------------------------------|
 | `input_path`         | **(Required)** Path to a JSON file with patient data (single record).                                |
 | `output_path`        | **(Required)** Path to save the prediction result as a JSON.                                         |
-| `--trained_path`     | **(Required** Path to the folder containing trained model + preprocessor files. The folder must contain:<br>• `model_config.json`<br>• `model.pt`<br>• `preprocessing_config.json`<br>• `standard_scaler.pkl` |
+| `--trained_path`     | **(Required)** Path to the folder containing trained model + preprocessor files. The folder must contain:<br>• `model_config.json`<br>• `model.pt`<br>• `preprocessing_config.json`<br>• `standard_scaler.pkl` |
 | `--treatment_config` | **(Required)** Path to a JSON file specifying valid treatment combinations to evaluate.              |
 
 ### 🧪 Example Usage
