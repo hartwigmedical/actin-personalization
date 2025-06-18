@@ -13,5 +13,5 @@ More details on the following modules are available from the links below:
 | [Datamodel](datamodel)   | The definition of the common reference entry datamodel used by personalization                             | 
 | [Database](database)     | Code to write the common datamodel to MySQL including creating a flattened view for models to use          |
 | [NCR](ncr)               | Logic to inspect and convert NCR-specific data to the common personalization datamodel                     | 
-| [Prediction](prediction) | Module containing the logic to create the actual predictive algorithms                                     |
+| [Prediction](prediction) | Module containing the logic to create and run the actual predictive algorithms                             |
 | [Similarity](similarity) | A module providing basic patient-like-me functionality, to compare a new patient with a reference database |
