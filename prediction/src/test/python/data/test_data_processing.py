@@ -9,7 +9,7 @@ test_settings = Settings(outcome="OS", save_models=False)
 
 @pytest.fixture(scope="function")
 def dp() -> DataPreprocessor:
-    return DataPreprocessor(settings=test_settings, fit=False)
+    return DataPreprocessor(settings=test_settings, fit=True)
 
 
 class TestDataPreprocessor:
@@ -24,7 +24,7 @@ class TestDataPreprocessor:
               "systemicTreatmentPlan_bevacizumab": 0, "systemicTreatmentPlan_panitumumab": 0, "systemicTreatmentPlan_pembrolizumab": 0,
               "systemicTreatmentPlan_nivolumab": 0}),
     ])
-    def test_parse_treatment(self, dp, treatment, expected):
+    def test_parse_treatment(self, dp: DataPreprocessor, treatment: str, expected: dict):
         assert dp.parse_treatment(treatment) == expected
 
     def test_group_treatments(self, dp: DataPreprocessor):
@@ -35,8 +35,7 @@ class TestDataPreprocessor:
         assert "treatment" in result.columns
         assert result["treatment"].tolist() == [1, 0, 0]
 
-    def test_handle_missing_values(self):
-        dp = DataPreprocessor(settings=test_settings, fit=True)
+    def test_handle_missing_values(self, dp: DataPreprocessor):
         df = pd.DataFrame({
             "ageAtMetastaticDiagnosis": [65, 70, np.nan, 60],
             test_settings.duration_col: [100, 200, 300, 400],
@@ -46,12 +45,12 @@ class TestDataPreprocessor:
         assert not result["ageAtMetastaticDiagnosis"].isnull().any()
         assert "ageAtMetastaticDiagnosis" in dp.medians
 
-    def test_knn_imputation_fills_na(self, dp):
+    def test_knn_imputation_fills_na(self, dp: DataPreprocessor):
         df = pd.DataFrame({"whoAssessmentAtMetastaticDiagnosis": [1.0, None, 3.0, None]})
         df = dp.impute_knn(df, ["whoAssessmentAtMetastaticDiagnosis"], k=2)
         assert not df["whoAssessmentAtMetastaticDiagnosis"].isnull().any()
 
-    def test_encode_categorical_creates_dummies(self, dp):
+    def test_encode_categorical_creates_dummies(self, dp: DataPreprocessor):
         df = pd.DataFrame({
             "primaryTumorLocation": ["RECTUM", "SIGMOID_COLON", "RECTUM", "COECUM"],
             test_settings.duration_col: [120, 300, 250, 190],
