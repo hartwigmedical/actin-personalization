@@ -15,7 +15,7 @@
                 "batch_size": 32,
                 "epochs": 50,
                 "early_stopping_patience": 30,
-                "input_size": 101,
+                "input_size": 111,
                 "use_attention": false
             }
         },
@@ -36,7 +36,8 @@
                 "batch_size": 128,
                 "epochs": 100,
                 "early_stopping_patience": 50,
-                "use_attention": true
+                "use_attention": true,
+                "input_size": 111
             }
         },
         "LogisticHazardModel": {
@@ -53,7 +54,8 @@
                 "early_stopping_patience": 50,
                 "optimizer": "Adam",
                 "epochs": 500,
-                "use_attention": false
+                "use_attention": false,
+                "input_size": 111
             }
         },
         "LogisticHazardModel_attention": {
@@ -69,7 +71,8 @@
                 "early_stopping_patience": 20,
                 "optimizer": "RMSprop",
                 "epochs": 50,
-                "use_attention": true
+                "use_attention": true,
+                "input_size": 111
             }
         },
         "DeepHitModel": {
@@ -89,7 +92,8 @@
                 "batch_size": 64,
                 "epochs": 100,
                 "early_stopping_patience": 50,
-                "use_attention": false
+                "use_attention": false,
+                "input_size": 111
             }
         },
         "DeepHitModel_attention": {
@@ -109,7 +113,8 @@
                 "batch_size": 128,
                 "epochs": 500,
                 "early_stopping_patience": 30,
-                "use_attention": true
+                "use_attention": true,
+                "input_size": 111
             }
         },
         "PCHazardModel": {
@@ -125,7 +130,8 @@
                 "batch_size": 32,
                 "epochs": 500,
                 "early_stopping_patience": 20,
-                "use_attention": false
+                "use_attention": false,
+                "input_size": 111
             }
         },
         "PCHazardModel_attention": {
@@ -141,7 +147,8 @@
                 "batch_size": 128,
                 "epochs": 200,
                 "early_stopping_patience": 50,
-                "use_attention": true
+                "use_attention": true,
+                "input_size": 111
             }
         },
         "MTLRModel": {
@@ -156,7 +163,8 @@
                 "batch_size": 32,
                 "epochs": 50,
                 "early_stopping_patience": 30,
-                "use_attention": false
+                "use_attention": false,
+                "input_size": 111
             }
         },
         "MTLRModel_attention": {
@@ -171,7 +179,8 @@
                 "batch_size": 32,
                 "epochs": 200,
                 "early_stopping_patience": 20,
-                "use_attention": true
+                "use_attention": true,
+                "input_size": 111
             }
         },
         "CoxPH": {
@@ -222,6 +231,204 @@
                 "optimizer": "RMSprop",
                 "use_attention": false
             }
+        },
+        "DeepSurv_attention": {
+        "class": "models.survival_models.DeepSurv",
+            "kwargs": {
+                "num_nodes": [
+                    64,
+                    32
+                ],
+                "batch_norm": true,
+                "dropout": 0.2,
+                "weight_decay": 0.0005,
+                "lr": 0.001,
+                "activation": "elu",
+                "optimizer": "RMSprop",
+                "batch_size": 32,
+                "epochs": 500,
+                "early_stopping_patience": 50,
+                "input_size": 102,
+                "use_attention": true
+            }
+        },
+        "LogisticHazardModel": {
+            "class": "models.survival_models.LogisticHazardModel",
+            "kwargs": {
+                "num_nodes": [
+                    128,
+                    64,
+                    32
+                ],
+                "lr": 0.01,
+                "dropout": 0.1,
+                "batch_size": 64,
+                "early_stopping_patience": 50,
+                "optimizer": "RMSprop",
+                "epochs": 200,
+                "use_attention": false,
+                "input_size": 102
+            }
+        },
+        "LogisticHazardModel_attention": {
+            "class": "models.survival_models.LogisticHazardModel",
+            "kwargs": {
+                "num_nodes": [
+                    64,
+                    32
+                ],
+                "lr": 0.0005,
+                "dropout": 0.15,
+                "batch_size": 64,
+                "early_stopping_patience": 50,
+                "optimizer": "Adam",
+                "epochs": 200,
+                "use_attention": true,
+                "input_size": 102
+            }
+        },
+        "DeepHitModel": {
+            "class": "models.survival_models.DeepHitModel",
+            "kwargs": {
+                "num_nodes": [
+                    128,
+                    64,
+                    32
+                ],
+                "activation": "elu",
+                "alpha": 0.4,
+                "sigma": 0.2,
+                "weight_decay": 0.0001,
+                "optimizer": "Adam",
+                "dropout": 0.2,
+                "batch_size": 128,
+                "epochs": 50,
+                "early_stopping_patience": 30,
+                "use_attention": false,
+                "input_size": 102
+            }
+        },
+        "DeepHitModel_attention": {
+            "class": "models.survival_models.DeepHitModel",
+            "kwargs": {
+                "num_nodes": [
+                    128,
+                    64,
+                    32
+                ],
+                "activation": "swish",
+                "alpha": 0.3,
+                "sigma": 0.1,
+                "weight_decay": 0.0001,
+                "optimizer": "RMSprop",
+                "dropout": 0.2,
+                "batch_size": 32,
+                "epochs": 50,
+                "early_stopping_patience": 30,
+                "use_attention": true,
+                "input_size": 102
+            }
+        },
+        "PCHazardModel": {
+            "class": "models.survival_models.PCHazardModel",
+            "kwargs": {
+                "num_nodes": [
+                    128,
+                    64,
+                    32
+                ],
+                "num_durations": 60,
+                "lr": 0.01,
+                "dropout": 0.1,
+                "optimizer": "Adam",
+                "batch_size": 64,
+                "epochs": 200,
+                "early_stopping_patience": 30,
+                "use_attention": false,
+                "input_size": 102
+            }
+        },
+        "PCHazardModel_attention": {
+            "class": "models.survival_models.PCHazardModel",
+            "kwargs": {
+                "num_nodes": [
+                    64,
+                    32
+                ],
+                "num_durations": 120,
+                "lr": 0.001,
+                "dropout": 0.15,
+                "optimizer": "RMSprop",
+                "batch_size": 32,
+                "epochs": 500,
+                "early_stopping_patience": 20,
+                "use_attention": true,
+                "input_size": 102
+            }
+        },
+        "MTLRModel": {
+            "class": "models.survival_models.MTLRModel",
+            "kwargs": {
+                "num_nodes": [
+                    32
+                ],
+                "lr": 0.001,
+                "dropout": 0.2,
+                "optimizer": "RMSprop",
+                "batch_size": 128,
+                "epochs": 50,
+                "early_stopping_patience": 30,
+                "use_attention": false,
+                "input_size": 102
+            }
+        },
+        "MTLRModel_attention": {
+            "class": "models.survival_models.MTLRModel",
+            "kwargs": {
+                "num_nodes": [
+                    128,
+                    64
+                ],
+                "lr": 0.0005,
+                "dropout": 0.2,
+                "optimizer": "RMSprop",
+                "batch_size": 64,
+                "epochs": 200,
+                "early_stopping_patience": 30,
+                "use_attention": true,
+                "input_size": 102
+            }
+        },
+        "CoxPH": {
+            "class": "models.survival_models.CoxPHModel",
+            "kwargs": {
+                "alpha": 0.5,
+                "ties": "efron",
+                "n_iter": 500,
+                "tol": 1e-05
+            }
+        },
+        "RandomSurvivalForest": {
+            "class": "models.survival_models.RandomSurvivalForestModel",
+            "kwargs": {
+                "n_estimators": 500,
+                "max_depth": 10,
+                "min_samples_split": 20,
+                "min_samples_leaf": 10,
+                "max_features": "sqrt"
+            }
+        },
+        "GradientBoosting": {
+            "class": "models.survival_models.GradientBoostingSurvivalModel",
+            "kwargs": {
+                "learning_rate": 0.01,
+                "n_estimators": 500,
+                "max_depth": 5,
+                "subsample": 1.0,
+                "min_samples_leaf": 20,
+                "min_samples_split": 50,
+                "max_features": "sqrt"
+            }
         }
     },
     "treatment_vs_no_OS": {
@@ -242,7 +449,7 @@
                 "batch_size": 128,
                 "epochs": 50,
                 "early_stopping_patience": 20,
-                "input_size": 84,
+                "input_size": 95,
                 "use_attention": false
             }
         },
@@ -262,7 +469,7 @@
                 "batch_size": 32,
                 "epochs": 500,
                 "early_stopping_patience": 50,
-                "input_size": 84,
+                "input_size": 95,
                 "use_attention": true
             }
         },
@@ -279,7 +486,7 @@
                 "early_stopping_patience": 20,
                 "optimizer": "RMSprop",
                 "epochs": 50,
-                "input_size": 84,
+                "input_size": 95,
                 "use_attention": false
             }
         },
@@ -296,7 +503,7 @@
                 "early_stopping_patience": 30,
                 "optimizer": "Adam",
                 "epochs": 100,
-                "input_size": 84,
+                "input_size": 95,
                 "use_attention": true
             }
         },
@@ -316,7 +523,7 @@
                 "batch_size": 32,
                 "epochs": 50,
                 "early_stopping_patience": 30,
-                "input_size": 84,
+                "input_size": 95,
                 "use_attention": false
             }
         },
@@ -337,7 +544,7 @@
                 "batch_size": 64,
                 "epochs": 200,
                 "early_stopping_patience": 50,
-                "input_size": 84,
+                "input_size": 95,
                 "use_attention": true
             }
         },
@@ -356,7 +563,7 @@
                 "batch_size": 64,
                 "epochs": 500,
                 "early_stopping_patience": 50,
-                "input_size": 84,
+                "input_size": 95,
                 "use_attention": false
             }
         },
@@ -374,7 +581,7 @@
                 "batch_size": 64,
                 "epochs": 200,
                 "early_stopping_patience": 50,
-                "input_size": 84,
+                "input_size": 95,
                 "use_attention": true
             }
         },
@@ -391,7 +598,7 @@
                 "batch_size": 64,
                 "epochs": 100,
                 "early_stopping_patience": 30,
-                "input_size": 84,
+                "input_size": 95,
                 "use_attention": false
             }
         },
@@ -409,7 +616,7 @@
                 "batch_size": 32,
                 "epochs": 500,
                 "early_stopping_patience": 30,
-                "input_size": 84,
+                "input_size": 95,
                 "use_attention": true
             }
         },
@@ -659,6 +866,407 @@
                 "subsample": 0.8,
                 "min_samples_leaf": 20,
                 "min_samples_split": 10,
+                "max_features": "log2"
+            }
+        }
+    },
+    "treatment_drug_PFS": {
+        "LogisticHazardModel": {
+            "class": "models.survival_models.LogisticHazardModel",
+            "kwargs": {
+                "num_nodes": [
+                    128,
+                    64,
+                    32
+                ],
+                "lr": 0.01,
+                "dropout": 0.1,
+                "batch_size": 64,
+                "early_stopping_patience": 50,
+                "optimizer": "RMSprop",
+                "epochs": 200,
+                "use_attention": false,
+                "input_size": 102
+            }
+        },
+        "LogisticHazardModel_attention": {
+            "class": "models.survival_models.LogisticHazardModel",
+            "kwargs": {
+                "num_nodes": [
+                    64,
+                    32
+                ],
+                "lr": 0.0005,
+                "dropout": 0.15,
+                "batch_size": 64,
+                "early_stopping_patience": 50,
+                "optimizer": "Adam",
+                "epochs": 200,
+                "use_attention": true,
+                "input_size": 102
+            }
+        },
+        "DeepHitModel": {
+            "class": "models.survival_models.DeepHitModel",
+            "kwargs": {
+                "num_nodes": [
+                    128,
+                    64,
+                    32
+                ],
+                "activation": "elu",
+                "alpha": 0.4,
+                "sigma": 0.2,
+                "weight_decay": 0.0001,
+                "optimizer": "Adam",
+                "dropout": 0.2,
+                "batch_size": 128,
+                "epochs": 50,
+                "early_stopping_patience": 30,
+                "use_attention": false,
+                "input_size": 102
+            }
+        },
+        "DeepHitModel_attention": {
+            "class": "models.survival_models.DeepHitModel",
+            "kwargs": {
+                "num_nodes": [
+                    128,
+                    64,
+                    32
+                ],
+                "activation": "swish",
+                "alpha": 0.3,
+                "sigma": 0.1,
+                "weight_decay": 0.0001,
+                "optimizer": "RMSprop",
+                "dropout": 0.2,
+                "batch_size": 32,
+                "epochs": 50,
+                "early_stopping_patience": 30,
+                "use_attention": true,
+                "input_size": 102
+            }
+        },
+        "PCHazardModel": {
+            "class": "models.survival_models.PCHazardModel",
+            "kwargs": {
+                "num_nodes": [
+                    128,
+                    64,
+                    32
+                ],
+                "num_durations": 60,
+                "lr": 0.01,
+                "dropout": 0.1,
+                "optimizer": "Adam",
+                "batch_size": 64,
+                "epochs": 200,
+                "early_stopping_patience": 30,
+                "use_attention": false,
+                "input_size": 102
+            }
+        },
+        "PCHazardModel_attention": {
+            "class": "models.survival_models.PCHazardModel",
+            "kwargs": {
+                "num_nodes": [
+                    64,
+                    32
+                ],
+                "num_durations": 120,
+                "lr": 0.001,
+                "dropout": 0.15,
+                "optimizer": "RMSprop",
+                "batch_size": 32,
+                "epochs": 500,
+                "early_stopping_patience": 20,
+                "use_attention": true,
+                "input_size": 102
+            }
+        },
+        "MTLRModel": {
+            "class": "models.survival_models.MTLRModel",
+            "kwargs": {
+                "num_nodes": [
+                    32
+                ],
+                "lr": 0.001,
+                "dropout": 0.2,
+                "optimizer": "RMSprop",
+                "batch_size": 128,
+                "epochs": 50,
+                "early_stopping_patience": 30,
+                "use_attention": false,
+                "input_size": 102
+            }
+        },
+        "MTLRModel_attention": {
+            "class": "models.survival_models.MTLRModel",
+            "kwargs": {
+                "num_nodes": [
+                    128,
+                    64
+                ],
+                "lr": 0.0005,
+                "dropout": 0.2,
+                "optimizer": "RMSprop",
+                "batch_size": 64,
+                "epochs": 200,
+                "early_stopping_patience": 30,
+                "use_attention": true,
+                "input_size": 102
+            }
+        },
+        "CoxPH": {
+            "class": "models.survival_models.CoxPHModel",
+            "kwargs": {
+                "alpha": 0.5,
+                "ties": "efron",
+                "n_iter": 500,
+                "tol": 1e-05
+            }
+        },
+        "RandomSurvivalForest": {
+            "class": "models.survival_models.RandomSurvivalForestModel",
+            "kwargs": {
+                "n_estimators": 500,
+                "max_depth": 10,
+                "min_samples_split": 20,
+                "min_samples_leaf": 10,
+                "max_features": "sqrt"
+            }
+        },
+        "GradientBoosting": {
+            "class": "models.survival_models.GradientBoostingSurvivalModel",
+            "kwargs": {
+                "learning_rate": 0.01,
+                "n_estimators": 500,
+                "max_depth": 5,
+                "subsample": 1.0,
+                "min_samples_leaf": 20,
+                "min_samples_split": 50,
+                "max_features": "sqrt"
+            }
+        }
+    },
+    "treatment_vs_no_PFS": {
+        "DeepSurv": {
+            "class": "models.survival_models.DeepSurv",
+            "kwargs": {
+                "num_nodes": [
+                    64
+                ],
+                "batch_norm": true,
+                "dropout": 0.1,
+                "weight_decay": 0.001,
+                "lr": 0.01,
+                "activation": "elu",
+                "optimizer": "Adam",
+                "batch_size": 32,
+                "epochs": 50,
+                "early_stopping_patience": 30,
+                "use_attention": false,
+                "input_size": 95
+            }
+        },
+        "DeepSurv_attention": {
+            "class": "models.survival_models.DeepSurv",
+            "kwargs": {
+                "num_nodes": [
+                    128,
+                    64,
+                    32
+                ],
+                "batch_norm": false,
+                "dropout": 0.1,
+                "weight_decay": 0.001,
+                "lr": 0.0005,
+                "activation": "elu",
+                "optimizer": "RMSprop",
+                "batch_size": 64,
+                "epochs": 100,
+                "early_stopping_patience": 50,
+                "use_attention": true,
+                "input_size": 95
+            }
+        },
+        "LogisticHazardModel": {
+            "class": "models.survival_models.LogisticHazardModel",
+            "kwargs": {
+                "num_nodes": [
+                    128,
+                    64,
+                    32
+                ],
+                "lr": 0.01,
+                "dropout": 0.2,
+                "batch_size": 64,
+                "early_stopping_patience": 50,
+                "optimizer": "RMSprop",
+                "epochs": 200,
+                "use_attention": false,
+                "input_size": 95
+            }
+        },
+        "LogisticHazardModel_attention": {
+            "class": "models.survival_models.LogisticHazardModel",
+            "kwargs": {
+                "num_nodes": [
+                    128,
+                    64
+                ],
+                "lr": 0.0005,
+                "dropout": 0.2,
+                "batch_size": 32,
+                "early_stopping_patience": 30,
+                "optimizer": "Adam",
+                "epochs": 200,
+                "use_attention": true,
+                "input_size": 95
+            }
+        },
+        "DeepHitModel": {
+            "class": "models.survival_models.DeepHitModel",
+            "kwargs": {
+                "num_nodes": [
+                    64,
+                    32
+                ],
+                "activation": "swish",
+                "alpha": 0.3,
+                "sigma": 0.05,
+                "weight_decay": 0.0005,
+                "optimizer": "RMSprop",
+                "dropout": 0.15,
+                "batch_size": 128,
+                "epochs": 100,
+                "early_stopping_patience": 20,
+                "use_attention": false,
+                "input_size": 95
+            }
+        },
+        "DeepHitModel_attention": {
+            "class": "models.survival_models.DeepHitModel",
+            "kwargs": {
+                "num_nodes": [
+                    64,
+                    32
+                ],
+                "activation": "elu",
+                "alpha": 0.4,
+                "sigma": 0.1,
+                "weight_decay": 0.0005,
+                "optimizer": "RMSprop",
+                "dropout": 0.2,
+                "batch_size": 64,
+                "epochs": 500,
+                "early_stopping_patience": 20,
+                "use_attention": true,
+                "input_size": 95
+            }
+        },
+        "PCHazardModel": {
+            "class": "models.survival_models.PCHazardModel",
+            "kwargs": {
+                "num_nodes": [
+                    128,
+                    64,
+                    32
+                ],
+                "num_durations": 120,
+                "lr": 0.0005,
+                "dropout": 0.2,
+                "optimizer": "Adam",
+                "batch_size": 32,
+                "epochs": 100,
+                "early_stopping_patience": 30,
+                "use_attention": false,
+                "input_size": 95
+            }
+        },
+        "PCHazardModel_attention": {
+            "class": "models.survival_models.PCHazardModel",
+            "kwargs": {
+                "num_nodes": [
+                    128,
+                    64
+                ],
+                "num_durations": 80,
+                "lr": 0.0005,
+                "dropout": 0.2,
+                "optimizer": "Adam",
+                "batch_size": 32,
+                "epochs": 100,
+                "early_stopping_patience": 50,
+                "use_attention": true,
+                "input_size": 95
+            }
+        },
+        "MTLRModel": {
+            "class": "models.survival_models.MTLRModel",
+            "kwargs": {
+                "num_nodes": [
+                    256,
+                    128,
+                    64
+                ],
+                "lr": 0.0005,
+                "dropout": 0.15,
+                "optimizer": "Adam",
+                "batch_size": 128,
+                "epochs": 500,
+                "early_stopping_patience": 30,
+                "use_attention": false,
+                "input_size": 95
+            }
+        },
+        "MTLRModel_attention": {
+            "class": "models.survival_models.MTLRModel",
+            "kwargs": {
+                "num_nodes": [
+                    256,
+                    128,
+                    64
+                ],
+                "lr": 0.001,
+                "dropout": 0.2,
+                "optimizer": "RMSprop",
+                "batch_size": 128,
+                "epochs": 100,
+                "early_stopping_patience": 50,
+                "use_attention": true,
+                "input_size": 95
+            }
+        },
+        "CoxPH": {
+            "class": "models.survival_models.CoxPHModel",
+            "kwargs": {
+                "alpha": 1.0,
+                "ties": "efron",
+                "n_iter": 500,
+                "tol": 1e-07
+            }
+        },
+        "RandomSurvivalForest": {
+            "class": "models.survival_models.RandomSurvivalForestModel",
+            "kwargs": {
+                "n_estimators": 500,
+                "max_depth": 50,
+                "min_samples_split": 20,
+                "min_samples_leaf": 10,
+                "max_features": "sqrt"
+            }
+        },
+        "GradientBoosting": {
+            "class": "models.survival_models.GradientBoostingSurvivalModel",
+            "kwargs": {
+                "learning_rate": 0.01,
+                "n_estimators": 200,
+                "max_depth": 10,
+                "subsample": 1.0,
+                "min_samples_leaf": 5,
+                "min_samples_split": 50,
                 "max_features": "log2"
             }
         }

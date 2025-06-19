@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 import pymysql
 import json
+import os
 
 from sklearn.impute import KNNImputer
 from sklearn.model_selection import train_test_split
@@ -11,11 +12,12 @@ from typing import List, Dict, Tuple, Any
 import joblib
 import warnings
 
-from utils.settings import settings
+from utils.settings import config_settings
 from .lookups import lookup_manager
 
 class DataSplitter:
-    def __init__(self, test_size: float=0.1, random_state: int=42) -> None:
+    def __init__(self, settings=config_settings, test_size: float=0.1, random_state: int=42) -> None:
+        self.settings = settings
         self.test_size = test_size
         self.random_state = random_state
 
@@ -23,8 +25,8 @@ class DataSplitter:
         """
         Split the data into training and test sets, stratified by treatment type and censoring status.
         """
-        if settings.event_col:
-            stratify_labels = y[settings.event_col].astype(str)
+        if isinstance(y, np.ndarray) and self.settings.event_col in y.dtype.names:
+            stratify_labels = y[self.settings.event_col].astype(str)
         else:
             stratify_labels = None
        
@@ -32,20 +34,26 @@ class DataSplitter:
             X, y, test_size=self.test_size, random_state=self.random_state, stratify=stratify_labels
         )
         
-        settings.input_size = X_train.shape[1]
+        self.settings.input_size = X_train.shape[1]
         
         return X_train, X_test, y_train, y_test
 
 class DataPreprocessor:
-    def __init__(self, db_config_path: str = settings.db_config_path, db_name: str = settings.db_name, fit: bool = True) -> None:
-        self.db_config_path = db_config_path
-        self.db_name = db_name
+    def __init__(self, settings=config_settings, fit: bool = True, preprocessor_path=True) -> None:
+        self.settings = settings
+        self.db_config_path = self.settings.db_config_path
+        self.db_name = self.settings.db_name
         self.data_dir = "data"
         self.fit = fit
         
+        if preprocessor_path:
+            self.preprocessor_path = os.path.join(self.settings.save_path, f"{self.settings.outcome}_preprocessor")
+        else:
+            self.preprocessor_path = self.settings.save_path
+
         if not self.fit:
             try:
-                with open(f"{settings.save_path}/preprocessor/preprocessing_config.json", "r") as f:
+                with open(f"{self.preprocessor_path}/preprocessing_config.json", "r") as f:
                     config = json.load(f)
                     self.medians = config.get("medians", {})
                     self.encoded_columns = config.get("encoded_columns", {})
@@ -55,7 +63,7 @@ class DataPreprocessor:
                 self.encoded_columns = {}
 
             try:
-                self.scaler = joblib.load(f"{settings.save_path}/preprocessor/standard_scaler.pkl")
+                self.scaler = joblib.load(f"{self.preprocessor_path}/standard_scaler.pkl", "r")
             except Exception as e:
                 warnings.warn(f"Failed to load StandardScaler: {e}")
                 self.scaler = None
@@ -69,16 +77,16 @@ class DataPreprocessor:
     def preprocess_data(self, features = lookup_manager.features, df = None) -> Tuple[pd.DataFrame, List[str], Dict[str, List[str]]]:
         if df is None:
             df = self.load_data()
-                
-        df = df[features + [settings.duration_col, settings.event_col]]
+                            
+        df = df[features + [self.settings.duration_col, self.settings.event_col]]
 
         df = df[~df["firstSystemicTreatmentAfterMetastaticDiagnosis"].str.upper().str.contains("NIVOLUMAB", na=False)]
         
         df = df[~df[lookup_manager.features].isna().all(axis=1)].copy()
 
-        if settings.experiment_type == 'treatment_vs_no':
+        if self.settings.experiment_type == 'treatment_vs_no':
             df = self.group_treatments(df)
-        elif settings.experiment_type == 'treatment_drug':
+        elif self.settings.experiment_type == 'treatment_drug':
             df = self.add_treatment_drugs(df)
 
         df = self.impute_knn(df, ['whoAssessmentAtMetastaticDiagnosis'], k=7)
@@ -90,9 +98,9 @@ class DataPreprocessor:
         
         df = self.encode_categorical(df) 
 
-        updated_features = [col for col in df.columns if col not in [settings.duration_col, settings.event_col]]
+        updated_features = [col for col in df.columns if col not in [self.settings.duration_col, self.settings.event_col]]
         
-        if settings.standardize:
+        if self.settings.standardize:
             df = self.standardize(df, updated_features)
        
         return df, updated_features, self.encoded_columns
@@ -105,11 +113,11 @@ class DataPreprocessor:
             db=self.db_name
         )
     
-        df = pd.read_sql(f"SELECT * FROM {settings.view_name}", db_connection)
+        df = pd.read_sql(f"SELECT * FROM {self.settings.view_name}", db_connection)
     
         db_connection.close()
         
-        return df.dropna(subset=[settings.duration_col, settings.event_col]).copy()
+        return df.dropna(subset=[self.settings.duration_col, self.settings.event_col]).copy()
 
     def impute_knn(self, df: pd.DataFrame, columns: List[str], k: int) -> pd.DataFrame:
         """
@@ -131,12 +139,13 @@ class DataPreprocessor:
         for column, lookup in lookup_dictionary.items():
             if column in df.columns:
                 df[column] = df[column].map(lookup)
+                
         return df
     
     def handle_missing_values(self, df: pd.DataFrame) -> pd.DataFrame:
       
         numerical_cols = df.select_dtypes(include=['float64', 'int64', 'bool']).columns.tolist()
-        numerical_cols = [col for col in numerical_cols if col not in [settings.event_col, settings.duration_col]]
+        numerical_cols = [col for col in numerical_cols if col not in [self.settings.event_col, self.settings.duration_col]]
 
         for col in numerical_cols:
             if self.fit:
@@ -146,10 +155,13 @@ class DataPreprocessor:
             else:
                 median_value = self.medians.get(col, 0)  
             df[col] = df[col].fillna(median_value)
+        # Check for duplicate column names
+        duplicate_cols = df.columns[df.columns.duplicated()].tolist()
+        if duplicate_cols:
+            raise ValueError(f"Duplicate columns found in DataFrame: {duplicate_cols}")
 
-        if settings.duration_col in df.columns:
-            df = df[df[settings.duration_col] > 0].copy() 
-        
+        if self.settings.duration_col in df.columns:
+            df = df[df[self.settings.duration_col] > 0].copy()
 
         return df
     
@@ -158,6 +170,7 @@ class DataPreprocessor:
             lambda x: 1 if pd.notnull(x) and str(x).strip() != '' else 0
         )
         df = df.drop(columns = [treatment_col])
+        
         return df
     
     def parse_treatment(self, treatment: str) -> Dict[str, int]:
@@ -178,10 +191,10 @@ class DataPreprocessor:
         if "iri" in t:
             components["systemicTreatmentPlan_irinotecan"] = 1
 
-        if "bevacizumab" in t or t.endswith("_b"):
+        if "bevacizumab" in t or t.endswith("-b"):
             components["systemicTreatmentPlan_bevacizumab"] = 1
 
-        if "panitumumab" in t or t.endswith("_p"):
+        if "panitumumab" in t or t.endswith("-p"):
             components["systemicTreatmentPlan_panitumumab"] = 1
 
         if "pembrolizumab" in t: 
@@ -190,7 +203,6 @@ class DataPreprocessor:
         if "nivolumab" in t: 
             components["systemicTreatmentPlan_nivolumab"] = 1
             
-
         return components
 
 
@@ -220,12 +232,13 @@ class DataPreprocessor:
         return df
 
     def encode_categorical(self, df: pd.DataFrame) -> pd.DataFrame:
+
         for col, encoding_info in self.encoded_columns.items():
             if encoding_info["type"] == "onehot" and col in df.columns:
                 df[col] = df[col].astype('object')
                 
         categorical_cols = df.select_dtypes(include=['object', 'category']).columns.tolist()
-        categorical_cols = [col for col in categorical_cols if col not in [settings.event_col, settings.duration_col]]
+        categorical_cols = [col for col in categorical_cols if col not in [self.settings.event_col, self.settings.duration_col]]
 
           
         for col in categorical_cols:
@@ -249,8 +262,6 @@ class DataPreprocessor:
                         dummies = dummies[expected_dummies]
 
                     df = pd.concat([df.drop(columns=[col]), dummies], axis=1)
-           
-
              
             else:
                 if df[col].nunique(dropna=False) == 2:
@@ -268,14 +279,13 @@ class DataPreprocessor:
                         "columns": list(dummies.columns)
                     } 
               
-        if self.fit:
-            with open(f"{settings.save_path}/preprocessor/preprocessing_config.json", "w") as f:  
+        if self.fit and self.settings.save_models:
+            with open(f"{self.settings.save_path}/{self.settings.outcome}_preprocessor/preprocessing_config.json", "w") as f:
                 json.dump({
                     "medians": self.medians,
                     "encoded_columns": self.encoded_columns
                 }, f)
 
-                
         return df
     
     def standardize(self, df: pd.DataFrame, features: List[str]) -> pd.DataFrame:
@@ -283,24 +293,24 @@ class DataPreprocessor:
             cols_to_standardize = [
                 col for col in features
                 if pd.api.types.is_numeric_dtype(df[col])
-                and col not in [settings.event_col, settings.duration_col]
+                and col not in [self.settings.event_col, self.settings.duration_col]
                 and df[col].nunique() > 2
             ]
 
             self.scaler = StandardScaler()
             df[cols_to_standardize] = self.scaler.fit_transform(df[cols_to_standardize])
 
-            if settings.save_models:
-                joblib.dump(self.scaler, f"{settings.save_path}/preprocessor/standard_scaler.pkl")
+            if self.settings.save_models:
+                joblib.dump(self.scaler, f"{self.settings.save_path}/{self.settings.outcome}_preprocessor/standard_scaler.pkl")
             return df
 
         else:
             if self.scaler is None:
-                raise RuntimeError(f"No pre‐fitted StandardScaler found at {settings.save_path}/preprocessor/standard_scaler.pkl")
+                raise RuntimeError(f"No pre‐fitted StandardScaler found at {self.settings.save_path}/{self.settings.outcome}_preprocessor/standard_scaler.pkl")
                 
             trained_cols = list(self.scaler.feature_names_in_)
             df = df.assign(**{c: 0.0 for c in trained_cols if c not in df.columns})
             
-            df.loc[:, trained_cols] = self.scaler.transform(df[trained_cols])
+            df[trained_cols] = pd.DataFrame(self.scaler.transform(df[trained_cols]), index=df.index, columns=trained_cols)
 
             return df

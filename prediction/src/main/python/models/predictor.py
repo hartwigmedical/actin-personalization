@@ -1,21 +1,31 @@
 import torch
 import pandas as pd
 import os
+import json
+import importlib
 import dill
-from data.data_processing import DataPreprocessor
-from utils.settings import settings
 
+from data.data_processing import DataPreprocessor
+from utils.settings import Settings
 from models import *
 
-def load_model(trained_path: str, model_type: str = "DeepSurv_attention"):
-    config_mgr = ExperimentConfig("/data/repos/actin-personalization/prediction/src/main/python/models/configs/model_hyperparams.json")
-    loaded_configs = config_mgr.load_model_configs()
-    
-    model_class, model_kwargs = loaded_configs[model_type]
-    
-    model = model_class(**model_kwargs)
+def load_model(trained_path: str) -> any:
 
-    state = torch.load(f"{trained_path}/{settings.outcome}_{model_type}.pt", map_location=torch.device("cpu"))
+    config_path = os.path.join(trained_path, "model_config.json")
+    with open(config_path, "r") as f:
+        model_config = json.load(f)
+
+    class_path = model_config["class"] 
+    kwargs = model_config["kwargs"]
+
+    module_name, class_name = class_path.rsplit(".", 1)
+    module = importlib.import_module(module_name)
+    model_class = getattr(module, class_name)
+    model = model_class(**kwargs)
+
+    state_path = os.path.join(trained_path, "model.pt")
+    state = torch.load(state_path, map_location=torch.device("cpu"))
+
     model.model.net.load_state_dict(state["net_state"])
 
     if "labtrans" in state:
@@ -27,14 +37,14 @@ def load_model(trained_path: str, model_type: str = "DeepSurv_attention"):
         model.model.baseline_cumulative_hazards_ = state["baseline_cumulative_hazards"]
 
     model.model.net.eval()
-    
-    return model 
 
-def predict_treatment_scenarios(patient_data: dict, trained_path: str, valid_treatment_combinations: dict) -> dict:
+    return model
+
+def predict_treatment_scenarios(patient_data: dict, trained_path: str, valid_treatment_combinations: dict, settings=Settings) -> dict:
     
     patient_df = pd.DataFrame([patient_data])
 
-    preprocessor = DataPreprocessor(fit=False)
+    preprocessor = DataPreprocessor(settings, fit=False, preprocessor_path=False)
     processed_df, updated_features, _ = preprocessor.preprocess_data(df=patient_df)
     
     model = load_model(trained_path)
@@ -43,9 +53,7 @@ def predict_treatment_scenarios(patient_data: dict, trained_path: str, valid_tre
 
     treatment_cols = [c for c in X_base.columns if c.startswith("systemicTreatmentPlan")]
 
-    time_grid = None
     survival_dict = {}
-
     for idx, (label, mapping) in enumerate(valid_treatment_combinations.items()):
         for col, val in mapping.items():
             if col in X_base.columns:
@@ -57,7 +65,6 @@ def predict_treatment_scenarios(patient_data: dict, trained_path: str, valid_tre
         sf = surv_fns[0] 
         
         survival_dict[label] = {
-            "time_grid": sf.x.astype(float).tolist(),
             "survival_probs": sf.y.astype(float).tolist()
         }
 
