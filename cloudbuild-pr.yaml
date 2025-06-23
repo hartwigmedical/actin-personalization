@@ -1,8 +1,22 @@
 steps:
-  - id: 'Maven build using cache'
-    name: 'maven:3.9.7-eclipse-temurin-17'
+  - id: 'Maven build and test using cache'
+    name: 'europe-west4-docker.pkg.dev/actin-build/build-registry-docker/actin-build-agent:2.0.0'
     entrypoint: mvn
     args: [ 'test' ]
+    env:
+      - MAVEN_OPTS=-Dmaven.repo.local=/.m2/repository
+
+  - id: 'Python tests'
+    name: 'python:3.11'
+    entrypoint: bash
+    env:
+      - PYTHONPATH=prediction/src/main/python
+    args:
+      - -c
+      - |
+        pip install -r prediction/src/main/python/requirements.txt
+        pip install pytest
+        pytest prediction/src/test/python
 
 options:
   machineType: 'E2_HIGHCPU_8'

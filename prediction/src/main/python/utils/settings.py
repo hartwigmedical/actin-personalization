@@ -10,7 +10,7 @@ class Settings:
     
     cross_val_n_splits: int = 5
     hyperparam_tuning_optimization_metric: str = 'auc'  # c_index, IBS, CE, auc
-    hyperparam_tuning_number_combinations: int = 10
+    hyperparam_tuning_number_combinations: int = 5
     save_models: bool = True
     json_config_file: str = 'src/main/python/models/configs/model_hyperparams.json'
     db_name: str = 'actin_personalization'
@@ -46,7 +46,6 @@ class Settings:
             self.view_name = 'knownPalliativeTreatedReference'
     
     def configure_model_settings(self) -> None:
-        self.save_models = True
         if self.save_path is None:
             self.save_path = f'/data/patient_like_me/prediction/trained_models/{self.experiment_type}'
         if self.outcome.upper() == 'OS':
@@ -55,4 +54,4 @@ class Settings:
             self.time_points = [int(round(i * 365 / 4)) for i in range(1, 13)]
             self.max_time = 1095
 
-settings = Settings()
+config_settings = Settings()

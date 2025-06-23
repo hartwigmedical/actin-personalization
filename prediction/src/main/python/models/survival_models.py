@@ -14,7 +14,7 @@ from typing import Dict, Any, Optional, List
 from pycox.models import CoxPH, LogisticHazard, DeepHitSingle, PCHazard, MTLR
 from scipy.interpolate import interp1d
 
-from utils.settings import settings
+from utils.settings import config_settings
 
 torch.manual_seed(0)
 
@@ -74,7 +74,7 @@ class RandomSurvivalForestModel(BaseSurvivalModel):
     def __init__(self, **kwargs: Dict[str, Any]):
         super().__init__()
         self.kwargs = kwargs
-        self.model = RandomSurvivalForest(n_jobs = settings.n_jobs, **self.kwargs)
+        self.model = RandomSurvivalForest(n_jobs = config_settings.n_jobs, **self.kwargs)
 
     def fit(self, X: pd.DataFrame, y: pd.DataFrame) -> None:
         self.model.fit(X, y)
@@ -118,7 +118,7 @@ class FeatureAttention(nn.Module):
         )
 
     def _apply_gate(self, x):
-        if settings.use_gate:
+        if config_settings.use_gate:
             if self.msi_index is not None and self.immuno_index is not None:
                 msi_gate = x[:, self.msi_index].unsqueeze(1)
                 x[:, self.immuno_index] *= msi_gate

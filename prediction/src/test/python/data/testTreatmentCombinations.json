@@ -4,7 +4,7 @@
             "systemicTreatmentPlan_oxaliplatin": 0,
             "systemicTreatmentPlan_irinotecan": 0,
             "systemicTreatmentPlan_bevacizumab": 0,
-            "systemicTreatmentPlan_panitumab": 0,
+            "systemicTreatmentPlan_panitumumab": 0,
             "systemicTreatmentPlan_pembrolizumab": 0,
             "systemicTreatmentPlan_nivolumab": 0
     },
@@ -13,7 +13,7 @@
         "systemicTreatmentPlan_oxaliplatin": 0,
         "systemicTreatmentPlan_irinotecan": 0,
         "systemicTreatmentPlan_bevacizumab": 0,
-        "systemicTreatmentPlan_panitumab": 0, 
+        "systemicTreatmentPlan_panitumumab": 0, 
         "systemicTreatmentPlan_pembrolizumab": 0,
         "systemicTreatmentPlan_nivolumab": 0
     },
@@ -22,7 +22,7 @@
         "systemicTreatmentPlan_oxaliplatin": 1,
         "systemicTreatmentPlan_irinotecan": 0,
         "systemicTreatmentPlan_bevacizumab": 0,
-        "systemicTreatmentPlan_panitumab": 0,
+        "systemicTreatmentPlan_panitumumab": 0,
         "systemicTreatmentPlan_pembrolizumab": 0,
         "systemicTreatmentPlan_nivolumab": 0
     },
@@ -31,7 +31,7 @@
         "systemicTreatmentPlan_oxaliplatin": 1,
         "systemicTreatmentPlan_irinotecan": 0,
         "systemicTreatmentPlan_bevacizumab": 1,
-        "systemicTreatmentPlan_panitumab": 0,
+        "systemicTreatmentPlan_panitumumab": 0,
         "systemicTreatmentPlan_pembrolizumab": 0,
         "systemicTreatmentPlan_nivolumab": 0
     },
@@ -40,7 +40,7 @@
         "systemicTreatmentPlan_oxaliplatin": 0,
         "systemicTreatmentPlan_irinotecan": 1,
         "systemicTreatmentPlan_bevacizumab": 0,
-        "systemicTreatmentPlan_panitumab": 0,
+        "systemicTreatmentPlan_panitumumab": 0,
         "systemicTreatmentPlan_pembrolizumab": 0,
         "systemicTreatmentPlan_nivolumab": 0
     },
@@ -49,7 +49,7 @@
         "systemicTreatmentPlan_oxaliplatin": 0,
         "systemicTreatmentPlan_irinotecan": 1,
         "systemicTreatmentPlan_bevacizumab": 1,
-        "systemicTreatmentPlan_panitumab": 0,
+        "systemicTreatmentPlan_panitumumab": 0,
         "systemicTreatmentPlan_pembrolizumab": 0,
         "systemicTreatmentPlan_nivolumab": 0
     },
@@ -58,7 +58,7 @@
         "systemicTreatmentPlan_oxaliplatin": 0,
         "systemicTreatmentPlan_irinotecan": 1,
         "systemicTreatmentPlan_bevacizumab": 0,
-        "systemicTreatmentPlan_panitumab": 1,
+        "systemicTreatmentPlan_panitumumab": 1,
         "systemicTreatmentPlan_pembrolizumab": 0,
         "systemicTreatmentPlan_nivolumab": 0
     },
@@ -67,7 +67,7 @@
         "systemicTreatmentPlan_oxaliplatin": 1,
         "systemicTreatmentPlan_irinotecan": 1,
         "systemicTreatmentPlan_bevacizumab": 0,
-        "systemicTreatmentPlan_panitumab": 0,
+        "systemicTreatmentPlan_panitumumab": 0,
         "systemicTreatmentPlan_pembrolizumab": 0,
         "systemicTreatmentPlan_nivolumab": 0
     },
@@ -76,7 +76,7 @@
         "systemicTreatmentPlan_oxaliplatin": 1,
         "systemicTreatmentPlan_irinotecan": 1,
         "systemicTreatmentPlan_bevacizumab": 1,
-        "systemicTreatmentPlan_panitumab": 0,
+        "systemicTreatmentPlan_panitumumab": 0,
         "systemicTreatmentPlan_pembrolizumab": 0,
         "systemicTreatmentPlan_nivolumab": 0
     },
@@ -85,7 +85,7 @@
         "systemicTreatmentPlan_oxaliplatin": 0,
         "systemicTreatmentPlan_irinotecan": 0,
         "systemicTreatmentPlan_bevacizumab": 0,
-        "systemicTreatmentPlan_panitumab": 0,
+        "systemicTreatmentPlan_panitumumab": 0,
         "systemicTreatmentPlan_pembrolizumab": 1,
         "systemicTreatmentPlan_nivolumab": 0
     }

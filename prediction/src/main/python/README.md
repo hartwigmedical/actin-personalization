@@ -74,6 +74,38 @@ To ensure that the code runs as intended, set up your Python environment with th
 This will install all the packages required to run the project.
 
 
+## 🏃 Running Inference with `run_prediction.py`
+
+To generate survival predictions for a single patient using a pretrained model, use the script `run_prediction.py`.
+
+### 🧾 Input Arguments
+
+| Argument             | Description                                                                                          |
+|----------------------|------------------------------------------------------------------------------------------------------|
+| `input_path`         | **(Required)** Path to a JSON file with patient data (single record).                                |
+| `output_path`        | **(Required)** Path to save the prediction result as a JSON.                                         |
+| `--trained_path`     | **(Required)** Path to the folder containing trained model + preprocessor files. The folder must contain:<br>• `model_config.json`<br>• `model.pt`<br>• `preprocessing_config.json`<br>• `standard_scaler.pkl` |
+| `--treatment_config` | **(Required)** Path to a JSON file specifying valid treatment combinations to evaluate.              |
+
+### 🧪 Example Usage
+
+```bash
+python run_prediction.py \
+    /path/to/patient_input.json \
+    /path/to/output_predictions.json \
+    --trained_path /path/to/model_artifacts \
+    --treatment_config /path/to/treatment_combinations.json
+```
+
+What this script does:
+1. Loads patient data from `input_path`
+2. Loads the model and preprocessing pipeline from `trained_path`
+3. Loads treatment combinations from `--treatment_config`
+4. Generates survival predictions for each treatment scenario
+5. Saves predictions to `output_path`
+   
+
+
 
 
 
