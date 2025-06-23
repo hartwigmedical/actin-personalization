@@ -108,11 +108,7 @@ class LookupManager:
             'presentedWithIleus',
             'presentedWithPerforation',
             'extraMuralInvasionCategory',
-<<<<<<< Updated upstream
          
-=======
-
->>>>>>> Stashed changes
             'daysBetweenPrimaryAndMetastaticDiagnosis',
             'hasLiverOrIntrahepaticBileDuctMetastases',
             'numberOfLiverMetastases',
