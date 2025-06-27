@@ -89,7 +89,8 @@ class DataPreprocessor:
         elif self.settings.experiment_type == 'treatment_drug':
             df = self.add_treatment_drugs(df)
 
-        df = self.impute_knn(df, ['whoAssessmentAtMetastaticDiagnosis'], k=7)
+        if len(df) > 1:
+            df = self.impute_knn(df, ['whoAssessmentAtMetastaticDiagnosis'], k=7)
         
         df = self.numerize(df, lookup_manager.lookup_dictionary)
         
@@ -155,12 +156,8 @@ class DataPreprocessor:
             else:
                 median_value = self.medians.get(col, 0)  
             df[col] = df[col].fillna(median_value)
-        # Check for duplicate column names
-        duplicate_cols = df.columns[df.columns.duplicated()].tolist()
-        if duplicate_cols:
-            raise ValueError(f"Duplicate columns found in DataFrame: {duplicate_cols}")
 
-        if self.settings.duration_col in df.columns:
+        if self.settings.duration_col in df.columns and len(df) > 1:
             df = df[df[self.settings.duration_col] > 0].copy()
 
         return df
