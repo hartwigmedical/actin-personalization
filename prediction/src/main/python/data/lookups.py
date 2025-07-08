@@ -107,11 +107,8 @@ class LookupManager:
             'positiveLymphNodesCountPrimaryDiagnosis',
             'presentedWithIleus',
             'presentedWithPerforation',
-            # 'venousInvasionDescription',
-            # 'lymphaticInvasionCategory',
             'extraMuralInvasionCategory',
-            'tumorRegression',
-
+         
             'daysBetweenPrimaryAndMetastaticDiagnosis',
             'hasLiverOrIntrahepaticBileDuctMetastases',
             'numberOfLiverMetastases',

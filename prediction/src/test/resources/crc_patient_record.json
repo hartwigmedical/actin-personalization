@@ -1,16 +1,16 @@
 {
-  "patientId": "EXAMPLE-LUNG-01",
+  "patientId": "EXAMPLE-CRC-01",
   "patient": {
     "gender": "FEMALE",
     "birthYear": 1975,
-    "registrationDate": "2025-02-20",
-    "questionnaireDate": "2025-02-20",
-    "hasHartwigSequencing": true
+    "registrationDate": "2025-02-27",
+    "questionnaireDate": "2025-02-27",
+    "hasHartwigSequencing": false
   },
   "tumor": {
-    "name": "Lung adenocarcinoma",
+    "name": "Colorectal adenocarcinoma",
     "doids": [
-      "3910"
+      "9256"
     ],
     "stage": "IV",
     "derivedStages": null,
@@ -24,175 +24,75 @@
     "hasLungLesions": true,
     "hasLymphNodeLesions": false,
     "otherLesions": [],
-    "biopsyLocation": "Lung",
+    "biopsyLocation": "Colon",
     "rawPathologyReport": null
   },
   "clinicalStatus": {
     "who": 1,
     "infectionStatus": null,
-    "ecg": {
-      "hasSigAberrationLatestECG": false,
-      "aberrationDescription": "",
-      "qtcfValue": 430,
-      "qtcfUnit": "ms"
-    },
+    "ecg": {},
     "lvef": 0.5,
     "hasComplications": false
   },
   "oncologicalHistory": [
     {
-      "treatments": [
-        {
-          "name": "OSIMERTINIB",
-          "drugs": [
-            {
-              "name": "OSIMERTINIB",
-              "drugTypes": [
-                "EGFR_INHIBITOR",
-                "EGFR_INHIBITOR_GEN_3",
-                "EGFR_TYROSINE_KINASE_INHIBITOR",
-                "TYROSINE_KINASE_INHIBITOR"
-              ],
-              "category": "TARGETED_THERAPY",
-              "displayOverride": null
-            }
-          ],
-          "synonyms": [],
-          "displayOverride": null,
-          "isSystemic": true,
-          "maxCycles": null,
-          "treatmentClass": "DRUG_TREATMENT"
-        }
-      ],
-      "startYear": 2023,
-      "startMonth": 6,
+      "treatments": [],
+      "startYear": null,
+      "startMonth": null,
       "intents": null,
       "isTrial": false,
       "trialAcronym": null,
-      "treatmentHistoryDetails": {
-        "stopYear": 2025,
-        "stopMonth": 1,
-        "ongoingAsOf": null,
-        "cycles": null,
-        "bestResponse": "PARTIAL_RESPONSE",
-        "stopReason": "PROGRESSIVE_DISEASE",
-        "stopReasonDetail": "PD",
-        "switchToTreatments": null,
-        "maintenanceTreatment": null,
-        "toxicities": [],
-        "bodyLocationCategories": null,
-        "bodyLocations": null
-      }
+      "treatmentHistoryDetails": {}
     }
   ],
   "priorPrimaries": [],
   "comorbidities": [
     {
-      "name": "Rheumatoid arthritis",
+      "name": "AIDS",
       "year": 2023,
       "month": null,
-      "icdCodes": [],
-      "category": "Autoimmune disease",
+      "icdCodes": ["B24"],
       "comorbidityClass": "OTHER_CONDITION"
     }
   ],
   "labValues": [
     {
-      "date": "2025-01-15",
-      "code": "ALAT",
-      "name": "Alanine aminotransferase",
-      "comparator": "",
-      "value": 40.0,
-      "unit": "UNITS_PER_LITER",
-      "refLimitLow": 7.0,
-      "refLimitUp": 56.0,
-      "isOutsideRef": false
-    },
-    {
-      "date": "2025-01-15",
-      "code": "ASAT",
-      "name": "Aspartate aminotransferase",
-      "comparator": "",
-      "value": 30.0,
-      "unit": "UNITS_PER_LITER",
-      "refLimitLow": 8.0,
-      "refLimitUp": 33.0,
-      "isOutsideRef": false
-    },
-    {
-      "date": "2025-01-15",
-      "code": "TOTAL_BILIRUBIN",
-      "name": "total bilirubin",
-      "comparator": "",
-      "value": 8.0,
-      "unit": "MICROMOLES_PER_LITER",
-      "refLimitLow": 0,
-      "refLimitUp": 17.0,
-      "isOutsideRef": false
-    },
-    {
-      "date": "2025-01-15",
-      "code": "Hb",
-      "name": "hemoglobin",
-      "comparator": "",
-      "value": 8.2,
-      "unit": "MILLIMOLES_PER_LITER",
-      "refLimitLow": 8,
-      "refLimitUp": 10,
-      "isOutsideRef": false
-    },
-    {
-      "date": "2025-01-15",
-      "code": "THROMBOCYTES_ABS",
-      "name": "absolute thrombocyte count",
-      "comparator": "",
-      "value": 125.0,
-      "unit": "BILLIONS_PER_LITER",
-      "refLimitLow": 150.0,
-      "refLimitUp": 370.0,
+      "date": "2025-02-25",
+      "measurement": "CARCINOEMBRYONIC_ANTIGEN",
+      "value": 150.0,
+      "unit": "MICROGRAMS_PER_LITER",
+      "refLimitLow": 0.0,
+      "refLimitUp": 5.0,
       "isOutsideRef": true
     },
     {
-      "date": "2025-01-15",
-      "code": "LYMPHOCYTES_ABS_EDA",
-      "name": "absolute lymphocyte count eDA",
-      "comparator": "",
-      "value": 3.0,
-      "unit": "BILLIONS_PER_LITER",
-      "refLimitLow": 0.5,
-      "refLimitUp": 5.0,
-      "isOutsideRef": false
+      "date": "2025-02-25",
+      "measurement": "ALKALINE_PHOSPHATASE",
+      "value": 280.0,
+      "unit": "UNITS_PER_LITER",
+      "refLimitLow": 40,
+      "refLimitUp": 130,
+      "isOutsideRef": true
+    },
+    {
+      "date": "2025-02-25",
+      "measurement": "HEMOGLOBIN",
+      "value": 7.5,
+      "unit": "MILLIMOLES_PER_LITER",
+      "refLimitLow": 8.0,
+      "refLimitUp": 10.0,
+      "isOutsideRef": true
     }
   ],
   "surgeries": [
     {
-      "name": "Cholecystectomy",
-      "endDate": "2024-08-01",
+      "name": "Right hemicolectomy",
+      "endDate": "2025-02-15",
       "status": "FINISHED"
     }
   ],
-  "bodyWeights": [
-    {
-      "date": "2024-09-09T08:00:00",
-      "value": 60.0,
-      "unit": "KILOGRAMS",
-      "valid": true
-    },
-    {
-      "date": "2024-05-01T08:00:00",
-      "value": 64.0,
-      "unit": "KILOGRAMS",
-      "valid": true
-    }
-  ],
-  "bodyHeights": [
-    {
-      "date": "2024-05-01T08:00:00",
-      "value": 165.0,
-      "unit": "CENTIMETERS",
-      "valid": true
-    }
-  ],
+  "bodyWeights": [],
+  "bodyHeights": [],
   "vitalFunctions": [
     {
       "date": "2024-09-09T08:00:00",
@@ -211,61 +111,14 @@
       "valid": true
     }
   ],
-  "bloodTransfusions": [
-    {
-      "date": "2024-09-20",
-      "product": "ERTHROCYTES_FILTERED"
-    }
-  ],
-  "medications": [
-    {
-      "name": "St. John's Wort",
-      "status": "ACTIVE",
-      "administrationRoute": "Oral",
-      "dosage": {
-        "dosageMin": 300.0,
-        "dosageMax": 300.0,
-        "dosageUnit": "MILLIGRAMS",
-        "frequency": 1.0,
-        "frequencyUnit": "DAYS",
-        "periodBetweenValue": 1.0,
-        "periodBetweenUnit": "DAYS",
-        "ifNeeded": false
-      },
-      "startDate": "2023-02-01",
-      "stopDate": null,
-      "drug": null,
-      "cypInteractions": [
-        {
-          "type": "INDUCER",
-          "strength": "STRONG",
-          "group": "CYP",
-          "name": "3A4/5"
-        }
-      ],
-      "transporterInteractions": [],
-      "qtProlongatingRisk": "NONE",
-      "atc": null,
-      "isSelfCare": true,
-      "isTrialMedication": false
-    }
-  ],
-  "ihcTests": [
-    {
-      "item": "PD-L1",
-      "measure": null,
-      "scoreText": null,
-      "scoreValuePrefix": ">",
-      "scoreValue": 50,
-      "scoreValueUnit": "%",
-      "impliesPotentialIndeterminateStatus": false
-    }
-  ],
+  "bloodTransfusions": [],
+  "medications": [],
+  "ihcTests": [],
   "molecularHistory": {
     "molecularTests": [
       {
-        "patientId": "EXAMPLE-LUNG-01",
-        "sampleId": "EXAMPLE-LUNG-01-T",
+        "patientId": "EXAMPLE-CRC-01",
+        "sampleId": "EXAMPLE-CRC-01-T",
         "refGenomeVersion": "V37",
         "externalTrialSource": "Hartwig",
         "containsTumorCells": true,
@@ -731,113 +584,37 @@
               "isAssociatedWithDrugResistance": null
             }
           ],
-          "copyNumbers": [
-            {
-              "canonicalImpact": {
-                "transcriptId": "",
-                "type": "DEL",
-                "minCopies": 0,
-                "maxCopies": 0
-              },
-              "otherImpacts": [],
-              "isReportable": true,
-              "event": "TP53 del",
-              "driverLikelihood": "HIGH",
-              "evidence": {
-                "treatmentEvidence": [],
-                "eligibleTrials": []
-              },
-              "gene": "TP53",
-              "geneRole": "TSG",
-              "proteinEffect": "UNKNOWN",
-              "isAssociatedWithDrugResistance": null
-            }
-          ],
+          "copyNumbers": [],
           "homozygousDisruptions": [],
           "disruptions": [],
-          "fusions": [
-            {
-              "geneStart": "MET",
-              "geneEnd": "MET",
-              "driverType": "KNOWN_PAIR",
-              "proteinEffect": "GAIN_OF_FUNCTION",
-              "isAssociatedWithDrugResistance": true,
-              "geneTranscriptStart": "116312446",
-              "geneTranscriptEnd": "116438440",
-              "fusedExonUp": 13,
-              "fusedExonDown": 15,
-              "isReportable": true,
-              "event": "MET(exon13)::MET(exon15) fusion",
-              "driverLikelihood": "HIGH",
-              "evidence": {
-                "treatmentEvidence": [],
-                "eligibleTrials": []
-              }
-            }
-          ],
+          "fusions": [],
           "viruses": []
         },
         "characteristics": {
           "purity": 0.5,
           "ploidy": 2.3,
           "predictedTumorOrigin": {
-            "predictions": [
+             "predictions": [
               {
-                "cancerType": "Lung: Non-small cell: LUAD",
-                "likelihood": 0.98,
-                "snvPairwiseClassifier": 0.6,
-                "genomicPositionClassifier": 0.7,
-                "featureClassifier": 0.8,
-                "cuppaMode": "WGS"
-              },
-              {
-                "cancerType": "Colorectum/Small intestine/Appendix",
-                "likelihood": 0.02,
-                "snvPairwiseClassifier": 0.01,
-                "genomicPositionClassifier": 0.02,
-                "featureClassifier": 0.03,
-                "cuppaMode": "WGS"
+                "cancerType": "Colorectal adenocarcinoma",
+                "likelihood": 0.95
               }
             ]
           },
           "microsatelliteStability": {
             "microsatelliteIndelsPerMb": 0.0,
-            "isUnstable": false,
+            "isUnstable": true,
             "evidence": {
               "treatmentEvidence": [],
               "eligibleTrials": []
             }
           },
-          "homologousRecombination": {
-            "score": 0.0,
-            "isDeficient": false,
-            "type": "NONE",
-            "brca1Value": 0.0,
-            "brca2Value": 0.0,
-            "evidence": {
-              "treatmentEvidence": [],
-              "eligibleTrials": []
-            }
-          },
-          "tumorMutationalBurden": {
-            "score": 14.0,
-            "isHigh": true,
-            "evidence": {
-              "treatmentEvidence": [],
-              "eligibleTrials": []
-            }
-          },
-          "tumorMutationalLoad": {
-            "score": 160,
-            "isHigh": true,
-            "evidence": {
-              "treatmentEvidence": [],
-              "eligibleTrials": []
-            }
+          "homologousRecombination": {},
+          "tumorMutationalBurden": {},
+          "tumorMutationalLoad": {}
           }
-        },
-        "evidenceSource": "External"
-      }
+        }
+
     ]
   }
 }
