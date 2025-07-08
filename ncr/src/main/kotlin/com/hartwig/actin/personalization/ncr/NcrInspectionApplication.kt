@@ -1,7 +1,7 @@
 package com.hartwig.actin.personalization.ncr
 
 import com.hartwig.actin.personalization.ncr.datamodel.NcrRecord
-import com.hartwig.actin.personalization.ncr.interpretation.ReferenceEntryFactory
+import com.hartwig.actin.personalization.ncr.interpretation.NcrReferenceEntryFactory
 import com.hartwig.actin.personalization.ncr.interpretation.filter.NcrQualityFilter
 import com.hartwig.actin.personalization.ncr.serialization.NcrDataReader
 import io.github.oshai.kotlinlogging.KotlinLogging
@@ -35,7 +35,7 @@ class NcrInspectionApplication : Callable<Int> {
         printTreatmentResponseOverview(ncrRecords)
 
         LOGGER.info { "Creating reference entries from NCR records" }
-        val referenceEntries = ReferenceEntryFactory(NcrQualityFilter(logFilteredRecords = false)).create(ncrRecords)
+        val referenceEntries = NcrReferenceEntryFactory(NcrQualityFilter(logFilteredRecords = false)).create(ncrRecords)
         LOGGER.info { " Created ${referenceEntries.size} reference entries from ${ncrRecords.size} NCR records" }
 
         LOGGER.info { "Done!" }

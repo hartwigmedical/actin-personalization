@@ -5,9 +5,9 @@ import com.hartwig.actin.personalization.ncr.interpretation.filter.NcrQualityFil
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
-class ReferenceEntryFactoryTest {
+class NcrReferenceEntryFactoryTest {
 
-    private val factory = ReferenceEntryFactory(NcrQualityFilter(logFilteredRecords = true))
+    private val factory = NcrReferenceEntryFactory(NcrQualityFilter(logFilteredRecords = true))
     
     @Test
     fun `Should create record for minimal NCR input`() {

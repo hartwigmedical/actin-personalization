@@ -7,7 +7,7 @@ import com.hartwig.actin.personalization.ncr.interpretation.filter.NcrQualityFil
 
 import java.util.stream.Collectors
 
-class ReferenceEntryFactory(private val filter: NcrQualityFilter) {
+class NcrReferenceEntryFactory(private val filter: NcrQualityFilter) {
     
     fun create(records: List<NcrRecord>): List<ReferenceEntry> {
         val filtered = filter.run(records)

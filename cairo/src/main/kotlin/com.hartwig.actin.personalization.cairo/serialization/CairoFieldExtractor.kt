@@ -40,7 +40,7 @@ data class CairoFieldExtractor(private val fields: MutableMap<String, String>) {
     }
 
     private fun value(property: String): String {
-        return parts[fields[property]!!]
+        return fields[property]!!
     }
 
     private fun logEpisodeID(property: String) {
@@ -52,4 +52,3 @@ data class CairoFieldExtractor(private val fields: MutableMap<String, String>) {
         private val LOGGER = KotlinLogging.logger {}
     }
 }
-)

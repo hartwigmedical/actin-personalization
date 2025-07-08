@@ -1,6 +1,32 @@
 package com.hartwig.actin.personalization.cairo.serialization
 
-import com.hartwig.actin.personalization.cairo.datamodel.*
+import com.hartwig.actin.personalization.cairo.datamodel.CairoAdjuvantChemo
+import com.hartwig.actin.personalization.cairo.datamodel.CairoBiochemistryValues
+import com.hartwig.actin.personalization.cairo.datamodel.CairoHaematologyValues
+import com.hartwig.actin.personalization.cairo.datamodel.CairoIdentification
+import com.hartwig.actin.personalization.cairo.datamodel.CairoLabValues
+import com.hartwig.actin.personalization.cairo.datamodel.CairoMetastasesAscitis
+import com.hartwig.actin.personalization.cairo.datamodel.CairoMetastasesBone
+import com.hartwig.actin.personalization.cairo.datamodel.CairoMetastasesLiver
+import com.hartwig.actin.personalization.cairo.datamodel.CairoMetastasesLung
+import com.hartwig.actin.personalization.cairo.datamodel.CairoMetastasesLymphNode
+import com.hartwig.actin.personalization.cairo.datamodel.CairoMetastasesOther
+import com.hartwig.actin.personalization.cairo.datamodel.CairoMetastasesPleuralEffusion
+import com.hartwig.actin.personalization.cairo.datamodel.CairoMetastasesSkin
+import com.hartwig.actin.personalization.cairo.datamodel.CairoMetastasesSoftTissue
+import com.hartwig.actin.personalization.cairo.datamodel.CairoMetastaticDiagnosis
+import com.hartwig.actin.personalization.cairo.datamodel.CairoMetastaticSurgery
+import com.hartwig.actin.personalization.cairo.datamodel.CairoMolecularCharacteristics
+import com.hartwig.actin.personalization.cairo.datamodel.CairoPatientCharacteristics
+import com.hartwig.actin.personalization.cairo.datamodel.CairoPrimaryDiagnosis
+import com.hartwig.actin.personalization.cairo.datamodel.CairoPrimarySurgery
+import com.hartwig.actin.personalization.cairo.datamodel.CairoRadiotherapy
+import com.hartwig.actin.personalization.cairo.datamodel.CairoRecord
+import com.hartwig.actin.personalization.cairo.datamodel.CairoResponseAssessment
+import com.hartwig.actin.personalization.cairo.datamodel.CairoTreatment
+import com.hartwig.actin.personalization.cairo.datamodel.CairoTreatmentChanges
+import com.hartwig.actin.personalization.cairo.datamodel.CairoTreatmentResponse
+import com.hartwig.actin.personalization.cairo.datamodel.CairoUrinalysisValues
 import java.io.File
 import java.nio.file.Files
 
@@ -33,7 +59,6 @@ object CairoDataReader {
 
         return records
     }
-
 
     fun aggregateCsvFiles(csvFiles: List<File>, fieldDelimiter: String = ";"): Map<String, MutableMap<String, String>> {
         val aggregatedData = mutableMapOf<String, MutableMap<String, String>>()
