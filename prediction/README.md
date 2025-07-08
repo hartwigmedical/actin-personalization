@@ -41,42 +41,46 @@ The pipeline is designed to run on **Python 3.11**. To get started:
 
 ### 1. Install Python 3.11 (if needed)
 
-If Python 3.11 is not yet available on your machine (e.g., in a VM), install it manually:
+If Python 3.11 is not yet available on your machine (e.g., in a VM), install it using `pyenv` and add to your path:
 
 ```bash
-sudo apt update
-sudo apt install -y wget build-essential libssl-dev zlib1g-dev \
-  libncurses5-dev libreadline-dev libsqlite3-dev libbz2-dev \
-  libexpat1-dev liblzma-dev tk-dev uuid-dev libffi-dev
+version="3.11.13"
 
-cd /tmp
-wget https://www.python.org/ftp/python/3.11.9/Python-3.11.9.tgz
-tar -xvzf Python-3.11.9.tgz
-cd Python-3.11.9
-./configure --enable-optimizations
-make -j4
-sudo make altinstall
+if [[ ! -d "${HOME}/.pyenv" ]]; then 
+    echo "PyEnv not yet present, installing"
+    curl -L https://raw.githubusercontent.com/yyuu/pyenv-installer/master/bin/pyenv-installer | bash
+fi
+
+echo "Initialising pyenv..."
+${HOME}/.pyenv/bin/pyenv install ${version}
+${HOME}/.pyenv/versions/${version}/bin/pip install --upgrade pip
+
+echo "Switching to new ${version} version"
+export PATH="${HOME}/.pyenv/versions/${version}/bin:$PATH"
 ```
 
 ### 2. Create and activate a virtual environment
 ```bash
-python3.11 -m venv /path/to/your/env/prediction_3_11
-source /path/to/your/env/prediction_3_11/bin/activate
+python3 -m venv /path/to/your/env/prediction_3_11_venv
+source /path/to/your/env/prediction_3_11_venv/bin/activate
 ```
 
 ### 3. Install required packages
 Install all required dependencies using the requirements.txt in the main code folder:
 ```bash
-pip install -r prediction/src/main/python/requirements.txt
+pip install -r /path/to/actin-personalization-repo/prediction/src/main/python/requirements.txt
 ```
 
 ### 4. (Optional) Add the environment to JupyterLab
 If you're working in Jupyter and want the new environment to show up:
 ```bash
 pip install ipykernel
-python -m ipykernel install --user --name=prediction_3_11 --display-name "Python 3.11 (prediction)"
+python3 -m ipykernel install --user --name=prediction_3_11_venv --display-name "Python 3.11 (prediction)"
 ```
-_Note: You may need to restart JupyterLab for the new kernel to appear_
+_Note: You may need to restart JupyterLab for the new kernel to appear via_
+```bash
+sudo systemctl {start/stop/status} jupyterlab.service
+```
 
 ---
 
