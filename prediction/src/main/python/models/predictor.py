@@ -1,15 +1,13 @@
-import torch
-import pandas as pd
-import os
-import json
 import importlib
-import dill
-import joblib
-
+import json
+import os
+import pandas as pd
+import torch
 from data.data_processing import DataPreprocessor
-from utils.settings import Settings
 from data.lookups import lookup_manager
 from models import *
+from utils.settings import Settings
+
 
 def load_model(trained_path: str) -> any:
 
@@ -57,8 +55,12 @@ def load_patient_df(patient, settings: Settings) -> pd.DataFrame:
         return False
 
 
-    variant_genes = {v.get("gene"): v for test in molecular_tests for v in test.get("drivers", {}).get("variants", [])}
     birth_year = patient.get("patient", {}).get("birthYear")
+    variant_genes = {v.get("gene"): v for test in molecular_tests for v in test.get("drivers", {}).get("variants", [])}
+    has_msi = any(
+        (test.get("characteristics", {}).get("microsatelliteStability") or {}).get("isUnstable", False)
+        for test in molecular_tests
+    )
 
     patient_dict = {
         "sex": patient.get("patient", {}).get("gender"),
@@ -141,10 +143,7 @@ def load_patient_df(patient, settings: Settings) -> pd.DataFrame:
         "hasLiverDisease": has_icd([ "K71", "K72", "K73", "K74", "K75", "K76"]),
         "hasUlcerDisease": has_icd(["K25", "K26", "K27", "K28"]),
 
-        "hasMsi": any(
-            test.get("characteristics", {}).get("microsatelliteStability", {}).get("isUnstable", False)
-            for test in molecular_tests
-        ),
+        "hasMsi": has_msi,
         "hasBrafMutation": "BRAF" in variant_genes,
         "hasBrafV600EMutation": "BRAF" in variant_genes and "V600E" in variant_genes["BRAF"].get("event", ""),
         "hasRasMutation": any(gene in variant_genes for gene in ["KRAS", "NRAS", "HRAS"]),
