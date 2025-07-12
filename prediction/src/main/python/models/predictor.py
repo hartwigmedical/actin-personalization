@@ -3,11 +3,11 @@ import json
 import os
 import pandas as pd
 import torch
+
 from data.data_processing import DataPreprocessor
 from data.lookups import lookup_manager
 from models import *
 from utils.settings import Settings
-
 
 def load_model(trained_path: str) -> any:
 
