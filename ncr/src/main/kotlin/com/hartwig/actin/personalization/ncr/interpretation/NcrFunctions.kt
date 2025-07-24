@@ -5,6 +5,7 @@ import com.hartwig.actin.personalization.ncr.interpretation.conversion.Metastati
 import kotlin.math.max
 
 const val DIAGNOSIS_EPISODE = "DIA"
+const val FOLLOW_UP_EPISODE = "VERB"
 
 object NcrFunctions {
 
