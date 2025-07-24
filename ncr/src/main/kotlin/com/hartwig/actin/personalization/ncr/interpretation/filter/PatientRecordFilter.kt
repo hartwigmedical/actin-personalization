@@ -3,13 +3,11 @@ package com.hartwig.actin.personalization.ncr.interpretation.filter
 import com.hartwig.actin.personalization.ncr.datamodel.NcrRecord
 import com.hartwig.actin.personalization.ncr.interpretation.DIAGNOSIS_EPISODE
 import com.hartwig.actin.personalization.ncr.interpretation.FOLLOW_UP_EPISODE
-import io.github.oshai.kotlinlogging.KotlinLogging
 
-class PatientRecordFilter(val log: (String) -> Unit) {
-    internal fun hasValidTreatmentData(tumorRecordsPerId: Map.Entry<Int, List<NcrRecord>>): Boolean {
-        val allTreatments = tumorRecordsPerId.value.map { it.treatment }
-
-        val hasAtLeastOneInvalidTreatment = allTreatments.any { treatment ->
+class PatientRecordFilter(override val logFilteredRecords: Boolean) : RecordFilter {
+    internal fun hasValidTreatmentData(tumorRecords: List<NcrRecord>): Boolean {
+        val allTreatments = tumorRecords.map { it.treatment }
+        val indicatesTreatmentButNoTreatmentDefined = allTreatments.any { treatment ->
             treatment.tumgerichtTher == 1 &&
                     (treatment.primarySurgery.chir == null || treatment.primarySurgery.chir == 0) &&
                     treatment.primaryRadiotherapy.rt == 0 &&
@@ -22,56 +20,70 @@ class PatientRecordFilter(val log: (String) -> Unit) {
                     treatment.metastaticRadiotherapy.metaRtCode1 == null
         }
 
-        if (hasAtLeastOneInvalidTreatment) {
-            log("Invalid treatment data found for set of NCR tumor records with ID: ${tumorRecordsPerId.key}")
+        if (indicatesTreatmentButNoTreatmentDefined) {
+            log("Invalid treatment data found for set of NCR tumor records with ID: ${tumorRecords.first().identification.keyZid}")
         }
-
-        return !hasAtLeastOneInvalidTreatment
+        return !indicatesTreatmentButNoTreatmentDefined
     }
 
-    internal fun hasIdentialSex(tumorRecordsPerId: Map.Entry<Int, List<NcrRecord>>): Boolean {
-        val allSexes = tumorRecordsPerId.value.map { it.patientCharacteristics.gesl }
-        return allSexes.toSet().size == 1
-    }
+    internal fun hasConsistentSex(tumorRecords: List<NcrRecord>): Boolean {
+        val consistentSex = tumorRecords.map { it.patientCharacteristics.gesl }.toSet().size == 1
 
-    internal fun hasExactlyOneDiagnosis(tumorRecordsPerId: Map.Entry<Int, List<NcrRecord>>): Boolean {
-        val diagnosisRecords = tumorRecordsPerId.value.filter { it.identification.epis == DIAGNOSIS_EPISODE }
-        if (diagnosisRecords.size != 1) {
-            log("Expected exactly one diagnosis record for tumor ID ${tumorRecordsPerId.key}, found ${diagnosisRecords.size}")
-            return false
+        if (!consistentSex) {
+            log("Inconsistent sex found for tumor ID ${tumorRecords.first().identification.keyZid}")
         }
-        return true
+        return consistentSex
     }
 
-    internal fun hasVitalStatusForDIARecords(tumorRecordsPerId: Map.Entry<Int, List<NcrRecord>>): Boolean {
-        val diagnosisRecords = tumorRecordsPerId.value.filter { it.identification.epis == DIAGNOSIS_EPISODE }
+    internal fun hasExactlyOneDiagnosis(tumorRecords: List<NcrRecord>): Boolean {
+        val numDiagnosisRecords = tumorRecords.count { it.identification.epis == DIAGNOSIS_EPISODE }
+        val exactlyOneDiagnosis = numDiagnosisRecords == 1
+        if (!exactlyOneDiagnosis) {
+            log("Expected exactly one diagnosis record for tumor ID ${tumorRecords.first().identification.keyZid}, found ${numDiagnosisRecords}")
+        }
+        return exactlyOneDiagnosis
+    }
+
+    internal fun hasVitalStatusForDiaRecords(tumorRecords: List<NcrRecord>): Boolean {
+        val diagnosisRecords = tumorRecords.filter { it.identification.epis == DIAGNOSIS_EPISODE }
 
         val hasVitalStatus =
             diagnosisRecords.all { it.patientCharacteristics.vitStat != null && it.patientCharacteristics.vitStatInt != null }
         if (!hasVitalStatus) {
-            log("Missing vital status for diagnosis records of tumor ID ${tumorRecordsPerId.key}")
+            log("Missing vital status for diagnosis records of tumor ID ${tumorRecords.first().identification.keyZid}")
         }
         return hasVitalStatus
     }
 
-    internal fun hasEmptyVitalStatusForVerbRecords(tumorRecordsPerId: Map.Entry<Int, List<NcrRecord>>): Boolean {
-        val verbRecords = tumorRecordsPerId.value.filter { it.identification.epis == FOLLOW_UP_EPISODE }
+    internal fun hasEmptyVitalStatusForVerbRecords(tumorRecords: List<NcrRecord>): Boolean {
+        val verbRecords = tumorRecords.filter { it.identification.epis == FOLLOW_UP_EPISODE }
 
         val hasEmptyVitalStatus =
             verbRecords.all { it.patientCharacteristics.vitStat == null && it.patientCharacteristics.vitStatInt == null }
         if (!hasEmptyVitalStatus) {
-            log("Non-empty vital status found for verb records of tumor ID ${tumorRecordsPerId.key}")
+            log("Non-empty vital status found for verb records of tumor ID ${tumorRecords.first().identification.keyZid}")
         }
         return hasEmptyVitalStatus
     }
 
-    internal fun hasIdenticalYearOfIncidence(tumorRecordsPerId: Map.Entry<Int, List<NcrRecord>>): Boolean {
-        val yearsOfIncidence = tumorRecordsPerId.value.map { it.primaryDiagnosis.incjr }
+    internal fun hasConsistentYearOfIncidence(tumorRecords: List<NcrRecord>): Boolean {
+        val uniqueYearsOfIncidence = tumorRecords.map { it.primaryDiagnosis.incjr }.toSet().size
+        val consistentYearOfIncidence = uniqueYearsOfIncidence == 1
 
-        if (yearsOfIncidence.toSet().size > 1) {
-            log("Multiple years of incidence found for tumor ID ${tumorRecordsPerId.key}")
-            return false
+        if (!consistentYearOfIncidence) {
+            log("Multiple years of incidence found for tumor ID ${tumorRecords.first().identification.keyZid}")
         }
-        return true
+        return consistentYearOfIncidence
+    }
+
+    override fun apply(record: List<NcrRecord>): Boolean {
+        return listOf(
+            ::hasValidTreatmentData,
+            ::hasConsistentSex,
+            ::hasExactlyOneDiagnosis,
+            ::hasVitalStatusForDiaRecords,
+            ::hasEmptyVitalStatusForVerbRecords,
+            ::hasConsistentYearOfIncidence
+        ).all { it(record) }
     }
 }
