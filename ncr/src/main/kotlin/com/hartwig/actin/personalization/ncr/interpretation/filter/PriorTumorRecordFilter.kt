@@ -2,16 +2,9 @@ package com.hartwig.actin.personalization.ncr.interpretation.filter
 
 import com.hartwig.actin.personalization.ncr.datamodel.NcrRecord
 import com.hartwig.actin.personalization.ncr.interpretation.FOLLOW_UP_EPISODE
-import kotlin.reflect.full.memberProperties
 
 class PriorTumorRecordFilter(val log: (String) -> Unit) {
-
-    inline fun <reified T : Any> areAllFieldsNull(obj: T): Boolean {
-        return T::class.memberProperties.all { prop ->
-            prop.get(obj) == null
-        }
-    }
-
+    
     internal fun hasEmptyPriorTumorInVerbEpisode(tumorRecordsPerId: Map.Entry<Int, List<NcrRecord>>): Boolean {
         val verbRecords = tumorRecordsPerId.value.filter { it.identification.epis == FOLLOW_UP_EPISODE }
 
