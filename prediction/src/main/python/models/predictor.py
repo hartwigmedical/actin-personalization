@@ -4,6 +4,8 @@ import os
 import pandas as pd
 import numpy as np
 import torch
+import re
+
 
 from data.data_processing import DataPreprocessor
 from data.lookups import lookup_manager
@@ -76,19 +78,40 @@ def load_patient_df(patient, tnm_stage_medians, settings: Settings) -> pd.DataFr
                 if any(icd.startswith(code) for code in icd_codes):
                     return True
         return False
+    
+   
+    def get_stage_median(stage_type: str, stage: str, key: str):
+        stage_data = tnm_stage_medians.get(stage_type, {})
+
+        norm_stage = str(stage).strip().upper()
+        norm_stage_data = {str(s).strip().upper(): v for s, v in stage_data.items()}
+
+        if norm_stage in norm_stage_data and key in norm_stage_data[norm_stage]:
+            return norm_stage_data[norm_stage][key]
+        
+        pattern = re.compile(rf"^{re.escape(norm_stage)}[ABC]$")
+        matching_substages = [
+            v[key]
+            for s, v in norm_stage_data.items()
+            if isinstance(v, dict) and pattern.match(s) and key in v and v[key] is not None
+        ]
+
+        if matching_substages:
+            return float(np.nanmean(matching_substages))
+        
+        return np.nan
 
 
     birth_year = patient.get("patient", {}).get("birthYear")
     
-    tnm_values = {}
-    
     stage = tumor.get("stage")
-
+    tnm_values = {}
     for tnm in ["T", "N", "M"]:
-        clinical_key = f"clinicalTnm{tnm}_num"
-        pathological_key = f"pathologicalTnm{tnm}_num"
-        tnm_values[f"clinicalTnm{tnm}"] = tnm_stage_medians.get("clinical", {}).get(str(stage), {}).get(clinical_key, np.nan)
-        tnm_values[f"pathologicalTnm{tnm}"] = tnm_stage_medians.get("pathological", {}).get(str(stage), {}).get(pathological_key, np.nan)
+        clinical_key = f"clinicalTnm{tnm}"
+        pathological_key = f"pathologicalTnm{tnm}"
+
+        tnm_values[f"clinicalTnm{tnm}"] = get_stage_median("clinical", stage, clinical_key)
+        tnm_values[f"pathologicalTnm{tnm}"] = get_stage_median("pathological", stage, pathological_key)
         
     has_other_malignancy = any(
             icd not in ALL_SPECIFIED_ICD_CODES
@@ -108,9 +131,9 @@ def load_patient_df(patient, tnm_stage_medians, settings: Settings) -> pd.DataFr
         "numberOfPriorTumors": len(tumor.get("priorPrimaries", [])),
         "hasDoublePrimaryTumor": any(p.get("status") == "ACTIVE" for p in tumor.get("priorPrimaries", [])),
 
-        # "primaryTumorType": #TODO #see doids.json (but: no specific code for specific CRC variations?)
-        # "primaryTumorTypeLocation": , #TODO
-        # "sidedness": , #TODO
+        # "primaryTumorType": not available (no specific doids for CRC variations),
+        # "primaryTumorTypeLocation": not available,
+        # "sidedness": not available,
 
         # "anorectalVergeDistanceCategory": not available,
         # "mesorectalFasciaIsClear": not available
@@ -135,7 +158,7 @@ def load_patient_df(patient, tnm_stage_medians, settings: Settings) -> pd.DataFr
         "hasLymphNodeMetastases": tumor.get("hasLymphNodeLesions"),
         # "investigatedLymphNodesCountMetastaticDiagnosis": not available,
         # "positiveLymphNodesCountMetastaticDiagnosis": not available,
-        # "hasPeritonealMetastases": #TODO,
+        # "hasPeritonealMetastases": not available,
         "hasBronchusOrLungMetastases": tumor.get("hasLungLesions"),
         "hasBrainMetastases": tumor.get("hasBrainLesions"),
         "hasOtherMetastases": bool(tumor.get("otherLesions")),
@@ -149,16 +172,16 @@ def load_patient_df(patient, tnm_stage_medians, settings: Settings) -> pd.DataFr
         "albumineAtMetastaticDiagnosis": lab_values.get("ALBUMIN", {}).get("value"),
         "neutrophilsAbsoluteAtMetastaticDiagnosis": lab_values.get("NEUTROPHILS_ABS", {}).get("value"),
 
-        # "hasHadPrimarySurgeryPriorToMetastaticTreatment": #TODO,
-        # "hasHadPrimarySurgeryDuringMetastaticTreatment": #TODO,
-        # "hasHadGastroenterologySurgeryPriorToMetastaticTreatment": #TODO,
-        # "hasHadGastroenterologySurgeryDuringMetastaticTreatment": #TODO,
-        # "hasHadHipecPriorToMetastaticTreatment": #TODO,
-        # "hasHadHipecDuringMetastaticTreatment": #TODO,
-        # "hasHadPrimaryRadiotherapyPriorToMetastaticTreatment": #TODO,
-        # "hasHadPrimaryRadiotherapyDuringMetastaticTreatment": #TODO,
-        # "hasHadMetastaticSurgery": #TODO,
-        # "hasHadMetastaticRadiotherapy": #TODO,
+        # "hasHadPrimarySurgeryPriorToMetastaticTreatment": not available,
+        # "hasHadPrimarySurgeryDuringMetastaticTreatment": not available,
+        # "hasHadGastroenterologySurgeryPriorToMetastaticTreatment": not available,
+        # "hasHadGastroenterologySurgeryDuringMetastaticTreatment":  not available,
+        # "hasHadHipecPriorToMetastaticTreatment": not available,
+        # "hasHadHipecDuringMetastaticTreatment":  not available,
+        # "hasHadPrimaryRadiotherapyPriorToMetastaticTreatment":  not available,
+        # "hasHadPrimaryRadiotherapyDuringMetastaticTreatment":  not available,
+        # "hasHadMetastaticSurgery": : not available,
+        # "hasHadMetastaticRadiotherapy": not available,
 
         # "charlsonComorbidityIndex": not available,
         "hasAids": has_icd("hasAids"),
