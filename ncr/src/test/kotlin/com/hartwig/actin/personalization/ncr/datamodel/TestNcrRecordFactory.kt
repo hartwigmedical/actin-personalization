@@ -18,7 +18,7 @@ object TestNcrRecordFactory {
         val baseRecord = minimalRecord()
         return baseRecord
             .copy(identification = baseRecord.identification.copy(epis = DIAGNOSIS_EPIS),
-                patientCharacteristics = baseRecord.patientCharacteristics.copy(vitStat = 2, vitStatInt = 2)
+                patientCharacteristics = baseRecord.patientCharacteristics.copy(vitStat = 0, vitStatInt = 563)
             )
     }
 
