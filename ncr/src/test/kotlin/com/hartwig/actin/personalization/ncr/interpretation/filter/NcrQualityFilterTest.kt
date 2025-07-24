@@ -11,10 +11,11 @@ class NcrQualityFilterTest {
     @Test
     fun `Should select properly from a set of multiple patients`() {
         val valid = TestNcrRecordFactory.minimalDiagnosisRecord()
+        val validFollowup = TestNcrRecordFactory.minimalFollowupRecord()
         val invalid = valid.copy(treatment = valid.treatment.copy(tumgerichtTher = 1))
 
         val record1Patient1 = valid.copy(identification = valid.identification.copy(keyNkr = 1, keyZid = 1, keyEid = 1))
-        val record2Patient1 = valid.copy(identification = valid.identification.copy(keyNkr = 1, keyZid = 1, keyEid = 2))
+        val record2Patient1 = validFollowup.copy(identification = validFollowup.identification.copy(keyNkr = 1, keyZid = 1, keyEid = 2))
 
         val record1Patient2 = valid.copy(identification = valid.identification.copy(keyNkr = 2, keyZid = 1, keyEid = 1))
         val record2Patient2 = valid.copy(identification = valid.identification.copy(keyNkr = 2, keyZid = 2, keyEid = 1))

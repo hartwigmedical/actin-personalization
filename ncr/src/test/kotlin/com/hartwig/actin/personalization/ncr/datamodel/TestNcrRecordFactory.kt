@@ -17,7 +17,9 @@ object TestNcrRecordFactory {
     fun minimalDiagnosisRecord(): NcrRecord {
         val baseRecord = minimalRecord()
         return baseRecord
-            .copy(identification = baseRecord.identification.copy(epis = DIAGNOSIS_EPIS))
+            .copy(identification = baseRecord.identification.copy(epis = DIAGNOSIS_EPIS),
+                patientCharacteristics = baseRecord.patientCharacteristics.copy(vitStat = 2, vitStatInt = 2)
+            )
     }
 
     fun minimalFollowupRecord(): NcrRecord {

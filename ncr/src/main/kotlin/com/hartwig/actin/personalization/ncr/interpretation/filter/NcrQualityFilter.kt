@@ -1,8 +1,6 @@
 package com.hartwig.actin.personalization.ncr.interpretation.filter
 
 import com.hartwig.actin.personalization.ncr.datamodel.NcrRecord
-import com.hartwig.actin.personalization.ncr.interpretation.DIAGNOSIS_EPISODE
-import com.hartwig.actin.personalization.ncr.interpretation.FOLLOW_UP_EPISODE
 import io.github.oshai.kotlinlogging.KotlinLogging
 
 class NcrQualityFilter(private val logFilteredRecords: Boolean) {
@@ -34,6 +32,7 @@ class NcrQualityFilter(private val logFilteredRecords: Boolean) {
             patientRecordFilter::hasIdenticalYearOfIncidence,
             priorTumorRecordFilter::hasEmptyPriorTumorInVerbEpisode,
             priorTumorRecordFilter::hasNoPositiveValueInMalInt,
+            priorTumorRecordFilter::hasCompletePriorTumorData,
         )
         return filters.all { it(tumorRecordsPerId) }
     }
