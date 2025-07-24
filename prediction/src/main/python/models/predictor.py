@@ -6,7 +6,6 @@ import numpy as np
 import torch
 import re
 
-
 from data.data_processing import DataPreprocessor
 from data.lookups import lookup_manager
 from models import *
@@ -64,145 +63,52 @@ def load_model(trained_path: str) -> any:
 
     return model
 
+
 def load_patient_df(patient, tnm_stage_medians, settings: Settings) -> pd.DataFrame:
     tumor = patient.get("tumor", {})
     clinical_status = patient.get("clinicalStatus", {})
     comorbidities = patient.get("comorbidities", [])
     molecular_tests = patient.get("molecularHistory", {}).get("molecularTests", [])
     lab_values = {lab["measurement"]: lab for lab in patient.get("labValues", [])}
-
-    def has_icd(feature_name) -> bool:
-        icd_codes = MALIGNANCY_ICD_CODES.get(feature_name, [])
-        for c in comorbidities:
-            for icd in c.get("icdCodes", []):
-                if any(icd.startswith(code) for code in icd_codes):
-                    return True
-        return False
-    
-   
-    def get_stage_median(stage_type: str, stage: str, key: str):
-        stage_data = tnm_stage_medians.get(stage_type, {})
-
-        norm_stage = str(stage).strip().upper()
-        norm_stage_data = {str(s).strip().upper(): v for s, v in stage_data.items()}
-
-        if norm_stage in norm_stage_data and key in norm_stage_data[norm_stage]:
-            return norm_stage_data[norm_stage][key]
-        
-        pattern = re.compile(rf"^{re.escape(norm_stage)}[ABC]$")
-        matching_substages = [
-            v[key]
-            for s, v in norm_stage_data.items()
-            if isinstance(v, dict) and pattern.match(s) and key in v and v[key] is not None
-        ]
-
-        if matching_substages:
-            return float(np.nanmean(matching_substages))
-        
-        return np.nan
-
-
     birth_year = patient.get("patient", {}).get("birthYear")
-    
     stage = tumor.get("stage")
-    tnm_values = {}
-    for tnm in ["T", "N", "M"]:
-        clinical_key = f"clinicalTnm{tnm}"
-        pathological_key = f"pathologicalTnm{tnm}"
 
-        tnm_values[f"clinicalTnm{tnm}"] = get_stage_median("clinical", stage, clinical_key)
-        tnm_values[f"pathologicalTnm{tnm}"] = get_stage_median("pathological", stage, pathological_key)
-        
+    tnm_values = get_tnm_values(tnm_stage_medians, stage)
+    comorbidity_dict = get_comorbidity_dict(comorbidities)
+
     has_other_malignancy = any(
-            icd not in ALL_SPECIFIED_ICD_CODES
-            for c in comorbidities
-            for icd in c.get("icdCodes", [])
-        )
-    
+        icd not in ALL_SPECIFIED_ICD_CODES
+        for c in comorbidities
+        for icd in c.get("icdCodes", [])
+    )
     variant_genes = {v.get("gene"): v for test in molecular_tests for v in test.get("drivers", {}).get("variants", [])}
     has_msi = any(
         (test.get("characteristics", {}).get("microsatelliteStability") or {}).get("isUnstable", False)
         for test in molecular_tests
     )
-
+    
     patient_dict = {
         "sex": patient.get("patient", {}).get("gender"),
         "ageAtMetastaticDiagnosis": 2025 - birth_year if birth_year else 0,
         "numberOfPriorTumors": len(tumor.get("priorPrimaries", [])),
         "hasDoublePrimaryTumor": any(p.get("status") == "ACTIVE" for p in tumor.get("priorPrimaries", [])),
-
-        # "primaryTumorType": not available (no specific doids for CRC variations),
-        # "primaryTumorTypeLocation": not available,
-        # "sidedness": not available,
-
-        # "anorectalVergeDistanceCategory": not available,
-        # "mesorectalFasciaIsClear": not available
-        # "distanceToMesorectalFasciaMm": not available,
-
-        # "differentiationGrade": not available,
-
         **tnm_values,
         "clinicalTumorStage": stage,
         "pathologicalTumorStage": stage,
-
-        # "investigatedLymphNodesCountPrimaryDiagnosis": not available,
-        # "positiveLymphNodesCountPrimaryDiagnosis": not available
-        # "presentedWithIleus": not available,
-        # "presentedWithPerforation": not available,
-        # "extraMuralInvasionCategory": not available,
-        
-        # "daysBetweenPrimaryAndMetastaticDiagnosis": not available,
         "hasLiverOrIntrahepaticBileDuctMetastases": tumor.get("hasLiverLesions"),
-        # "numberOfLiverMetastases": not available,
-        # "maximumSizeOfLiverMetastasisMm": not available,
         "hasLymphNodeMetastases": tumor.get("hasLymphNodeLesions"),
-        # "investigatedLymphNodesCountMetastaticDiagnosis": not available,
-        # "positiveLymphNodesCountMetastaticDiagnosis": not available,
-        # "hasPeritonealMetastases": not available,
         "hasBronchusOrLungMetastases": tumor.get("hasLungLesions"),
         "hasBrainMetastases": tumor.get("hasBrainLesions"),
         "hasOtherMetastases": bool(tumor.get("otherLesions")),
-
         "whoAssessmentAtMetastaticDiagnosis": clinical_status.get("who"),
-        # "asaAssessmentAtMetastaticDiagnosis": not available,
         "lactateDehydrogenaseAtMetastaticDiagnosis": lab_values.get("LACTATE_DEHYDROGENASE", {}).get("value"),
         "alkalinePhosphataseAtMetastaticDiagnosis": lab_values.get("ALKALINE_PHOSPHATASE", {}).get("value"),
         "leukocytesAbsoluteAtMetastaticDiagnosis": lab_values.get("LEUKOCYTES_ABS", {}).get("value"),
         "carcinoembryonicAntigenAtMetastaticDiagnosis": lab_values.get("CARCINOEMBRYONIC_ANTIGEN", {}).get("value"),
         "albumineAtMetastaticDiagnosis": lab_values.get("ALBUMIN", {}).get("value"),
         "neutrophilsAbsoluteAtMetastaticDiagnosis": lab_values.get("NEUTROPHILS_ABS", {}).get("value"),
-
-        # "hasHadPrimarySurgeryPriorToMetastaticTreatment": not available,
-        # "hasHadPrimarySurgeryDuringMetastaticTreatment": not available,
-        # "hasHadGastroenterologySurgeryPriorToMetastaticTreatment": not available,
-        # "hasHadGastroenterologySurgeryDuringMetastaticTreatment":  not available,
-        # "hasHadHipecPriorToMetastaticTreatment": not available,
-        # "hasHadHipecDuringMetastaticTreatment":  not available,
-        # "hasHadPrimaryRadiotherapyPriorToMetastaticTreatment":  not available,
-        # "hasHadPrimaryRadiotherapyDuringMetastaticTreatment":  not available,
-        # "hasHadMetastaticSurgery": : not available,
-        # "hasHadMetastaticRadiotherapy": not available,
-
-        # "charlsonComorbidityIndex": not available,
-        "hasAids": has_icd("hasAids"),
-        "hasCongestiveHeartFailure": has_icd("hasCongestiveHeartFailure"),
-        "hasCollagenosis": has_icd("hasCollagenosis"),
-        "hasCopd": has_icd("hasCopd"),
-        "hasCerebrovascularDisease": has_icd("hasCerebrovascularDisease"),
-        "hasDementia": has_icd("hasDementia"),
-        "hasDiabetesMellitus": has_icd("hasDiabetesMellitus"),
-        "hasDiabetesMellitusWithEndOrganDamage": has_icd("hasDiabetesMellitusWithEndOrganDamage"),
-        "hasOtherMetastaticSolidTumor": has_icd("hasOtherMetastaticSolidTumor"),
-        
+        **comorbidity_dict,
         "hasOtherMalignancy": has_other_malignancy,
-        "hasMyocardialInfarct": has_icd("hasMyocardialInfarct"),
-        "hasMildLiverDisease": has_icd("hasMildLiverDisease"),
-        "hasHemiplegiaOrParaplegia": has_icd("hasHemiplegiaOrParaplegia"),
-        "hasPeripheralVascularDisease": has_icd("hasPeripheralVascularDisease"),
-        "hasRenalDisease": has_icd("hasRenalDisease"),
-        "hasLiverDisease": has_icd("hasLiverDisease"),
-        "hasUlcerDisease": has_icd("hasUlcerDisease"),
-
         "hasMsi": has_msi,
         "hasBrafMutation": "BRAF" in variant_genes,
         "hasBrafV600EMutation": "BRAF" in variant_genes and "V600E" in variant_genes["BRAF"].get("event", ""),
@@ -211,9 +117,8 @@ def load_patient_df(patient, tnm_stage_medians, settings: Settings) -> pd.DataFr
     }
     
     features = lookup_manager.features + [settings.event_col, settings.duration_col]
-
     patient_dict = {key: patient_dict.get(key, None) for key in features}
-
+    
     return pd.DataFrame([patient_dict])
 
 
@@ -250,3 +155,52 @@ def predict_treatment_scenarios(patient_data: dict, trained_path: str, valid_tre
         }
 
     return survival_dict
+
+
+def get_stage_median(tnm_stage_medians, stage_type: str, stage: str, key: str):
+    stage_data = tnm_stage_medians.get(stage_type, {})
+    norm_stage = str(stage).strip().upper()
+    norm_stage_data = {str(s).strip().upper(): v for s, v in stage_data.items()}
+    
+    if norm_stage in norm_stage_data and key in norm_stage_data[norm_stage]:
+        return norm_stage_data[norm_stage][key]
+    
+    pattern = re.compile(rf"^{re.escape(norm_stage)}[ABC]$")
+    matching_substages = [
+        v[key]
+        for s, v in norm_stage_data.items()
+        if isinstance(v, dict) and pattern.match(s) and key in v and v[key] is not None
+    ]
+    
+    if matching_substages:
+        return float(np.nanmean(matching_substages))
+    
+    return np.nan
+
+def get_tnm_values(tnm_stage_medians, stage):
+    tnm_values = {}
+    for tnm in ["T", "N", "M"]:
+        clinical_key = f"clinicalTnm{tnm}"
+        pathological_key = f"pathologicalTnm{tnm}"
+        tnm_values[clinical_key] = get_stage_median(tnm_stage_medians, "clinical", stage, clinical_key)
+        tnm_values[pathological_key] = get_stage_median(tnm_stage_medians, "pathological", stage, pathological_key)
+        
+    return tnm_values
+
+def get_comorbidity_dict(comorbidities):
+    def has_icd(feature_name):
+        icd_codes = MALIGNANCY_ICD_CODES.get(feature_name, [])
+        for c in comorbidities:
+            for icd in c.get("icdCodes", []):
+                if any(icd.startswith(code) for code in icd_codes):
+                    return True
+        return False
+    
+    keys = [
+        "hasAids", "hasCongestiveHeartFailure", "hasCollagenosis", "hasCopd", "hasCerebrovascularDisease", "hasDementia",
+        "hasDiabetesMellitus", "hasDiabetesMellitusWithEndOrganDamage", "hasOtherMetastaticSolidTumor", "hasMyocardialInfarct",
+        "hasMildLiverDisease", "hasHemiplegiaOrParaplegia", "hasPeripheralVascularDisease", "hasRenalDisease",
+        "hasLiverDisease", "hasUlcerDisease"
+    ]
+    
+    return {k: has_icd(k) for k in keys}
