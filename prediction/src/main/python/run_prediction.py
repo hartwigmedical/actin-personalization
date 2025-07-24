@@ -1,8 +1,6 @@
-import json
 import argparse
 
-from utils.settings import Settings
-from models.predictor import *
+from predictor import *
 
 import logging
 
