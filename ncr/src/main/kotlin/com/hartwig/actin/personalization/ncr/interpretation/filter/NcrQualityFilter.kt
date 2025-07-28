@@ -21,12 +21,10 @@ class NcrQualityFilter(private val logFilteredRecords: Boolean) {
     }
 
     private fun isReliableTumorRecordSet(tumorRecords: List<NcrRecord>): Boolean {
-        val patientRecordFilter = PatientRecordFilter(logFilteredRecords)
-        val priorTumorRecordFilter = PriorTumorRecordFilter(logFilteredRecords)
         val filters = listOf(
-            patientRecordFilter,
-            priorTumorRecordFilter,
+            PatientRecordFilter(logFilteredRecords),
+            PriorTumorRecordFilter(logFilteredRecords),
         )
-        return filters.all { it.apply(tumorRecords) }
+        return filters.all { it.tumorRecords(tumorRecords) }
     }
 }

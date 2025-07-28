@@ -17,7 +17,7 @@ class PriorTumorRecordFilter(override val logFilteredRecords: Boolean) : RecordF
 
         val hasEmptyPriorTumor = verbRecords.all { allFieldsAreNull(it.priorMalignancies) }
         if (!hasEmptyPriorTumor) {
-            log("Non-empty prior tumor data found for verb records of tumor ID ${tumorRecords.first().identification.keyZid}")
+            log("Non-empty prior tumor data found for verb records of tumor ID ${tumorRecords.tumorId()}")
         }
         return hasEmptyPriorTumor
     }
@@ -33,7 +33,7 @@ class PriorTumorRecordFilter(override val logFilteredRecords: Boolean) : RecordF
         }.filterNotNull()
         val hasNoPositiveValues = allMalIntValues.all { it <= 0 }
         if (!hasNoPositiveValues) {
-            log("Found positive malInt values for tumor ID ${tumorRecords.first().identification.keyZid}: $allMalIntValues")
+            log("Found positive malInt values for tumor ID ${tumorRecords.tumorId()}: $allMalIntValues")
         }
         return hasNoPositiveValues
     }
@@ -51,12 +51,12 @@ class PriorTumorRecordFilter(override val logFilteredRecords: Boolean) : RecordF
         val allNullOrComplete =
             allPriorTumorInfo.all { priorMalignancy -> priorMalignancy.all { it == null } || priorMalignancy.none { it == null } }
         if (!allNullOrComplete) {
-            log("Incomplete prior tumor data found for tumor ID ${tumorRecords.first().identification.keyZid}: $allPriorTumorInfo")
+            log("Incomplete prior tumor data found for tumor ID ${tumorRecords.tumorId()}: $allPriorTumorInfo")
         }
         return allNullOrComplete
     }
 
-    override fun apply(record: List<NcrRecord>): Boolean {
+    override fun tumorRecords(record: List<NcrRecord>): Boolean {
         return listOf(
             ::hasEmptyPriorTumorInVerbEpisode,
             ::hasNoPositiveValueInMalInt,

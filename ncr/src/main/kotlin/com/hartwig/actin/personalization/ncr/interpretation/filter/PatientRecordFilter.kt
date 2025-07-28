@@ -21,7 +21,7 @@ class PatientRecordFilter(override val logFilteredRecords: Boolean) : RecordFilt
         }
 
         if (indicatesTreatmentButNoTreatmentDefined) {
-            log("Invalid treatment data found for set of NCR tumor records with ID: ${tumorRecords.first().identification.keyZid}")
+            log("Invalid treatment data found for set of NCR tumor records with ID: ${tumorRecords.tumorId()}")
         }
         return !indicatesTreatmentButNoTreatmentDefined
     }
@@ -30,7 +30,7 @@ class PatientRecordFilter(override val logFilteredRecords: Boolean) : RecordFilt
         val consistentSex = tumorRecords.map { it.patientCharacteristics.gesl }.toSet().size == 1
 
         if (!consistentSex) {
-            log("Inconsistent sex found for tumor ID ${tumorRecords.first().identification.keyZid}")
+            log("Inconsistent sex found for tumor ID ${tumorRecords.tumorId()}")
         }
         return consistentSex
     }
@@ -39,7 +39,7 @@ class PatientRecordFilter(override val logFilteredRecords: Boolean) : RecordFilt
         val numDiagnosisRecords = tumorRecords.count { it.identification.epis == DIAGNOSIS_EPISODE }
         val exactlyOneDiagnosis = numDiagnosisRecords == 1
         if (!exactlyOneDiagnosis) {
-            log("Expected exactly one diagnosis record for tumor ID ${tumorRecords.first().identification.keyZid}, found ${numDiagnosisRecords}")
+            log("Expected exactly one diagnosis record for tumor ID ${tumorRecords.tumorId()}, found ${numDiagnosisRecords}")
         }
         return exactlyOneDiagnosis
     }
@@ -50,7 +50,7 @@ class PatientRecordFilter(override val logFilteredRecords: Boolean) : RecordFilt
         val hasVitalStatus =
             diagnosisRecords.all { it.patientCharacteristics.vitStat != null && it.patientCharacteristics.vitStatInt != null }
         if (!hasVitalStatus) {
-            log("Missing vital status for diagnosis records of tumor ID ${tumorRecords.first().identification.keyZid}")
+            log("Missing vital status for diagnosis records of tumor ID ${tumorRecords.tumorId()}")
         }
         return hasVitalStatus
     }
@@ -61,7 +61,7 @@ class PatientRecordFilter(override val logFilteredRecords: Boolean) : RecordFilt
         val hasEmptyVitalStatus =
             verbRecords.all { it.patientCharacteristics.vitStat == null && it.patientCharacteristics.vitStatInt == null }
         if (!hasEmptyVitalStatus) {
-            log("Non-empty vital status found for verb records of tumor ID ${tumorRecords.first().identification.keyZid}")
+            log("Non-empty vital status found for verb records of tumor ID ${tumorRecords.tumorId()}")
         }
         return hasEmptyVitalStatus
     }
@@ -71,12 +71,12 @@ class PatientRecordFilter(override val logFilteredRecords: Boolean) : RecordFilt
         val consistentYearOfIncidence = uniqueYearsOfIncidence == 1
 
         if (!consistentYearOfIncidence) {
-            log("Multiple years of incidence found for tumor ID ${tumorRecords.first().identification.keyZid}")
+            log("Multiple years of incidence found for tumor ID ${tumorRecords.tumorId()}")
         }
         return consistentYearOfIncidence
     }
 
-    override fun apply(record: List<NcrRecord>): Boolean {
+    override fun tumorRecords(record: List<NcrRecord>): Boolean {
         return listOf(
             ::hasValidTreatmentData,
             ::hasConsistentSex,
