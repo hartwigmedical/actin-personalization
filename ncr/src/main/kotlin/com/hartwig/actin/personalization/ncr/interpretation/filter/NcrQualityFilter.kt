@@ -9,7 +9,7 @@ class NcrQualityFilter(private val logFilteredRecords: Boolean) {
 
     fun run(records: List<NcrRecord>): List<NcrRecord> {
         val cleaned = records.groupBy { it.identification.keyNkr }.values.map { patientRecords ->
-            patientRecords.groupBy { it.identification.keyZid }.entries.filter { isReliableTumorRecordSet(it) }.map { it.value }.flatten()
+            patientRecords.groupBy { it.identification.keyZid }.values.filter { isReliableTumorRecordSet(it) }.flatten()
         }.flatten()
         
         val filteredRecords = records - cleaned.toSet()
@@ -20,27 +20,11 @@ class NcrQualityFilter(private val logFilteredRecords: Boolean) {
         return cleaned
     }
 
-    private fun isReliableTumorRecordSet(tumorRecordsPerId: Map.Entry<Int, List<NcrRecord>>): Boolean {
-        val patientRecordFilter = PatientRecordFilter { ::log }
-        val priorTumorRecordFilter = PriorTumorRecordFilter { ::log }
+    private fun isReliableTumorRecordSet(tumorRecords: List<NcrRecord>): Boolean {
         val filters = listOf(
-            patientRecordFilter::hasValidTreatmentData,
-            patientRecordFilter::hasIdentialSex,
-            patientRecordFilter::hasExactlyOneDiagnosis,
-            patientRecordFilter::hasVitalStatusForDIARecords,
-            patientRecordFilter::hasEmptyVitalStatusForVerbRecords,
-            patientRecordFilter::hasIdenticalYearOfIncidence,
-            priorTumorRecordFilter::hasEmptyPriorTumorInVerbEpisode,
-            priorTumorRecordFilter::hasNoPositiveValueInMalInt,
-            priorTumorRecordFilter::hasCompletePriorTumorData,
+            PatientRecordFilter(logFilteredRecords),
+            PriorTumorRecordFilter(logFilteredRecords),
         )
-        return filters.all { it(tumorRecordsPerId) }
-    }
-    
-
-    internal fun log(message: String) {
-        if (logFilteredRecords) {
-            logger.warn { " $message" }
-        }
+        return filters.all { it.tumorRecords(tumorRecords) }
     }
 }

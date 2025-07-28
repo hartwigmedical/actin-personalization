@@ -17,7 +17,8 @@ object TestNcrRecordFactory {
     fun minimalDiagnosisRecord(): NcrRecord {
         val baseRecord = minimalRecord()
         return baseRecord
-            .copy(identification = baseRecord.identification.copy(epis = DIAGNOSIS_EPIS),
+            .copy(
+                identification = baseRecord.identification.copy(epis = DIAGNOSIS_EPIS),
                 patientCharacteristics = baseRecord.patientCharacteristics.copy(vitStat = 0, vitStatInt = 563)
             )
     }
@@ -654,11 +655,13 @@ object TestNcrRecordFactory {
                 chirInt1 = 20,
                 chirType1 = 4
             ),
-            primaryRadiotherapy = NcrPrimaryRadiotherapy(rt = 2,
+            primaryRadiotherapy = NcrPrimaryRadiotherapy(
+                rt = 2,
                 rtType1 = 2,
                 rtStartInt1 = 24,
                 rtStopInt1 = 28,
-                rtDosis1 = 5.0)
+                rtDosis1 = 5.0
+            )
         )
     }
 
