@@ -68,7 +68,7 @@ class TreatmentRecordFilter(override val logFilteredRecords: Boolean) : RecordFi
 
     internal fun isPrimarySurgeryValid(tumorRecords: List<NcrRecord>): Boolean {
         val isPrimarySurgeryValid = tumorRecords.map { it.treatment }.all { treatment ->
-            val hasPrimarySurgeryChir = treatment.primarySurgery.chir != 0
+            val hasPrimarySurgeryChir = treatment.primarySurgery.chir != null
             val hasPrimarySurgeryType1 = treatment.primarySurgery.chirType1.isNotZeroOrNull()
             val hasPrimarySurgeryType2 = treatment.primarySurgery.chirType2.isNotZeroOrNull()
             hasPrimarySurgeryChir == (hasPrimarySurgeryType1 || hasPrimarySurgeryType2)

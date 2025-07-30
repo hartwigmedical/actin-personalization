@@ -66,7 +66,8 @@ class NcrQualityFilterTest {
         val recordWithValidTreatmentData = noTreatmentButFlaggedAsHavingOne.copy(
             treatment = noTreatmentButFlaggedAsHavingOne.treatment.copy(
                 tumgerichtTher = 1,
-                systemicTreatment = noTreatmentButFlaggedAsHavingOne.treatment.systemicTreatment.copy(chemo = 1)
+                geenTherReden = null,
+                systemicTreatment = noTreatmentButFlaggedAsHavingOne.treatment.systemicTreatment.copy(target = 1, chemo = 1, systCode1 = "code1")
             )
         )
         assertThat(filter.run(listOf(recordWithValidTreatmentData))).containsExactly(recordWithValidTreatmentData)

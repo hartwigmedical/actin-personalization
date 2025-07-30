@@ -19,6 +19,7 @@ object TestNcrRecordFactory {
         return baseRecord
             .copy(
                 identification = baseRecord.identification.copy(epis = DIAGNOSIS_EPIS),
+                clinicalCharacteristics = baseRecord.clinicalCharacteristics.copy(anusAfst = 0),
                 patientCharacteristics = baseRecord.patientCharacteristics.copy(vitStat = 0, vitStatInt = 563)
             )
     }
@@ -29,6 +30,7 @@ object TestNcrRecordFactory {
             .copy(identification = baseRecord.identification.copy(epis = FOLLOWUP_EPIS, metaEpis = 1))
             .copy(patientCharacteristics = baseRecord.patientCharacteristics.copy(vitStat = null, vitStatInt = null))
             .copy(primaryDiagnosis = baseRecord.primaryDiagnosis.copy(morfCat = null))
+            .copy(molecularCharacteristics = baseRecord.molecularCharacteristics.copy(brafMut = 0, rasMut = 0, msiStat = 0))
     }
 
     fun properDiagnosisRecord(): NcrRecord {
