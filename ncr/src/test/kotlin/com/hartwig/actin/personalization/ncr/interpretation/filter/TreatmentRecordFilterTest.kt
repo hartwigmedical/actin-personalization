@@ -79,7 +79,7 @@ class TreatmentRecordFilterTest {
                 primarySurgery = TestNcrRecordFactory.minimalDiagnosisRecord().treatment.primarySurgery.copy(chir = 1, chirType1 = 1, chirType2 = null)
             )
         ))
-        assertThat(TreatmentRecordFilter(true).isPrimarySurgeryValid(records)).isTrue()
+        assertThat(TreatmentRecordFilter(true).hasValidPrimaryTumor(records)).isTrue()
     }
 
     @Test
@@ -89,7 +89,7 @@ class TreatmentRecordFilterTest {
                 primarySurgery = TestNcrRecordFactory.minimalDiagnosisRecord().treatment.primarySurgery.copy(chir = 1, chirType1 = null, chirType2 = null)
             )
         ))
-        assertThat(TreatmentRecordFilter(true).isPrimarySurgeryValid(records)).isFalse()
+        assertThat(TreatmentRecordFilter(true).hasValidPrimaryTumor(records)).isFalse()
     }
 
     @Test
@@ -99,7 +99,7 @@ class TreatmentRecordFilterTest {
                 primaryRadiotherapy = TestNcrRecordFactory.minimalDiagnosisRecord().treatment.primaryRadiotherapy.copy(rt = 1, chemort = 0, rtType1 = 1, rtType2 = null)
             )
         ))
-        assertThat(TreatmentRecordFilter(true).isPrimaryRadiotherapyValid(records)).isTrue()
+        assertThat(TreatmentRecordFilter(true).hasValidPrimaryRadiotherapy(records)).isTrue()
     }
 
     @Test
@@ -109,7 +109,7 @@ class TreatmentRecordFilterTest {
                 primaryRadiotherapy = TestNcrRecordFactory.minimalDiagnosisRecord().treatment.primaryRadiotherapy.copy(rt = 1, chemort = 0, rtType1 = null, rtType2 = null)
             )
         ))
-        assertThat(TreatmentRecordFilter(true).isPrimaryRadiotherapyValid(records)).isFalse()
+        assertThat(TreatmentRecordFilter(true).hasValidPrimaryRadiotherapy(records)).isFalse()
     }
 
     @Test
@@ -119,7 +119,7 @@ class TreatmentRecordFilterTest {
                 gastroenterologyResection = TestNcrRecordFactory.minimalDiagnosisRecord().treatment.gastroenterologyResection.copy(mdlRes = 1, mdlResType1 = 1, mdlResType2 = null)
             )
         ))
-        assertThat(TreatmentRecordFilter(true).isGastroResectionValid(records)).isTrue()
+        assertThat(TreatmentRecordFilter(true).hasValidGastroResection(records)).isTrue()
     }
 
     @Test
@@ -129,7 +129,7 @@ class TreatmentRecordFilterTest {
                 gastroenterologyResection = TestNcrRecordFactory.minimalDiagnosisRecord().treatment.gastroenterologyResection.copy(mdlRes = 1, mdlResType1 = null, mdlResType2 = null)
             )
         ))
-        assertThat(TreatmentRecordFilter(true).isGastroResectionValid(records)).isFalse()
+        assertThat(TreatmentRecordFilter(true).hasValidGastroResection(records)).isFalse()
     }
 
     @Test
@@ -139,7 +139,7 @@ class TreatmentRecordFilterTest {
                 systemicTreatment = TestNcrRecordFactory.minimalDiagnosisRecord().treatment.systemicTreatment.copy(chemo = 1, target = 1, systCode1 = "code1", systSchemanum1 = null)
             )
         ))
-        assertThat(TreatmentRecordFilter(true).isSystemicTreatmentValid(records)).isTrue()
+        assertThat(TreatmentRecordFilter(true).hasValidSystemicTreatment(records)).isTrue()
     }
 
     @Test
@@ -149,7 +149,7 @@ class TreatmentRecordFilterTest {
                 systemicTreatment = TestNcrRecordFactory.minimalDiagnosisRecord().treatment.systemicTreatment.copy(chemo = 1, target = 0, systCode1 = null)
             )
         ))
-        assertThat(TreatmentRecordFilter(true).isSystemicTreatmentValid(records)).isFalse()
+        assertThat(TreatmentRecordFilter(true).hasValidSystemicTreatment(records)).isFalse()
     }
 
     @Test

@@ -66,42 +66,42 @@ class TreatmentRecordFilter(override val logFilteredRecords: Boolean) : RecordFi
         return hasValidTherprepostCode
     }
 
-    internal fun isPrimarySurgeryValid(tumorRecords: List<NcrRecord>): Boolean {
-        val isPrimarySurgeryValid = tumorRecords.map { it.treatment }.all { treatment ->
+    internal fun hasValidPrimaryTumor(tumorRecords: List<NcrRecord>): Boolean {
+        val hasValidPrimaryTumor = tumorRecords.map { it.treatment }.all { treatment ->
             val hasPrimarySurgeryChir = treatment.primarySurgery.chir != null
             val hasPrimarySurgeryType1 = treatment.primarySurgery.chirType1.isNotZeroOrNull()
             val hasPrimarySurgeryType2 = treatment.primarySurgery.chirType2.isNotZeroOrNull()
             hasPrimarySurgeryChir == (hasPrimarySurgeryType1 || hasPrimarySurgeryType2)
         }
-        if (!isPrimarySurgeryValid) log("Primary surgery validity check failed for tumor ${tumorRecords.tumorId()}")
-        return isPrimarySurgeryValid
+        if (!hasValidPrimaryTumor) log("Primary surgery validity check failed for tumor ${tumorRecords.tumorId()}")
+        return hasValidPrimaryTumor
     }
 
-    internal fun isPrimaryRadiotherapyValid(tumorRecords: List<NcrRecord>): Boolean {
-        val isPrimaryRadiotherapyValid = tumorRecords.map { it.treatment }.all { treatment ->
+    internal fun hasValidPrimaryRadiotherapy(tumorRecords: List<NcrRecord>): Boolean {
+        val hasValidPrimaryRadiotherapy = tumorRecords.map { it.treatment }.all { treatment ->
             val hasPrimaryRadiotherapyRt = treatment.primaryRadiotherapy.rt != 0
             val hasPrimaryRadiotherapyChemort = treatment.primaryRadiotherapy.chemort.isNotZeroOrNull()
             val hasPrimaryRadiotherapyType1 = treatment.primaryRadiotherapy.rtType1.isNotZeroOrNull()
             val hasPrimaryRadiotherapyType2 = treatment.primaryRadiotherapy.rtType2.isNotZeroOrNull()
             (hasPrimaryRadiotherapyRt || hasPrimaryRadiotherapyChemort) == (hasPrimaryRadiotherapyType1 || hasPrimaryRadiotherapyType2)
         }
-        if (!isPrimaryRadiotherapyValid) log("Primary radiotherapy validity check failed for tumor ${tumorRecords.tumorId()}")
-        return isPrimaryRadiotherapyValid
+        if (!hasValidPrimaryRadiotherapy) log("Primary radiotherapy validity check failed for tumor ${tumorRecords.tumorId()}")
+        return hasValidPrimaryRadiotherapy
     }
 
-    internal fun isGastroResectionValid(tumorRecords: List<NcrRecord>): Boolean {
-        val isGastroResectionValid = tumorRecords.map { it.treatment }.all { treatment ->
+    internal fun hasValidGastroResection(tumorRecords: List<NcrRecord>): Boolean {
+        val hasValidGastroResection = tumorRecords.map { it.treatment }.all { treatment ->
             val hasGastroResection = treatment.gastroenterologyResection.mdlRes.isNotZeroOrNull()
             val hasGastroResectionType1 = treatment.gastroenterologyResection.mdlResType1.isNotZeroOrNull()
             val hasGastroResectionType2 = treatment.gastroenterologyResection.mdlResType2.isNotZeroOrNull()
             hasGastroResection == (hasGastroResectionType1 || hasGastroResectionType2)
         }
-        if (!isGastroResectionValid) log("Gastrointestinal resection validity check failed for tumor ${tumorRecords.tumorId()}")
-        return isGastroResectionValid
+        if (!hasValidGastroResection) log("Gastrointestinal resection validity check failed for tumor ${tumorRecords.tumorId()}")
+        return hasValidGastroResection
     }
 
-    internal fun isSystemicTreatmentValid(tumorRecords: List<NcrRecord>): Boolean {
-        val isSystemicTreatmentValid = tumorRecords.map { it.treatment }.all { treatment ->
+    internal fun hasValidSystemicTreatment(tumorRecords: List<NcrRecord>): Boolean {
+        val hasValidSystemicTreatment = tumorRecords.map { it.treatment }.all { treatment ->
             val hasSystemicChemo = treatment.systemicTreatment.chemo != 0
             val hasSystemicTarget = treatment.systemicTreatment.target != 0
             val hasSystemicCode = listOf(
@@ -122,8 +122,8 @@ class TreatmentRecordFilter(override val logFilteredRecords: Boolean) : RecordFi
             ).any { code -> code != null }
             hasSystemicChemo == hasSystemicTarget && hasSystemicTarget == hasSystemicCode
         }
-        if (!isSystemicTreatmentValid) log("Systemic treatment validation failed: chemo, target, or codes are inconsistent for tumor ${tumorRecords.tumorId()}")
-        return isSystemicTreatmentValid
+        if (!hasValidSystemicTreatment) log("Systemic treatment validation failed: chemo, target, or codes are inconsistent for tumor ${tumorRecords.tumorId()}")
+        return hasValidSystemicTreatment
     }
 
     internal fun hasValidSystemCodes(tumorRecords: List<NcrRecord>): Boolean {
@@ -156,10 +156,10 @@ class TreatmentRecordFilter(override val logFilteredRecords: Boolean) : RecordFi
         return listOf(
             ::hasConsistentReasonRefrainingTreatment,
             ::hasValidTherprepostCode,
-            ::isPrimarySurgeryValid,
-            ::isPrimaryRadiotherapyValid,
-            ::isGastroResectionValid,
-            ::isSystemicTreatmentValid,
+            ::hasValidPrimaryTumor,
+            ::hasValidPrimaryRadiotherapy,
+            ::hasValidGastroResection,
+            ::hasValidSystemicTreatment,
             ::hasValidSystemCodes
         ).all { it(tumorRecords) }
     }
