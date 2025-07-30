@@ -1,0 +1,156 @@
+package com.hartwig.actin.personalization.ncr.interpretation.filter
+
+import com.hartwig.actin.personalization.ncr.datamodel.TestNcrRecordFactory
+import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.Test
+
+class PatientRecordFilterTest {
+    private val filter = PatientRecordFilter(true)
+
+    @Test
+    fun `Should return true when treatment is valid`() {
+        val records = listOf(TestNcrRecordFactory.minimalDiagnosisRecord())
+        assertThat(filter.hasValidTreatmentData(records)).isTrue()
+    }
+
+    @Test
+    fun `Should return false when treatment is invalid`() {
+        val records = listOf(TestNcrRecordFactory.minimalDiagnosisRecord().copy(
+            treatment = TestNcrRecordFactory.minimalDiagnosisRecord().treatment.copy(
+                tumgerichtTher = 1,
+                primarySurgery = TestNcrRecordFactory.minimalDiagnosisRecord().treatment.primarySurgery.copy(chir = null),
+                primaryRadiotherapy = TestNcrRecordFactory.minimalDiagnosisRecord().treatment.primaryRadiotherapy.copy(
+                    rt = 0,
+                    chemort = 0
+                ),
+                gastroenterologyResection = TestNcrRecordFactory.minimalDiagnosisRecord().treatment.gastroenterologyResection.copy(
+                    mdlRes = null
+                ),
+                hipec = TestNcrRecordFactory.minimalDiagnosisRecord().treatment.hipec.copy(hipec = null),
+                systemicTreatment = TestNcrRecordFactory.minimalDiagnosisRecord().treatment.systemicTreatment.copy(
+                    chemo = 0,
+                    target = 0
+                ),
+                metastaticSurgery = TestNcrRecordFactory.minimalDiagnosisRecord().treatment.metastaticSurgery.copy(
+                    metaChirInt1 = null
+                ),
+                metastaticRadiotherapy = TestNcrRecordFactory.minimalDiagnosisRecord().treatment.metastaticRadiotherapy.copy(
+                    metaRtCode1 = null
+                )
+            )
+        ))
+        assertThat(filter.hasValidTreatmentData(records)).isFalse()
+    }
+
+    @Test
+    fun `Should return true when all records have identical sex`() {
+        val record1 = TestNcrRecordFactory.minimalDiagnosisRecord().copy(
+            patientCharacteristics = TestNcrRecordFactory.minimalDiagnosisRecord().patientCharacteristics.copy(gesl = 1)
+        )
+        val record2 = record1.copy()
+        val records = listOf(record1, record2)
+        assertThat(filter.hasConsistentSex(records)).isTrue()
+    }
+
+    @Test
+    fun `Should return false when records have different sex`() {
+        val record1 = TestNcrRecordFactory.minimalDiagnosisRecord().copy(
+            patientCharacteristics = TestNcrRecordFactory.minimalDiagnosisRecord().patientCharacteristics.copy(gesl = 1)
+        )
+        val record2 = record1.copy(patientCharacteristics = record1.patientCharacteristics.copy(gesl = 2))
+        val records = listOf(record1, record2)
+        assertThat(filter.hasConsistentSex(records)).isFalse()
+    }
+
+    @Test
+    fun `Should return true when there is exactly one diagnosis`() {
+        val records = listOf(TestNcrRecordFactory.minimalDiagnosisRecord())
+        assertThat(filter.hasExactlyOneDiagnosis(records)).isTrue()
+    }
+
+    @Test
+    fun `Should return false when there are zero or multiple diagnoses`() {
+        val record = TestNcrRecordFactory.minimalDiagnosisRecord()
+        val followUp = record.copy(identification = record.identification.copy(epis = "NOT DIA"))
+        val entryNone = listOf(followUp)
+        val entryMultiple = listOf(record, record)
+        assertThat(filter.hasExactlyOneDiagnosis(entryNone)).isFalse()
+        assertThat(filter.hasExactlyOneDiagnosis(entryMultiple)).isFalse()
+    }
+
+    @Test
+    fun `Should return true when all DIA records have vital status`() {
+        val records = listOf(TestNcrRecordFactory.minimalDiagnosisRecord().copy(
+            patientCharacteristics = TestNcrRecordFactory.minimalDiagnosisRecord().patientCharacteristics.copy(
+                vitStat = 1,
+                vitStatInt = 1
+            )
+        ))
+        assertThat(filter.hasVitalStatusForDiaRecords(records)).isTrue()
+    }
+
+    @Test
+    fun `Should return false when any DIA record is missing vital status`() {
+        val records = listOf(TestNcrRecordFactory.minimalDiagnosisRecord().copy(
+            patientCharacteristics = TestNcrRecordFactory.minimalDiagnosisRecord().patientCharacteristics.copy(
+                vitStat = null,
+                vitStatInt = null
+            )
+        ))
+        assertThat(filter.hasVitalStatusForDiaRecords(records)).isFalse()
+    }
+
+    @Test
+    fun `Should return true when all VERB records have empty vital status`() {
+        val records = listOf(TestNcrRecordFactory.minimalFollowupRecord().copy(
+            patientCharacteristics = TestNcrRecordFactory.minimalDiagnosisRecord().patientCharacteristics.copy(
+                vitStat = null,
+                vitStatInt = null
+            )
+        ))
+        assertThat(filter.hasEmptyVitalStatusForVerbRecords(records)).isTrue()
+    }
+
+    @Test
+    fun `Should return false when any VERB record has vital status`() {
+        val records = listOf(TestNcrRecordFactory.minimalFollowupRecord().copy(
+            patientCharacteristics = TestNcrRecordFactory.minimalDiagnosisRecord().patientCharacteristics.copy(
+                vitStat = 1,
+                vitStatInt = 1
+            )
+        ))        
+        assertThat(filter.hasEmptyVitalStatusForVerbRecords(records)).isFalse()
+    }
+
+    @Test
+    fun `Should return true when all records have identical year of incidence`() {
+        val record1 = TestNcrRecordFactory.minimalDiagnosisRecord().copy(
+            primaryDiagnosis = TestNcrRecordFactory.minimalDiagnosisRecord().primaryDiagnosis.copy(
+                incjr = 2020
+            )
+        )
+        val record2 = TestNcrRecordFactory.minimalFollowupRecord().copy(
+            primaryDiagnosis = TestNcrRecordFactory.minimalFollowupRecord().primaryDiagnosis.copy(
+                incjr = 2020
+            )
+        )
+        val records = listOf(record1, record2)
+        assertThat(filter.hasConsistentYearOfIncidence(records)).isTrue()
+    }
+
+    @Test
+    fun `Should return false when records have different year of incidence`() {
+        val record1 = TestNcrRecordFactory.minimalDiagnosisRecord().copy(
+            primaryDiagnosis = TestNcrRecordFactory.minimalDiagnosisRecord().primaryDiagnosis.copy(
+                incjr = 2020
+            )
+        )
+        val record2 = TestNcrRecordFactory.minimalFollowupRecord().copy(
+            primaryDiagnosis = TestNcrRecordFactory.minimalFollowupRecord().primaryDiagnosis.copy(
+                incjr = 2021
+            )
+        )
+        val records = listOf(record1, record2)
+        assertThat(filter.hasConsistentYearOfIncidence(records)).isFalse()
+    }
+}
