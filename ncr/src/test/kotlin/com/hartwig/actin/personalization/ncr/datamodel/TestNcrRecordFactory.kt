@@ -19,7 +19,7 @@ object TestNcrRecordFactory {
         return baseRecord
             .copy(
                 identification = baseRecord.identification.copy(epis = DIAGNOSIS_EPIS),
-                clinicalCharacteristics = baseRecord.clinicalCharacteristics.copy(anusAfst = 0),
+                clinicalCharacteristics = baseRecord.clinicalCharacteristics.copy(anusAfst = 9),
                 patientCharacteristics = baseRecord.patientCharacteristics.copy(vitStat = 0, vitStatInt = 563)
             )
     }
@@ -52,7 +52,7 @@ object TestNcrRecordFactory {
                 )
             )
             .copy(clinicalCharacteristics = minimalClinicalCharacteristics())
-            .copy(molecularCharacteristics = minimalMolecularCharacteristics())
+            .copy(molecularCharacteristics = properMolecularCharacteristics())
             .copy(priorMalignancies = minimalPriorMalignancies())
             .copy(primaryDiagnosis = properPrimaryDiagnosisForMetastaticEpisode())
             .copy(metastaticDiagnosis = minimalMetastaticDiagnosis())
@@ -75,7 +75,7 @@ object TestNcrRecordFactory {
                 )
             )
             .copy(clinicalCharacteristics = minimalClinicalCharacteristics())
-            .copy(molecularCharacteristics = minimalMolecularCharacteristics())
+            .copy(molecularCharacteristics = properMolecularCharacteristics())
             .copy(priorMalignancies = minimalPriorMalignancies())
             .copy(primaryDiagnosis = properPrimaryDiagnosisForMetastaticEpisode())
             .copy(comorbidities = minimalComorbidities())
