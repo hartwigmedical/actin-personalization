@@ -24,6 +24,10 @@ class NcrQualityFilter(private val logFilteredRecords: Boolean) {
         val filters = listOf(
             PatientRecordFilter(logFilteredRecords),
             PriorTumorRecordFilter(logFilteredRecords),
+            PrimaryTumorRecordFilter(logFilteredRecords),
+            MetastaticDiagnosisRecordFilter(logFilteredRecords),
+            ComorbidityRecordFilter(logFilteredRecords),
+            MolecularRecordFilter(logFilteredRecords),
         )
         return filters.all { it.tumorRecords(tumorRecords) }
     }

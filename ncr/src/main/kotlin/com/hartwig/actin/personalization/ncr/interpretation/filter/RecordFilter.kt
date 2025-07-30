@@ -23,17 +23,11 @@ interface RecordFilter {
 
     fun List<NcrRecord>.tumorId() = first().identification.keyZid
 
+    fun Int?.isNotZeroOrNull(): Boolean {
+    return this != null && this != 0
+}
+
+
     fun tumorRecords(record: List<NcrRecord>): Boolean
 }
 
-internal inline fun <reified T : Any> areAllFieldsNull(obj: T): Boolean {
-    return T::class.memberProperties.all { prop ->
-        prop.get(obj) == null
-    }
-}
-
-internal inline fun <reified T : Any> areAllFieldsNotNull(obj: T): Boolean {
-    return T::class.memberProperties.all { prop ->
-        prop.get(obj) != null
-    }
-}
