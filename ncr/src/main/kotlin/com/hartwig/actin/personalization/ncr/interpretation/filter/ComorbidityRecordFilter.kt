@@ -71,10 +71,10 @@ class ComorbidityRecordFilter(override val logFilteredRecords: Boolean) : Record
         return hasCompleteComorbidityData
     }
 
-    override fun tumorRecords(record: List<NcrRecord>): Boolean {
+    override fun apply(tumorRecords: List<NcrRecord>): Boolean {
         return listOf(
             ::hasNoComorbidityOnFollowUpEpisode,
             ::hasCompleteComorbidityData
-        ).all { it(record) }
+        ).all { it(tumorRecords) }
     }
 }

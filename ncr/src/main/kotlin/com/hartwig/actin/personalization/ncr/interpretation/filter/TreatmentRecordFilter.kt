@@ -152,7 +152,7 @@ class TreatmentRecordFilter(override val logFilteredRecords: Boolean) : RecordFi
         return hasValidSystemCodes
     }
 
-    override fun tumorRecords(record: List<NcrRecord>): Boolean {
+    override fun apply(tumorRecords: List<NcrRecord>): Boolean {
         return listOf(
             ::hasConsistentReasonRefrainingTreatment,
             ::hasValidTherprepostCode,
@@ -161,6 +161,6 @@ class TreatmentRecordFilter(override val logFilteredRecords: Boolean) : RecordFi
             ::isGastroResectionValid,
             ::isSystemicTreatmentValid,
             ::hasValidSystemCodes
-        ).all { it(record) }
+        ).all { it(tumorRecords) }
     }
 }

@@ -4,14 +4,13 @@ import com.hartwig.actin.personalization.ncr.datamodel.NcrRecord
 import com.hartwig.actin.personalization.ncr.interpretation.DIAGNOSIS_EPISODE
 import com.hartwig.actin.personalization.ncr.interpretation.FOLLOW_UP_EPISODE
 import io.github.oshai.kotlinlogging.KotlinLogging
-import kotlin.reflect.full.memberProperties
 
 interface RecordFilter {
     val logFilteredRecords: Boolean
-
+    private val logger get() = KotlinLogging.logger {}
+    
     fun log(message: String) {
         if (logFilteredRecords) {
-            val logger = KotlinLogging.logger {}
             logger.info { message }
         }
     }
@@ -27,7 +26,5 @@ interface RecordFilter {
     return this != null && this != 0
 }
 
-
-    fun tumorRecords(record: List<NcrRecord>): Boolean
+    fun apply(tumorRecords: List<NcrRecord>): Boolean
 }
-

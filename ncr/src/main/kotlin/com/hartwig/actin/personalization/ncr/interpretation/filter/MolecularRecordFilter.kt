@@ -14,7 +14,7 @@ class MolecularRecordFilter(override val logFilteredRecords: Boolean) : RecordFi
         return hasCompleteMolecularData
     }
 
-    override fun tumorRecords(record: List<NcrRecord>): Boolean {
-        return hasCompleteMolecularData(record)
+    override fun apply(tumorRecords: List<NcrRecord>): Boolean {
+        return hasCompleteMolecularData(tumorRecords)
     }
 }

@@ -1,7 +1,6 @@
 package com.hartwig.actin.personalization.ncr.interpretation.filter
 
 import com.hartwig.actin.personalization.ncr.datamodel.NcrRecord
-import kotlin.reflect.full.memberProperties
 
 class MetastaticDiagnosisRecordFilter(override val logFilteredRecords: Boolean) : RecordFilter {
     internal fun hasOnlyOneMetastaticDetection(records: List<NcrRecord>): Boolean {
@@ -70,11 +69,11 @@ class MetastaticDiagnosisRecordFilter(override val logFilteredRecords: Boolean) 
         return hasConsistentMetastaticProgression
     }
 
-    override fun tumorRecords(record: List<NcrRecord>): Boolean {
+    override fun apply(tumorRecords: List<NcrRecord>): Boolean {
         return listOf(
             ::hasOnlyOneMetastaticDetection,
             ::hasEmptyMetastaticFieldIfDetectionNotPresent,
             ::hasConsistentMetastaticProgression,
-        ).all { it(record) }
+        ).all { it(tumorRecords) }
     }
 }
