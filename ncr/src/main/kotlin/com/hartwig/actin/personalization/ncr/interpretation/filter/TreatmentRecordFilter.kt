@@ -11,7 +11,7 @@ class TreatmentRecordFilter(override val logFilteredRecords: Boolean) : RecordFi
             treatment.primaryRadiotherapy.rt,
             treatment.systemicTreatment.chemo,
             treatment.hipec.hipec
-        ).any { it.isNotZeroOrNull() } ||
+        ).any { it.notZeroNorNull() } ||
                 listOf(
                     treatment.metastaticSurgery.metaChirCode1,
                     treatment.metastaticSurgery.metaChirCode2,
@@ -69,8 +69,8 @@ class TreatmentRecordFilter(override val logFilteredRecords: Boolean) : RecordFi
     internal fun hasValidPrimaryTumor(tumorRecords: List<NcrRecord>): Boolean {
         val hasValidPrimaryTumor = tumorRecords.map { it.treatment }.all { treatment ->
             val hasPrimarySurgeryChir = treatment.primarySurgery.chir != null
-            val hasPrimarySurgeryType1 = treatment.primarySurgery.chirType1.isNotZeroOrNull()
-            val hasPrimarySurgeryType2 = treatment.primarySurgery.chirType2.isNotZeroOrNull()
+            val hasPrimarySurgeryType1 = treatment.primarySurgery.chirType1.notZeroNorNull()
+            val hasPrimarySurgeryType2 = treatment.primarySurgery.chirType2.notZeroNorNull()
             hasPrimarySurgeryChir == (hasPrimarySurgeryType1 || hasPrimarySurgeryType2)
         }
         if (!hasValidPrimaryTumor) log("Primary surgery validity check failed for tumor ${tumorRecords.tumorId()}")
@@ -80,9 +80,9 @@ class TreatmentRecordFilter(override val logFilteredRecords: Boolean) : RecordFi
     internal fun hasValidPrimaryRadiotherapy(tumorRecords: List<NcrRecord>): Boolean {
         val hasValidPrimaryRadiotherapy = tumorRecords.map { it.treatment }.all { treatment ->
             val hasPrimaryRadiotherapyRt = treatment.primaryRadiotherapy.rt != 0
-            val hasPrimaryRadiotherapyChemort = treatment.primaryRadiotherapy.chemort.isNotZeroOrNull()
-            val hasPrimaryRadiotherapyType1 = treatment.primaryRadiotherapy.rtType1.isNotZeroOrNull()
-            val hasPrimaryRadiotherapyType2 = treatment.primaryRadiotherapy.rtType2.isNotZeroOrNull()
+            val hasPrimaryRadiotherapyChemort = treatment.primaryRadiotherapy.chemort.notZeroNorNull()
+            val hasPrimaryRadiotherapyType1 = treatment.primaryRadiotherapy.rtType1.notZeroNorNull()
+            val hasPrimaryRadiotherapyType2 = treatment.primaryRadiotherapy.rtType2.notZeroNorNull()
             (hasPrimaryRadiotherapyRt || hasPrimaryRadiotherapyChemort) == (hasPrimaryRadiotherapyType1 || hasPrimaryRadiotherapyType2)
         }
         if (!hasValidPrimaryRadiotherapy) log("Primary radiotherapy validity check failed for tumor ${tumorRecords.tumorId()}")
@@ -91,9 +91,9 @@ class TreatmentRecordFilter(override val logFilteredRecords: Boolean) : RecordFi
 
     internal fun hasValidGastroResection(tumorRecords: List<NcrRecord>): Boolean {
         val hasValidGastroResection = tumorRecords.map { it.treatment }.all { treatment ->
-            val hasGastroResection = treatment.gastroenterologyResection.mdlRes.isNotZeroOrNull()
-            val hasGastroResectionType1 = treatment.gastroenterologyResection.mdlResType1.isNotZeroOrNull()
-            val hasGastroResectionType2 = treatment.gastroenterologyResection.mdlResType2.isNotZeroOrNull()
+            val hasGastroResection = treatment.gastroenterologyResection.mdlRes.notZeroNorNull()
+            val hasGastroResectionType1 = treatment.gastroenterologyResection.mdlResType1.notZeroNorNull()
+            val hasGastroResectionType2 = treatment.gastroenterologyResection.mdlResType2.notZeroNorNull()
             hasGastroResection == (hasGastroResectionType1 || hasGastroResectionType2)
         }
         if (!hasValidGastroResection) log("Gastrointestinal resection validity check failed for tumor ${tumorRecords.tumorId()}")

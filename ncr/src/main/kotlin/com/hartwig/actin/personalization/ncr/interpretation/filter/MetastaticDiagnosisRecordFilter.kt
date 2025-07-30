@@ -56,9 +56,9 @@ class MetastaticDiagnosisRecordFilter(override val logFilteredRecords: Boolean) 
                 record.metastaticDiagnosis.metaProg10
             )
             when (record.identification.metaEpis) {
-                0 -> allMetaProgression.all { !it.isNotZeroOrNull() }
-                1 -> allMetaProgression.all { !it.isNotZeroOrNull() }
-                2 -> allMetaProgression.any { it.isNotZeroOrNull() }
+                0 -> allMetaProgression.all { !it.notZeroNorNull() }
+                1 -> allMetaProgression.all { !it.notZeroNorNull() }
+                2 -> allMetaProgression.any { it.notZeroNorNull() }
                 else -> false
             }
         }

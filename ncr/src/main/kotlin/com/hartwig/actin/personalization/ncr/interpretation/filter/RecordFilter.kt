@@ -22,7 +22,7 @@ interface RecordFilter {
 
     fun List<NcrRecord>.tumorId() = first().identification.keyZid
 
-    fun Int?.isNotZeroOrNull(): Boolean {
+    fun Int?.notZeroNorNull(): Boolean {
     return this != null && this != 0
 }
 
