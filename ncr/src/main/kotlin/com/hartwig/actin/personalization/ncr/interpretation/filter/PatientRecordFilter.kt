@@ -76,7 +76,7 @@ class PatientRecordFilter(override val logFilteredRecords: Boolean) : RecordFilt
         return consistentYearOfIncidence
     }
 
-    override fun tumorRecords(record: List<NcrRecord>): Boolean {
+    override fun apply(tumorRecords: List<NcrRecord>): Boolean {
         return listOf(
             ::hasValidTreatmentData,
             ::hasConsistentSex,
@@ -84,6 +84,6 @@ class PatientRecordFilter(override val logFilteredRecords: Boolean) : RecordFilt
             ::hasVitalStatusForDiaRecords,
             ::hasEmptyVitalStatusForVerbRecords,
             ::hasConsistentYearOfIncidence
-        ).all { it(record) }
+        ).all { it(tumorRecords) }
     }
 }

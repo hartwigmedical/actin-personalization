@@ -56,11 +56,11 @@ class PriorTumorRecordFilter(override val logFilteredRecords: Boolean) : RecordF
         return allNullOrComplete
     }
 
-    override fun tumorRecords(record: List<NcrRecord>): Boolean {
+    override fun apply(tumorRecords: List<NcrRecord>): Boolean {
         return listOf(
             ::hasEmptyPriorTumorInVerbEpisode,
             ::hasNoPositiveValueInMalInt,
             ::hasCompletePriorTumorData
-        ).all { it(record) }
+        ).all { it(tumorRecords) }
     }
 }

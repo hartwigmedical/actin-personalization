@@ -5,15 +5,15 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 
 interface RecordFilter {
     val logFilteredRecords: Boolean
+    val logger get() = KotlinLogging.logger {}
     
     fun log(message: String) {
         if (logFilteredRecords) {
-            val logger = KotlinLogging.logger {}
             logger.info { message }
         }
     }
     
     fun List<NcrRecord>.tumorId() = first().identification.keyZid
     
-    fun tumorRecords(record: List<NcrRecord>): Boolean
+    fun apply(tumorRecords: List<NcrRecord>): Boolean
 }

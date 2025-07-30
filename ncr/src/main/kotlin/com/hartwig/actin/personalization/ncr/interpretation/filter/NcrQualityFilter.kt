@@ -25,6 +25,6 @@ class NcrQualityFilter(private val logFilteredRecords: Boolean) {
             PatientRecordFilter(logFilteredRecords),
             PriorTumorRecordFilter(logFilteredRecords),
         )
-        return filters.all { it.tumorRecords(tumorRecords) }
+        return filters.all { it.apply(tumorRecords) }
     }
 }
