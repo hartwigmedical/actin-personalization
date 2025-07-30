@@ -5,7 +5,7 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 
 interface RecordFilter {
     val logFilteredRecords: Boolean
-    val logger get() = KotlinLogging.logger {}
+    private val logger get() = KotlinLogging.logger {}
     
     fun log(message: String) {
         if (logFilteredRecords) {
