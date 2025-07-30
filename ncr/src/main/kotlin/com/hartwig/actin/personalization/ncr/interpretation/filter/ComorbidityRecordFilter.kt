@@ -55,12 +55,20 @@ class ComorbidityRecordFilter(override val logFilteredRecords: Boolean) : Record
 
     internal fun hasNoComorbidityOnFollowUpEpisode(tumorRecords: List<NcrRecord>): Boolean {
         val followupDiagnosis = tumorRecords.filter { it.identification.epis == FOLLOW_UP_EPISODE }
-        return followupDiagnosis.all { it.comorbidities.allFieldsAreNull() }
+        val hasNoComorbidityOnFollowUpEpisode = followupDiagnosis.all { it.comorbidities.allFieldsAreNull() }
+        if (!hasNoComorbidityOnFollowUpEpisode) {
+            log("Tumor ${tumorRecords.tumorId()} has comorbidity on follow-up episode")
+        }
+        return hasNoComorbidityOnFollowUpEpisode
     }
 
     internal fun hasCompleteComorbidityData(tumorRecords: List<NcrRecord>): Boolean {
         val allComorbidityRecords = tumorRecords.map { it.comorbidities }
-        return allComorbidityRecords.all { it.allFieldsAreNull() || it.allFieldsAreNotNull() }
+        val hasCompleteComorbidityData = allComorbidityRecords.all { it.allFieldsAreNull() || it.allFieldsAreNotNull() }
+        if (!hasCompleteComorbidityData) {
+            log("Tumor ${tumorRecords.tumorId()} has incomplete comorbidity data")
+        }
+        return hasCompleteComorbidityData
     }
 
     override fun tumorRecords(record: List<NcrRecord>): Boolean {

@@ -7,7 +7,11 @@ class MolecularRecordFilter(override val logFilteredRecords: Boolean) : RecordFi
     internal fun hasCompleteMolecularData(tumorRecords: List<NcrRecord>): Boolean {
         val (_, followupDiagnosis) = extractPrimaryDiagnosis(tumorRecords)
         val allMolecularCharacteristics = followupDiagnosis.map { it.molecularCharacteristics }
-        return allMolecularCharacteristics.all { it.brafMut != null && it.rasMut != null && it.msiStat != null }
+        val hasCompleteMolecularData = allMolecularCharacteristics.all { it.brafMut != null && it.rasMut != null && it.msiStat != null }
+        if (!hasCompleteMolecularData) {
+            log("Incomplete molecular data for tumor ID: ${tumorRecords.tumorId()}")
+        }
+        return hasCompleteMolecularData
     }
 
     override fun tumorRecords(record: List<NcrRecord>): Boolean {

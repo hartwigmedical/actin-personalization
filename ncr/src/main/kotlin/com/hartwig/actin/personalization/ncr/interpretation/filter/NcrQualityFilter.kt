@@ -28,6 +28,7 @@ class NcrQualityFilter(private val logFilteredRecords: Boolean) {
             MetastaticDiagnosisRecordFilter(logFilteredRecords),
             ComorbidityRecordFilter(logFilteredRecords),
             MolecularRecordFilter(logFilteredRecords),
+            TreatmentRecordFilter(logFilteredRecords),
         )
         return filters.all { it.tumorRecords(tumorRecords) }
     }
