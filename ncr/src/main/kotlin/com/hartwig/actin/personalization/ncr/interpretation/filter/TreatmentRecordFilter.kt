@@ -124,8 +124,7 @@ class TreatmentRecordFilter(override val logFilteredRecords: Boolean) : RecordFi
                 treatment.systemicTreatment.systCode13,
                 treatment.systemicTreatment.systCode14
             ).any { code -> code != null }
-            (hasSystemicCode && (hasSystemicChemo || hasSystemicTarget)) ||
-                    (!hasSystemicChemo && !hasSystemicTarget && !hasSystemicCode)
+            hasSystemicCode == (hasSystemicChemo || hasSystemicTarget)
         }
         if (!hasValidSystemicTreatment) log("Systemic treatment validation failed: chemo, target, or codes are inconsistent for tumor ${tumorRecords.tumorId()}")
         return hasValidSystemicTreatment

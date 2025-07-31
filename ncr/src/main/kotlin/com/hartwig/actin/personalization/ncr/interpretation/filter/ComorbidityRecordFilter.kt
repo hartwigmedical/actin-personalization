@@ -30,11 +30,11 @@ class ComorbidityRecordFilter(override val logFilteredRecords: Boolean) : Record
     }
     
     private fun NcrCharlsonComorbidities.allFieldsAreNull(): Boolean {
-        return this.allFields().all { it == null }
+        return allFields().all { it == null }
     }
     
     private fun NcrCharlsonComorbidities.allFieldsAreNotNull(): Boolean {
-        return this.allFields().all { it != null }
+        return allFields().all { it != null }
     }
 
     internal fun hasValidComorbidityData(tumorRecords: List<NcrRecord>): Boolean {
@@ -47,8 +47,6 @@ class ComorbidityRecordFilter(override val logFilteredRecords: Boolean) : Record
 
 
     override fun apply(tumorRecords: List<NcrRecord>): Boolean {
-        return listOf(
-            ::hasValidComorbidityData,
-        ).all { it(tumorRecords) }
+        return hasValidComorbidityData(tumorRecords)
     }
 }

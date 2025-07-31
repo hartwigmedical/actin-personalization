@@ -5,9 +5,9 @@ import com.hartwig.actin.personalization.ncr.datamodel.NcrRecord
 class PrimaryTumorRecordFilter(override val logFilteredRecords: Boolean) : RecordFilter {
    
     internal fun hasValidDoubleTumorData(tumorRecords: List<NcrRecord>): Boolean {
-        val (primaryDiagnosis, followupDiagnosis) = extractPrimaryDiagnosis(tumorRecords)
+        val (primaryDiagnosis,followUpDiagnosis) = extractPrimaryDiagnosis(tumorRecords)
         val hasValidDoubleTumorData = primaryDiagnosis.all { it.clinicalCharacteristics.dubbeltum != null } &&
-                followupDiagnosis.all { it.clinicalCharacteristics.dubbeltum == 0 }
+               followUpDiagnosis.all { it.clinicalCharacteristics.dubbeltum == 0 }
         if (!hasValidDoubleTumorData) {
             log("Tumor ${tumorRecords.tumorId()} has invalid double tumor data")
         }
@@ -16,9 +16,9 @@ class PrimaryTumorRecordFilter(override val logFilteredRecords: Boolean) : Recor
 
 
     internal fun hasValidMorfCatData(tumorRecords: List<NcrRecord>): Boolean {
-        val (primaryDiagnosis, followupDiagnosis) = extractPrimaryDiagnosis(tumorRecords)
+        val (primaryDiagnosis,followUpDiagnosis) = extractPrimaryDiagnosis(tumorRecords)
         val hasValidMorfCatData = primaryDiagnosis.all { it.primaryDiagnosis.morfCat != null } &&
-                followupDiagnosis.all { it.primaryDiagnosis.morfCat == null }
+               followUpDiagnosis.all { it.primaryDiagnosis.morfCat == null }
         if (!hasValidMorfCatData) {
             log("Tumor ${tumorRecords.tumorId()} has invalid morfCat data")
         }
@@ -26,9 +26,9 @@ class PrimaryTumorRecordFilter(override val logFilteredRecords: Boolean) : Recor
     }
 
     internal fun hasValidAnusAfstData(tumorRecords: List<NcrRecord>): Boolean {
-        val (primaryDiagnosis, followupDiagnosis) = extractPrimaryDiagnosis(tumorRecords)
+        val (primaryDiagnosis,followUpDiagnosis) = extractPrimaryDiagnosis(tumorRecords)
         val hasValidAnusAfstData = primaryDiagnosis.all { it.clinicalCharacteristics.anusAfst != null } &&
-                followupDiagnosis.all { it.clinicalCharacteristics.anusAfst == null }
+               followUpDiagnosis.all { it.clinicalCharacteristics.anusAfst == null }
         if (!hasValidAnusAfstData) {
             log("Tumor ${tumorRecords.tumorId()} has invalid anusAfst data")
         }

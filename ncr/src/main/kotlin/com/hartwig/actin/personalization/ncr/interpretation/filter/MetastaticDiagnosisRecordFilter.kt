@@ -9,7 +9,7 @@ class MetastaticDiagnosisRecordFilter(override val logFilteredRecords: Boolean) 
 
     internal fun hasAtMostOneMetastaticDetection(records: List<NcrRecord>): Boolean {
         val metastaticRecords =
-            records.filter { it.identification.metaEpis == 1 || it.identification.metaEpis == 2 }
+            records.filter { it.identification.metaEpis == METASTATIC_DETECTION_AT_START || it.identification.metaEpis == METASTATIC_DETECTION_AT_PROGRESSION }
         val hasAtMostOneMetastaticDetection = metastaticRecords.size <= 1
         if (!hasAtMostOneMetastaticDetection) {
             log("Multiple metastatic detections found in tumor ${records.tumorId()}")
