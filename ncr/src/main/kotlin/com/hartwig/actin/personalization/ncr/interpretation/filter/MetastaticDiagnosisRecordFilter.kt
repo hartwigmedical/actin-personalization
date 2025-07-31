@@ -3,14 +3,14 @@ package com.hartwig.actin.personalization.ncr.interpretation.filter
 import com.hartwig.actin.personalization.ncr.datamodel.NcrRecord
 
 class MetastaticDiagnosisRecordFilter(override val logFilteredRecords: Boolean) : RecordFilter {
-    internal fun hasOnlyOneMetastaticDetection(records: List<NcrRecord>): Boolean {
+    internal fun hasAtMostOneMetastaticDetection(records: List<NcrRecord>): Boolean {
         val metastaticRecords =
             records.filter { it.identification.metaEpis == 1 || it.identification.metaEpis == 2 }
-        val hasOnlyOneMetastaticDetection = metastaticRecords.size == 1
-        if (!hasOnlyOneMetastaticDetection) {
+        val hasAtMostOneMetastaticDetection = metastaticRecords.size <= 1
+        if (!hasAtMostOneMetastaticDetection) {
             log("Multiple metastatic detections found in tumor ${records.tumorId()}")
         }
-        return hasOnlyOneMetastaticDetection
+        return hasAtMostOneMetastaticDetection
     }
 
     internal fun hasEmptyMetastaticFieldIfDetectionNotPresent(records: List<NcrRecord>): Boolean {
@@ -61,7 +61,7 @@ class MetastaticDiagnosisRecordFilter(override val logFilteredRecords: Boolean) 
 
     override fun apply(tumorRecords: List<NcrRecord>): Boolean {
         return listOf(
-            ::hasOnlyOneMetastaticDetection,
+            ::hasAtMostOneMetastaticDetection,
             ::hasEmptyMetastaticFieldIfDetectionNotPresent,
             ::hasConsistentMetastaticProgression,
         ).all { it(tumorRecords) }

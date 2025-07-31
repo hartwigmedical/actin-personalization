@@ -9,11 +9,19 @@ class MetastaticDiagnosisRecordFilterTest {
     private val minimalDiagnosisRecord = TestNcrRecordFactory.minimalDiagnosisRecord()
     
     @Test
+    fun `Should return true for zero metastatic episodes`() {
+        val records = listOf(minimalDiagnosisRecord.copy(
+            identification = minimalDiagnosisRecord.identification.copy(metaEpis = 0)
+        ))
+        assertThat(filter.hasAtMostOneMetastaticDetection(records)).isTrue()
+    }
+    
+    @Test
     fun `Should return true for one metastatic detection`() {
         val records = listOf(minimalDiagnosisRecord.copy(
             identification = minimalDiagnosisRecord.identification.copy(metaEpis = 1)
         ))
-        assertThat(filter.hasOnlyOneMetastaticDetection(records)).isTrue()
+        assertThat(filter.hasAtMostOneMetastaticDetection(records)).isTrue()
     }
 
     @Test
@@ -22,7 +30,7 @@ class MetastaticDiagnosisRecordFilterTest {
             minimalDiagnosisRecord.copy(identification = minimalDiagnosisRecord.identification.copy(metaEpis = 1)),
             minimalDiagnosisRecord.copy(identification = minimalDiagnosisRecord.identification.copy(metaEpis = 2))
         )
-        assertThat(filter.hasOnlyOneMetastaticDetection(records)).isFalse()
+        assertThat(filter.hasAtMostOneMetastaticDetection(records)).isFalse()
     }
 
     @Test
