@@ -5,7 +5,7 @@ import com.hartwig.actin.personalization.ncr.datamodel.NcrRecord
 import com.hartwig.actin.personalization.ncr.interpretation.FOLLOW_UP_EPISODE
 
 class ComorbidityRecordFilter(override val logFilteredRecords: Boolean) : RecordFilter {
-    private fun NcrCharlsonComorbidities.allFieldsAreNull(): Boolean {
+    private fun NcrCharlsonComorbidities.allFields(): List<Any?> {
         return listOf(
             cci,
             cciAids,
@@ -26,55 +26,29 @@ class ComorbidityRecordFilter(override val logFilteredRecords: Boolean) : Record
             cciRenal,
             cciSevereLiver,
             cciUlcer
-        ).all { it == null }
+        )
+    }
+    
+    private fun NcrCharlsonComorbidities.allFieldsAreNull(): Boolean {
+        return this.allFields().all { it == null }
     }
     
     private fun NcrCharlsonComorbidities.allFieldsAreNotNull(): Boolean {
-        return listOf(
-            cci,
-            cciAids,
-            cciCat,
-            cciChf,
-            cciCollagenosis,
-            cciCopd,
-            cciCvd,
-            cciDementia,
-            cciDm,
-            cciEodDm,
-            cciMalignancy,
-            cciMetastatic,
-            cciMi,
-            cciMildLiver,
-            cciPlegia,
-            cciPvd,
-            cciRenal,
-            cciSevereLiver,
-            cciUlcer
-        ).all { it != null }
+        return this.allFields().all { it != null }
     }
 
-    internal fun hasNoComorbidityOnFollowUpEpisode(tumorRecords: List<NcrRecord>): Boolean {
-        val followupDiagnosis = tumorRecords.filter { it.identification.epis == FOLLOW_UP_EPISODE }
-        val hasNoComorbidityOnFollowUpEpisode = followupDiagnosis.all { it.comorbidities.allFieldsAreNull() }
-        if (!hasNoComorbidityOnFollowUpEpisode) {
+    internal fun hasValidComorbidityData(tumorRecords: List<NcrRecord>): Boolean {
+        val hasValidComorbidityData = tumorRecords.all { it.comorbidities.allFieldsAreNull() || (it.identification.epis != FOLLOW_UP_EPISODE && it.comorbidities.allFieldsAreNotNull()) }
+        if (!hasValidComorbidityData) {
             log("Tumor ${tumorRecords.tumorId()} has comorbidity on follow-up episode")
         }
-        return hasNoComorbidityOnFollowUpEpisode
+        return hasValidComorbidityData
     }
 
-    internal fun hasCompleteComorbidityData(tumorRecords: List<NcrRecord>): Boolean {
-        val allComorbidityRecords = tumorRecords.map { it.comorbidities }
-        val hasCompleteComorbidityData = allComorbidityRecords.all { it.allFieldsAreNull() || it.allFieldsAreNotNull() }
-        if (!hasCompleteComorbidityData) {
-            log("Tumor ${tumorRecords.tumorId()} has incomplete comorbidity data")
-        }
-        return hasCompleteComorbidityData
-    }
 
     override fun apply(tumorRecords: List<NcrRecord>): Boolean {
         return listOf(
-            ::hasNoComorbidityOnFollowUpEpisode,
-            ::hasCompleteComorbidityData
+            ::hasValidComorbidityData,
         ).all { it(tumorRecords) }
     }
 }

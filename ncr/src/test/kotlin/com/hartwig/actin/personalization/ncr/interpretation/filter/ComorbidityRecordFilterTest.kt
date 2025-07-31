@@ -6,36 +6,38 @@ import org.junit.jupiter.api.Test
 
 class ComorbidityRecordFilterTest {
     private val filter = ComorbidityRecordFilter(true)
+    private val minimalDiagnosisRecord = TestNcrRecordFactory.minimalDiagnosisRecord()
+    private val minimalFollowupRecord = TestNcrRecordFactory.minimalFollowupRecord()
 
     @Test
     fun `Should returns true when all follow-up records have no comorbidity`() {
         val records = listOf(
-            TestNcrRecordFactory.minimalFollowupRecord().copy(
-                comorbidities = TestNcrRecordFactory.minimalFollowupRecord().comorbidities.copy(
+            minimalFollowupRecord.copy(
+                comorbidities = minimalFollowupRecord.comorbidities.copy(
                     cciPvd = null, cciRenal = null, cciSevereLiver = null, cciUlcer = null
                 )
             )
         )
-        assertThat(filter.hasNoComorbidityOnFollowUpEpisode(records)).isTrue()
+        assertThat(filter.hasValidComorbidityData(records)).isTrue()
     }
 
     @Test
     fun `Should returns false when any follow-up record has comorbidity`() {
         val records = listOf(
-            TestNcrRecordFactory.minimalFollowupRecord().copy(
-                comorbidities = TestNcrRecordFactory.minimalFollowupRecord().comorbidities.copy(
+            minimalFollowupRecord.copy(
+                comorbidities = minimalFollowupRecord.comorbidities.copy(
                     cciPvd = 1, cciRenal = null, cciSevereLiver = null, cciUlcer = null
                 )
             )
         )
-        assertThat(filter.hasNoComorbidityOnFollowUpEpisode(records)).isFalse()
+        assertThat(filter.hasValidComorbidityData(records)).isFalse()
     }
 
     @Test
     fun `Should returns true when all records are complete or empty`() {
         val records = listOf(
-            TestNcrRecordFactory.minimalDiagnosisRecord().copy(
-                comorbidities = TestNcrRecordFactory.minimalDiagnosisRecord().comorbidities.copy(
+            minimalDiagnosisRecord.copy(
+                comorbidities = minimalDiagnosisRecord.comorbidities.copy(
                     cci = 1,
                     cciAids = 1,
                     cciCat = 1,
@@ -57,25 +59,21 @@ class ComorbidityRecordFilterTest {
                     cciUlcer = 1
                 )
             ),
-            TestNcrRecordFactory.minimalDiagnosisRecord().copy(
-                comorbidities = TestNcrRecordFactory.minimalDiagnosisRecord().comorbidities.copy(
-                    cciPvd = null, cciRenal = null, cciSevereLiver = null, cciUlcer = null
-                )
-            )
+            minimalDiagnosisRecord
         )
-        assertThat(filter.hasCompleteComorbidityData(records)).isTrue()
+        assertThat(filter.hasValidComorbidityData(records)).isTrue()
     }
 
     @Test
     fun `Should returns false when any record is partially complete`() {
         val records = listOf(
-            TestNcrRecordFactory.minimalDiagnosisRecord().copy(
-                comorbidities = TestNcrRecordFactory.minimalDiagnosisRecord().comorbidities.copy(
+            minimalDiagnosisRecord.copy(
+                comorbidities = minimalDiagnosisRecord.comorbidities.copy(
                     cciPvd = 1, cciRenal = null, cciSevereLiver = 1, cciUlcer = 1
                 )
             )
         )
-        assertThat(filter.hasCompleteComorbidityData(records)).isFalse()
+        assertThat(filter.hasValidComorbidityData(records)).isFalse()
     }
 }
 
