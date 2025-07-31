@@ -4,12 +4,18 @@ import com.hartwig.actin.personalization.ncr.datamodel.NcrRecord
 import com.hartwig.actin.personalization.ncr.datamodel.NcrTreatment
 
 class TreatmentRecordFilter(override val logFilteredRecords: Boolean) : RecordFilter {
+    private val PRE_SURGERY_CODE = 1
+    private val POST_SURGERY_CODE = 2
 
-    internal fun hasAtLeastOneTreatment(treatment: NcrTreatment): Boolean {
+
+    private fun hasAtLeastOneTreatment(treatment: NcrTreatment): Boolean {
         return listOf(
+            treatment.gastroenterologyResection.mdlRes,
             treatment.primarySurgery.chir,
             treatment.primaryRadiotherapy.rt,
+            treatment.primaryRadiotherapy.chemort,
             treatment.systemicTreatment.chemo,
+            treatment.systemicTreatment.target,
             treatment.hipec.hipec
         ).any { it.notZeroNorNull() } ||
                 listOf(
@@ -25,56 +31,54 @@ class TreatmentRecordFilter(override val logFilteredRecords: Boolean) : RecordFi
 
     internal fun hasConsistentReasonRefrainingTreatment(tumorRecords: List<NcrRecord>): Boolean {
         val hasConsistentReasonRefrainingTreatment = tumorRecords.map { it.treatment }.all { treatment ->
-            when (hasAtLeastOneTreatment(treatment)) {
-                true -> treatment.geenTherReden == null
-                else -> true
-            }
+            hasAtLeastOneTreatment(treatment) == (treatment.geenTherReden == null)
         }
         if (!hasConsistentReasonRefrainingTreatment) log("Inconsistent reason for refraining treatment for tumor ${tumorRecords.tumorId()}")
         return hasConsistentReasonRefrainingTreatment
     }
 
-    internal fun hasValidPrimarySurgeryInt(
+    private fun hasConsistentPreAndPostSurgicalIntervals(
         surgeryChir: Int?,
         surgeryStartInt: Int?,
         otherTreatmentCode: Int?,
         otherTreatmentStartInt: Int?
     ): Boolean {
         return when (otherTreatmentCode) {
-            1 -> surgeryChir == null || (surgeryStartInt != null && otherTreatmentStartInt != null && otherTreatmentStartInt <= surgeryStartInt)
-            2 -> surgeryChir != null && (surgeryStartInt != null && otherTreatmentStartInt != null && otherTreatmentStartInt >= surgeryStartInt)
+            PRE_SURGERY_CODE -> surgeryChir == null || (surgeryStartInt != null && otherTreatmentStartInt != null && otherTreatmentStartInt <= surgeryStartInt)
+            POST_SURGERY_CODE -> surgeryChir != null && (surgeryStartInt != null && otherTreatmentStartInt != null && otherTreatmentStartInt >= surgeryStartInt)
             else -> true
         }
     }
 
-    internal fun hasValidTherprepostCode(tumorRecords: List<NcrRecord>): Boolean {
-        val hasValidTherprepostCode = tumorRecords.map { it.treatment }.all { it ->
-            hasValidPrimarySurgeryInt(
-                it.primarySurgery.chir,
-                it.primarySurgery.chirInt1,
-                it.primaryRadiotherapy.rt,
-                it.primaryRadiotherapy.rtStartInt1
-            ) &&
-                    hasValidPrimarySurgeryInt(
-                        it.primarySurgery.chir,
-                        it.primarySurgery.chirInt1,
-                        it.systemicTreatment.chemo,
-                        it.systemicTreatment.systStartInt1
-                    )
-        }
-        if (!hasValidTherprepostCode) log("Invalid therapy pre/post codes for tumor ${tumorRecords.tumorId()}")
-        return hasValidTherprepostCode
+    internal fun hasConsistentPreAndPostSurgicalIntervalsForChemoAndRadiotherapy(tumorRecords: List<NcrRecord>): Boolean {
+        val hasConsistentPreAndPostSurgicalIntervalsForChemoAndRadiotherapy =
+            tumorRecords.map { it.treatment }.all { it ->
+                hasConsistentPreAndPostSurgicalIntervals(
+                    it.primarySurgery.chir,
+                    it.primarySurgery.chirInt1,
+                    it.primaryRadiotherapy.rt,
+                    it.primaryRadiotherapy.rtStartInt1
+                ) &&
+                        hasConsistentPreAndPostSurgicalIntervals(
+                            it.primarySurgery.chir,
+                            it.primarySurgery.chirInt1,
+                            it.systemicTreatment.chemo,
+                            it.systemicTreatment.systStartInt1
+                        )
+            }
+        if (!hasConsistentPreAndPostSurgicalIntervalsForChemoAndRadiotherapy) log("Invalid therapy pre/post codes for tumor ${tumorRecords.tumorId()}")
+        return hasConsistentPreAndPostSurgicalIntervalsForChemoAndRadiotherapy
     }
 
-    internal fun hasValidPrimaryTumor(tumorRecords: List<NcrRecord>): Boolean {
-        val hasValidPrimaryTumor = tumorRecords.map { it.treatment }.all { treatment ->
+    internal fun hasValidPrimarySurgery(tumorRecords: List<NcrRecord>): Boolean {
+        val hasValidPrimarySurgery = tumorRecords.map { it.treatment }.all { treatment ->
             val hasPrimarySurgeryChir = treatment.primarySurgery.chir != null
             val hasPrimarySurgeryType1 = treatment.primarySurgery.chirType1.notZeroNorNull()
             val hasPrimarySurgeryType2 = treatment.primarySurgery.chirType2.notZeroNorNull()
             hasPrimarySurgeryChir == (hasPrimarySurgeryType1 || hasPrimarySurgeryType2)
         }
-        if (!hasValidPrimaryTumor) log("Primary surgery validity check failed for tumor ${tumorRecords.tumorId()}")
-        return hasValidPrimaryTumor
+        if (!hasValidPrimarySurgery) log("Primary surgery validity check failed for tumor ${tumorRecords.tumorId()}")
+        return hasValidPrimarySurgery
     }
 
     internal fun hasValidPrimaryRadiotherapy(tumorRecords: List<NcrRecord>): Boolean {
@@ -120,7 +124,8 @@ class TreatmentRecordFilter(override val logFilteredRecords: Boolean) : RecordFi
                 treatment.systemicTreatment.systCode13,
                 treatment.systemicTreatment.systCode14
             ).any { code -> code != null }
-            hasSystemicChemo == hasSystemicTarget && hasSystemicTarget == hasSystemicCode
+            (hasSystemicCode && (hasSystemicChemo || hasSystemicTarget)) ||
+                    (!hasSystemicChemo && !hasSystemicTarget && !hasSystemicCode)
         }
         if (!hasValidSystemicTreatment) log("Systemic treatment validation failed: chemo, target, or codes are inconsistent for tumor ${tumorRecords.tumorId()}")
         return hasValidSystemicTreatment
@@ -155,8 +160,8 @@ class TreatmentRecordFilter(override val logFilteredRecords: Boolean) : RecordFi
     override fun apply(tumorRecords: List<NcrRecord>): Boolean {
         return listOf(
             ::hasConsistentReasonRefrainingTreatment,
-            ::hasValidTherprepostCode,
-            ::hasValidPrimaryTumor,
+            ::hasConsistentPreAndPostSurgicalIntervalsForChemoAndRadiotherapy,
+            ::hasValidPrimarySurgery,
             ::hasValidPrimaryRadiotherapy,
             ::hasValidGastroResection,
             ::hasValidSystemicTreatment,

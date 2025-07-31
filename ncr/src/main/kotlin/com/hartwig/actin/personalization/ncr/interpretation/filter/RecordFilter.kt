@@ -8,7 +8,7 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 interface RecordFilter {
     val logFilteredRecords: Boolean
     private val logger get() = KotlinLogging.logger {}
-    
+
     fun log(message: String) {
         if (logFilteredRecords) {
             logger.info { message }
@@ -23,8 +23,11 @@ interface RecordFilter {
     fun List<NcrRecord>.tumorId() = first().identification.keyZid
 
     fun Int?.notZeroNorNull(): Boolean {
-    return this != null && this != 0
-}
+        return this != null && this != 0
+    }
+    fun Int?.ZeroOrNull(): Boolean {
+        return this == null || this == 0
+    }
 
     fun apply(tumorRecords: List<NcrRecord>): Boolean
 }

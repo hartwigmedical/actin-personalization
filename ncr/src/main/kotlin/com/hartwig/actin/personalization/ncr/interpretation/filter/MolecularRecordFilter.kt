@@ -4,10 +4,10 @@ import com.hartwig.actin.personalization.ncr.datamodel.NcrRecord
 
 class MolecularRecordFilter(override val logFilteredRecords: Boolean) : RecordFilter {
 
-    internal fun hasCompleteMolecularData(tumorRecords: List<NcrRecord>): Boolean {
+    internal fun hasNoMolecularDataForFollowUp(tumorRecords: List<NcrRecord>): Boolean {
         val (_, followupDiagnosis) = extractPrimaryDiagnosis(tumorRecords)
         val allMolecularCharacteristics = followupDiagnosis.map { it.molecularCharacteristics }
-        val hasCompleteMolecularData = allMolecularCharacteristics.all { it.brafMut != null && it.rasMut != null && it.msiStat != null }
+        val hasCompleteMolecularData = allMolecularCharacteristics.all { it.brafMut.ZeroOrNull() && it.rasMut.ZeroOrNull() && it.msiStat.ZeroOrNull() }
         if (!hasCompleteMolecularData) {
             log("Incomplete molecular data for tumor ID: ${tumorRecords.tumorId()}")
         }
@@ -15,6 +15,6 @@ class MolecularRecordFilter(override val logFilteredRecords: Boolean) : RecordFi
     }
 
     override fun apply(tumorRecords: List<NcrRecord>): Boolean {
-        return hasCompleteMolecularData(tumorRecords)
+        return hasNoMolecularDataForFollowUp(tumorRecords)
     }
 }

@@ -8,22 +8,18 @@ class MolecularRecordFilterTest {
     private val filter = MolecularRecordFilter(true)
 
     @Test
-    fun `Should return true for complete molecular data`() {
+    fun `Should return false for non-empty molecular data in followup`() {
         val records = listOf(TestNcrRecordFactory.minimalFollowupRecord().copy(
             molecularCharacteristics = TestNcrRecordFactory.minimalFollowupRecord().molecularCharacteristics.copy(
                 brafMut = 1, rasMut = 1, msiStat = 1
             )
         ))
-        assertThat(filter.hasCompleteMolecularData(records)).isTrue()
+        assertThat(filter.hasNoMolecularDataForFollowUp(records)).isFalse()
     }
 
     @Test
-    fun `Should return false for incomplete molecular data`() {
-        val records = listOf(TestNcrRecordFactory.minimalFollowupRecord().copy(
-            molecularCharacteristics = TestNcrRecordFactory.minimalFollowupRecord().molecularCharacteristics.copy(
-                brafMut = null, rasMut = 1, msiStat = 1
-            )
-        ))
-        assertThat(filter.hasCompleteMolecularData(records)).isFalse()
+    fun `Should return true for empty molecular data in followup`() {
+        val records = listOf(TestNcrRecordFactory.minimalFollowupRecord())
+        assertThat(filter.hasNoMolecularDataForFollowUp(records)).isTrue()
     }
 }
