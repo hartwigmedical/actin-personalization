@@ -10,7 +10,7 @@ class MolecularRecordFilter(override val logFilteredRecords: Boolean) : RecordFi
             with(followUp.molecularCharacteristics) { listOf(brafMut, rasMut, msiStat).all { it.ZeroOrNull() } }
         }
         if (!hasNoMolecularDataForFollowUp) {
-            log("Incomplete molecular data for tumor ID: ${tumorRecords.tumorId()}")
+            log("Follow-up diagnosis contains molecular data for tumor ID: ${tumorRecords.tumorId()}")
         }
         return hasNoMolecularDataForFollowUp
     }
