@@ -62,8 +62,8 @@ class TreatmentRecordFilter(override val logFilteredRecords: Boolean) : RecordFi
                         hasConsistentPreAndPostSurgicalIntervals(
                             it.primarySurgery.chir,
                             it.primarySurgery.chirInt1,
-                            it.systemicTreatment.chemo,
-                            it.systemicTreatment.systStartInt1
+                            it.primaryRadiotherapy.chemort,
+                            it.primaryRadiotherapy.rtStartInt1
                         )
             }
         if (!hasConsistentPreAndPostSurgicalIntervalsForChemoAndRadiotherapy) log("Invalid therapy pre/post codes for tumor ${tumorRecords.tumorId()}")
