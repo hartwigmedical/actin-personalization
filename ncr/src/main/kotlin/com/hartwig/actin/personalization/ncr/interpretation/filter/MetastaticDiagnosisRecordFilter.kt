@@ -43,8 +43,8 @@ class MetastaticDiagnosisRecordFilter(override val logFilteredRecords: Boolean) 
 
     internal fun hasConsistentMetastaticProgression(records: List<NcrRecord>): Boolean {
         val metastaticRecords = records.filter {
-            it.identification.metaEpis != METASTATIC_DETECTION_AT_START ||
-                    it.identification.metaEpis != METASTATIC_DETECTION_AT_PROGRESSION
+            it.identification.metaEpis == METASTATIC_DETECTION_AT_START ||
+                    it.identification.metaEpis == METASTATIC_DETECTION_AT_PROGRESSION
         }
         val hasConsistentMetastaticProgression = metastaticRecords.all { record ->
             val allMetaProgression = with(record.metastaticDiagnosis) {
