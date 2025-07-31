@@ -15,19 +15,21 @@ interface RecordFilter {
         }
     }
 
-    fun extractPrimaryDiagnosis(records: List<NcrRecord>): Pair<List<NcrRecord>, List<NcrRecord>> {
-        return records.filter { it.identification.epis == DIAGNOSIS_EPISODE } to
-                records.filter { it.identification.epis == FOLLOW_UP_EPISODE }
-    }
-
-    fun List<NcrRecord>.tumorId() = first().identification.keyZid
-
-    fun Int?.notZeroNorNull(): Boolean {
-        return this != null && this != 0
-    }
-    fun Int?.ZeroOrNull(): Boolean {
-        return this == null || this == 0
-    }
 
     fun apply(tumorRecords: List<NcrRecord>): Boolean
+}
+
+internal fun List<NcrRecord>.tumorId() = first().identification.keyZid
+
+internal fun extractPrimaryDiagnosis(records: List<NcrRecord>): Pair<List<NcrRecord>, List<NcrRecord>> {
+    return records.filter { it.identification.epis == DIAGNOSIS_EPISODE } to
+            records.filter { it.identification.epis == FOLLOW_UP_EPISODE }
+}
+
+internal fun Int?.notZeroNorNull(): Boolean {
+    return this != null && this != 0
+}
+
+internal fun Int?.ZeroOrNull(): Boolean {
+    return this == null || this == 0
 }

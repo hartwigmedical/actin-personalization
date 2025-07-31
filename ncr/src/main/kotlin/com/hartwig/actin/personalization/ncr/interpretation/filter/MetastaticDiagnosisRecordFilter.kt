@@ -3,6 +3,10 @@ package com.hartwig.actin.personalization.ncr.interpretation.filter
 import com.hartwig.actin.personalization.ncr.datamodel.NcrRecord
 
 class MetastaticDiagnosisRecordFilter(override val logFilteredRecords: Boolean) : RecordFilter {
+    private val METASTATIC_DETECTION_ABSENT = 0
+    private val METASTATIC_DETECTION_AT_START = 1
+    private val METASTATIC_DETECTION_AT_PROGRESSION = 2
+
     internal fun hasAtMostOneMetastaticDetection(records: List<NcrRecord>): Boolean {
         val metastaticRecords =
             records.filter { it.identification.metaEpis == 1 || it.identification.metaEpis == 2 }
@@ -14,7 +18,7 @@ class MetastaticDiagnosisRecordFilter(override val logFilteredRecords: Boolean) 
     }
 
     internal fun hasEmptyMetastaticFieldIfDetectionNotPresent(records: List<NcrRecord>): Boolean {
-        val absentMetastaticRecords = records.filter { it.identification.metaEpis == 0 }
+        val absentMetastaticRecords = records.filter { it.identification.metaEpis == METASTATIC_DETECTION_ABSENT }
         val hasEmptyMetastaticFieldIfDetectionNotPresent = absentMetastaticRecords.all { record ->
             val hasEmptyMetastaticDiagnosis = with(record.metastaticDiagnosis) {
                 listOf(
@@ -38,18 +42,21 @@ class MetastaticDiagnosisRecordFilter(override val logFilteredRecords: Boolean) 
     }
 
     internal fun hasConsistentMetastaticProgression(records: List<NcrRecord>): Boolean {
-        val hasConsistentMetastaticProgression = records.all { record ->
+        val metastaticRecords = records.filter {
+            it.identification.metaEpis != METASTATIC_DETECTION_AT_START ||
+                    it.identification.metaEpis != METASTATIC_DETECTION_AT_PROGRESSION
+        }
+        val hasConsistentMetastaticProgression = metastaticRecords.all { record ->
             val allMetaProgression = with(record.metastaticDiagnosis) {
                 listOf(
                     metaProg1, metaProg2, metaProg3, metaProg4, metaProg5,
                     metaProg6, metaProg7, metaProg8, metaProg9, metaProg10
                 )
             }
-            when (record.identification.metaEpis) {
-                0 -> allMetaProgression.all { !it.notZeroNorNull() }    
-                1 -> allMetaProgression.all { !it.notZeroNorNull() }
-                2 -> allMetaProgression.any { it.notZeroNorNull() }
-                else -> false
+            if (record.identification.metaEpis == METASTATIC_DETECTION_AT_START) {
+                allMetaProgression.all { !it.notZeroNorNull() }
+            } else {
+                allMetaProgression.any { it.notZeroNorNull() }
             }
         }
 
