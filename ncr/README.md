@@ -49,10 +49,10 @@ The following assumptions are made about the NCR data _but are currently not exp
 - Prior tumors:
     - prior tumors are only defined on DIA episodes and are always null in VERB episodes
     - `mal1_int` (e.t.c.) are never positive numbers
-    - `mal1_syst` (and 2/3/4) are trivially derivable from the drug list.
+    - `malN_syst` can be derived from `malN_syst_code` -> if a systemic code is present the corresponding `syst` field should always be 1,
+      otherwise 0
     - Every prior molecular tumor has at least an interval (`int`), type (`morf`), location (`topo_sublok`), category (`tum_soort`) and
-      systemic
-      treatment (`syst`), only `stadium` (stage) is optional.
+      systemic treatment (`syst`), only `stadium` (stage) is optional.
 - Primary diagnosis:
     - Has double tumor (`dubbeltum`) is always present for DIA and always 0 for any VERB episode and can be ignored.
     - primaryTumorType (`morf_cat`) is always present for DIA and always null for VERB.
@@ -69,9 +69,6 @@ The following assumptions are made about the NCR data _but are currently not exp
     - If the field `cci` is populated, then all other cci fields are present as well.
 - Molecular results:
     - All fields (`braf_mut`, `ras_mut`, `msi_stat`) are potentially present during DIA but always null at VERB
-- Lab measurements:
-    - If no interval has been provided we can take the minimum days since diagnosis for the record.
-    - All lab measures are only included if they are below an upper bound.
 - Treatment:
     - `geen_ther_reden` (reason for refraining from treatment) is always null in case a patient got treatment and always not-null in other
       cases.
