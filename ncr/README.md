@@ -30,7 +30,7 @@ and potentially multiple followup episodes per patient. The datamodel collected 
 The ingestion application starts with filtering NCR records that are for whatever reason considered unreliable. Individual episodes are
 checked for reliability and tumor entries are filtered in entirety if a single episode for that tumor fails any reliability check.
 
-The parameter `-log-filtered-records` can be passed to log all filtered records via command line with a reference to the tumor
+The parameter `-log_filtered_records` can be passed to log all filtered records via command line with a reference to the tumor
 id (`key_zid`)
 
 The following records are deemed unreliable and are removed prior to ingestion:
