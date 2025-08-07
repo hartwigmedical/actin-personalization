@@ -77,7 +77,7 @@ def load_patient_df(patient, tnm_stage_medians, settings: Settings) -> pd.DataFr
     comorbidity_dict = get_comorbidity_dict(comorbidities)
 
     has_other_malignancy = any(
-        icd not in ALL_SPECIFIED_ICD_CODES
+        icd.get("mainCode", "") not in ALL_SPECIFIED_ICD_CODES
         for c in comorbidities
         for icd in c.get("icdCodes", [])
     )
@@ -192,7 +192,7 @@ def get_comorbidity_dict(comorbidities):
         icd_codes = MALIGNANCY_ICD_CODES.get(feature_name, [])
         for c in comorbidities:
             for icd in c.get("icdCodes", []):
-                if any(icd.startswith(code) for code in icd_codes):
+                if any(icd.get("mainCode", "").startswith(code) for code in icd_codes):
                     return True
         return False
     
