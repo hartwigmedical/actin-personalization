@@ -35,8 +35,12 @@ class TestPredictor:
             },
             "clinicalStatus": {"who": 2},
             "comorbidities": [
-                {"icdCodes": ["I50", "J44", "K25"]},
-                {"icdCodes": ["E11.2"]}
+                {"icdCodes": [
+                    {"mainCode": "I50", "extensionCode": None},
+                    {"mainCode": "J44", "extensionCode": None},
+                    {"mainCode": "K25", "extensionCode": None}
+                ]},
+                {"icdCodes": [{"mainCode": "E11.2", "extensionCode": None}]}
             ],
             "molecularHistory": {"molecularTests": [
                 {"drivers": {"variants": [{"gene": "KRAS", "event": "G12C"}]},
@@ -100,13 +104,13 @@ class TestPredictor:
 
     def test_other_malignancy_flag(self):
         patient = self.example_patient().copy()
-        patient["comorbidities"] = [{"icdCodes": ["Z99"]}]
+        patient["comorbidities"] = [{"icdCodes": [{"mainCode": "Z99", "extensionCode": None}]}]
         df = load_patient_df(patient, self.EXAMPLE_TNM_MEDIANS, self.settings)
         assert bool(df.iloc[0]['hasOtherMalignancy']) is True
 
     def test_icd_startswith_matching(self):
         patient = self.example_patient().copy()
-        patient["comorbidities"] = [{"icdCodes": ["I50999", "X999"]}]
+        patient["comorbidities"] = [{"icdCodes": [{"mainCode": "I50999", "extensionCode": None}, {"mainCode": "X999", "extensionCode": None}]}]
         df = load_patient_df(patient, self.EXAMPLE_TNM_MEDIANS, self.settings)
         assert bool(df.iloc[0]['hasCongestiveHeartFailure']) is True
 
