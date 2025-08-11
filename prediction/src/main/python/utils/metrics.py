@@ -21,7 +21,6 @@ def calculate_time_dependent_c_index(survival_predictions: np.ndarray, event_tim
 
     return float(np.mean(cindex_scores)) if cindex_scores else float("nan")
 
-
 def calculate_time_dependent_auc(y_train: np.ndarray, y_test: np.ndarray, risk_scores: np.ndarray, times: np.ndarray) -> Tuple[
     np.ndarray, float]:
     auc_times, mean_auc = cumulative_dynamic_auc(y_train, y_test, risk_scores, times)

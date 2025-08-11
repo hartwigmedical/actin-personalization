@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from typing import List, Optional
+import numpy as np
 
 @dataclass
 class Settings:
@@ -18,10 +19,12 @@ class Settings:
     db_config_path: str = '/home/jupyter/.my.cnf'
     
     standardize: bool = True
+    multitask: bool = True
     #--------------------------------------------------------------------------------------------
     # Derived or computed settings:
     event_col: Optional[str] = None
     duration_col: Optional[str] = None
+    fixed_time_bins: Optional[List[int]] = None
 
     save_path: Optional[str] = None
     time_points: Optional[List[int]] = None
@@ -33,6 +36,8 @@ class Settings:
     def __post_init__(self):
         self.configure_data_settings()
         self.configure_model_settings()
+        
+       
     
     def configure_data_settings(self) -> None:
         self.group_treatment = False 
@@ -40,10 +45,13 @@ class Settings:
             self.event_col = 'hadSurvivalEvent'
             self.duration_col = 'survivalDaysSinceMetastaticDiagnosis'
             self.view_name = 'palliativeReference'
+            self.fixed_time_bins = np.arange(30, 5*365 + 1, 30).astype('float32')
         else:
             self.event_col = 'hadProgressionEvent'
             self.duration_col = 'daysBetweenTreatmentStartAndProgression'
             self.view_name = 'knownPalliativeTreatedReference'
+            self.fixed_time_bins = np.arange(30, 3*365 + 1, 30).astype('float32')
+
     
     def configure_model_settings(self) -> None:
         if self.save_path is None:

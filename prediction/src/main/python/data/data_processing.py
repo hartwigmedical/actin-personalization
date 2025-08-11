@@ -15,6 +15,21 @@ import warnings
 from utils.settings import config_settings
 from .lookups import lookup_manager
 
+TREATMENT_GROUPS = [
+    "No Treatment",
+    "5-FU",
+    "5-FU + oxaliplatin",
+    "5-FU + oxaliplatin + bevacizumab",
+    "5-FU + oxaliplatin + panitumumab",
+    "5-FU + irinotecan",
+    "5-FU + irinotecan + bevacizumab",
+    "5-FU + oxaliplatin + irinotecan",
+    "5-FU + oxaliplatin + irinotecan + bevacizumab",
+    "PEMBROLIZUMAB"
+]
+
+TREATMENT_IDX = {name: idx for idx, name in enumerate(TREATMENT_GROUPS)}
+
 class DataSplitter:
     def __init__(self, settings=config_settings, test_size: float=0.1, random_state: int=42) -> None:
         self.settings = settings
@@ -88,6 +103,10 @@ class DataPreprocessor:
             df = self.group_treatments(df)
         elif self.settings.experiment_type == 'treatment_drug':
             df = self.add_treatment_drugs(df)
+        
+        if self.settings.multitask:
+            df['treatment_group_idx'] = df.apply(self.get_treatment_group, axis=1)
+            df = df.dropna(subset=['treatment_group_idx'])
 
         if len(df) > 1:
             df = self.impute_knn(df, ['whoAssessmentAtMetastaticDiagnosis'], k=7)
@@ -215,6 +234,31 @@ class DataPreprocessor:
 
         return df
     
+    def get_treatment_group(self, row):
+        group = tuple(int(row[col]) for col in [
+            "systemicTreatmentPlan_5-FU", "systemicTreatmentPlan_oxaliplatin",
+            "systemicTreatmentPlan_irinotecan", "systemicTreatmentPlan_bevacizumab",
+            "systemicTreatmentPlan_panitumumab", "systemicTreatmentPlan_pembrolizumab",
+            "systemicTreatmentPlan_nivolumab"
+        ])
+        mapping = {
+            (0,0,0,0,0,0,0): "No Treatment",
+            (1,0,0,0,0,0,0): "5-FU",
+            (1,1,0,0,0,0,0): "5-FU + oxaliplatin",
+            (1,1,0,1,0,0,0): "5-FU + oxaliplatin + bevacizumab",
+            (1,1,0,0,1,0,0): "5-FU + oxaliplatin + panitumumab",
+            (1,0,1,0,0,0,0): "5-FU + irinotecan",
+            (1,0,1,1,0,0,0): "5-FU + irinotecan + bevacizumab",
+            (1,1,1,0,0,0,0): "5-FU + oxaliplatin + irinotecan",
+            (1,1,1,1,0,0,0): "5-FU + oxaliplatin + irinotecan + bevacizumab",
+            (0,0,0,0,0,1,0): "PEMBROLIZUMAB",
+        }
+        label = mapping.get(group, None)
+        if label is None:
+            return None
+        return TREATMENT_IDX[label]
+
+    
     def auto_cast_object_columns(self, df: pd.DataFrame) -> pd.DataFrame:
         for col in df.select_dtypes(include='object').columns:
             try:
@@ -290,7 +334,7 @@ class DataPreprocessor:
             cols_to_standardize = [
                 col for col in features
                 if pd.api.types.is_numeric_dtype(df[col])
-                and col not in [self.settings.event_col, self.settings.duration_col]
+                and col not in [self.settings.event_col, self.settings.duration_col, 'treatment_group_idx']
                 and df[col].nunique() > 2
             ]
 

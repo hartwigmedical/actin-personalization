@@ -3,9 +3,9 @@ from itertools import product
 from utils.settings import config_settings
 from typing import List, Dict, Any
 
-from .configs.load_model_configurations import *
+from .load_model_configurations import *
 from models.model_trainer import *
-from .survival_models import BaseSurvivalModel, NNSurvivalModel
+from models.models import *
 
 
 def random_parameter_search(param_dict: Dict[str, List[Any]], settings=config_settings) -> List[Dict[str, Any]]:
@@ -38,10 +38,13 @@ def hyperparameter_search(X_train: pd.DataFrame, y_train: pd.DataFrame, X_test: 
     best_models = {}
     all_results = {}
     trainer = ModelTrainer(models={}, settings=settings)
-
+    
+    for base in list(param_grids):
+        param_grids[ base + '_attention' ] = param_grids[base]
+        
     for model_name, model_instance in base_models.items():
         model_class = type(model_instance)
-        use_attention   = getattr(model_instance, 'kwargs', {}).get('use_attention', False)
+        use_attention = getattr(model_instance, 'kwargs', {}).get('use_attention', False)
     
         if model_name not in param_grids:
             print(f"No hyperparameter grid found for {model_name}, skipping optimization...")
@@ -53,8 +56,6 @@ def hyperparameter_search(X_train: pd.DataFrame, y_train: pd.DataFrame, X_test: 
         best_model_trained = None
         all_results[model_name] = []
         
-        for base in list(param_grids):
-            param_grids[ base + '_attention' ] = param_grids[base]
 
         for param_dict in param_grids[model_name]:
             sampled_params = random_parameter_search(param_dict=param_dict, settings=settings)

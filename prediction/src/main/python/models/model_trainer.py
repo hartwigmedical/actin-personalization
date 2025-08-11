@@ -14,7 +14,7 @@ import os
 from typing import List, Dict, Tuple, Any, Optional, Callable
 from joblib import Parallel, delayed
 
-from .survival_models import BaseSurvivalModel, NNSurvivalModel
+from models.models import *
 from utils.metrics import calculate_time_dependent_c_index, calculate_brier_score, calibration_assessment, calculate_time_dependent_auc
 from utils.settings import config_settings
 
@@ -45,7 +45,7 @@ class ModelTrainer:
         model_class = type(model_template)
         kwargs = getattr(model_template, 'kwargs', {})
 
-        if issubclass(model_class, NNSurvivalModel):
+        if isinstance(model_template, (NNSurvivalModel, MultiTaskNNSurvivalModel)):
             kwargs['input_size'] = input_size
    
         return model_class(**kwargs)
@@ -140,7 +140,11 @@ class ModelTrainer:
         min_follow_up = y_val_structured['duration'].min()
         upper_bound = min(self.max_time, max_follow_up)
         
-        if surv_funcs is not None and model_name != 'AalenAdditive':
+        if isinstance(model, MultiTaskNNSurvivalModel) and isinstance(surv_funcs, pd.DataFrame):
+            max_times = [surv_funcs.index[-1]]
+            global_max_time = min(max_times)
+            upper_bound = min(upper_bound, global_max_time)
+        elif surv_funcs is not None:
             max_times = [fn.x[-1] for fn in surv_funcs]
             global_max_time = min(max_times)
             upper_bound = min(upper_bound, global_max_time)
@@ -162,14 +166,19 @@ class ModelTrainer:
             predictions = risk_scores
             auc_input = -risk_scores
         else:
-            if model_name == 'AalenAdditive':
-                predictions = model.predict_survival_function(X_val, times=times)
+            if isinstance(model, MultiTaskNNSurvivalModel) and isinstance(surv_funcs, pd.DataFrame):
+                df_disc = surv_funcs.reindex(times, method='nearest', fill_value='extrapolate')
+                # df_disc is shape [len(times), n_samples], so transpose
+                predictions = df_disc.values.T
+                auc_input = -predictions
             else:
                 predictions = np.row_stack([fn(times) for fn in surv_funcs])
-            auc_input = -predictions 
-
+                auc_input = -predictions 
+                
         return times, predictions, auc_input
 
+                
+    
     def _evaluate_model(
         self, 
         model: BaseSurvivalModel, 
@@ -177,18 +186,20 @@ class ModelTrainer:
         y_train_structured: pd.DataFrame, 
         y_val_structured: pd.DataFrame, 
         model_name: str
-    ) -> Dict[str, List[float]]:
+        ) -> Dict[str, List[float]]:
         results = {}
-
-        try:
-            surv_funcs = model.predict_survival_function(X_val)
-        except AttributeError:
-            surv_funcs = None
-
-        if model_name == 'AalenAdditive':
-            durations = y_val_structured['duration']
-            risk_scores = model.predict(X_val, durations=durations)
+        
+        if isinstance(model, MultiTaskNNSurvivalModel):
+            task_idx_val = X_val['treatment_group_idx'].values.astype(int)
+            X_val = X_val.drop(columns=['treatment_group_idx'])
+    
+            surv_funcs = model.predict_survival_function(X_val, task_idx_val)
+            risk_scores = model.predict(X_val, task_idx=task_idx_val)
         else:
+            try:
+                surv_funcs = model.predict_survival_function(X_val)
+            except AttributeError:
+                surv_funcs = None
             risk_scores = model.predict(X_val)
 
         times, predictions, auc_input = self._get_survival_metrics(
@@ -221,13 +232,25 @@ class ModelTrainer:
     ) -> Dict[str, float]:
         
         X_tr, y_tr_struct, X_val, y_val_struct, y_val_df = self._prepare_fold_data(X, y, fold_indices)
-
-        model = self._initialize_model(model_template, input_size=X.shape[1])
+        if isinstance(model_template, MultiTaskNNSurvivalModel):
+            input_size = X_tr.drop(columns=['treatment_group_idx']).shape[1]
+        else:
+            input_size = X_tr.shape[1]
+            
+        model = self._initialize_model(model_template, input_size=input_size)
         ModelTrainer._set_attention_indices(model, self.feature_names)
 
         if isinstance(model, NNSurvivalModel):
             val_data = (X_val.values.astype('float32'), y_val_struct)
             model.fit(X_tr, y_tr_struct, val_data=val_data)
+        elif isinstance(model, MultiTaskNNSurvivalModel):
+            task_idx_tr = X_tr['treatment_group_idx'].values.astype(int)
+            task_idx_val = X_val['treatment_group_idx'].values.astype(int)
+            X_tr_input  = X_tr.drop(columns=['treatment_group_idx'])
+            X_val_input = X_val.drop(columns=['treatment_group_idx'])
+
+            model.fit(X_tr_input, task_idx_tr, y_tr_struct, val_data=(X_val_input, y_val_df))
+            
         else:
             model.fit(X_tr, y_tr_struct)
 
@@ -266,7 +289,11 @@ class ModelTrainer:
             print(f"{model_name} CV Results: {mean_results}")
             
             print("training final model")
-            final_model = self._initialize_model(model_template, input_size=X_train.shape[1])
+            if isinstance(model_template, MultiTaskNNSurvivalModel):
+                input_size = X_train.drop(columns=['treatment_group_idx']).shape[1]
+            else:
+                input_size = X_train.shape[1]
+            final_model = self._initialize_model(model_template, input_size=input_size)
             ModelTrainer._set_attention_indices(final_model,
                                                     self.feature_names)
             
@@ -283,6 +310,12 @@ class ModelTrainer:
                 val_data = (X_val_final.values.astype('float32'), y_val_structured_final)
 
                 final_model.fit(X_train_final, y_train_structured_final, val_data=val_data)
+                
+            elif isinstance(final_model, MultiTaskNNSurvivalModel):
+                task_idx_train = X_train['treatment_group_idx'].values.astype(int)
+                X_train_input  = X_train.drop(columns=['treatment_group_idx'])
+                final_model.fit(X_train_input, task_idx_train, y_train_df)
+
             else:
                 final_model.fit(X_train, y_train_structured)
                 
