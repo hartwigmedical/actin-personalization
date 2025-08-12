@@ -24,6 +24,12 @@ def apply_settings_from_args(args):
     logger.info(f"Configured settings with outcome={settings.outcome}, trained_path={settings.save_path}")
     return settings
     
+
+def failed_status(output_path: str):
+    logger.error("An error occurred during the prediction process.")
+    with open(output_path, 'w') as f:
+        json.dump({}, f)
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("input_path", help="Path to input JSON file")
@@ -41,7 +47,8 @@ def main():
             patient_data = json.load(f)
     except Exception as e:
         logger.error(f"Failed to load input data: {e}")
-        raise
+        failed_status(args.output_path)
+        return
 
     try:
         logger.info(f"Loading treatment configuration from {args.treatment_config}")
@@ -49,15 +56,21 @@ def main():
             treatment_config = json.load(f)
     except Exception as e:
         logger.error(f"Failed to load treatment config: {e}")
-        raise
+        failed_status(args.output_path)
+        return
     
     logger.info("Running predictions...")
-    result = predict_treatment_scenarios(
-        patient_data=patient_data,
-        trained_path=args.trained_path,
-        valid_treatment_combinations=treatment_config, 
-        settings=settings
-    )
+    try:
+        result = predict_treatment_scenarios(
+            patient_data=patient_data,
+            trained_path=args.trained_path,
+            valid_treatment_combinations=treatment_config, 
+            settings=settings
+        )
+    except Exception as e:
+        logger.error(f"Prediction failed: {e}")
+        failed_status(args.output_path)
+        return
     
     logger.info(f"Saving results to {args.output_path}")
     with open(args.output_path, 'w') as f:
