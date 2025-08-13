@@ -131,10 +131,25 @@ class FeatureAttention(nn.Module):
                 x[:, self.treatment_indices] *= gate
         return x
 
-    def forward(self, x):
+    def forward(self, x, mask=None):
         x = self._apply_gate(x)
+        
+        if mask is not None:
+            if not torch.is_tensor(mask):
+                mask = torch.as_tensor(mask, dtype=x.dtype, device=x.device)
+            else:
+                mask = mask.to(dtype=x.dtype, device=x.device)
+            x = x * mask
+        
         weights = self.attn(x)
+        
+        if mask is not None:
+            weights = weights * mask
+        
         return x * weights
+
+    
+    
     
 class AttentionMLP(nn.Module):
     def __init__(self, input_size: int, num_nodes: List[int], out_features: int, activation, batch_norm: bool, dropout: float, msi_index: int = None, immuno_index: List[int] = None, ras_index: int = None, panitumumab_index: int = None, treatment_indices: List[int]=None):
@@ -144,8 +159,10 @@ class AttentionMLP(nn.Module):
             in_features=input_size, num_nodes=num_nodes, out_features=out_features,
             activation=activation, batch_norm=batch_norm, dropout=dropout)
     
-    def forward(self, x):
-        x = self.attention(x)
+    def forward(self, x, mask=None):
+        if isinstance(x, tuple):
+            x, mask = x
+        x = self.attention(x, mask=mask)
         return self.mlp(x)
 
 class NNSurvivalModel(BaseSurvivalModel):
@@ -250,59 +267,83 @@ class NNSurvivalModel(BaseSurvivalModel):
 
         self.model = model_class(self.net, self.optimizer, **model_specific_kwargs)
 
-    def fit(self, X: pd.DataFrame, y: pd.DataFrame, val_data: pd.DataFrame = None) -> None:
+    def fit(self, X: pd.DataFrame, y: pd.DataFrame, val_data: pd.DataFrame = None, mask: Optional[pd.DataFrame] = None) -> None:
         durations = y['duration'].astype('float32')
         events = y['event'].astype('float32')
-        X_tensor = X.values.astype('float32')
+        X_np = X.values.astype('float32')
+        X_input = X_np
+        if mask is not None:
+            mask_np = mask.reindex(index=X.index)[X.columns].values.astype('float32')
+            X_input = (X_np, mask_np)
 
         if hasattr(self.model_class, 'label_transform'):
             self.labtrans = self.model_class.label_transform(self.num_durations)
-            y = self.labtrans.fit_transform(durations, events)
+            y_tr = self.labtrans.fit_transform(durations, events)
             self.model.duration_index = self.labtrans.cuts
         else:
-            y = (durations, events)
+            y_tr = (durations, events)
   
         if val_data is not None:
-            X_val, y_val = val_data
+            X_val_in, y_val = val_data
+
             if hasattr(self.model_class, 'label_transform'):
                 y_val = self.labtrans.transform(
-                    y_val['duration'].astype('float32'), y_val['event'].astype('float32')
+                    y_val['duration'].astype('float32'),
+                    y_val['event'].astype('float32')
                 )
             else:
                 durations_val = y_val['duration'].astype('float32')
-                events_val = y_val['event'].astype('float32')
+                events_val    = y_val['event'].astype('float32')
                 y_val = (durations_val, events_val)
-            val_data = (X_val.astype('float32'), y_val)
+
+            if isinstance(X_val_in, tuple):
+                X_val_np, val_mask_np = X_val_in
+                X_val_np    = np.asarray(X_val_np, dtype='float32')
+                val_mask_np = np.asarray(val_mask_np, dtype='float32')
+                X_val_prepared = (X_val_np, val_mask_np)
+            else:
+                X_val_prepared = np.asarray(X_val_in, dtype='float32')
+
+            val_data = (X_val_prepared, y_val)
+
 
         callbacks = [tt.callbacks.EarlyStopping(patience=self.early_stopping_patience, min_delta=1e-4)]
-        self.model.fit(X_tensor, y, self.batch_size, self.epochs, callbacks, verbose=False, val_data=val_data)
+        self.model.fit(X_input, y_tr, self.batch_size, self.epochs, callbacks, verbose=False, val_data=val_data)
 
         if hasattr(self.model, 'compute_baseline_hazards'):
             self.model.compute_baseline_hazards()
 
 
-    def predict_survival_function(self, X: pd.DataFrame, times: np.ndarray = None) -> np.ndarray:
-        X_tensor = X.values.astype('float32')
-        surv = self.model.predict_surv_df(X_tensor)
+    def predict_survival_function(self, X: pd.DataFrame, mask: Optional[pd.DataFrame] = None, times: np.ndarray = None) -> np.ndarray:
+        X_np = X.values.astype('float32')
+        X_input = X_np
+        if mask is not None:
+            mask_np = mask.reindex(index=X.index)[X.columns].values.astype('float32')
+            X_input = (X_np, mask_np)
+        surv = self.model.predict_surv_df(X_input)
 
         if times is not None:
             surv = surv.reindex(times, method='nearest', fill_value='extrapolate')
 
         return [interp1d(surv.index.values, surv.iloc[:, i].values, bounds_error=False, fill_value='extrapolate') for i in range(surv.shape[1])]
 
-    def predict(self, X: pd.DataFrame) -> np.ndarray:        
-        X_tensor = X.values.astype('float32')
+    def predict(self, X: pd.DataFrame, mask: Optional[pd.DataFrame] = None) -> np.ndarray:        
+        X_np = X.values.astype('float32')
+        X_input = X_np
+        if mask is not None:
+            mask_np = mask.reindex(index=X.index)[X.columns].values.astype('float32')
+            X_input = (X_np, mask_np)
         if hasattr(self.model, 'predict_risk'):
-            risk_scores = self.model.predict_risk(X_tensor)
+            risk_scores = self.model.predict_risk(X_input)
             
         elif hasattr(self.model, 'predict_cumulative_hazard'):
-            cum_haz = self.model.predict_cumulative_hazard(X_tensor)
+            cum_haz = self.model.predict_cumulative_hazard(X_input)
             time_point = cum_haz.index[-1]
             cum_haz_at_time = cum_haz.loc[time_point].values
             risk_scores = cum_haz_at_time
             
         elif hasattr(self.model, 'predict_surv_df'):
-            surv = self.model.predict_surv_df(X_tensor)
+            surv = self.model.predict_surv_df(X_input)
             
             time_point = surv.index[-1]
             surv_at_time = surv.loc[time_point].values
@@ -311,7 +352,7 @@ class NNSurvivalModel(BaseSurvivalModel):
             risk_scores = -np.log(surv_at_time)
             
         else:
-            risk_scores = self.model.predict(X_tensor).flatten()
+            risk_scores = self.model.predict(X_input).flatten()
             
         return risk_scores
     

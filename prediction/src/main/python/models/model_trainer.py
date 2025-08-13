@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 
-from sklearn.model_selection import StratifiedKFold
+from sklearn.model_selection import StratifiedKFold, KFold
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import MinMaxScaler
 
@@ -16,23 +16,29 @@ from joblib import Parallel, delayed
 
 from .survival_models import BaseSurvivalModel, NNSurvivalModel
 from utils.metrics import calculate_time_dependent_c_index, calculate_brier_score, calibration_assessment, calculate_time_dependent_auc
-from utils.settings import settings
+from utils.settings import config_settings
 
 class ModelTrainer:
-    def __init__(self, models: Dict[str, BaseSurvivalModel], random_state: int = 42):
+    def __init__(self, models: Dict[str, BaseSurvivalModel], settings = config_settings, random_state: int = 42):
+        self.settings = settings
         self.models = models
-        self.n_splits = settings.cross_val_n_splits
+        self.n_splits = self.settings.cross_val_n_splits
         self.random_state = random_state
         self.results = dict()
         self.trained_models = dict()
         self.feature_names: List[str] = []
         
-        self.max_time = settings.max_time
+        
+        self.max_time = self.settings.max_time
 
     def cross_validate(self, X: pd.DataFrame, y: pd.DataFrame, encoded_columns: Dict[str, List[str]]) -> List[Tuple[np.ndarray, np.ndarray]]:
-        skf = StratifiedKFold(n_splits=self.n_splits, shuffle=True, random_state=self.random_state)
-      
-        return list(skf.split(X, y[settings.event_col].astype(str)))
+        if self.settings.event_col in y.dtype.names:
+            splitter = StratifiedKFold(n_splits=self.n_splits, shuffle=True, random_state=self.random_state)
+            return list(splitter.split(X, y[self.settings.event_col].astype(str)))
+        else:
+            splitter = KFold(n_splits=self.n_splits, shuffle=True, random_state=self.random_state)
+            return list(splitter.split(X))
+        
     
     def _initialize_model(self, model_template: BaseSurvivalModel, input_size: Optional[int] = None) -> BaseSurvivalModel:
         model_class = type(model_template)
@@ -44,10 +50,10 @@ class ModelTrainer:
         return model_class(**kwargs)
     
     def save_model(self, model: BaseSurvivalModel, model_name: str)-> None:
-        if not os.path.exists(settings.save_path):
-            os.makedirs(settings.save_path)
+        if not os.path.exists(self.settings.save_path):
+            os.makedirs(self.settings.save_path)
             
-        model_file = os.path.join(settings.save_path, f"{settings.outcome}_{model_name}")
+        model_file = os.path.join(self.settings.save_path, f"{self.settings.outcome}_{model_name}")
 
         if isinstance(model, NNSurvivalModel):
          
@@ -111,7 +117,7 @@ class ModelTrainer:
         train_idx, val_idx = indices
         X_train, X_val = X.iloc[train_idx], X.iloc[val_idx]
 
-        y_df = pd.DataFrame({'duration': y[settings.duration_col], 'event': y[settings.event_col]}, index=X.index)
+        y_df = pd.DataFrame({'duration': y[self.settings.duration_col], 'event': y[self.settings.event_col]}, index=X.index)
         y_train_df, y_val_df = y_df.iloc[train_idx], y_df.iloc[val_idx]
 
         y_train_structured = Surv.from_dataframe('event', 'duration', y_train_df)
@@ -169,12 +175,16 @@ class ModelTrainer:
         X_val: pd.DataFrame, 
         y_train_structured: pd.DataFrame, 
         y_val_structured: pd.DataFrame, 
-        model_name: str
+        model_name: str,
+        mask: Optional[pd.DataFrame] = None 
     ) -> Dict[str, List[float]]:
         results = {}
 
         try:
-            surv_funcs = model.predict_survival_function(X_val)
+            if isinstance(model, NNSurvivalModel):
+                surv_funcs = model.predict_survival_function(X_val, mask=mask)
+            else:
+                surv_funcs = model.predict_survival_function(X_val)
         except AttributeError:
             surv_funcs = None
 
@@ -182,17 +192,26 @@ class ModelTrainer:
             durations = y_val_structured['duration']
             risk_scores = model.predict(X_val, durations=durations)
         else:
-            risk_scores = model.predict(X_val)
+            if isinstance(model, NNSurvivalModel):
+                risk_scores = model.predict(X_val, mask=mask)
+            else:
+                risk_scores = model.predict(X_val)
 
         times, predictions, auc_input = self._get_survival_metrics(
             model, model_name, surv_funcs, risk_scores, X_val, y_val_structured
         )
 
         results['c_index'] = calculate_time_dependent_c_index(predictions, y_val_structured['duration'], y_val_structured['event'], times)
-        results['ibs'] = calculate_brier_score(y_train_structured, y_val_structured, predictions, times)
         results['ce'] = calibration_assessment(predictions, y_val_structured, times)
-
-        auc_times, mean_auc = calculate_time_dependent_auc(y_train_structured, y_val_structured, auc_input, times)
+        
+        max_train_time = float(y_train_structured["duration"].max())  - 1e-5
+        safe_times = times[times < (max_train_time)]
+        y_val_clipped = y_val_structured.copy()
+        y_val_clipped["duration"] = np.minimum(y_val_clipped["duration"], max_train_time)
+        
+        results['ibs'] = calculate_brier_score(y_train_structured, y_val_clipped, predictions, safe_times)
+        
+        _, mean_auc = calculate_time_dependent_auc(y_train_structured,y_val_clipped,auc_input,safe_times)
         results['auc'] = mean_auc
 
         return results
@@ -205,22 +224,31 @@ class ModelTrainer:
         X: pd.DataFrame,
         y: pd.DataFrame,
         encoded_columns: Dict[str, List[str]],
+        mask_df: Optional[pd.DataFrame] = None
     ) -> Dict[str, float]:
         
-        X_tr, y_tr_struct, X_val, y_val_struct, y_val_df = \
-            self._prepare_fold_data(X, y, fold_indices)
+        X_tr, y_tr_struct, X_val, y_val_struct, y_val_df = self._prepare_fold_data(X, y, fold_indices)
+        
+        tr_mask  = mask_df.loc[X_tr.index,  X_tr.columns] if mask_df is not None else None
+        val_mask = mask_df.loc[X_val.index, X_val.columns] if mask_df is not None else None
 
         model = self._initialize_model(model_template, input_size=X.shape[1])
         ModelTrainer._set_attention_indices(model, self.feature_names)
 
         if isinstance(model, NNSurvivalModel):
-            val_data = (X_val.values.astype('float32'), y_val_struct)
-            model.fit(X_tr, y_tr_struct, val_data=val_data)
+            if val_mask is not None:
+                val_X_tuple = (X_val.values.astype('float32'), val_mask.values.astype('float32'))
+                val_data = (val_X_tuple, y_val_struct)
+            else:
+                val_data = (X_val.values.astype('float32'), y_val_struct)
+
+            model.fit(X_tr, y_tr_struct, val_data=val_data, mask=tr_mask)
         else:
             model.fit(X_tr, y_tr_struct)
 
-        metrics = self._evaluate_model(model, X_val, y_tr_struct, y_val_struct, model_name)
-        
+        metrics = self._evaluate_model(
+            model, X_val, y_tr_struct, y_val_struct, model_name, mask=val_mask
+        )
         return metrics
     
     def train_and_evaluate(
@@ -228,6 +256,8 @@ class ModelTrainer:
         X_train:  pd.DataFrame, y_train: pd.DataFrame, 
         X_test: pd.DataFrame, y_test: pd.DataFrame, 
         encoded_columns: Dict[str, List[str]], 
+        mask_train: Optional[pd.DataFrame] = None,
+        mask_test:  Optional[pd.DataFrame] = None  
     ) -> Tuple[pd.DataFrame, Dict[str, BaseSurvivalModel]]:
         self.feature_names = X_train.columns.tolist()
         folds = self.cross_validate(X_train, y_train, encoded_columns)
@@ -236,14 +266,15 @@ class ModelTrainer:
             print(f"training model: {model_name}")
             model_metrics = {'cv': {'c_index': [], 'ibs': [], 'ce': [], 'auc': []}}
 
-            cv_fold_results = Parallel(n_jobs=settings.n_jobs , backend="threading", verbose=10)(
+            cv_fold_results = Parallel(n_jobs=self.settings.n_jobs , backend="threading", verbose=10)(
                 delayed(self._run_one_fold)(
                     model_name,
                     model_template,
                     fold_idx,
                     X_train,
                     y_train,
-                    encoded_columns)
+                    encoded_columns,
+                    mask_df=mask_train)
                 for fold_idx in folds)
 
             mean_results = {
@@ -258,9 +289,9 @@ class ModelTrainer:
             ModelTrainer._set_attention_indices(final_model,
                                                     self.feature_names)
             
-            y_train_df = pd.DataFrame({'duration': y_train[settings.duration_col], 'event': y_train[settings.event_col]}, index=X_train.index)
+            y_train_df = pd.DataFrame({'duration': y_train[self.settings.duration_col], 'event': y_train[self.settings.event_col]}, index=X_train.index)
             y_train_structured = Surv.from_dataframe('event', 'duration', y_train_df)
-            y_test_df = pd.DataFrame({'duration': y_test[settings.duration_col], 'event': y_test[settings.event_col]}, index=X_test.index)
+            y_test_df = pd.DataFrame({'duration': y_test[self.settings.duration_col], 'event': y_test[self.settings.event_col]}, index=X_test.index)
             y_test_structured = Surv.from_dataframe('event', 'duration', y_test_df)
 
             if isinstance(final_model, NNSurvivalModel):
@@ -268,18 +299,29 @@ class ModelTrainer:
         
                 y_train_structured_final = Surv.from_dataframe('event', 'duration', y_train_final)
                 y_val_structured_final = Surv.from_dataframe('event', 'duration', y_val_final)
-                val_data = (X_val_final.values.astype('float32'), y_val_structured_final)
-
-                final_model.fit(X_train_final, y_train_structured_final, val_data=val_data)
+                
+                
+                train_mask_final = None
+                val_mask_final   = None
+                if mask_train is not None:
+                    train_mask_final = mask_train.loc[X_train_final.index, X_train_final.columns]
+                    val_mask_final   = mask_train.loc[X_val_final.index,   X_val_final.columns]
+                if val_mask_final is not None:
+                    val_X_tuple = (X_val_final.values.astype('float32'),
+                                   val_mask_final.values.astype('float32'))
+                    val_data = (val_X_tuple, y_val_structured_final)
+                else:
+                    val_data = (X_val_final.values.astype('float32'), y_val_structured_final)
+                final_model.fit(X_train_final, y_train_structured_final, val_data=val_data, mask=train_mask_final)
             else:
-                final_model.fit(X_train, y_train_structured)
+                    final_model.fit(X_train, y_train_structured)
                 
                 
             holdout_metrics = self._evaluate_model(
-               final_model, X_test, y_train_structured, y_test_structured, model_name
+               final_model, X_test, y_train_structured, y_test_structured, model_name, mask=mask_test 
             )
             
-            if settings.save_models:
+            if self.settings.save_models:
                 self.save_model(final_model, model_name)
                 
             print(f"{model_name} Hold-Out Results: {holdout_metrics}")
@@ -288,4 +330,3 @@ class ModelTrainer:
             self.results[model_name]['holdout'] = holdout_metrics
 
         return self.results, self.trained_models
-
