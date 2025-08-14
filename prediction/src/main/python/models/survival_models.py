@@ -116,40 +116,46 @@ class FeatureAttention(nn.Module):
             nn.Linear(input_size, input_size),
             nn.Sigmoid()
         )
+    
+    def _biological_gate(self, x: torch.Tensor) -> torch.Tensor:
+        B, D = x.shape
+        gate = torch.ones(B, D, dtype=x.dtype, device=x.device)
 
-    def _apply_gate(self, x):
-        if settings.use_gate:
-            if self.msi_index is not None and self.immuno_index is not None:
-                msi_gate = x[:, self.msi_index].unsqueeze(1)
-                x[:, self.immuno_index] *= msi_gate
-            if self.ras_index is not None and self.panitumumab_index is not None:
-                ras_gate = 1 - x[:, self.ras_index]
-                x[:, self.panitumumab_index] *= ras_gate
-            if self.treatment_indices:
-                mask = x[:, self.treatment_indices]
-                gate = (mask > 0).float()
-                x[:, self.treatment_indices] *= gate
-        return x
+        if not settings.use_gate:
+            return gate
 
-    def forward(self, x, mask=None):
-        x = self._apply_gate(x)
-        
-        if mask is not None:
+        if (self.msi_index is not None) and (len(self.immuno_index) > 0):
+            msi_val = x[:, self.msi_index].clamp(0, 1).unsqueeze(1)
+            gate[:, self.immuno_index] = msi_val.expand(-1, len(self.immuno_index))
+
+        if (self.ras_index is not None) and (self.panitumumab_index is not None):
+            ras_gate = (1.0 - x[:, self.ras_index].clamp(0, 1))        
+            gate[:, self.panitumumab_index] = ras_gate
+
+        if len(self.treatment_indices) > 0:
+            tmask = (x[:, self.treatment_indices] > 0).to(dtype=x.dtype)
+            gate[:, self.treatment_indices] = tmask
+
+        return gate
+
+    def forward(self, x: torch.Tensor, mask: Optional[torch.Tensor] = None) -> torch.Tensor:
+        if mask is None:
+            mask = torch.ones_like(x)
+        else:
             if not torch.is_tensor(mask):
                 mask = torch.as_tensor(mask, dtype=x.dtype, device=x.device)
             else:
                 mask = mask.to(dtype=x.dtype, device=x.device)
-            x = x * mask
-        
-        weights = self.attn(x)
-        
-        if mask is not None:
-            weights = weights * mask
-        
-        return x * weights
 
-    
-    
+        bio_gate = self._biological_gate(x)      
+        full_gate = bio_gate * mask          
+
+        x_masked = x * full_gate
+        weights = self.attn(x_masked) * full_gate
+
+        return x_masked * weights
+
+
     
 class AttentionMLP(nn.Module):
     def __init__(self, input_size: int, num_nodes: List[int], out_features: int, activation, batch_norm: bool, dropout: float, msi_index: int = None, immuno_index: List[int] = None, ras_index: int = None, panitumumab_index: int = None, treatment_indices: List[int]=None):
