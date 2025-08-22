@@ -10,12 +10,16 @@ from sksurv.util import Surv
 import torch
 import dill
 import os
+import re
 
 from typing import List, Dict, Tuple, Any, Optional, Callable
 from joblib import Parallel, delayed
 
 from models.models import *
-from utils.metrics import calculate_time_dependent_c_index, calculate_brier_score, calibration_assessment, calculate_time_dependent_auc
+from utils.metrics import calculate_time_dependent_c_index, calculate_brier_score, calibration_assessment, calculate_time_dependent_auc, compute_c_for_benefit_per_treatment
+from utils.cfb import CForBenefitCovariateMatcher
+cfb_matcher = CForBenefitCovariateMatcher()
+
 from utils.settings import config_settings
 
 class ModelTrainer:
@@ -26,9 +30,7 @@ class ModelTrainer:
         self.random_state = random_state
         self.results = dict()
         self.trained_models = dict()
-        self.feature_names: List[str] = []
-        
-        
+        self.feature_names: List[str] = [] 
         self.max_time = self.settings.max_time
 
     def cross_validate(self, X: pd.DataFrame, y: pd.DataFrame, encoded_columns: Dict[str, List[str]]) -> List[Tuple[np.ndarray, np.ndarray]]:
@@ -74,40 +76,40 @@ class ModelTrainer:
                 
     @staticmethod
     def _set_attention_indices(model: BaseSurvivalModel, feature_names: List[str]):
-        
-        if not (isinstance(model, NNSurvivalModel) and hasattr(model.net, 'attention')):
-            return
-
-        attn = model.net.attention
-
-        if 'hasMsi' in feature_names:
-            attn.msi_index = feature_names.index('hasMsi')
-        else:
-            attn.msi_index = None
+        def col_idx(name: str):
+            return feature_names.index(name) if name in feature_names else None
 
         immuno_cols = [
             'systemicTreatmentPlan_pembrolizumab',
             'systemicTreatmentPlan_nivolumab'
         ]
-        attn.immuno_index = [feature_names.index(c) for c in immuno_cols if c in feature_names] or None
+        immuno_idx_list = [feature_names.index(c) for c in immuno_cols if c in feature_names]
+        immuno_idx_list = immuno_idx_list if immuno_idx_list else None
 
-        if 'hasRasMutation' in feature_names:
-            attn.ras_index = feature_names.index('hasRasMutation')
-        else:
-            attn.ras_index = None
-
-        if 'systemicTreatmentPlan_panitumumab' in feature_names:
-            attn.panitumumab_index = feature_names.index('systemicTreatmentPlan_panitumumab')
-        else:
-            attn.panitumumab_index = None
+        panitumumab_idx = col_idx('systemicTreatmentPlan_panitumumab')
+        msi_idx = col_idx('hasMsi')
+        ras_idx = col_idx('hasRasMutation')
 
         treatment_idxs = [
             i for i, f in enumerate(feature_names)
             if f.startswith('systemicTreatmentPlan_') or f == 'treatment'
-        ]
-        
-        attn.treatment_indices = treatment_idxs if treatment_idxs else None
+        ] or None
 
+        if isinstance(model, NNSurvivalModel) and hasattr(model.net, 'attention'):
+            attn = model.net.attention
+            attn.msi_index = msi_idx
+            attn.immuno_index = immuno_idx_list
+            attn.ras_index = ras_idx
+            attn.panitumumab_index = panitumumab_idx
+            attn.treatment_indices = treatment_idxs
+                                                                                            
+            return
+
+        if isinstance(model, MultiTaskNNSurvivalModel):
+            model.net.msi_index = msi_idx
+            model.net.ras_index = ras_idx
+                                                                                                  
+        return
     
     def _prepare_fold_data(
         self, 
@@ -136,31 +138,14 @@ class ModelTrainer:
         y_val_structured: np.ndarray
     ) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:  
         
-        max_follow_up = y_val_structured['duration'].max()
-        min_follow_up = y_val_structured['duration'].min()
-        upper_bound = min(self.max_time, max_follow_up)
-        
-        if isinstance(model, MultiTaskNNSurvivalModel) and isinstance(surv_funcs, pd.DataFrame):
-            max_times = [surv_funcs.index[-1]]
-            global_max_time = min(max_times)
-            upper_bound = min(upper_bound, global_max_time)
-        elif surv_funcs is not None:
-            max_times = [fn.x[-1] for fn in surv_funcs]
-            global_max_time = min(max_times)
-            upper_bound = min(upper_bound, global_max_time)
-         
-        if upper_bound < 30: 
-            times = np.array([upper_bound])
-        else:
-            start_time = max(30, min_follow_up)
-            months_count = int((upper_bound - 30) // 30) + 1
-            end_time = start_time + (months_count - 1)*30
-            times = np.arange(start_time, end_time + 1, 30)
-    
-            if times.size == 0:
-                times = np.array([upper_bound])
-    
-        times = times[(times > min_follow_up) & (times < max_follow_up)].astype(int)
+        grid = np.asarray(config_settings.fixed_time_bins, dtype=int)
+        lower = int(y_val_structured['duration'].min())
+        upper = int(min(self.max_time, y_val_structured['duration'].max()))
+
+        times = grid[(grid > lower) & (grid < upper)]
+        if times.size == 0:
+            times = np.array([min(upper, grid[-1])])
+
         
         if surv_funcs is None:  
             predictions = risk_scores
@@ -177,8 +162,8 @@ class ModelTrainer:
                 
         return times, predictions, auc_input
 
-                
-    
+    # models/model_trainer.py (inside _evaluate_model)
+
     def _evaluate_model(
         self, 
         model: BaseSurvivalModel, 
@@ -186,41 +171,65 @@ class ModelTrainer:
         y_train_structured: pd.DataFrame, 
         y_val_structured: pd.DataFrame, 
         model_name: str
-        ) -> Dict[str, List[float]]:
+    ) -> Dict[str, List[float]]:
         results = {}
-        
+
+        X_val_with_tgi = X_val.copy()
+        y_val_df = pd.DataFrame({
+            "duration": y_val_structured["duration"],
+            "event": y_val_structured["event"],
+        }, index=X_val_with_tgi.index)
+
         if isinstance(model, MultiTaskNNSurvivalModel):
-            task_idx_val = X_val['treatment_group_idx'].values.astype(int)
-            X_val = X_val.drop(columns=['treatment_group_idx'])
-    
-            surv_funcs = model.predict_survival_function(X_val, task_idx_val)
-            risk_scores = model.predict(X_val, task_idx=task_idx_val)
+            task_idx_val = X_val_with_tgi['treatment_group_idx'].values.astype(int)
+            X_val_input = X_val_with_tgi.drop(columns=['treatment_group_idx'])
+            surv_funcs = model.predict_survival_function(X_val_input, task_idx_val)
+            risk_scores = model.predict(X_val_input, task_idx=task_idx_val)
         else:
+            X_val_input = X_val_with_tgi.drop(columns=['treatment_group_idx'], errors="ignore")
             try:
-                surv_funcs = model.predict_survival_function(X_val)
+                surv_funcs = model.predict_survival_function(X_val_input)
             except AttributeError:
                 surv_funcs = None
-            risk_scores = model.predict(X_val)
+            risk_scores = model.predict(X_val_input)
+
 
         times, predictions, auc_input = self._get_survival_metrics(
             model, model_name, surv_funcs, risk_scores, X_val, y_val_structured
         )
 
-        results['c_index'] = calculate_time_dependent_c_index(predictions, y_val_structured['duration'], y_val_structured['event'], times)
+        results['c_index'] = calculate_time_dependent_c_index(
+            predictions, y_val_structured['duration'], y_val_structured['event'], times
+        )
         results['ce'] = calibration_assessment(predictions, y_val_structured, times)
-        
-        max_train_time = float(y_train_structured["duration"].max())  - 1e-5
+
+        max_train_time = float(y_train_structured["duration"].max()) - 1e-5
         safe_times = times[times < (max_train_time)]
         y_val_clipped = y_val_structured.copy()
         y_val_clipped["duration"] = np.minimum(y_val_clipped["duration"], max_train_time)
-        
+
         results['ibs'] = calculate_brier_score(y_train_structured, y_val_clipped, predictions, safe_times)
-        
-        _, mean_auc = calculate_time_dependent_auc(y_train_structured,y_val_clipped,auc_input,safe_times)
+        _, mean_auc = calculate_time_dependent_auc(y_train_structured, y_val_clipped, auc_input, safe_times)
         results['auc'] = mean_auc
 
+        # --- C-for-benefit per treatment (uses X_val_with_tgi and y_val_df) ---
+        cfb_df = compute_c_for_benefit_per_treatment(
+            model=model,
+            X_val_with_tgi=X_val_with_tgi,
+            y_df=y_val_df,
+            treatment_groups=self.settings.treatment_groups,
+            feature_cols=self.feature_names,
+            days=self.settings.evaluation_days
+        )
+        results['cfb_mean'] = float(cfb_df['c_for_benefit'].mean()) if not cfb_df.empty else float('nan')
+        
+        for _, row in cfb_df.iterrows():
+            t_name = str(row['treatment'])
+            score = float(row['c_for_benefit']) if pd.notnull(row['c_for_benefit']) else float('nan')
+            results[f"cfb_{re.sub(r'[^a-z0-9]+', '_', t_name.lower()).strip('_')}"] = score
+
         return results
-    
+
     def _run_one_fold(
         self,
         model_name: str,
@@ -232,27 +241,34 @@ class ModelTrainer:
     ) -> Dict[str, float]:
         
         X_tr, y_tr_struct, X_val, y_val_struct, y_val_df = self._prepare_fold_data(X, y, fold_indices)
+        input_size = X_tr.drop(columns=['treatment_group_idx']).shape[1]
+        num_tasks_fold = int(max(X_tr['treatment_group_idx'].max(),
+                         X_val['treatment_group_idx'].max())) + 1
+
+        # pass into the template kwargs so _initialize_model picks it up
         if isinstance(model_template, MultiTaskNNSurvivalModel):
-            input_size = X_tr.drop(columns=['treatment_group_idx']).shape[1]
-        else:
-            input_size = X_tr.shape[1]
-            
+            model_template.kwargs['num_tasks'] = num_tasks_fold
+   
         model = self._initialize_model(model_template, input_size=input_size)
         ModelTrainer._set_attention_indices(model, self.feature_names)
 
         if isinstance(model, NNSurvivalModel):
-            val_data = (X_val.values.astype('float32'), y_val_struct)
-            model.fit(X_tr, y_tr_struct, val_data=val_data)
+            X_tr_input = X_tr.drop(columns=['treatment_group_idx'], errors="ignore")
+            val_data = (X_val.drop(columns=['treatment_group_idx'], errors="ignore").values.astype('float32'),
+                        y_val_struct)
+            model.fit(X_tr_input, y_tr_struct, val_data=val_data)
+
         elif isinstance(model, MultiTaskNNSurvivalModel):
             task_idx_tr = X_tr['treatment_group_idx'].values.astype(int)
             task_idx_val = X_val['treatment_group_idx'].values.astype(int)
             X_tr_input  = X_tr.drop(columns=['treatment_group_idx'])
             X_val_input = X_val.drop(columns=['treatment_group_idx'])
-
             model.fit(X_tr_input, task_idx_tr, y_tr_struct, val_data=(X_val_input, y_val_df))
-            
+
         else:
-            model.fit(X_tr, y_tr_struct)
+            # Cox, RSF, DeepSurv, etc.
+            X_tr_input = X_tr.drop(columns=['treatment_group_idx'], errors="ignore")
+            model.fit(X_tr_input, y_tr_struct)
 
         metrics = self._evaluate_model(model, X_val, y_tr_struct, y_val_struct, model_name)
         
@@ -289,11 +305,15 @@ class ModelTrainer:
             print(f"{model_name} CV Results: {mean_results}")
             
             print("training final model")
+            num_tasks_final = int(max(X_train['treatment_group_idx'].max(), X_test['treatment_group_idx'].max())) + 1
             if isinstance(model_template, MultiTaskNNSurvivalModel):
-                input_size = X_train.drop(columns=['treatment_group_idx']).shape[1]
-            else:
-                input_size = X_train.shape[1]
-            final_model = self._initialize_model(model_template, input_size=input_size)
+                model_template.kwargs['num_tasks'] = num_tasks_final
+
+            final_model = self._initialize_model(
+                model_template, input_size=X_train.drop(columns=['treatment_group_idx']).shape[1]
+            )
+
+            final_model = self._initialize_model(model_template, input_size=X_train.drop(columns=['treatment_group_idx']).shape[1])
             ModelTrainer._set_attention_indices(final_model,
                                                     self.feature_names)
             
@@ -301,9 +321,13 @@ class ModelTrainer:
             y_train_structured = Surv.from_dataframe('event', 'duration', y_train_df)
             y_test_df = pd.DataFrame({'duration': y_test[self.settings.duration_col], 'event': y_test[self.settings.event_col]}, index=X_test.index)
             y_test_structured = Surv.from_dataframe('event', 'duration', y_test_df)
-
+            
+            
+            task_idx_train = X_train['treatment_group_idx'].values.astype(int)
+            X_train_input  = X_train.drop(columns=['treatment_group_idx'])
+            
             if isinstance(final_model, NNSurvivalModel):
-                X_train_final, X_val_final, y_train_final, y_val_final = train_test_split(X_train, y_train_df, test_size=0.1, random_state=self.random_state)
+                X_train_final, X_val_final, y_train_final, y_val_final = train_test_split(X_train_input, y_train_df, test_size=0.1, random_state=self.random_state)
         
                 y_train_structured_final = Surv.from_dataframe('event', 'duration', y_train_final)
                 y_val_structured_final = Surv.from_dataframe('event', 'duration', y_val_final)
@@ -312,12 +336,10 @@ class ModelTrainer:
                 final_model.fit(X_train_final, y_train_structured_final, val_data=val_data)
                 
             elif isinstance(final_model, MultiTaskNNSurvivalModel):
-                task_idx_train = X_train['treatment_group_idx'].values.astype(int)
-                X_train_input  = X_train.drop(columns=['treatment_group_idx'])
                 final_model.fit(X_train_input, task_idx_train, y_train_df)
 
             else:
-                final_model.fit(X_train, y_train_structured)
+                final_model.fit(X_train_input, y_train_structured)
                 
                 
             holdout_metrics = self._evaluate_model(

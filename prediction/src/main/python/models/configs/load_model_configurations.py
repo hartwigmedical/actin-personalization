@@ -1,7 +1,7 @@
 import importlib
 import json
 import os
-from models.models.survival_models import *
+from models.models import *
 from utils.settings import config_settings
 
 class ExperimentConfig:

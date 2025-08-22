@@ -19,9 +19,26 @@ class Settings:
     db_config_path: str = '/home/jupyter/.my.cnf'
     
     standardize: bool = True
-    multitask: bool = True
+    
+    evaluation_days: int = 365
+    treatment_groups = [
+        "No Treatment",
+        "5-FU",
+        "5-FU + bevacizumab",
+        "5-FU + oxaliplatin",
+        "5-FU + oxaliplatin + bevacizumab",
+        "5-FU + oxaliplatin + panitumumab",
+        "5-FU + irinotecan",
+        "5-FU + irinotecan + bevacizumab",
+        "5-FU + oxaliplatin + irinotecan",
+        "5-FU + oxaliplatin + irinotecan + bevacizumab",
+        "PEMBROLIZUMAB"
+    ]
     #--------------------------------------------------------------------------------------------
     # Derived or computed settings:
+    
+    treatment_idx = {name: idx for idx, name in enumerate(treatment_groups)}
+    
     event_col: Optional[str] = None
     duration_col: Optional[str] = None
     fixed_time_bins: Optional[List[int]] = None

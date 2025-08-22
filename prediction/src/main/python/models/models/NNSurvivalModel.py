@@ -7,6 +7,8 @@ import torchtuples as tt
 from typing import Dict, Any, Optional, List
 from scipy.interpolate import interp1d
 
+from pycox.models import CoxPH, LogisticHazard, DeepHitSingle, PCHazard, MTLR
+
 from models.models.survival_models import BaseSurvivalModel
 from utils.settings import config_settings
 
@@ -121,7 +123,7 @@ class NNSurvivalModel(BaseSurvivalModel):
 
         if hasattr(self.model_class, 'label_transform'):
             self.labtrans = self.model_class.label_transform(self.num_durations)
-            labtrans.cuts = config_settings.fixed_time_bins
+            self.labtrans.cuts = config_settings.fixed_time_bins
             y = self.labtrans.fit_transform(durations, events)
             self.model.duration_index = self.labtrans.cuts
         else:
@@ -146,14 +148,34 @@ class NNSurvivalModel(BaseSurvivalModel):
             self.model.compute_baseline_hazards()
 
 
-    def predict_survival_function(self, X: pd.DataFrame, times: np.ndarray = None) -> np.ndarray:
+    def predict_survival_function(self, X: pd.DataFrame, times: np.ndarray = None):
         X_tensor = X.values.astype('float32')
-        surv = self.model.predict_surv_df(X_tensor)
+        surv_df = self.model.predict_surv_df(X_tensor)  # shape: [n_times_src, n_samples]
 
-        if times is not None:
-            surv = surv.reindex(times, method='nearest', fill_value='extrapolate')
+        # Clean source time grid
+        surv_df = surv_df[~surv_df.index.duplicated(keep='first')].sort_index()
 
-        return [interp1d(surv.index.values, surv.iloc[:, i].values, bounds_error=False, fill_value='extrapolate') for i in range(surv.shape[1])]
+        # Decide target grid
+        if times is None:
+            target = np.asarray(config_settings.fixed_time_bins, dtype=float)
+        else:
+            target = np.asarray(times, dtype=float)
+            target = np.unique(target)  # strictly increasing
+
+        # Interpolate each column onto target grid
+        t_src = surv_df.index.values.astype(float)
+        mat   = surv_df.values
+        out   = np.empty((len(target), mat.shape[1]), dtype=float)
+        for j in range(mat.shape[1]):
+            out[:, j] = np.interp(target, t_src, mat[:, j], left=mat[0, j], right=mat[-1, j])
+
+        # Numerical safety
+        out = np.clip(out, 1e-8, 1.0)
+
+        # If your downstream expects callables:
+        return [lambda t, col=j: np.interp(t, target, out[:, col], left=out[0, col], right=out[-1, col])
+                for j in range(out.shape[1])]
+
 
     def predict(self, X: pd.DataFrame) -> np.ndarray:        
         X_tensor = X.values.astype('float32')
@@ -226,8 +248,6 @@ class FeatureAttentionGating(nn.Module):
         x = self._apply_gate(x)
         weights = self.attn(x)
         return x * weights
-    
-
 
 class DeepSurv(NNSurvivalModel):
     def __init__(self, **kwargs: Dict[str, Any]):
@@ -235,25 +255,25 @@ class DeepSurv(NNSurvivalModel):
         super().__init__(model_class = CoxPH, **kwargs)
 
 class LogisticHazardModel(NNSurvivalModel):
-    def __init__(self, **kwargs: Dict[str, Any]):
+    def __init__(self, **kwargs):
         kwargs.pop('model_class', None)
-        kwargs.pop('num_durations', None) 
-        super().__init__(model_class = LogisticHazard, num_durations=60, **kwargs)
+        kwargs['num_durations'] = len(config_settings.fixed_time_bins)
+        super().__init__(model_class=LogisticHazard, **kwargs)
 
 class DeepHitModel(NNSurvivalModel):
-    def __init__(self, **kwargs: Dict[str, Any]):
-        kwargs.pop('num_durations', None) 
+    def __init__(self, **kwargs):
         kwargs.pop('model_class', None)
-        super().__init__(model_class = DeepHitSingle, num_durations=60, **kwargs)
+        kwargs['num_durations'] = len(config_settings.fixed_time_bins)
+        super().__init__(model_class=DeepHitSingle, **kwargs)
 
 class PCHazardModel(NNSurvivalModel):
-    def __init__(self, **kwargs: Dict[str, Any]):
-        kwargs.pop('num_durations', None) 
+    def __init__(self, **kwargs):
         kwargs.pop('model_class', None)
-        super().__init__(model_class = PCHazard, num_durations=60, **kwargs)
+        kwargs['num_durations'] = len(config_settings.fixed_time_bins)
+        super().__init__(model_class=PCHazard, **kwargs)
 
 class MTLRModel(NNSurvivalModel):
-    def __init__(self, **kwargs: Dict[str, Any]):
-        kwargs.pop('num_durations', None) 
+    def __init__(self, **kwargs):
         kwargs.pop('model_class', None)
-        super().__init__(model_class = MTLR, num_durations=60, **kwargs)
+        kwargs['num_durations'] = len(config_settings.fixed_time_bins)
+        super().__init__(model_class=MTLR, **kwargs)

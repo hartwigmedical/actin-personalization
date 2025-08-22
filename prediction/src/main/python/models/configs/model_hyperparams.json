@@ -1,7 +1,7 @@
 {
     "treatment_specific_OS": {
         "DeepSurv": {
-            "class": "models.survival_models.DeepSurv",
+            "class": "models.models.NNSurvivalModel.DeepSurv",
             "kwargs": {
                 "num_nodes": [
                     64
@@ -20,7 +20,7 @@
             }
         },
         "DeepSurv_attention": {
-            "class": "models.survival_models.DeepSurv",
+            "class": "models.models.NNSurvivalModel.DeepSurv",
             "kwargs": {
                 "num_nodes": [
                     128,
@@ -41,7 +41,7 @@
             }
         },
         "LogisticHazardModel": {
-            "class": "models.survival_models.LogisticHazardModel",
+            "class": "models.models.NNSurvivalModel.LogisticHazardModel",
             "kwargs": {
                 "num_nodes": [
                     128,
@@ -59,7 +59,7 @@
             }
         },
         "LogisticHazardModel_attention": {
-            "class": "models.survival_models.LogisticHazardModel",
+            "class": "models.models.NNSurvivalModel.LogisticHazardModel",
             "kwargs": {
                 "num_nodes": [
                     128,
@@ -76,7 +76,7 @@
             }
         },
         "DeepHitModel": {
-            "class": "models.survival_models.DeepHitModel",
+            "class": "models.models.NNSurvivalModel.DeepHitModel",
             "kwargs": {
                 "num_nodes": [
                     256,
@@ -97,7 +97,7 @@
             }
         },
         "DeepHitModel_attention": {
-            "class": "models.survival_models.DeepHitModel",
+            "class": "models.models.NNSurvivalModel.DeepHitModel",
             "kwargs": {
                 "num_nodes": [
                     256,
@@ -118,7 +118,7 @@
             }
         },
         "PCHazardModel": {
-            "class": "models.survival_models.PCHazardModel",
+            "class": "models.models.NNSurvivalModel.PCHazardModel",
             "kwargs": {
                 "num_nodes": [
                     32
@@ -135,7 +135,7 @@
             }
         },
         "PCHazardModel_attention": {
-            "class": "models.survival_models.PCHazardModel",
+            "class": "models.models.NNSurvivalModel.PCHazardModel",
             "kwargs": {
                 "num_nodes": [
                     32
@@ -152,7 +152,7 @@
             }
         },
         "MTLRModel": {
-            "class": "models.survival_models.MTLRModel",
+            "class": "models.models.NNSurvivalModel.MTLRModel",
             "kwargs": {
                 "num_nodes": [
                     32
@@ -168,7 +168,7 @@
             }
         },
         "MTLRModel_attention": {
-            "class": "models.survival_models.MTLRModel",
+            "class": "models.models.NNSurvivalModel.MTLRModel",
             "kwargs": {
                 "num_nodes": [
                     32
@@ -184,7 +184,7 @@
             }
         },
         "CoxPH": {
-            "class": "models.survival_models.CoxPHModel",
+            "class": "models.models.survival_models.CoxPHModel",
             "kwargs": {
                 "alpha": 1.0,
                 "ties": "breslow",
@@ -193,7 +193,7 @@
             }
         },
         "RandomSurvivalForest": {
-            "class": "models.survival_models.RandomSurvivalForestModel",
+            "class": "models.models.survival_models.RandomSurvivalForestModel",
             "kwargs": {
                 "n_estimators": 500,
                 "max_depth": 20,
@@ -203,7 +203,7 @@
             }
         },
         "GradientBoosting": {
-            "class": "models.survival_models.GradientBoostingSurvivalModel",
+            "class": "models.models.survival_models.GradientBoostingSurvivalModel",
             "kwargs": {
                 "learning_rate": 0.1,
                 "n_estimators": 50,
@@ -216,7 +216,7 @@
     },
     "treatment_specific_PFS": {
         "DeepSurv": {
-            "class": "models.survival_models.DeepSurv",
+            "class": "models.models.NNSurvivalModel.DeepSurv",
             "kwargs": {
                 "num_nodes": [
                     256,
@@ -233,7 +233,7 @@
             }
         },
         "DeepSurv_attention": {
-            "class": "models.survival_models.DeepSurv",
+            "class": "models.models.NNSurvivalModel.DeepSurv",
             "kwargs": {
                 "num_nodes": [
                     64,
@@ -253,7 +253,7 @@
             }
         },
         "LogisticHazardModel": {
-            "class": "models.survival_models.LogisticHazardModel",
+            "class": "models.models.NNSurvivalModel.LogisticHazardModel",
             "kwargs": {
                 "num_nodes": [
                     128,
@@ -271,7 +271,7 @@
             }
         },
         "LogisticHazardModel_attention": {
-            "class": "models.survival_models.LogisticHazardModel",
+            "class": "models.models.NNSurvivalModel.LogisticHazardModel",
             "kwargs": {
                 "num_nodes": [
                     64,
@@ -288,7 +288,7 @@
             }
         },
         "DeepHitModel": {
-            "class": "models.survival_models.DeepHitModel",
+            "class": "models.models.NNSurvivalModel.DeepHitModel",
             "kwargs": {
                 "num_nodes": [
                     128,
@@ -309,7 +309,7 @@
             }
         },
         "DeepHitModel_attention": {
-            "class": "models.survival_models.DeepHitModel",
+            "class": "models.models.NNSurvivalModel.DeepHitModel",
             "kwargs": {
                 "num_nodes": [
                     128,
@@ -330,7 +330,7 @@
             }
         },
         "PCHazardModel": {
-            "class": "models.survival_models.PCHazardModel",
+            "class": "models.models.NNSurvivalModel.PCHazardModel",
             "kwargs": {
                 "num_nodes": [
                     128,
@@ -349,7 +349,7 @@
             }
         },
         "PCHazardModel_attention": {
-            "class": "models.survival_models.PCHazardModel",
+            "class": "models.models.NNSurvivalModel.PCHazardModel",
             "kwargs": {
                 "num_nodes": [
                     64,
@@ -367,7 +367,7 @@
             }
         },
         "MTLRModel": {
-            "class": "models.survival_models.MTLRModel",
+            "class": "models.models.NNSurvivalModel.MTLRModel",
             "kwargs": {
                 "num_nodes": [
                     32
@@ -383,7 +383,7 @@
             }
         },
         "MTLRModel_attention": {
-            "class": "models.survival_models.MTLRModel",
+            "class": "models.models.NNSurvivalModel.MTLRModel",
             "kwargs": {
                 "num_nodes": [
                     128,
@@ -400,7 +400,7 @@
             }
         },
         "CoxPH": {
-            "class": "models.survival_models.CoxPHModel",
+            "class": "models.models.survival_models.CoxPHModel",
             "kwargs": {
                 "alpha": 0.5,
                 "ties": "efron",
@@ -409,7 +409,7 @@
             }
         },
         "RandomSurvivalForest": {
-            "class": "models.survival_models.RandomSurvivalForestModel",
+            "class": "models.models.survival_models.RandomSurvivalForestModel",
             "kwargs": {
                 "n_estimators": 500,
                 "max_depth": 10,
@@ -419,7 +419,7 @@
             }
         },
         "GradientBoosting": {
-            "class": "models.survival_models.GradientBoostingSurvivalModel",
+            "class": "models.models.survival_models.GradientBoostingSurvivalModel",
             "kwargs": {
                 "learning_rate": 0.01,
                 "n_estimators": 500,
@@ -433,7 +433,7 @@
     },
     "treatment_vs_no_OS": {
         "DeepSurv": {
-            "class": "models.survival_models.DeepSurv",
+            "class": "models.models.NNSurvivalModel.DeepSurv",
             "kwargs": {
                 "num_nodes": [
                     128,
@@ -454,7 +454,7 @@
             }
         },
         "DeepSurv_attention": {
-            "class": "models.survival_models.DeepSurv",
+            "class": "models.models.NNSurvivalModel.DeepSurv",
             "kwargs": {
                 "num_nodes": [
                     64,
@@ -474,7 +474,7 @@
             }
         },
         "LogisticHazardModel": {
-            "class": "models.survival_models.LogisticHazardModel",
+            "class": "models.models.NNSurvivalModel.LogisticHazardModel",
             "kwargs": {
                 "num_nodes": [
                     64,
@@ -491,7 +491,7 @@
             }
         },
         "LogisticHazardModel_attention": {
-            "class": "models.survival_models.LogisticHazardModel",
+            "class": "models.models.NNSurvivalModel.LogisticHazardModel",
             "kwargs": {
                 "num_nodes": [
                     64,
@@ -508,7 +508,7 @@
             }
         },
         "DeepHitModel": {
-            "class": "models.survival_models.DeepHitModel",
+            "class": "models.models.NNSurvivalModel.DeepHitModel",
             "kwargs": {
                 "num_nodes": [
                     128,
@@ -528,7 +528,7 @@
             }
         },
         "DeepHitModel_attention": {
-            "class": "models.survival_models.DeepHitModel",
+            "class": "models.models.NNSurvivalModel.DeepHitModel",
             "kwargs": {
                 "num_nodes": [
                     128,
@@ -549,7 +549,7 @@
             }
         },
         "PCHazardModel": {
-            "class": "models.survival_models.PCHazardModel",
+            "class": "models.models.NNSurvivalModel.PCHazardModel",
             "kwargs": {
                 "num_nodes": [
                     128,
@@ -568,7 +568,7 @@
             }
         },
         "PCHazardModel_attention": {
-            "class": "models.survival_models.PCHazardModel",
+            "class": "models.models.NNSurvivalModel.PCHazardModel",
             "kwargs": {
                 "num_nodes": [
                     64,
@@ -586,7 +586,7 @@
             }
         },
         "MTLRModel": {
-            "class": "models.survival_models.MTLRModel",
+            "class": "models.models.NNSurvivalModel.MTLRModel",
             "kwargs": {
                 "num_nodes": [
                     128,
@@ -603,7 +603,7 @@
             }
         },
         "MTLRModel_attention": {
-            "class": "models.survival_models.MTLRModel",
+            "class": "models.models.NNSurvivalModel.MTLRModel",
             "kwargs": {
                 "num_nodes": [
                     256,
@@ -621,7 +621,7 @@
             }
         },
         "CoxPH": {
-            "class": "models.survival_models.CoxPHModel",
+            "class": "models.models.survival_models.CoxPHModel",
             "kwargs": {
                 "alpha": 1.0,
                 "ties": "breslow",
@@ -630,7 +630,7 @@
             }
         },
         "RandomSurvivalForest": {
-            "class": "models.survival_models.RandomSurvivalForestModel",
+            "class": "models.models.survival_models.RandomSurvivalForestModel",
             "kwargs": {
                 "n_estimators": 200,
                 "max_depth": 50,
@@ -639,7 +639,7 @@
             }
         },
         "GradientBoosting": {
-            "class": "models.survival_models.GradientBoostingSurvivalModel",
+            "class": "models.models.survival_models.GradientBoostingSurvivalModel",
             "kwargs": {
                 "learning_rate": 0.1,
                 "n_estimators": 50,
@@ -652,7 +652,7 @@
     },
     "treatment_drug_OS": {
         "DeepSurv": {
-            "class": "models.survival_models.DeepSurv",
+            "class": "models.models.NNSurvivalModel.DeepSurv",
             "kwargs": {
                 "num_nodes": [
                     128,
@@ -673,7 +673,7 @@
             }
         },
         "LogisticHazardModel": {
-            "class": "models.survival_models.LogisticHazardModel",
+            "class": "models.models.NNSurvivalModel.LogisticHazardModel",
             "kwargs": {
                 "num_nodes": [
                     64,
@@ -690,7 +690,7 @@
             }
         },
         "DeepHitModel": {
-            "class": "models.survival_models.DeepHitModel",
+            "class": "models.models.NNSurvivalModel.DeepHitModel",
             "kwargs": {
                 "num_nodes": [
                     256,
@@ -711,7 +711,7 @@
             }
         },
         "PCHazardModel": {
-            "class": "models.survival_models.PCHazardModel",
+            "class": "models.models.NNSurvivalModel.PCHazardModel",
             "kwargs": {
                 "num_nodes": [
                     64,
@@ -729,7 +729,7 @@
             }
         },
         "MTLRModel": {
-            "class": "models.survival_models.MTLRModel",
+            "class": "models.models.NNSurvivalModel.MTLRModel",
             "kwargs": {
                 "num_nodes": [
                     64
@@ -745,7 +745,7 @@
             }
         },
         "CoxPH": {
-            "class": "models.survival_models.CoxPHModel",
+            "class": "models.models.survival_models.CoxPHModel",
             "kwargs": {
                 "alpha": 1.0,
                 "ties": "breslow",
@@ -754,7 +754,7 @@
             }
         },
         "DeepSurv_attention": {
-            "class": "models.survival_models.DeepSurv",
+            "class": "models.models.NNSurvivalModel.DeepSurv",
             "kwargs": {
                 "num_nodes": [
                     64,
@@ -774,7 +774,7 @@
             }
         },
         "LogisticHazardModel_attention": {
-            "class": "models.survival_models.LogisticHazardModel",
+            "class": "models.models.NNSurvivalModel.LogisticHazardModel",
             "kwargs": {
                 "num_nodes": [
                     128,
@@ -791,7 +791,7 @@
             }
         },
         "DeepHitModel_attention": {
-            "class": "models.survival_models.DeepHitModel",
+            "class": "models.models.NNSurvivalModel.DeepHitModel",
             "kwargs": {
                 "num_nodes": [
                     128,
@@ -812,7 +812,7 @@
             }
         },
         "PCHazardModel_attention": {
-            "class": "models.survival_models.PCHazardModel",
+            "class": "models.models.NNSurvivalModel.PCHazardModel",
             "kwargs": {
                 "num_nodes": [
                     64,
@@ -830,7 +830,7 @@
             }
         },
         "MTLRModel_attention": {
-            "class": "models.survival_models.MTLRModel",
+            "class": "models.models.NNSurvivalModel.MTLRModel",
             "kwargs": {
                 "num_nodes": [
                     128,
@@ -848,7 +848,7 @@
             }
         },
         "RandomSurvivalForest": {
-            "class": "models.survival_models.RandomSurvivalForestModel",
+            "class": "models.models.survival_models.RandomSurvivalForestModel",
             "kwargs": {
                 "n_estimators": 200,
                 "max_depth": 20,
@@ -858,7 +858,7 @@
             }
         },
         "GradientBoosting": {
-            "class": "models.survival_models.GradientBoostingSurvivalModel",
+            "class": "models.models.survival_models.GradientBoostingSurvivalModel",
             "kwargs": {
                 "learning_rate": 0.1,
                 "n_estimators": 300,
@@ -868,8 +868,6 @@
                 "min_samples_split": 10,
                 "max_features": "log2"
             }
-        },
-        "MultiTaskNN_LogisticHazard": {
-            "class": "models.survival_models.MultiTaskNNSurvivalModel",
-            "kwargs": {
-                "model_class": 
+        }
+      }
+      }

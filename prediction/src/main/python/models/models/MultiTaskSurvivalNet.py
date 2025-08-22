@@ -14,21 +14,6 @@ from utils.settings import config_settings
 
 torch.manual_seed(0)
 
-
-TREATMENT_GROUPS = [
-    "No Treatment",
-    "5-FU",
-    "5-FU + oxaliplatin",
-    "5-FU + oxaliplatin + bevacizumab",
-    "5-FU + oxaliplatin + panitumumab",
-    "5-FU + irinotecan",
-    "5-FU + irinotecan + bevacizumab",
-    "5-FU + oxaliplatin + irinotecan",
-    "5-FU + oxaliplatin + irinotecan + bevacizumab",
-    "PEMBROLIZUMAB"
-]
-
-TREATMENT_IDX = {name: idx for idx, name in enumerate(TREATMENT_GROUPS)}
    
 class MultiTaskSurvivalNet(nn.Module):
     def __init__(
@@ -42,10 +27,15 @@ class MultiTaskSurvivalNet(nn.Module):
         batch_norm: bool = False,
         use_attention: bool = False,
         attn_kwargs: dict | None = None,
+        msi_index: int | None = None, 
+        ras_index: int | None = None
     ):
         super().__init__()
         self.use_attention = use_attention
-        if use_attention:
+        self.msi_index = msi_index
+        self.ras_index = ras_index
+        
+        if self.use_attention:
             self.attn = FeatureAttention(input_size, **(attn_kwargs or {}))
         else:
             self.attn = None
@@ -73,7 +63,7 @@ class MultiTaskSurvivalNet(nn.Module):
         all_out = torch.stack([head(h) for head in self.heads], dim=1)  
 
         if config_settings.use_gate:
-            panit = TREATMENT_IDX.get("5-FU + oxaliplatin + panitumumab")
+            panit = config_settings.treatment_idx.get("5-FU + oxaliplatin + panitumumab")
             if panit is not None and hasattr(self, "ras_index"):
                 ras_idx = self.ras_index
                 if ras_idx is not None:
@@ -81,7 +71,7 @@ class MultiTaskSurvivalNet(nn.Module):
                     gate = (1 - ras).clamp(0, 1).view(-1, 1, 1)
                     all_out[:, panit:panit+1, :] *= gate
 
-            immu = TREATMENT_IDX.get("PEMBROLIZUMAB")
+            immu = config_settings.treatment_idx.get("PEMBROLIZUMAB")
             if immu is not None and hasattr(self, "msi_index"):
                 msi_idx = self.msi_index
                 if msi_idx is not None:
@@ -108,6 +98,8 @@ class MultiTaskNNSurvivalModel(BaseSurvivalModel):
         epochs=50,
         use_attention=False,
         attn_kwargs=None,
+        msi_index: int | None = None, 
+        ras_index: int | None = None,
         **kwargs
     ):
         super().__init__()
@@ -124,6 +116,8 @@ class MultiTaskNNSurvivalModel(BaseSurvivalModel):
             batch_norm=batch_norm,
             use_attention=use_attention,
             attn_kwargs=attn_kwargs,
+            msi_index=msi_index,
+            ras_index=ras_index
         )
         self.optimizer = torch.optim.Adam(self.net.parameters(), lr=lr)
         self.model_class = model_class
@@ -144,11 +138,13 @@ class MultiTaskNNSurvivalModel(BaseSurvivalModel):
             'batch_norm': batch_norm,
             'activation': activation,
             'epochs': epochs,
+            'msi_index': msi_index,
+            'ras_index': ras_index, 
             **kwargs
         }
 
     def fit(self, X: pd.DataFrame, task_idx: np.ndarray, y: pd.DataFrame, val_data=None):
-        # Standardize y columns
+   
         if isinstance(y, np.ndarray) and y.dtype.names:
             durations = y['survivalDaysSinceMetastaticDiagnosis'].astype('float32') if 'survivalDaysSinceMetastaticDiagnosis' in y.dtype.names else y['duration'].astype('float32')
             events = y['hadSurvivalEvent'].astype('float32') if 'hadSurvivalEvent' in y.dtype.names else y['event'].astype('float32')
@@ -165,19 +161,17 @@ class MultiTaskNNSurvivalModel(BaseSurvivalModel):
         y_events = torch.from_numpy(y_lab[1]).float()
         self.labtrans = labtrans
 
-        # Dataloader setup
         dataset = torch.utils.data.TensorDataset(X_tensor, task_idx_tensor, y_time_bins, y_events)
         loader = torch.utils.data.DataLoader(dataset, batch_size=128, shuffle=True)
         self.net.train()
         for epoch in range(self.epochs):
             for xb, tb, yb1, yb2 in loader:
                 pred = self.net(xb, tb)
-                # loss expects (pred, y_time_bins, y_events)
                 loss = self.loss_fn(pred, yb1, yb2)
                 self.optimizer.zero_grad()
                 loss.backward()
                 self.optimizer.step()
-        self.model.labtrans = labtrans  # for prediction
+        self.model.labtrans = labtrans
 
     def predict_survival_function(self, X: pd.DataFrame, task_idx: np.ndarray, times: np.ndarray = None):
         """
@@ -187,11 +181,11 @@ class MultiTaskNNSurvivalModel(BaseSurvivalModel):
         with torch.no_grad():
             X_tensor = torch.from_numpy(X.values.astype('float32'))
             task_idx_tensor = torch.from_numpy(task_idx.astype('int64'))
-            logits = self.net(X_tensor, task_idx_tensor)  # shape: [n_samples, num_durations]
-            hazards = torch.sigmoid(logits)  # shape: [n_samples, num_durations]
-            surv = torch.cumprod(1 - hazards, dim=1)     # shape: [n_samples, num_durations]
-            surv_np = surv.cpu().numpy().T               # transpose to [num_durations, n_samples]
-            # Get time grid from label transform
+            logits = self.net(X_tensor, task_idx_tensor)  
+            hazards = torch.sigmoid(logits)
+            surv = torch.cumprod(1 - hazards, dim=1)
+            surv_np = surv.cpu().numpy().T
+            
             time_grid = config_settings.fixed_time_bins
             surv_df = pd.DataFrame(surv_np, index=time_grid)
             if times is not None:
@@ -204,17 +198,9 @@ class MultiTaskNNSurvivalModel(BaseSurvivalModel):
         by taking the negative log of the 1-year survival (or last available).
         """
         surv_df = self.predict_survival_function(X, task_idx)
-
-        # 2) Grab the final timepoint from the index
         last_t = surv_df.index[-1]
-
-        # 3) Extract survival probabilities at that time
-        surv_last = surv_df.loc[last_t].values  # shape (n_samples,)
-
-        # 4) Clip to avoid log(0)
+        surv_last = surv_df.loc[last_t].values
         surv_last = np.clip(surv_last, 1e-10, 1.0)
-
-        # 5) Risk = –log S(t)
         return -np.log(surv_last)
 
 
