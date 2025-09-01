@@ -7,7 +7,6 @@ import com.hartwig.actin.personalization.interpretation.ComorbidityInterpreter
 import com.hartwig.actin.personalization.interpretation.LabInterpreter
 import com.hartwig.actin.personalization.interpretation.MetastaticInterpreter
 import com.hartwig.actin.personalization.interpretation.MolecularInterpreter
-import com.hartwig.actin.personalization.interpretation.TnmInterpreter
 import com.hartwig.actin.personalization.interpretation.TreatmentInterpreter
 import com.hartwig.actin.personalization.interpretation.WhoInterpreter
 import io.github.oshai.kotlinlogging.KotlinLogging
@@ -37,8 +36,6 @@ object ReferenceObjectFactory {
         val daysBetweenMetastaticDiagnosisAndTreatmentStart =
             daysBetweenPrimaryDiagnosisAndTreatmentStart?.let { it - daysBetweenPrimaryAndMetastaticDiagnosis }
 
-        val tnmInterpreter = TnmInterpreter(entry.primaryDiagnosis, entry.metastaticDiagnosis)
-
         return ReferenceObject(
             source = entry.source,
             sourceId = entry.sourceId,
@@ -63,12 +60,12 @@ object ReferenceObjectFactory {
             mesorectalFasciaIsClear = entry.primaryDiagnosis.mesorectalFasciaIsClear,
             distanceToMesorectalFasciaMm = entry.primaryDiagnosis.distanceToMesorectalFasciaMm,
             differentiationGrade = entry.primaryDiagnosis.differentiationGrade,
-            clinicalTnmT = tnmInterpreter.clinicalTnm().tnmT,
-            clinicalTnmN = tnmInterpreter.clinicalTnm().tnmN,
-            clinicalTnmM = tnmInterpreter.clinicalTnm().tnmM,
-            pathologicalTnmT = tnmInterpreter.pathologicalTnm()?.tnmT,
-            pathologicalTnmN = tnmInterpreter.pathologicalTnm()?.tnmN,
-            pathologicalTnmM = tnmInterpreter.pathologicalTnm()?.tnmM,
+            clinicalTnmT = entry.primaryDiagnosis.clinicalTnmClassification.tnmT,
+            clinicalTnmN = entry.primaryDiagnosis.clinicalTnmClassification.tnmN,
+            clinicalTnmM = entry.primaryDiagnosis.clinicalTnmClassification.tnmM,
+            pathologicalTnmT = entry.primaryDiagnosis.pathologicalTnmClassification?.tnmT,
+            pathologicalTnmN = entry.primaryDiagnosis.pathologicalTnmClassification?.tnmN,
+            pathologicalTnmM = entry.primaryDiagnosis.pathologicalTnmClassification?.tnmM,
             clinicalTumorStage = entry.primaryDiagnosis.clinicalTumorStage,
             pathologicalTumorStage = entry.primaryDiagnosis.pathologicalTumorStage,
             investigatedLymphNodesCountPrimaryDiagnosis = entry.primaryDiagnosis.investigatedLymphNodesCount,
