@@ -263,7 +263,7 @@ object TestNcrRecordFactory {
             diffgrad = 2,
             ct = "0",
             cn = null,
-            cm = null,
+            cm = "1",
             pt = null,
             pn = null,
             pm = null,
