@@ -7,29 +7,7 @@ import org.junit.jupiter.api.Test
 class TreatmentRecordFilterTest {
     private val filter = TreatmentRecordFilter(true)
     private val minimalDiagnosisRecord = TestNcrRecordFactory.minimalDiagnosisRecord()
-
-    @Test
-    fun `Should return true for record with treatment and no reason`() {
-        val records = listOf(minimalDiagnosisRecord.copy(
-            treatment = minimalDiagnosisRecord.treatment.copy(
-                primarySurgery = minimalDiagnosisRecord.treatment.primarySurgery.copy(chir = 1),
-                geenTherReden = null
-            )
-        ))
-        assertThat(filter.hasConsistentReasonRefrainingTreatment(records)).isTrue()
-    }
-
-    @Test
-    fun `Should return false for record with treatment and reason`() {
-        val records = listOf(minimalDiagnosisRecord.copy(
-            treatment = minimalDiagnosisRecord.treatment.copy(
-                primarySurgery = minimalDiagnosisRecord.treatment.primarySurgery.copy(chir = 1),
-                geenTherReden = 1
-            )
-        ))
-        assertThat(filter.hasConsistentReasonRefrainingTreatment(records)).isFalse()
-    }
-
+    
     @Test
     fun `Should return true for valid intervals`() {
         val records = listOf(minimalDiagnosisRecord.copy(

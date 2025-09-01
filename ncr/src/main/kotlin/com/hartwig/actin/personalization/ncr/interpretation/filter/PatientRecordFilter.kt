@@ -66,16 +66,6 @@ class PatientRecordFilter(override val logFilteredRecords: Boolean) : RecordFilt
         return hasEmptyVitalStatus
     }
 
-    internal fun hasConsistentYearOfIncidence(tumorRecords: List<NcrRecord>): Boolean {
-        val uniqueYearsOfIncidence = tumorRecords.map { it.primaryDiagnosis.incjr }.toSet().size
-        val consistentYearOfIncidence = uniqueYearsOfIncidence == 1
-
-        if (!consistentYearOfIncidence) {
-            log("Multiple years of incidence found for tumor ID ${tumorRecords.tumorId()}")
-        }
-        return consistentYearOfIncidence
-    }
-
     override fun apply(tumorRecords: List<NcrRecord>): Boolean {
         return listOf(
             ::hasValidTreatmentData,
@@ -83,7 +73,6 @@ class PatientRecordFilter(override val logFilteredRecords: Boolean) : RecordFilt
             ::hasExactlyOneDiagnosis,
             ::hasVitalStatusForDiaRecords,
             ::hasEmptyVitalStatusForVerbRecords,
-            ::hasConsistentYearOfIncidence
         ).all { it(tumorRecords) }
     }
 }

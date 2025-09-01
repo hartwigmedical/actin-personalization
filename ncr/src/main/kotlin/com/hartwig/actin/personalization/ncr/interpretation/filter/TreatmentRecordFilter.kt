@@ -1,41 +1,10 @@
 package com.hartwig.actin.personalization.ncr.interpretation.filter
 
 import com.hartwig.actin.personalization.ncr.datamodel.NcrRecord
-import com.hartwig.actin.personalization.ncr.datamodel.NcrTreatment
 
 class TreatmentRecordFilter(override val logFilteredRecords: Boolean) : RecordFilter {
     private val PRE_SURGERY_CODE = 1
     private val POST_SURGERY_CODE = 2
-
-
-    private fun hasAtLeastOneTreatment(treatment: NcrTreatment): Boolean {
-        return listOf(
-            treatment.gastroenterologyResection.mdlRes,
-            treatment.primarySurgery.chir,
-            treatment.primaryRadiotherapy.rt,
-            treatment.primaryRadiotherapy.chemort,
-            treatment.systemicTreatment.chemo,
-            treatment.systemicTreatment.target,
-            treatment.hipec.hipec
-        ).any { it.notZeroNorNull() } ||
-                listOf(
-                    treatment.metastaticSurgery.metaChirCode1,
-                    treatment.metastaticSurgery.metaChirCode2,
-                    treatment.metastaticSurgery.metaChirCode3,
-                    treatment.metastaticRadiotherapy.metaRtCode1,
-                    treatment.metastaticRadiotherapy.metaRtCode2,
-                    treatment.metastaticRadiotherapy.metaRtCode3,
-                    treatment.metastaticRadiotherapy.metaRtCode4,
-                ).any { it != null }
-    }
-
-    internal fun hasConsistentReasonRefrainingTreatment(tumorRecords: List<NcrRecord>): Boolean {
-        val hasConsistentReasonRefrainingTreatment = tumorRecords.map { it.treatment }.all { treatment ->
-            hasAtLeastOneTreatment(treatment) == (treatment.geenTherReden == null)
-        }
-        if (!hasConsistentReasonRefrainingTreatment) log("Inconsistent reason for refraining treatment for tumor ${tumorRecords.tumorId()}")
-        return hasConsistentReasonRefrainingTreatment
-    }
 
     private fun hasConsistentPreAndPostSurgicalIntervals(
         surgeryChir: Int?,
@@ -72,7 +41,7 @@ class TreatmentRecordFilter(override val logFilteredRecords: Boolean) : RecordFi
 
     internal fun hasValidPrimarySurgery(tumorRecords: List<NcrRecord>): Boolean {
         val hasValidPrimarySurgery = tumorRecords.map { it.treatment }.all { treatment ->
-            val hasPrimarySurgeryChir = treatment.primarySurgery.chir != null
+            val hasPrimarySurgeryChir = treatment.primarySurgery.chir == 1
             val hasPrimarySurgeryType1 = treatment.primarySurgery.chirType1.notZeroNorNull()
             val hasPrimarySurgeryType2 = treatment.primarySurgery.chirType2.notZeroNorNull()
             hasPrimarySurgeryChir == (hasPrimarySurgeryType1 || hasPrimarySurgeryType2)
@@ -158,7 +127,6 @@ class TreatmentRecordFilter(override val logFilteredRecords: Boolean) : RecordFi
 
     override fun apply(tumorRecords: List<NcrRecord>): Boolean {
         return listOf(
-            ::hasConsistentReasonRefrainingTreatment,
             ::hasConsistentPreAndPostSurgicalIntervalsForChemoAndRadiotherapy,
             ::hasValidPrimarySurgery,
             ::hasValidPrimaryRadiotherapy,

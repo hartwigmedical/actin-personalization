@@ -122,36 +122,4 @@ class PatientRecordFilterTest {
         ))        
         assertThat(filter.hasEmptyVitalStatusForVerbRecords(records)).isFalse()
     }
-
-    @Test
-    fun `Should return true when all records have identical year of incidence`() {
-        val record1 = minimalDiagnosisRecord.copy(
-            primaryDiagnosis = minimalDiagnosisRecord.primaryDiagnosis.copy(
-                incjr = 2020
-            )
-        )
-        val record2 = TestNcrRecordFactory.minimalFollowupRecord().copy(
-            primaryDiagnosis = TestNcrRecordFactory.minimalFollowupRecord().primaryDiagnosis.copy(
-                incjr = 2020
-            )
-        )
-        val records = listOf(record1, record2)
-        assertThat(filter.hasConsistentYearOfIncidence(records)).isTrue()
-    }
-
-    @Test
-    fun `Should return false when records have different year of incidence`() {
-        val record1 = minimalDiagnosisRecord.copy(
-            primaryDiagnosis = minimalDiagnosisRecord.primaryDiagnosis.copy(
-                incjr = 2020
-            )
-        )
-        val record2 = TestNcrRecordFactory.minimalFollowupRecord().copy(
-            primaryDiagnosis = TestNcrRecordFactory.minimalFollowupRecord().primaryDiagnosis.copy(
-                incjr = 2021
-            )
-        )
-        val records = listOf(record1, record2)
-        assertThat(filter.hasConsistentYearOfIncidence(records)).isFalse()
-    }
 }
