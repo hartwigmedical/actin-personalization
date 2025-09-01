@@ -47,8 +47,8 @@ class PrimaryTumorRecordFilter(override val logFilteredRecords: Boolean) : Recor
     override fun apply(tumorRecords: List<NcrRecord>): Boolean {
         return listOf(
             ::hasValidDoubleTumorData,
-            ::hasValidMorfCatData,
-            ::hasValidAnusAfstData,
+//            ::hasValidMorfCatData,
+//            ::hasValidAnusAfstData,
             ::hasConsistentTopoSublokData
         ).all { it(tumorRecords) }
     }
