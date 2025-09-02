@@ -49,58 +49,6 @@ class PrimaryTumorRecordFilterTest {
     }
 
     @Test
-    fun `Should return true for valid morfCat data`() {
-        val records = listOf(
-            diagnosisRecord.copy(
-                primaryDiagnosis = diagnosisRecord.primaryDiagnosis.copy(morfCat = 1)
-            ),
-            followUpRecord.copy(
-                primaryDiagnosis = followUpRecord.primaryDiagnosis.copy(morfCat = null)
-            )
-        )
-        assertThat(filter.hasValidMorfCatData(records)).isTrue()
-    }
-
-    @Test
-    fun `Should return false for invalid morfCat data`() {
-        val records = listOf(
-            diagnosisRecord.copy(
-                primaryDiagnosis = diagnosisRecord.primaryDiagnosis.copy(morfCat = null)
-            ),
-            followUpRecord.copy(
-                primaryDiagnosis = followUpRecord.primaryDiagnosis.copy(morfCat = 1)
-            )
-        )
-        assertThat(filter.hasValidMorfCatData(records)).isFalse()
-    }
-
-    @Test
-    fun `Should return true for valid anusAfst data`() {
-        val records = listOf(
-            diagnosisRecord.copy(
-                clinicalCharacteristics = diagnosisRecord.clinicalCharacteristics.copy(anusAfst = 1)
-            ),
-            followUpRecord.copy(
-                clinicalCharacteristics = followUpRecord.clinicalCharacteristics.copy(anusAfst = null)
-            )
-        )
-        assertThat(filter.hasValidAnusAfstData(records)).isTrue()
-    }
-
-    @Test
-    fun `Should return false for invalid anusAfst data`() {
-        val records = listOf(
-            diagnosisRecord.copy(
-                clinicalCharacteristics = diagnosisRecord.clinicalCharacteristics.copy(anusAfst = null)
-            ),
-            followUpRecord.copy(
-                clinicalCharacteristics = followUpRecord.clinicalCharacteristics.copy(anusAfst = 1)
-            )
-        )
-        assertThat(filter.hasValidAnusAfstData(records)).isFalse()
-    }
-
-    @Test
     fun `Should return true for consistent topoSublok data`() {
         val records = listOf(
             diagnosisRecord.copy(

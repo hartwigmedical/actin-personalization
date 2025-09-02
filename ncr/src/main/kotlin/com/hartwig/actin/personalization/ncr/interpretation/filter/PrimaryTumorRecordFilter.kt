@@ -14,26 +14,6 @@ class PrimaryTumorRecordFilter(override val logFilteredRecords: Boolean) : Recor
         return hasValidDoubleTumorData
     }
 
-
-    internal fun hasValidMorfCatData(tumorRecords: List<NcrRecord>): Boolean {
-        val (primaryDiagnosis,followUpDiagnosis) = extractPrimaryDiagnosis(tumorRecords)
-        val hasValidMorfCatData = primaryDiagnosis.all { it.primaryDiagnosis.morfCat != null } &&
-               followUpDiagnosis.all { it.primaryDiagnosis.morfCat == null }
-        if (!hasValidMorfCatData) {
-            log("Tumor ${tumorRecords.tumorId()} has invalid morfCat data")
-        }
-        return hasValidMorfCatData
-    }
-
-    internal fun hasValidAnusAfstData(tumorRecords: List<NcrRecord>): Boolean {
-        val (primaryDiagnosis,followUpDiagnosis) = extractPrimaryDiagnosis(tumorRecords)
-        val hasValidAnusAfstData = primaryDiagnosis.all { it.clinicalCharacteristics.anusAfst != null } &&
-               followUpDiagnosis.all { it.clinicalCharacteristics.anusAfst == null }
-        if (!hasValidAnusAfstData) {
-            log("Tumor ${tumorRecords.tumorId()} has invalid anusAfst data")
-        }
-        return hasValidAnusAfstData
-    }
     
     internal fun hasConsistentTopoSublokData(tumorRecords: List<NcrRecord>): Boolean {
         val allTopoSubLock = tumorRecords.map { it.primaryDiagnosis.topoSublok }
@@ -47,8 +27,6 @@ class PrimaryTumorRecordFilter(override val logFilteredRecords: Boolean) : Recor
     override fun apply(tumorRecords: List<NcrRecord>): Boolean {
         return listOf(
             ::hasValidDoubleTumorData,
-            ::hasValidMorfCatData,
-            ::hasValidAnusAfstData,
             ::hasConsistentTopoSublokData
         ).all { it(tumorRecords) }
     }
