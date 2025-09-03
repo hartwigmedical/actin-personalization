@@ -132,10 +132,7 @@ def build_shap_explainer(model, shap_samples_path) -> shap.Explainer:
     X_samples = X_samples.astype(np.float64).fillna(0.0)
     logger.info(f"Loaded SHAP samples from {shap_samples_path} with shape {X_samples.shape}")
 
-    X_display = X_samples.rename(columns=feature_short_names)
-    display_names = list(X_display.columns)
-
-    explainer = shap.Explainer(model.predict, X_samples, feature_names=display_names)
+    explainer = shap.Explainer(model.predict, X_samples)
     logger.info(f"Created SHAP explainer with {X_samples.shape[0]} samples")
 
     return explainer
@@ -149,9 +146,9 @@ def get_shap_values(explainer: shap.Explainer, X: pd.DataFrame):
     shap.plots.bar(shap_values[0])
 
     result_dict = {
-        shap_values.feature_names[j]: {
-            "feature_value": shap_values.data[0][j],
-            "shap_value": shap_values.values[0][j]
+        feature_short_names.get(shap_values.feature_names[j], shap_values.feature_names[j]): {
+            "featureValue": shap_values.data[0][j],
+            "shapValue": shap_values.values[0][j]
         }
         for j in range(len(shap_values.feature_names))
     }
@@ -189,8 +186,8 @@ def predict_treatment_scenarios(patient_data: dict, trained_path: str, shap_samp
         sf = surv_fns[0]
 
         survival_dict[label] = {
-            "survival_probs": sf.y.astype(float).tolist(),
-            "shap_values": get_shap_values(shap_explainer, X_base)
+            "survivalProbs": sf.y.astype(float).tolist(),
+            "shapValues": get_shap_values(shap_explainer, X_base)
         }
 
     return survival_dict
