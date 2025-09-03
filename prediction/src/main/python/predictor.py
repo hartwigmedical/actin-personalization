@@ -155,7 +155,7 @@ def get_shap_values(explainer: shap.Explainer, X: pd.DataFrame):
     return result_dict
 
 
-def predict_treatment_scenarios(patient_data: dict, trained_path: str, shap_samples_path: str, valid_treatment_combinations: dict, settings: Settings) -> dict:
+def predict_treatment_scenarios(patient_data: dict, trained_path: str, shap_samples_path: str, valid_treatment_combinations: dict, settings: Settings) -> list:
     
     with open(f"{trained_path}/tnm_stage_medians.json", "r") as f:
         tnm_stage_medians = json.load(f)
@@ -173,7 +173,7 @@ def predict_treatment_scenarios(patient_data: dict, trained_path: str, shap_samp
 
     shap_explainer = build_shap_explainer(model, shap_samples_path)
 
-    survival_dict = {}
+    survival_prediction = []
     for idx, (label, mapping) in enumerate(valid_treatment_combinations.items()):
         for col, val in mapping.items():
             if col in X_base.columns:
@@ -185,12 +185,13 @@ def predict_treatment_scenarios(patient_data: dict, trained_path: str, shap_samp
 
         sf = surv_fns[0]
 
-        survival_dict[label] = {
+        survival_prediction.append({
+            "treatment": label,
             "survivalProbs": sf.y.astype(float).tolist(),
             "shapValues": get_shap_values(shap_explainer, X_base)
-        }
+        })
 
-    return survival_dict
+    return survival_prediction
 
 
 def get_stage_median(tnm_stage_medians, stage_type: str, stage: str, key: str):
