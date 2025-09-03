@@ -7,20 +7,45 @@ class PrimaryTumorRecordFilter(override val logFilteredRecords: Boolean) : Recor
     override fun apply(tumorRecords: List<NcrRecord>): Boolean {
         return listOf(
             ::hasValidDoubleTumorData,
+            ::hasValidMorfCatData,
+            ::hasValidAnusAfstData,
             ::hasConsistentTopoSublokData
         ).all { it(tumorRecords) }
     }
-    
+
     internal fun hasValidDoubleTumorData(tumorRecords: List<NcrRecord>): Boolean {
-        val (primaryDiagnosis,followUpDiagnosis) = splitDiagnosisAndFollowup(tumorRecords)
+        val (primaryDiagnosis, followUpDiagnosis) = splitDiagnosisAndFollowup(tumorRecords)
         val hasValidDoubleTumorData = primaryDiagnosis.all { it.clinicalCharacteristics.dubbeltum != null } &&
-               followUpDiagnosis.all { it.clinicalCharacteristics.dubbeltum == 0 }
+                followUpDiagnosis.all { it.clinicalCharacteristics.dubbeltum == 0 }
         if (!hasValidDoubleTumorData) {
             log("Tumor ${tumorRecords.tumorId()} has invalid double tumor data")
         }
         return hasValidDoubleTumorData
     }
-    
+
+    internal fun hasValidMorfCatData(tumorRecords: List<NcrRecord>): Boolean {
+        val (diagnosis, followup) = splitDiagnosisAndFollowup(tumorRecords)
+        val hasValidMorfCatData = diagnosis.all { it.primaryDiagnosis.morfCat != null } &&
+                followup.all { it.primaryDiagnosis.morfCat == null }
+        
+        if (!hasValidMorfCatData) {
+            log("Tumor ${tumorRecords.tumorId()} has invalid morfCat data")
+        }
+        
+        return hasValidMorfCatData
+    }
+
+    internal fun hasValidAnusAfstData(tumorRecords: List<NcrRecord>): Boolean {
+        val (_, followup) = splitDiagnosisAndFollowup(tumorRecords)
+        val hasValidAnusAfstData = followup.all { it.clinicalCharacteristics.anusAfst == null }
+        
+        if (!hasValidAnusAfstData) {
+            log("Tumor ${tumorRecords.tumorId()} has invalid anusAfst data")
+        }
+        
+        return hasValidAnusAfstData
+    }
+
     internal fun hasConsistentTopoSublokData(tumorRecords: List<NcrRecord>): Boolean {
         val allTopoSubLock = tumorRecords.map { it.primaryDiagnosis.topoSublok }
         val hasConsistentTopoSublokData = allTopoSubLock.toSet().size == 1

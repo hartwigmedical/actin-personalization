@@ -8,7 +8,7 @@ class PrimaryTumorRecordFilterTest {
     
     private val filter = PrimaryTumorRecordFilter(true)
     private val diagnosisRecord = TestNcrRecordFactory.minimalDiagnosisRecord()
-    private val followUpRecord = TestNcrRecordFactory.minimalFollowupRecord()
+    private val followupRecord = TestNcrRecordFactory.minimalFollowupRecord()
 
     @Test
     fun `Should return true for valid double tumor data`() {
@@ -16,8 +16,8 @@ class PrimaryTumorRecordFilterTest {
             diagnosisRecord.copy(
                 clinicalCharacteristics = diagnosisRecord.clinicalCharacteristics.copy(dubbeltum = 1)
             ),
-            followUpRecord.copy(
-                clinicalCharacteristics = followUpRecord.clinicalCharacteristics.copy(dubbeltum = 0)
+            followupRecord.copy(
+                clinicalCharacteristics = followupRecord.clinicalCharacteristics.copy(dubbeltum = 0)
             )
         )
         assertThat(filter.hasValidDoubleTumorData(records)).isTrue()
@@ -29,8 +29,8 @@ class PrimaryTumorRecordFilterTest {
             diagnosisRecord.copy(
                 clinicalCharacteristics = diagnosisRecord.clinicalCharacteristics.copy(dubbeltum = null)
             ),
-            followUpRecord.copy(
-                clinicalCharacteristics = followUpRecord.clinicalCharacteristics.copy(dubbeltum = null)
+            followupRecord.copy(
+                clinicalCharacteristics = followupRecord.clinicalCharacteristics.copy(dubbeltum = null)
             )
         )
         assertThat(filter.hasValidDoubleTumorData(records)).isFalse()
@@ -42,11 +42,59 @@ class PrimaryTumorRecordFilterTest {
             diagnosisRecord.copy(
                 clinicalCharacteristics = diagnosisRecord.clinicalCharacteristics.copy(dubbeltum = 1)
             ),
-            followUpRecord.copy(
-                clinicalCharacteristics = followUpRecord.clinicalCharacteristics.copy(dubbeltum = 1)
+            followupRecord.copy(
+                clinicalCharacteristics = followupRecord.clinicalCharacteristics.copy(dubbeltum = 1)
             )
         )
         assertThat(filter.hasValidDoubleTumorData(records)).isFalse()
+    }
+
+    @Test
+    fun `Should return true for valid morfCat data`() {
+        val records = listOf(
+            diagnosisRecord.copy(
+                primaryDiagnosis = diagnosisRecord.primaryDiagnosis.copy(morfCat = 1)
+            ),
+            followupRecord.copy(
+                primaryDiagnosis = followupRecord.primaryDiagnosis.copy(morfCat = null)
+            )
+        )
+        assertThat(filter.hasValidMorfCatData(records)).isTrue()
+    }
+
+    @Test
+    fun `Should return false for invalid morfCat data`() {
+        val records = listOf(
+            diagnosisRecord.copy(
+                primaryDiagnosis = diagnosisRecord.primaryDiagnosis.copy(morfCat = null)
+            ),
+            followupRecord.copy(
+                primaryDiagnosis = followupRecord.primaryDiagnosis.copy(morfCat = 1)
+            )
+        )
+        assertThat(filter.hasValidMorfCatData(records)).isFalse()
+    }
+
+    @Test
+    fun `Should return true for valid anusAfst data`() {
+        val records = listOf(
+            diagnosisRecord,
+            followupRecord.copy(
+                clinicalCharacteristics = followupRecord.clinicalCharacteristics.copy(anusAfst = null)
+            )
+        )
+        assertThat(filter.hasValidAnusAfstData(records)).isTrue()
+    }
+
+    @Test
+    fun `Should return false for invalid anusAfst data`() {
+        val records = listOf(
+            diagnosisRecord,
+            followupRecord.copy(
+                clinicalCharacteristics = followupRecord.clinicalCharacteristics.copy(anusAfst = 1)
+            )
+        )
+        assertThat(filter.hasValidAnusAfstData(records)).isFalse()
     }
 
     @Test
@@ -55,8 +103,8 @@ class PrimaryTumorRecordFilterTest {
             diagnosisRecord.copy(
                 primaryDiagnosis = diagnosisRecord.primaryDiagnosis.copy(topoSublok = "C000")
             ),
-            followUpRecord.copy(
-                primaryDiagnosis = followUpRecord.primaryDiagnosis.copy(topoSublok = "C000")
+            followupRecord.copy(
+                primaryDiagnosis = followupRecord.primaryDiagnosis.copy(topoSublok = "C000")
             )
         )
         assertThat(filter.hasConsistentTopoSublokData(records)).isTrue()
@@ -68,8 +116,8 @@ class PrimaryTumorRecordFilterTest {
             diagnosisRecord.copy(
                 primaryDiagnosis = diagnosisRecord.primaryDiagnosis.copy(topoSublok = "C000")
             ),
-            followUpRecord.copy(
-                primaryDiagnosis = followUpRecord.primaryDiagnosis.copy(topoSublok = "C001")
+            followupRecord.copy(
+                primaryDiagnosis = followupRecord.primaryDiagnosis.copy(topoSublok = "C001")
             )
         )
         assertThat(filter.hasConsistentTopoSublokData(records)).isFalse()
