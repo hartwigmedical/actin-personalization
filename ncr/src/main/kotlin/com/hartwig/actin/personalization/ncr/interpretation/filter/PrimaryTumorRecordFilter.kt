@@ -17,7 +17,7 @@ class PrimaryTumorRecordFilter(override val logFilteredRecords: Boolean) : Recor
         val hasValidDoubleTumorData = primaryDiagnosis.all { it.clinicalCharacteristics.dubbeltum != null } &&
                 followUpDiagnosis.all { it.clinicalCharacteristics.dubbeltum == 0 }
         if (!hasValidDoubleTumorData) {
-            log("Tumor ${tumorRecords.tumorId()} has invalid double tumor data")
+            log("Invalid double tumor data found for tumor ${tumorRecords.tumorId()}")
         }
         return hasValidDoubleTumorData
     }
