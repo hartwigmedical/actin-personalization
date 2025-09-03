@@ -15,12 +15,12 @@ class MolecularRecordFilterTest {
                 brafMut = 1, rasMut = 1, msiStat = 1
             )
         ))
-        assertThat(filter.hasNoMolecularDataForFollowUp(records)).isFalse()
+        assertThat(filter.hasNoMolecularDataForFollowup(records)).isFalse()
     }
 
     @Test
     fun `Should return true for empty molecular data in followup`() {
         val records = listOf(TestNcrRecordFactory.minimalFollowupRecord())
-        assertThat(filter.hasNoMolecularDataForFollowUp(records)).isTrue()
+        assertThat(filter.hasNoMolecularDataForFollowup(records)).isTrue()
     }
 }

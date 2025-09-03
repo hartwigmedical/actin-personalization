@@ -13,7 +13,7 @@ class PriorTumorRecordFilterTest {
     @Test
     fun `Should return true when all VERB records have empty prior tumor data`() {
         val records = listOf(minimalFollowupRecord)
-        assertThat(filter.hasEmptyPriorTumorInVerbEpisode(records)).isTrue()
+        assertThat(filter.hasEmptyPriorTumorInFollowups(records)).isTrue()
     }
 
     @Test
@@ -23,7 +23,7 @@ class PriorTumorRecordFilterTest {
                 priorMalignancies = minimalDiagnosisRecord.priorMalignancies.copy(mal1Int = 1)
             )
         )
-        assertThat(filter.hasEmptyPriorTumorInVerbEpisode(records)).isFalse()
+        assertThat(filter.hasEmptyPriorTumorInFollowups(records)).isFalse()
     }
 
     @Test

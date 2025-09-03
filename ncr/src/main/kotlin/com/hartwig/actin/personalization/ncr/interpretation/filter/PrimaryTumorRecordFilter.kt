@@ -13,12 +13,14 @@ class PrimaryTumorRecordFilter(override val logFilteredRecords: Boolean) : Recor
     }
 
     internal fun hasValidDoubleTumorData(tumorRecords: List<NcrRecord>): Boolean {
-        val (primaryDiagnosis, followUpDiagnosis) = splitDiagnosisAndFollowup(tumorRecords)
-        val hasValidDoubleTumorData = primaryDiagnosis.all { it.clinicalCharacteristics.dubbeltum != null } &&
-                followUpDiagnosis.all { it.clinicalCharacteristics.dubbeltum == 0 }
+        val (diagnosis, followup) = splitDiagnosisAndFollowup(tumorRecords)
+        val hasValidDoubleTumorData = diagnosis.all { it.clinicalCharacteristics.dubbeltum != null } &&
+                followup.all { it.clinicalCharacteristics.dubbeltum == 0 }
+        
         if (!hasValidDoubleTumorData) {
             log("Invalid double tumor data found for tumor ${tumorRecords.tumorId()}")
         }
+        
         return hasValidDoubleTumorData
     }
 

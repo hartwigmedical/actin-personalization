@@ -9,21 +9,23 @@ class MetastaticDiagnosisRecordFilter(override val logFilteredRecords: Boolean) 
 
     override fun apply(tumorRecords: List<NcrRecord>): Boolean {
         return listOf(
-            ::hasAtMostOneMetastaticDetection,
+            ::hasAtMostOneMetastaticRecord,
             ::hasEmptyMetastaticFieldIfDetectionNotPresent,
             ::hasConsistentMetastaticProgression,
         ).all { it(tumorRecords) }
     }
     
-    internal fun hasAtMostOneMetastaticDetection(records: List<NcrRecord>): Boolean {
+    internal fun hasAtMostOneMetastaticRecord(records: List<NcrRecord>): Boolean {
         val metastaticRecords = records.filter {
             it.identification.metaEpis == METASTATIC_DETECTION_AT_START ||
                     it.identification.metaEpis == METASTATIC_DETECTION_AT_PROGRESSION
         }
         val hasAtMostOneMetastaticDetection = metastaticRecords.size <= 1
+        
         if (!hasAtMostOneMetastaticDetection) {
-            log("Multiple metastatic detections found in tumor ${records.tumorId()}")
+            log("Multiple metastatic records found in tumor ${records.tumorId()}")
         }
+        
         return hasAtMostOneMetastaticDetection
     }
 
@@ -45,9 +47,11 @@ class MetastaticDiagnosisRecordFilter(override val logFilteredRecords: Boolean) 
                     record.treatment.metastaticRadiotherapy.metaRtCode4 == null
             hasEmptyMetastaticDiagnosis && hasEmptyMetastaticSurgery && hasEmptyMetastaticRadiotherapy
         }
+        
         if (!hasEmptyMetastaticFieldIfDetectionNotPresent) {
             log("Non-empty metastatic fields found in tumor ${records.tumorId()} without detection")
         }
+        
         return hasEmptyMetastaticFieldIfDetectionNotPresent
     }
 
@@ -73,6 +77,7 @@ class MetastaticDiagnosisRecordFilter(override val logFilteredRecords: Boolean) 
         if (!hasConsistentMetastaticProgression) {
             log("Inconsistent metastatic progression data found in tumor ${records.tumorId()}")
         }
+        
         return hasConsistentMetastaticProgression
     }
 }

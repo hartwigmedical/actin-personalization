@@ -2,7 +2,7 @@ package com.hartwig.actin.personalization.ncr.interpretation.filter
 
 import com.hartwig.actin.personalization.ncr.datamodel.NcrCharlsonComorbidities
 import com.hartwig.actin.personalization.ncr.datamodel.NcrRecord
-import com.hartwig.actin.personalization.ncr.interpretation.FOLLOW_UP_EPISODE
+import com.hartwig.actin.personalization.ncr.interpretation.FOLLOWUP_EPISODE
 
 class ComorbidityRecordFilter(override val logFilteredRecords: Boolean) : RecordFilter {
 
@@ -12,12 +12,14 @@ class ComorbidityRecordFilter(override val logFilteredRecords: Boolean) : Record
 
     internal fun hasValidComorbidityData(tumorRecords: List<NcrRecord>): Boolean {
         val hasValidComorbidityData = tumorRecords.all {
-            it.comorbidities.allFieldsAreNull() ||
-                    (it.identification.epis != FOLLOW_UP_EPISODE && it.comorbidities.allFieldsAreNotNull())
+            (it.identification.epis == FOLLOWUP_EPISODE && it.comorbidities.allFieldsAreNull()) ||
+                    (it.identification.epis != FOLLOWUP_EPISODE && it.comorbidities.allFieldsAreNotNull())
         }
+        
         if (!hasValidComorbidityData) {
             log("Tumor ${tumorRecords.tumorId()} has comorbidity on follow-up episode")
         }
+        
         return hasValidComorbidityData
     }
 

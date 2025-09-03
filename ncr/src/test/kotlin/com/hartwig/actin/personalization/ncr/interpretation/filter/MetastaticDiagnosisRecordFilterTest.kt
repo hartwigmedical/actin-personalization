@@ -16,7 +16,7 @@ class MetastaticDiagnosisRecordFilterTest {
                 identification = minimalDiagnosisRecord.identification.copy(metaEpis = 0)
             )
         )
-        assertThat(filter.hasAtMostOneMetastaticDetection(records)).isTrue()
+        assertThat(filter.hasAtMostOneMetastaticRecord(records)).isTrue()
     }
 
     @Test
@@ -26,7 +26,7 @@ class MetastaticDiagnosisRecordFilterTest {
                 identification = minimalDiagnosisRecord.identification.copy(metaEpis = 1)
             )
         )
-        assertThat(filter.hasAtMostOneMetastaticDetection(records)).isTrue()
+        assertThat(filter.hasAtMostOneMetastaticRecord(records)).isTrue()
     }
 
     @Test
@@ -35,7 +35,7 @@ class MetastaticDiagnosisRecordFilterTest {
             minimalDiagnosisRecord.copy(identification = minimalDiagnosisRecord.identification.copy(metaEpis = 1)),
             minimalDiagnosisRecord.copy(identification = minimalDiagnosisRecord.identification.copy(metaEpis = 2))
         )
-        assertThat(filter.hasAtMostOneMetastaticDetection(records)).isFalse()
+        assertThat(filter.hasAtMostOneMetastaticRecord(records)).isFalse()
     }
 
     @Test

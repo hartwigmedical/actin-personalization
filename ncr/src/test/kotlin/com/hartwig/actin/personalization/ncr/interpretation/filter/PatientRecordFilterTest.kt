@@ -12,7 +12,7 @@ class PatientRecordFilterTest {
     @Test
     fun `Should return true when treatment is valid`() {
         val records = listOf(minimalDiagnosisRecord)
-        assertThat(filter.hasValidTreatmentData(records)).isTrue()
+        assertThat(filter.hasConsistentTreatmentData(records)).isTrue()
     }
 
     @Test
@@ -41,7 +41,7 @@ class PatientRecordFilterTest {
                 )
             )
         ))
-        assertThat(filter.hasValidTreatmentData(records)).isFalse()
+        assertThat(filter.hasConsistentTreatmentData(records)).isFalse()
     }
 
     @Test
@@ -88,7 +88,7 @@ class PatientRecordFilterTest {
                 vitStatInt = 1
             )
         ))
-        assertThat(filter.hasVitalStatusForDiaRecords(records)).isTrue()
+        assertThat(filter.hasVitalStatusForDiagnosisRecords(records)).isTrue()
     }
 
     @Test
@@ -99,7 +99,7 @@ class PatientRecordFilterTest {
                 vitStatInt = null
             )
         ))
-        assertThat(filter.hasVitalStatusForDiaRecords(records)).isFalse()
+        assertThat(filter.hasVitalStatusForDiagnosisRecords(records)).isFalse()
     }
 
     @Test

@@ -18,6 +18,29 @@ class TreatmentRecordFilter(override val logFilteredRecords: Boolean) : RecordFi
         ).all { it(tumorRecords) }
     }
 
+    internal fun hasConsistentPreAndPostSurgicalIntervalsForChemoAndRadiotherapy(tumorRecords: List<NcrRecord>): Boolean {
+        val hasConsistentPreAndPostSurgicalIntervalsForChemoAndRadiotherapy =
+            tumorRecords.map { it.treatment }.all {
+                hasConsistentPreAndPostSurgicalIntervals(
+                    it.primarySurgery.chir,
+                    it.primarySurgery.chirInt1,
+                    it.primaryRadiotherapy.rt,
+                    it.primaryRadiotherapy.rtStartInt1
+                ) && hasConsistentPreAndPostSurgicalIntervals(
+                    it.primarySurgery.chir,
+                    it.primarySurgery.chirInt1,
+                    it.primaryRadiotherapy.chemort,
+                    it.primaryRadiotherapy.rtStartInt1
+                )
+            }
+
+        if (!hasConsistentPreAndPostSurgicalIntervalsForChemoAndRadiotherapy) {
+            log("Invalid therapy pre/post codes for tumor ${tumorRecords.tumorId()}")
+        }
+
+        return hasConsistentPreAndPostSurgicalIntervalsForChemoAndRadiotherapy
+    }
+
     private fun hasConsistentPreAndPostSurgicalIntervals(
         surgeryChir: Int?,
         surgeryStartInt: Int?,
@@ -33,30 +56,6 @@ class TreatmentRecordFilter(override val logFilteredRecords: Boolean) : RecordFi
 
             else -> true
         }
-    }
-
-    internal fun hasConsistentPreAndPostSurgicalIntervalsForChemoAndRadiotherapy(tumorRecords: List<NcrRecord>): Boolean {
-        val hasConsistentPreAndPostSurgicalIntervalsForChemoAndRadiotherapy =
-            tumorRecords.map { it.treatment }.all { it ->
-                hasConsistentPreAndPostSurgicalIntervals(
-                    it.primarySurgery.chir,
-                    it.primarySurgery.chirInt1,
-                    it.primaryRadiotherapy.rt,
-                    it.primaryRadiotherapy.rtStartInt1
-                ) &&
-                        hasConsistentPreAndPostSurgicalIntervals(
-                            it.primarySurgery.chir,
-                            it.primarySurgery.chirInt1,
-                            it.primaryRadiotherapy.chemort,
-                            it.primaryRadiotherapy.rtStartInt1
-                        )
-            }
-
-        if (!hasConsistentPreAndPostSurgicalIntervalsForChemoAndRadiotherapy) {
-            log("Invalid therapy pre/post codes for tumor ${tumorRecords.tumorId()}")
-        }
-
-        return hasConsistentPreAndPostSurgicalIntervalsForChemoAndRadiotherapy
     }
 
     internal fun hasValidPrimarySurgery(tumorRecords: List<NcrRecord>): Boolean {
