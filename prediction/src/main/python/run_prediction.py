@@ -36,6 +36,7 @@ def main():
     parser.add_argument("output_path", help="Path to output JSON file")
     parser.add_argument("--trained_path", help= "Path to folder that contains trained model + preprocessors")
     parser.add_argument("--treatment_config", help="Path to treatment combination JSON")
+    parser.add_argument("--shap_samples_path", help="Path to SHAP samples CSV file")
     args = parser.parse_args()
     
     logger.info("Starting treatment prediction script")
@@ -64,14 +65,16 @@ def main():
         result = predict_treatment_scenarios(
             patient_data=patient_data,
             trained_path=args.trained_path,
-            valid_treatment_combinations=treatment_config, 
+            shap_samples_path=args.shap_samples_path,
+            valid_treatment_combinations=treatment_config,
             settings=settings
         )
     except Exception as e:
         logger.error(f"Prediction failed: {e}")
         failed_status(args.output_path)
         return
-    
+
+
     logger.info(f"Saving results to {args.output_path}")
     with open(args.output_path, 'w') as f:
         json.dump(result, f)
