@@ -6,11 +6,12 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 
 interface RecordFilter {
     val logFilteredRecords: Boolean
+    
     private val logger get() = KotlinLogging.logger {}
 
     fun log(message: String) {
         if (logFilteredRecords) {
-            logger.info { message }
+            logger.warn { message }
         }
     }
 

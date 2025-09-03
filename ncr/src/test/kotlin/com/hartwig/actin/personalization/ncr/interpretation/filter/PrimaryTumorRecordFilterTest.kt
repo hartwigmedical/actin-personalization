@@ -96,30 +96,4 @@ class PrimaryTumorRecordFilterTest {
         )
         assertThat(filter.hasValidAnusAfstData(records)).isFalse()
     }
-
-    @Test
-    fun `Should return true for consistent topoSublok data`() {
-        val records = listOf(
-            diagnosisRecord.copy(
-                primaryDiagnosis = diagnosisRecord.primaryDiagnosis.copy(topoSublok = "C000")
-            ),
-            followupRecord.copy(
-                primaryDiagnosis = followupRecord.primaryDiagnosis.copy(topoSublok = "C000")
-            )
-        )
-        assertThat(filter.hasConsistentTopoSublokData(records)).isTrue()
-    }
-
-    @Test
-    fun `Should return false for inconsistent topoSublok data`() {
-        val records = listOf(
-            diagnosisRecord.copy(
-                primaryDiagnosis = diagnosisRecord.primaryDiagnosis.copy(topoSublok = "C000")
-            ),
-            followupRecord.copy(
-                primaryDiagnosis = followupRecord.primaryDiagnosis.copy(topoSublok = "C001")
-            )
-        )
-        assertThat(filter.hasConsistentTopoSublokData(records)).isFalse()
-    }
 }

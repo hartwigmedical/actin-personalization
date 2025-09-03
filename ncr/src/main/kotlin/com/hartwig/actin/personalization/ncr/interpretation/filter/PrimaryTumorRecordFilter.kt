@@ -8,8 +8,7 @@ class PrimaryTumorRecordFilter(override val logFilteredRecords: Boolean) : Recor
         return listOf(
             ::hasValidDoubleTumorData,
             ::hasValidMorfCatData,
-            ::hasValidAnusAfstData,
-            ::hasConsistentTopoSublokData
+            ::hasValidAnusAfstData
         ).all { it(tumorRecords) }
     }
 
@@ -44,14 +43,5 @@ class PrimaryTumorRecordFilter(override val logFilteredRecords: Boolean) : Recor
         }
         
         return hasValidAnusAfstData
-    }
-
-    internal fun hasConsistentTopoSublokData(tumorRecords: List<NcrRecord>): Boolean {
-        val allTopoSubLock = tumorRecords.map { it.primaryDiagnosis.topoSublok }
-        val hasConsistentTopoSublokData = allTopoSubLock.toSet().size == 1
-        if (!hasConsistentTopoSublokData) {
-            log("Tumor ${tumorRecords.tumorId()} has inconsistent topoSublok data: $allTopoSubLock")
-        }
-        return hasConsistentTopoSublokData
     }
 }
