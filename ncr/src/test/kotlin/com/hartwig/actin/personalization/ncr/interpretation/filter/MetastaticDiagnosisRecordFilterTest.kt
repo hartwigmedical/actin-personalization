@@ -128,34 +128,4 @@ class MetastaticDiagnosisRecordFilterTest {
         )
         assertThat(filter.hasConsistentMetastaticProgression(records)).isTrue()
     }
-
-    @Test
-    fun `Should return true when at least one clinical metastatic detection is present`() {
-        val records = listOf(
-            minimalDiagnosisRecord.copy(
-                primaryDiagnosis = minimalDiagnosisRecord.primaryDiagnosis.copy(cm = "1", pm = "-")
-            )
-        )
-        assertThat(filter.hasAtLeastOneMetastaticDetection(records)).isTrue()
-    }
-
-    @Test
-    fun `Should return true when at least one pathological metastatic detection is present`() {
-        val records = listOf(
-            minimalDiagnosisRecord.copy(
-                primaryDiagnosis = minimalDiagnosisRecord.primaryDiagnosis.copy(cm = "0", pm = "A")
-            )
-        )
-        assertThat(filter.hasAtLeastOneMetastaticDetection(records)).isTrue()
-    }
-
-    @Test
-    fun `Should return false when no clinical or pathological metastatic detection is present`() {
-        val records = listOf(
-            minimalDiagnosisRecord.copy(
-                primaryDiagnosis = minimalDiagnosisRecord.primaryDiagnosis.copy(cm = "0", pm = "-")
-            )
-        )
-        assertThat(filter.hasAtLeastOneMetastaticDetection(records)).isFalse()
-    }
 }

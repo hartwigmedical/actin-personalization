@@ -9,23 +9,12 @@ class MetastaticDiagnosisRecordFilter(override val logFilteredRecords: Boolean) 
 
     override fun apply(tumorRecords: List<NcrRecord>): Boolean {
         return listOf(
-            ::hasAtLeastOneMetastaticDetection,
             ::hasAtMostOneMetastaticDetection,
             ::hasEmptyMetastaticFieldIfDetectionNotPresent,
             ::hasConsistentMetastaticProgression,
         ).all { it(tumorRecords) }
     }
     
-    internal fun hasAtLeastOneMetastaticDetection(records: List<NcrRecord>): Boolean {
-        val hasAtLeastOneClinicalMetastaticDetection = records.any { it.primaryDiagnosis.cm != null && it.primaryDiagnosis.cm != "0" }
-        val hasAtLeastOnePathologicalMetastaticDetection = records.any { it.primaryDiagnosis.pm != null && it.primaryDiagnosis.pm != "-" }
-        val hasAtLeastOneMetastaticDetection = hasAtLeastOneClinicalMetastaticDetection || hasAtLeastOnePathologicalMetastaticDetection
-        if (!hasAtLeastOneMetastaticDetection) {
-            log("No metastatic detection found in tumor ${records.tumorId()}")
-        }
-        return hasAtLeastOneMetastaticDetection
-    }
-
     internal fun hasAtMostOneMetastaticDetection(records: List<NcrRecord>): Boolean {
         val metastaticRecords = records.filter {
             it.identification.metaEpis == METASTATIC_DETECTION_AT_START ||
