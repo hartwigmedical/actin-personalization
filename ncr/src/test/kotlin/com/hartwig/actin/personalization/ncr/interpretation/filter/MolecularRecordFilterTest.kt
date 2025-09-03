@@ -5,6 +5,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
 class MolecularRecordFilterTest {
+    
     private val filter = MolecularRecordFilter(true)
 
     @Test

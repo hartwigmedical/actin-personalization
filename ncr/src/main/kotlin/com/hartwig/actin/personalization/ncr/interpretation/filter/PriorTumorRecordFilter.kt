@@ -6,12 +6,14 @@ import kotlin.reflect.full.memberProperties
 
 class PriorTumorRecordFilter(override val logFilteredRecords: Boolean) : RecordFilter {
 
-    inline fun <reified T : Any> allFieldsAreNull(obj: T): Boolean {
-        return T::class.memberProperties.all { prop ->
-            prop.get(obj) == null
-        }
+    override fun apply(tumorRecords: List<NcrRecord>): Boolean {
+        return listOf(
+            ::hasEmptyPriorTumorInVerbEpisode,
+            ::hasNoPositiveValueInMalInt,
+            ::hasCompletePriorTumorData
+        ).all { it(tumorRecords) }
     }
-
+    
     internal fun hasEmptyPriorTumorInVerbEpisode(tumorRecords: List<NcrRecord>): Boolean {
         val verbRecords = tumorRecords.filter { it.identification.epis == FOLLOW_UP_EPISODE }
 
@@ -56,11 +58,9 @@ class PriorTumorRecordFilter(override val logFilteredRecords: Boolean) : RecordF
         return allNullOrComplete
     }
 
-    override fun apply(tumorRecords: List<NcrRecord>): Boolean {
-        return listOf(
-            ::hasEmptyPriorTumorInVerbEpisode,
-            ::hasNoPositiveValueInMalInt,
-            ::hasCompletePriorTumorData
-        ).all { it(tumorRecords) }
+    private inline fun <reified T : Any> allFieldsAreNull(obj: T): Boolean {
+        return T::class.memberProperties.all { prop ->
+            prop.get(obj) == null
+        }
     }
 }

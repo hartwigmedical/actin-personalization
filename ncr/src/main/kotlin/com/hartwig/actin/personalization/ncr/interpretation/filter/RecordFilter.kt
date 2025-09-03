@@ -20,7 +20,7 @@ interface RecordFilter {
 
 internal fun List<NcrRecord>.tumorId() = first().identification.keyZid
 
-internal fun extractPrimaryDiagnosis(records: List<NcrRecord>): Pair<List<NcrRecord>, List<NcrRecord>> {
+internal fun splitDiagnosisAndFollowup(records: List<NcrRecord>): Pair<List<NcrRecord>, List<NcrRecord>> {
     return records.partition { it.identification.epis == DIAGNOSIS_EPISODE }
 }
 
@@ -28,6 +28,6 @@ internal fun Int?.notZeroNorNull(): Boolean {
     return this != null && this != 0
 }
 
-internal fun Int?.ZeroOrNull(): Boolean {
+internal fun Int?.zeroOrNull(): Boolean {
     return this == null || this == 0
 }

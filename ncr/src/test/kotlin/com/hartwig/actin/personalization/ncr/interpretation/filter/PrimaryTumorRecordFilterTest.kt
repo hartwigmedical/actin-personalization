@@ -5,6 +5,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
 class PrimaryTumorRecordFilterTest {
+    
     private val filter = PrimaryTumorRecordFilter(true)
     private val diagnosisRecord = TestNcrRecordFactory.minimalDiagnosisRecord()
     private val followUpRecord = TestNcrRecordFactory.minimalFollowupRecord()

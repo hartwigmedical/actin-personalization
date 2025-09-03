@@ -3,9 +3,16 @@ package com.hartwig.actin.personalization.ncr.interpretation.filter
 import com.hartwig.actin.personalization.ncr.datamodel.NcrRecord
 
 class PrimaryTumorRecordFilter(override val logFilteredRecords: Boolean) : RecordFilter {
-   
+
+    override fun apply(tumorRecords: List<NcrRecord>): Boolean {
+        return listOf(
+            ::hasValidDoubleTumorData,
+            ::hasConsistentTopoSublokData
+        ).all { it(tumorRecords) }
+    }
+    
     internal fun hasValidDoubleTumorData(tumorRecords: List<NcrRecord>): Boolean {
-        val (primaryDiagnosis,followUpDiagnosis) = extractPrimaryDiagnosis(tumorRecords)
+        val (primaryDiagnosis,followUpDiagnosis) = splitDiagnosisAndFollowup(tumorRecords)
         val hasValidDoubleTumorData = primaryDiagnosis.all { it.clinicalCharacteristics.dubbeltum != null } &&
                followUpDiagnosis.all { it.clinicalCharacteristics.dubbeltum == 0 }
         if (!hasValidDoubleTumorData) {
@@ -13,7 +20,6 @@ class PrimaryTumorRecordFilter(override val logFilteredRecords: Boolean) : Recor
         }
         return hasValidDoubleTumorData
     }
-
     
     internal fun hasConsistentTopoSublokData(tumorRecords: List<NcrRecord>): Boolean {
         val allTopoSubLock = tumorRecords.map { it.primaryDiagnosis.topoSublok }
@@ -22,12 +28,5 @@ class PrimaryTumorRecordFilter(override val logFilteredRecords: Boolean) : Recor
             log("Tumor ${tumorRecords.tumorId()} has inconsistent topoSublok data: $allTopoSubLock")
         }
         return hasConsistentTopoSublokData
-    }
-
-    override fun apply(tumorRecords: List<NcrRecord>): Boolean {
-        return listOf(
-            ::hasValidDoubleTumorData,
-            ::hasConsistentTopoSublokData
-        ).all { it(tumorRecords) }
     }
 }

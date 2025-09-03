@@ -5,6 +5,17 @@ import com.hartwig.actin.personalization.ncr.interpretation.DIAGNOSIS_EPISODE
 import com.hartwig.actin.personalization.ncr.interpretation.FOLLOW_UP_EPISODE
 
 class PatientRecordFilter(override val logFilteredRecords: Boolean) : RecordFilter {
+
+    override fun apply(tumorRecords: List<NcrRecord>): Boolean {
+        return listOf(
+            ::hasValidTreatmentData,
+            ::hasConsistentSex,
+            ::hasExactlyOneDiagnosis,
+            ::hasVitalStatusForDiaRecords,
+            ::hasEmptyVitalStatusForVerbRecords,
+        ).all { it(tumorRecords) }
+    }
+    
     internal fun hasValidTreatmentData(tumorRecords: List<NcrRecord>): Boolean {
         val allTreatments = tumorRecords.map { it.treatment }
         val indicatesTreatmentButNoTreatmentDefined = allTreatments.any { treatment ->
@@ -64,15 +75,5 @@ class PatientRecordFilter(override val logFilteredRecords: Boolean) : RecordFilt
             log("Non-empty vital status found for verb records of tumor ID ${tumorRecords.tumorId()}")
         }
         return hasEmptyVitalStatus
-    }
-
-    override fun apply(tumorRecords: List<NcrRecord>): Boolean {
-        return listOf(
-            ::hasValidTreatmentData,
-            ::hasConsistentSex,
-            ::hasExactlyOneDiagnosis,
-            ::hasVitalStatusForDiaRecords,
-            ::hasEmptyVitalStatusForVerbRecords,
-        ).all { it(tumorRecords) }
     }
 }

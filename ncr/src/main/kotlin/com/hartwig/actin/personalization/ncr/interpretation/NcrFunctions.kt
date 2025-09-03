@@ -7,6 +7,11 @@ import kotlin.math.max
 const val DIAGNOSIS_EPISODE = "DIA"
 const val FOLLOW_UP_EPISODE = "VERB"
 
+const val METASTATIC_DETECTION_ABSENT = 0
+const val METASTATIC_DETECTION_AT_START = 1
+const val METASTATIC_DETECTION_AT_PROGRESSION = 2
+
+
 object NcrFunctions {
 
     fun diagnosisRecord(records: List<NcrRecord>): NcrRecord {
@@ -14,7 +19,8 @@ object NcrFunctions {
     }
 
     fun metastaticRecord(records: List<NcrRecord>): NcrRecord {
-        return records.single { it.identification.metaEpis == 1 || it.identification.metaEpis == 2 }
+        return records.single { it.identification.metaEpis == METASTATIC_DETECTION_AT_START || 
+                it.identification.metaEpis == METASTATIC_DETECTION_AT_PROGRESSION }
     }
 
     fun recordsWithMinDaysSinceDiagnosis(records: List<NcrRecord>): Map<NcrRecord, Int> {
