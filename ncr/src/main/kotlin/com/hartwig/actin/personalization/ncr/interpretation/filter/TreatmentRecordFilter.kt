@@ -1,7 +1,6 @@
 package com.hartwig.actin.personalization.ncr.interpretation.filter
 
 import com.hartwig.actin.personalization.ncr.datamodel.NcrRecord
-import com.hartwig.actin.personalization.ncr.datamodel.NcrTreatment
 
 private const val PRE_SURGERY_CODE = 1
 private const val POST_SURGERY_CODE = 2
@@ -10,7 +9,6 @@ class TreatmentRecordFilter(override val logFilteredRecords: Boolean) : RecordFi
 
     override fun apply(tumorRecords: List<NcrRecord>): Boolean {
         return listOf(
-            ::hasConsistentReasonRefrainingTreatment,
             ::hasConsistentPreAndPostSurgicalIntervalsForChemoAndRadiotherapy,
             ::hasValidPrimarySurgery,
             ::hasValidPrimaryRadiotherapy,
@@ -18,42 +16,6 @@ class TreatmentRecordFilter(override val logFilteredRecords: Boolean) : RecordFi
             ::hasValidSystemicTreatment,
             ::hasValidSystemCodes
         ).all { it(tumorRecords) }
-    }
-
-    internal fun hasConsistentReasonRefrainingTreatment(tumorRecords: List<NcrRecord>): Boolean {
-        val allRecordsHaveNoTreatment = tumorRecords.map { it.treatment }.all { treatment ->
-            !hasAtLeastOneTreatment(treatment)
-        }
-
-        val allRecordsMissReasonForRefrainment = tumorRecords.map { it.treatment }.all { treatment ->
-            treatment.geenTherReden == null
-        }
-        
-        val hasConsistentReasonRefraining = !(allRecordsHaveNoTreatment && allRecordsMissReasonForRefrainment)
-        if (!hasConsistentReasonRefraining) log("Inconsistent reason for refraining treatment for tumor ${tumorRecords.tumorId()}")
-        
-        return hasConsistentReasonRefraining
-    }
-
-    private fun hasAtLeastOneTreatment(treatment: NcrTreatment): Boolean {
-        return listOf(
-            treatment.gastroenterologyResection.mdlRes,
-            treatment.primarySurgery.chir,
-            treatment.primaryRadiotherapy.rt,
-            treatment.primaryRadiotherapy.chemort,
-            treatment.systemicTreatment.chemo,
-            treatment.systemicTreatment.target,
-            treatment.hipec.hipec
-        ).any { it.notZeroNorNull() } ||
-                listOf(
-                    treatment.metastaticSurgery.metaChirCode1,
-                    treatment.metastaticSurgery.metaChirCode2,
-                    treatment.metastaticSurgery.metaChirCode3,
-                    treatment.metastaticRadiotherapy.metaRtCode1,
-                    treatment.metastaticRadiotherapy.metaRtCode2,
-                    treatment.metastaticRadiotherapy.metaRtCode3,
-                    treatment.metastaticRadiotherapy.metaRtCode4,
-                ).any { it != null }
     }
 
     private fun hasConsistentPreAndPostSurgicalIntervals(
