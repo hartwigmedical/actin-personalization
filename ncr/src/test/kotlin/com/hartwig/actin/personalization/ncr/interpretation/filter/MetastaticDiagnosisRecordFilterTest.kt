@@ -10,7 +10,7 @@ class MetastaticDiagnosisRecordFilterTest {
     private val minimalDiagnosisRecord = TestNcrRecordFactory.minimalDiagnosisRecord()
 
     @Test
-    fun `Should return true for zero metastatic episodes`() {
+    fun `Should return true for zero metastatic records`() {
         val records = listOf(
             minimalDiagnosisRecord.copy(
                 identification = minimalDiagnosisRecord.identification.copy(metaEpis = 0)
@@ -20,7 +20,7 @@ class MetastaticDiagnosisRecordFilterTest {
     }
 
     @Test
-    fun `Should return true for one metastatic detection`() {
+    fun `Should return true for one record with metastatic detection`() {
         val records = listOf(
             minimalDiagnosisRecord.copy(
                 identification = minimalDiagnosisRecord.identification.copy(metaEpis = 1)
@@ -30,7 +30,7 @@ class MetastaticDiagnosisRecordFilterTest {
     }
 
     @Test
-    fun `Should return false for more than one metastatic detection`() {
+    fun `Should return false for more than one record with metastatic detection`() {
         val records = listOf(
             minimalDiagnosisRecord.copy(identification = minimalDiagnosisRecord.identification.copy(metaEpis = 1)),
             minimalDiagnosisRecord.copy(identification = minimalDiagnosisRecord.identification.copy(metaEpis = 2))
@@ -64,21 +64,13 @@ class MetastaticDiagnosisRecordFilterTest {
     }
 
     @Test
-    fun `Should return true for consistent progression`() {
+    fun `Should return true for at least one metastases without progression in case of detection at start`() {
         val records = listOf(
             minimalDiagnosisRecord.copy(
                 identification = minimalDiagnosisRecord.identification.copy(metaEpis = 1),
                 metastaticDiagnosis = minimalDiagnosisRecord.metastaticDiagnosis.copy(
                     metaProg1 = 0,
-                    metaProg2 = 0,
-                    metaProg3 = 0,
-                    metaProg4 = 0,
-                    metaProg5 = 0,
-                    metaProg6 = 0,
-                    metaProg7 = 0,
-                    metaProg8 = 0,
-                    metaProg9 = 0,
-                    metaProg10 = 0
+                    metaProg2 = 1
                 )
             )
         )
@@ -86,7 +78,7 @@ class MetastaticDiagnosisRecordFilterTest {
     }
 
     @Test
-    fun `Should return false for inconsistent progression with at_progression`() {
+    fun `Should return false for having no progression metastases in an episode with metastases during progression`() {
         val records = listOf(
             minimalDiagnosisRecord.copy(
                 identification = minimalDiagnosisRecord.identification.copy(metaEpis = 2),
@@ -108,7 +100,7 @@ class MetastaticDiagnosisRecordFilterTest {
     }
 
     @Test
-    fun `Should return true for inconsistent progression with at_progression`() {
+    fun `Should return true for consistent progression in an episode with metastases at progression`() {
         val records = listOf(
             minimalDiagnosisRecord.copy(
                 identification = minimalDiagnosisRecord.identification.copy(metaEpis = 2),

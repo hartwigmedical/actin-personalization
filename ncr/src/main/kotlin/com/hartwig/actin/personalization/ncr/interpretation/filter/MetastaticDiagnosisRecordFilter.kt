@@ -64,7 +64,7 @@ class MetastaticDiagnosisRecordFilter(override val logFilteredRecords: Boolean) 
                 )
             }
             if (record.identification.metaEpis == METASTATIC_DETECTION_AT_START) {
-                allMetaProgression.all { !it.notZeroNorNull() }
+                allMetaProgression.any { it.zeroOrNull() }
             } else {
                 allMetaProgression.any { it.notZeroNorNull() }
             }
