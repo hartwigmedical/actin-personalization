@@ -15,7 +15,6 @@ interface RecordFilter {
         }
     }
 
-
     fun apply(tumorRecords: List<NcrRecord>): Boolean
 }
 
