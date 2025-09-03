@@ -12,7 +12,7 @@ class ComorbidityRecordFilter(override val logFilteredRecords: Boolean) : Record
 
     internal fun hasValidComorbidityData(tumorRecords: List<NcrRecord>): Boolean {
         val hasValidComorbidityData = tumorRecords.all {
-            (it.identification.epis == FOLLOWUP_EPISODE && it.comorbidities.allFieldsAreNull()) ||
+            it.comorbidities.allFieldsAreNull() ||
                     (it.identification.epis != FOLLOWUP_EPISODE && it.comorbidities.allFieldsAreNotNull())
         }
         
