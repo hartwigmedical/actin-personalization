@@ -35,7 +35,7 @@ class NcrQualityFilterTest {
                 record1Patient3
             )
         )
-        
+
         assertThat(filtered).containsExactly(record1Patient1, record2Patient1, record1Patient2)
     }
 
@@ -67,7 +67,11 @@ class NcrQualityFilterTest {
             treatment = noTreatmentButFlaggedAsHavingOne.treatment.copy(
                 tumgerichtTher = 1,
                 geenTherReden = null,
-                systemicTreatment = noTreatmentButFlaggedAsHavingOne.treatment.systemicTreatment.copy(target = 1, chemo = 1, systCode1 = "code1")
+                systemicTreatment = noTreatmentButFlaggedAsHavingOne.treatment.systemicTreatment.copy(
+                    target = 1,
+                    chemo = 1,
+                    systCode1 = "code1"
+                )
             )
         )
         assertThat(filter.run(listOf(recordWithValidTreatmentData))).containsExactly(recordWithValidTreatmentData)
