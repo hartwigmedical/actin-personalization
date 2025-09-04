@@ -4,25 +4,21 @@ import com.hartwig.actin.personalization.ncr.datamodel.NcrCharlsonComorbidities
 import com.hartwig.actin.personalization.ncr.datamodel.NcrRecord
 import com.hartwig.actin.personalization.ncr.interpretation.FOLLOWUP_EPISODE
 
-class ComorbidityRecordFilter(override val logFilteredRecords: Boolean) : RecordFilter {
+class ConsistentComorbidityDataFilter(override val logFilteredRecords: Boolean) : RecordFilter {
 
     override fun apply(tumorRecords: List<NcrRecord>): Boolean {
-        return hasValidComorbidityData(tumorRecords)
-    }
-
-    internal fun hasValidComorbidityData(tumorRecords: List<NcrRecord>): Boolean {
-        val hasValidComorbidityData = tumorRecords.all {
+        val hasConsistentComorbidityData = tumorRecords.all {
             it.comorbidities.allFieldsAreNull() ||
                     (it.identification.epis != FOLLOWUP_EPISODE && it.comorbidities.allFieldsAreNotNull())
         }
-        
-        if (!hasValidComorbidityData) {
+
+        if (!hasConsistentComorbidityData) {
             log("Tumor ${tumorRecords.tumorId()} has comorbidity on follow-up episode")
         }
-        
-        return hasValidComorbidityData
-    }
 
+        return hasConsistentComorbidityData
+    }
+    
     private fun NcrCharlsonComorbidities.allFieldsAreNull(): Boolean {
         return allFields().all { it == null }
     }

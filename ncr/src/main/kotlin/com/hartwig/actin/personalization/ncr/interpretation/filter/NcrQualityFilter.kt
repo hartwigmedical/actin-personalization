@@ -25,8 +25,10 @@ class NcrQualityFilter(private val logFilteredRecords: Boolean) {
             PatientRecordFilter(logFilteredRecords),
             PriorTumorRecordFilter(logFilteredRecords),
             PrimaryTumorRecordFilter(logFilteredRecords),
-            MetastaticDiagnosisRecordFilter(logFilteredRecords),
-            ComorbidityRecordFilter(logFilteredRecords),
+            ConsistentMetastaticProgressionFilter(logFilteredRecords),
+            MaxOneMetastaticDiagnosisFilter(logFilteredRecords),
+            NoMetastaticDataIfAbsentFilter(logFilteredRecords),
+            ConsistentComorbidityDataFilter(logFilteredRecords),
             MolecularRecordFilter(logFilteredRecords),
             TreatmentRecordFilter(logFilteredRecords),
         )

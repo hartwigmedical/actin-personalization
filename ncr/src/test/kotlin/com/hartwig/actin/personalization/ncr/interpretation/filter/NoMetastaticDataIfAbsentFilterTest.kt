@@ -1,0 +1,32 @@
+package com.hartwig.actin.personalization.ncr.interpretation.filter
+
+import com.hartwig.actin.personalization.ncr.datamodel.TestNcrRecordFactory
+import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.Test
+
+class NoMetastaticDataIfAbsentFilterTest {
+
+    private val filter = NoMetastaticDataIfAbsentFilter(true)
+    private val minimal = TestNcrRecordFactory.minimalDiagnosisRecord()
+    
+    @Test
+    fun `Should return true when metastatic fields are empty if detection not present`() {
+        val records = listOf(minimal.copy(identification = minimal.identification.copy(metaEpis = 0)))
+        assertThat(filter.apply(records)).isTrue()
+    }
+
+    @Test
+    fun `Should return false when metastatic fields are not empty if detection not present`() {
+        val records = listOf(
+            minimal.copy(
+                identification = minimal.identification.copy(metaEpis = 0),
+                metastaticDiagnosis = minimal.metastaticDiagnosis.copy(metaProg1 = 1),
+                treatment = minimal.treatment.copy(
+                    metastaticSurgery = minimal.treatment.metastaticSurgery.copy(metaChirCode1 = "surgery"),
+                    metastaticRadiotherapy = minimal.treatment.metastaticRadiotherapy.copy(metaRtCode1 = "radiotherapy")
+                )
+            )
+        )
+        assertThat(filter.apply(records)).isFalse()
+    }
+}
