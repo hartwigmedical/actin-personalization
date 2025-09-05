@@ -18,16 +18,16 @@ interface RecordFilter {
     fun apply(tumorRecords: List<NcrRecord>): Boolean
 }
 
-internal fun List<NcrRecord>.tumorId() = first().identification.keyZid
+fun List<NcrRecord>.tumorId() = first().identification.keyZid
 
-internal fun splitDiagnosisAndFollowup(records: List<NcrRecord>): Pair<List<NcrRecord>, List<NcrRecord>> {
+fun splitDiagnosisAndFollowup(records: List<NcrRecord>): Pair<List<NcrRecord>, List<NcrRecord>> {
     return records.partition { it.identification.epis == DIAGNOSIS_EPISODE }
 }
 
-internal fun Int?.notZeroNorNull(): Boolean {
+fun Int?.notZeroNorNull(): Boolean {
     return this != null && this != 0
 }
 
-internal fun Int?.zeroOrNull(): Boolean {
+fun Int?.zeroOrNull(): Boolean {
     return this == null || this == 0
 }

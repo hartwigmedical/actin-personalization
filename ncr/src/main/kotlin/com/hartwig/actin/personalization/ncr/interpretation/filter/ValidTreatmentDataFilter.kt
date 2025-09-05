@@ -5,7 +5,7 @@ import com.hartwig.actin.personalization.ncr.datamodel.NcrRecord
 private const val PRE_SURGERY_CODE = 1
 private const val POST_SURGERY_CODE = 2
 
-class TreatmentRecordFilter(override val logFilteredRecords: Boolean) : RecordFilter {
+class ValidTreatmentDataFilter(override val logFilteredRecords: Boolean) : RecordFilter {
 
     override fun apply(tumorRecords: List<NcrRecord>): Boolean {
         return listOf(
@@ -18,7 +18,7 @@ class TreatmentRecordFilter(override val logFilteredRecords: Boolean) : RecordFi
         ).all { it(tumorRecords) }
     }
 
-    internal fun hasConsistentPreAndPostSurgicalIntervalsForChemoAndRadiotherapy(tumorRecords: List<NcrRecord>): Boolean {
+    private fun hasConsistentPreAndPostSurgicalIntervalsForChemoAndRadiotherapy(tumorRecords: List<NcrRecord>): Boolean {
         val hasConsistentPreAndPostSurgicalIntervalsForChemoAndRadiotherapy =
             tumorRecords.map { it.treatment }.all {
                 hasConsistentPreAndPostSurgicalIntervals(
@@ -58,7 +58,7 @@ class TreatmentRecordFilter(override val logFilteredRecords: Boolean) : RecordFi
         }
     }
 
-    internal fun hasValidPrimarySurgery(tumorRecords: List<NcrRecord>): Boolean {
+    private fun hasValidPrimarySurgery(tumorRecords: List<NcrRecord>): Boolean {
         val hasValidPrimarySurgery = tumorRecords.map { it.treatment }.all { treatment ->
             val hasPrimarySurgeryChir = treatment.primarySurgery.chir == 1
             val hasPrimarySurgeryType1 = treatment.primarySurgery.chirType1.notZeroNorNull()
@@ -71,7 +71,7 @@ class TreatmentRecordFilter(override val logFilteredRecords: Boolean) : RecordFi
         return hasValidPrimarySurgery
     }
 
-    internal fun hasValidPrimaryRadiotherapy(tumorRecords: List<NcrRecord>): Boolean {
+    private fun hasValidPrimaryRadiotherapy(tumorRecords: List<NcrRecord>): Boolean {
         val hasValidPrimaryRadiotherapy = tumorRecords.map { it.treatment }.all { treatment ->
             val hasPrimaryRadiotherapyRt = treatment.primaryRadiotherapy.rt != 0
             val hasPrimaryRadiotherapyChemort = treatment.primaryRadiotherapy.chemort.notZeroNorNull()
@@ -85,7 +85,7 @@ class TreatmentRecordFilter(override val logFilteredRecords: Boolean) : RecordFi
         return hasValidPrimaryRadiotherapy
     }
 
-    internal fun hasValidGastroResection(tumorRecords: List<NcrRecord>): Boolean {
+    private fun hasValidGastroResection(tumorRecords: List<NcrRecord>): Boolean {
         val hasValidGastroResection = tumorRecords.map { it.treatment }.all { treatment ->
             val hasGastroResection = treatment.gastroenterologyResection.mdlRes.notZeroNorNull()
             val hasGastroResectionType1 = treatment.gastroenterologyResection.mdlResType1.notZeroNorNull()
@@ -98,7 +98,7 @@ class TreatmentRecordFilter(override val logFilteredRecords: Boolean) : RecordFi
         return hasValidGastroResection
     }
 
-    internal fun hasValidSystemicTreatment(tumorRecords: List<NcrRecord>): Boolean {
+    private fun hasValidSystemicTreatment(tumorRecords: List<NcrRecord>): Boolean {
         val hasValidSystemicTreatment = tumorRecords.map { it.treatment }.all { treatment ->
             val hasSystemicChemo = treatment.systemicTreatment.chemo != 0
             val hasSystemicTarget = treatment.systemicTreatment.target != 0
@@ -128,7 +128,7 @@ class TreatmentRecordFilter(override val logFilteredRecords: Boolean) : RecordFi
         return hasValidSystemicTreatment
     }
 
-    internal fun hasValidSystemCodes(tumorRecords: List<NcrRecord>): Boolean {
+    private fun hasValidSystemCodes(tumorRecords: List<NcrRecord>): Boolean {
         val treatmentRecords = tumorRecords.map { it.treatment }
         val hasValidSystemCodes = treatmentRecords.all {
             listOf(

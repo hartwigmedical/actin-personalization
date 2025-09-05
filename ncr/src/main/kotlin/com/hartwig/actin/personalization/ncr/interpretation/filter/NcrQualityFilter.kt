@@ -22,13 +22,20 @@ class NcrQualityFilter(private val logFilteredRecords: Boolean) {
 
     private fun isReliableTumorRecordSet(tumorRecords: List<NcrRecord>): Boolean {
         val filters = listOf(
-            PatientRecordFilter(logFilteredRecords),
-            PriorTumorRecordFilter(logFilteredRecords),
-            PrimaryTumorRecordFilter(logFilteredRecords),
-            MetastaticDiagnosisRecordFilter(logFilteredRecords),
-            ComorbidityRecordFilter(logFilteredRecords),
-            MolecularRecordFilter(logFilteredRecords),
-            TreatmentRecordFilter(logFilteredRecords),
+            ConsistentTreatmentDataFilter(logFilteredRecords),
+            ConsistentSexFilter(logFilteredRecords),
+            ExactlyOnePrimaryDiagnosisRecordFilter(logFilteredRecords),
+            ValidVitalStatusFilter(logFilteredRecords),
+            ReliablePriorTumorDataFilter(logFilteredRecords),
+            ConsistentDoubleTumorDataFilter(logFilteredRecords),
+            ValidPrimaryTumorTypeFilter(logFilteredRecords),
+            ValidAnalDistanceFilter(logFilteredRecords),
+            ConsistentMetastaticProgressionFilter(logFilteredRecords),
+            MaxOneMetastaticRecordFilter(logFilteredRecords),
+            NoMetastaticDataIfAbsentFilter(logFilteredRecords),
+            ConsistentComorbidityDataFilter(logFilteredRecords),
+            NoMolecularDataForFollowupFilter(logFilteredRecords),
+            ValidTreatmentDataFilter(logFilteredRecords),
         )
         return filters.all { it.apply(tumorRecords) }
     }
