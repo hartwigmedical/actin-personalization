@@ -35,7 +35,7 @@ class NcrQualityFilter(private val logFilteredRecords: Boolean) {
             NoMetastaticDataIfAbsentFilter(logFilteredRecords),
             ConsistentComorbidityDataFilter(logFilteredRecords),
             NoMolecularDataForFollowupFilter(logFilteredRecords),
-            TreatmentRecordFilter(logFilteredRecords),
+            ValidTreatmentDataFilter(logFilteredRecords),
         )
         return filters.all { it.apply(tumorRecords) }
     }
