@@ -7,22 +7,20 @@ import org.junit.jupiter.api.Test
 class ValidVitalStatusFilterTest {
 
     private val filter = ValidVitalStatusFilter(true)
-    private val minimalDiagnosis = TestNcrRecordFactory.minimalDiagnosisRecord()
-    private val minimalFollowup = TestNcrRecordFactory.minimalFollowupRecord()
+    private val diagnosis = TestNcrRecordFactory.minimalDiagnosisRecord()
+    private val followup = TestNcrRecordFactory.minimalFollowupRecord()
 
     @Test
     fun `Should return true when all diagnosis records have vital status`() {
-        val records = listOf(
-            minimalDiagnosis.copy(patientCharacteristics = minimalDiagnosis.patientCharacteristics.copy(vitStat = 1, vitStatInt = 1))
-        )
-        
+        val records = listOf(diagnosis.copy(patientCharacteristics = diagnosis.patientCharacteristics.copy(vitStat = 1, vitStatInt = 1)))
+
         assertThat(filter.apply(records)).isTrue()
     }
 
     @Test
     fun `Should return false when any diagnosis record is missing vital status`() {
         val records = listOf(
-            minimalDiagnosis.copy(patientCharacteristics = minimalDiagnosis.patientCharacteristics.copy(vitStat = null, vitStatInt = null))
+            diagnosis.copy(patientCharacteristics = diagnosis.patientCharacteristics.copy(vitStat = null, vitStatInt = null))
         )
 
         assertThat(filter.apply(records)).isFalse()
@@ -31,7 +29,7 @@ class ValidVitalStatusFilterTest {
     @Test
     fun `Should return true when all followup records have empty vital status`() {
         val records = listOf(
-            minimalFollowup.copy(patientCharacteristics = minimalFollowup.patientCharacteristics.copy(vitStat = null, vitStatInt = null))
+            followup.copy(patientCharacteristics = followup.patientCharacteristics.copy(vitStat = null, vitStatInt = null))
         )
 
         assertThat(filter.apply(records)).isTrue()
@@ -40,7 +38,7 @@ class ValidVitalStatusFilterTest {
     @Test
     fun `Should return false when any followup record has vital status`() {
         val records = listOf(
-            minimalFollowup.copy(patientCharacteristics = minimalFollowup.patientCharacteristics.copy(vitStat = 1, vitStatInt = 1))
+            followup.copy(patientCharacteristics = followup.patientCharacteristics.copy(vitStat = 1, vitStatInt = 1))
         )
 
         assertThat(filter.apply(records)).isFalse()

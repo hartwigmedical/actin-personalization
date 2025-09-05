@@ -7,14 +7,14 @@ import org.junit.jupiter.api.Test
 class ConsistentMetastaticProgressionFilterTest {
 
     private val filter = ConsistentMetastaticProgressionFilter(true)
-    private val minimal = TestNcrRecordFactory.minimalDiagnosisRecord()
+    private val diagnosis = TestNcrRecordFactory.minimalDiagnosisRecord()
     
     @Test
     fun `Should return true for at least one metastases without progression in case of detection at start`() {
         val records = listOf(
-            minimal.copy(
-                identification = minimal.identification.copy(metaEpis = 1),
-                metastaticDiagnosis = minimal.metastaticDiagnosis.copy(
+            diagnosis.copy(
+                identification = diagnosis.identification.copy(metaEpis = 1),
+                metastaticDiagnosis = diagnosis.metastaticDiagnosis.copy(
                     metaProg1 = 0,
                     metaProg2 = 1
                 )
@@ -26,9 +26,9 @@ class ConsistentMetastaticProgressionFilterTest {
     @Test
     fun `Should return false for having no progression metastases in an episode with metastases during progression`() {
         val records = listOf(
-            minimal.copy(
-                identification = minimal.identification.copy(metaEpis = 2),
-                metastaticDiagnosis = minimal.metastaticDiagnosis.copy(
+            diagnosis.copy(
+                identification = diagnosis.identification.copy(metaEpis = 2),
+                metastaticDiagnosis = diagnosis.metastaticDiagnosis.copy(
                     metaProg1 = 0,
                     metaProg2 = 0,
                     metaProg3 = 0,
@@ -48,9 +48,9 @@ class ConsistentMetastaticProgressionFilterTest {
     @Test
     fun `Should return true for consistent progression in an episode with metastases at progression`() {
         val records = listOf(
-            minimal.copy(
-                identification = minimal.identification.copy(metaEpis = 2),
-                metastaticDiagnosis = minimal.metastaticDiagnosis.copy(
+            diagnosis.copy(
+                identification = diagnosis.identification.copy(metaEpis = 2),
+                metastaticDiagnosis = diagnosis.metastaticDiagnosis.copy(
                     metaProg1 = 1,
                     metaProg2 = 0,
                     metaProg3 = 0,

@@ -4,7 +4,7 @@ import com.hartwig.actin.personalization.ncr.datamodel.NcrRecord
 import com.hartwig.actin.personalization.ncr.interpretation.FOLLOWUP_EPISODE
 import kotlin.reflect.full.memberProperties
 
-class PriorTumorRecordFilter(override val logFilteredRecords: Boolean) : RecordFilter {
+class ReliablePriorTumorDataFilter(override val logFilteredRecords: Boolean) : RecordFilter {
 
     override fun apply(tumorRecords: List<NcrRecord>): Boolean {
         return listOf(
@@ -14,7 +14,7 @@ class PriorTumorRecordFilter(override val logFilteredRecords: Boolean) : RecordF
         ).all { it(tumorRecords) }
     }
     
-    internal fun hasEmptyPriorTumorInFollowups(tumorRecords: List<NcrRecord>): Boolean {
+    private fun hasEmptyPriorTumorInFollowups(tumorRecords: List<NcrRecord>): Boolean {
         val followups = tumorRecords.filter { it.identification.epis == FOLLOWUP_EPISODE }
 
         val hasEmptyPriorTumor = followups.all { allFieldsAreNull(it.priorMalignancies) }
@@ -26,7 +26,7 @@ class PriorTumorRecordFilter(override val logFilteredRecords: Boolean) : RecordF
         return hasEmptyPriorTumor
     }
 
-    internal fun hasNoPositiveValueInMalInt(tumorRecords: List<NcrRecord>): Boolean {
+    private fun hasNoPositiveValueInMalInt(tumorRecords: List<NcrRecord>): Boolean {
         val allMalIntValues = tumorRecords.flatMap { it ->
             listOf(
                 it.priorMalignancies.mal1Int,
@@ -44,7 +44,7 @@ class PriorTumorRecordFilter(override val logFilteredRecords: Boolean) : RecordF
         return hasNoPositiveValues
     }
 
-    internal fun hasCompletePriorTumorData(tumorRecords: List<NcrRecord>): Boolean {
+    private fun hasCompletePriorTumorData(tumorRecords: List<NcrRecord>): Boolean {
         val allPriorTumorInfo = tumorRecords.map { it.priorMalignancies }
             .flatMap {
                 listOf(

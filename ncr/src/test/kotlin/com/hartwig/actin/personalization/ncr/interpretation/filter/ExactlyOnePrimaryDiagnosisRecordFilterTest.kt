@@ -7,19 +7,19 @@ import org.junit.jupiter.api.Test
 class ExactlyOnePrimaryDiagnosisRecordFilterTest {
 
     private val filter = ExactlyOnePrimaryDiagnosisRecordFilter(true)
-    private val minimalDiagnosis = TestNcrRecordFactory.minimalDiagnosisRecord()
+    private val diagnosis = TestNcrRecordFactory.minimalDiagnosisRecord()
 
     @Test
     fun `Should return true when there is exactly one diagnosis`() {
-        val records = listOf(minimalDiagnosis)
+        val records = listOf(diagnosis)
         assertThat(filter.apply(records)).isTrue()
     }
 
     @Test
     fun `Should return false when there are zero or multiple diagnoses`() {
-        val notDiagnosis = minimalDiagnosis.copy(identification = minimalDiagnosis.identification.copy(epis = "NOT DIA"))
+        val notDiagnosis = diagnosis.copy(identification = diagnosis.identification.copy(epis = "NOT DIA"))
         assertThat(filter.apply(listOf(notDiagnosis))).isFalse()
         
-        assertThat(filter.apply(listOf(minimalDiagnosis, minimalDiagnosis.copy()))).isFalse()
+        assertThat(filter.apply(listOf(diagnosis, diagnosis.copy()))).isFalse()
     }
 }

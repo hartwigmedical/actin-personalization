@@ -7,14 +7,14 @@ import org.junit.jupiter.api.Test
 class ConsistentComorbidityDataFilterTest {
 
     private val filter = ConsistentComorbidityDataFilter(true)
-    private val minimalDiagnosis = TestNcrRecordFactory.minimalDiagnosisRecord()
-    private val minimalFollowup = TestNcrRecordFactory.minimalFollowupRecord()
+    private val diagnosis = TestNcrRecordFactory.minimalDiagnosisRecord()
+    private val followup = TestNcrRecordFactory.minimalFollowupRecord()
 
     @Test
     fun `Should returns true when all follow-up records have no comorbidity`() {
         val records = listOf(
-            minimalFollowup.copy(
-                comorbidities = minimalFollowup.comorbidities.copy(
+            followup.copy(
+                comorbidities = followup.comorbidities.copy(
                     cciPvd = null, cciRenal = null, cciSevereLiver = null, cciUlcer = null
                 )
             )
@@ -25,8 +25,8 @@ class ConsistentComorbidityDataFilterTest {
     @Test
     fun `Should returns false when any follow-up record has comorbidity`() {
         val records = listOf(
-            minimalFollowup.copy(
-                comorbidities = minimalFollowup.comorbidities.copy(
+            followup.copy(
+                comorbidities = followup.comorbidities.copy(
                     cciPvd = 1, cciRenal = null, cciSevereLiver = null, cciUlcer = null
                 )
             )
@@ -37,8 +37,8 @@ class ConsistentComorbidityDataFilterTest {
     @Test
     fun `Should returns true when all records are complete or empty`() {
         val records = listOf(
-            minimalDiagnosis.copy(
-                comorbidities = minimalDiagnosis.comorbidities.copy(
+            diagnosis.copy(
+                comorbidities = diagnosis.comorbidities.copy(
                     cci = 1,
                     cciAids = 1,
                     cciCat = 1,
@@ -60,7 +60,7 @@ class ConsistentComorbidityDataFilterTest {
                     cciUlcer = 1
                 )
             ),
-            minimalDiagnosis
+            diagnosis
         )
         assertThat(filter.apply(records)).isTrue()
     }
@@ -68,8 +68,8 @@ class ConsistentComorbidityDataFilterTest {
     @Test
     fun `Should returns false when any record is partially complete`() {
         val records = listOf(
-            minimalDiagnosis.copy(
-                comorbidities = minimalDiagnosis.comorbidities.copy(
+            diagnosis.copy(
+                comorbidities = diagnosis.comorbidities.copy(
                     cciPvd = 1, cciRenal = null, cciSevereLiver = 1, cciUlcer = 1
                 )
             )

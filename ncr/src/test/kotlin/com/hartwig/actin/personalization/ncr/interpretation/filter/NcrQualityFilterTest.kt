@@ -10,19 +10,19 @@ class NcrQualityFilterTest {
 
     @Test
     fun `Should select properly from a set of multiple patients`() {
-        val valid = TestNcrRecordFactory.minimalDiagnosisRecord()
+        val validDiagnosis = TestNcrRecordFactory.minimalDiagnosisRecord()
         val validFollowup = TestNcrRecordFactory.minimalFollowupRecord()
-        val invalid = valid.copy(treatment = valid.treatment.copy(tumgerichtTher = 1))
+        val invalid = validDiagnosis.copy(treatment = validDiagnosis.treatment.copy(tumgerichtTher = 1))
 
-        val record1Patient1 = valid.copy(identification = valid.identification.copy(keyNkr = 1, keyZid = 1, keyEid = 1))
+        val record1Patient1 = validDiagnosis.copy(identification = validDiagnosis.identification.copy(keyNkr = 1, keyZid = 1, keyEid = 1))
         val record2Patient1 = validFollowup.copy(identification = validFollowup.identification.copy(keyNkr = 1, keyZid = 1, keyEid = 2))
 
-        val record1Patient2 = valid.copy(identification = valid.identification.copy(keyNkr = 2, keyZid = 1, keyEid = 1))
-        val record2Patient2 = valid.copy(identification = valid.identification.copy(keyNkr = 2, keyZid = 2, keyEid = 1))
-        val record3Patient2 = invalid.copy(identification = valid.identification.copy(keyNkr = 2, keyZid = 2, keyEid = 2))
-        val record4Patient2 = invalid.copy(identification = valid.identification.copy(keyNkr = 2, keyZid = 3, keyEid = 1))
+        val record1Patient2 = validDiagnosis.copy(identification = validDiagnosis.identification.copy(keyNkr = 2, keyZid = 1, keyEid = 1))
+        val record2Patient2 = validDiagnosis.copy(identification = validDiagnosis.identification.copy(keyNkr = 2, keyZid = 2, keyEid = 1))
+        val record3Patient2 = invalid.copy(identification = validDiagnosis.identification.copy(keyNkr = 2, keyZid = 2, keyEid = 2))
+        val record4Patient2 = invalid.copy(identification = validDiagnosis.identification.copy(keyNkr = 2, keyZid = 3, keyEid = 1))
 
-        val record1Patient3 = invalid.copy(identification = valid.identification.copy(keyNkr = 3, keyZid = 1, keyEid = 1))
+        val record1Patient3 = invalid.copy(identification = validDiagnosis.identification.copy(keyNkr = 3, keyZid = 1, keyEid = 1))
 
         val filtered = filter.run(
             listOf(

@@ -4,7 +4,7 @@ import com.hartwig.actin.personalization.ncr.datamodel.NcrRecord
 import com.hartwig.actin.personalization.ncr.interpretation.METASTATIC_DETECTION_AT_PROGRESSION
 import com.hartwig.actin.personalization.ncr.interpretation.METASTATIC_DETECTION_AT_START
 
-class MaxOneMetastaticDiagnosisFilter(override val logFilteredRecords: Boolean) : RecordFilter {
+class MaxOneMetastaticRecordFilter(override val logFilteredRecords: Boolean) : RecordFilter {
     
     override fun apply(tumorRecords: List<NcrRecord>): Boolean {
         val metastaticRecords = tumorRecords.filter {
