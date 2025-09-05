@@ -7,6 +7,7 @@ class NoMetastaticDataIfAbsentFilter(override val logFilteredRecords: Boolean) :
     
     override fun apply(tumorRecords: List<NcrRecord>): Boolean {
         val absentMetastaticRecords = tumorRecords.filter { it.identification.metaEpis == METASTATIC_DETECTION_ABSENT }
+        
         val hasEmptyMetastaticFieldIfDetectionNotPresent = absentMetastaticRecords.all { record ->
             val hasEmptyMetastaticDiagnosis = with(record.metastaticDiagnosis) {
                 listOf(
@@ -30,5 +31,4 @@ class NoMetastaticDataIfAbsentFilter(override val logFilteredRecords: Boolean) :
 
         return hasEmptyMetastaticFieldIfDetectionNotPresent
     }
-
 }

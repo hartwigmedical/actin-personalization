@@ -22,7 +22,10 @@ class NcrQualityFilter(private val logFilteredRecords: Boolean) {
 
     private fun isReliableTumorRecordSet(tumorRecords: List<NcrRecord>): Boolean {
         val filters = listOf(
-            PatientRecordFilter(logFilteredRecords),
+            ConsistentTreatmentDataFilter(logFilteredRecords),
+            ConsistentSexFilter(logFilteredRecords),
+            ExactlyOnePrimaryDiagnosisRecordFilter(logFilteredRecords),
+            ValidVitalStatusFilter(logFilteredRecords),
             PriorTumorRecordFilter(logFilteredRecords),
             PrimaryTumorRecordFilter(logFilteredRecords),
             ConsistentMetastaticProgressionFilter(logFilteredRecords),

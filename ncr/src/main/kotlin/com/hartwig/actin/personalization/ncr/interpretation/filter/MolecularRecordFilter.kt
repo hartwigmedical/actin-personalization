@@ -15,7 +15,7 @@ class MolecularRecordFilter(override val logFilteredRecords: Boolean) : RecordFi
         }
         
         if (!hasNoMolecularDataForFollowup) {
-            log("Followup diagnosis contains molecular data for tumor ID: ${tumorRecords.tumorId()}")
+            log("Followup records contain molecular data for tumor ID: ${tumorRecords.tumorId()}")
         }
         
         return hasNoMolecularDataForFollowup
