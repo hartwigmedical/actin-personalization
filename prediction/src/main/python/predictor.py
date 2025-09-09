@@ -1,15 +1,20 @@
 import importlib
 import json
+import logging
 import os
 import pandas as pd
 import numpy as np
 import torch
+import shap
 import re
 
 from data.data_processing import DataPreprocessor
 from data.lookups import lookup_manager
 from models import *
 from utils.settings import Settings
+from utils.feature_translation import feature_short_names
+
+logger = logging.getLogger(__name__)
 
 MALIGNANCY_ICD_CODES = {
     "hasAids": ["B24"],
@@ -114,6 +119,7 @@ def load_patient_df(patient, tnm_stage_medians, settings: Settings) -> pd.DataFr
         "hasBrafV600EMutation": "BRAF" in variant_genes and "V600E" in variant_genes["BRAF"].get("event", ""),
         "hasRasMutation": any(gene in variant_genes for gene in ["KRAS", "NRAS", "HRAS"]),
         "hasKrasG12CMutation": "KRAS" in variant_genes and "G12C" in variant_genes["KRAS"].get("event", ""),
+        "tumorRegression": tumor.get("tumorRegression", 0)
     }
     
     features = lookup_manager.features + [settings.event_col, settings.duration_col]
@@ -121,8 +127,35 @@ def load_patient_df(patient, tnm_stage_medians, settings: Settings) -> pd.DataFr
     
     return pd.DataFrame([patient_dict])
 
+def build_shap_explainer(model, shap_samples_path) -> shap.Explainer:
+    X_samples = pd.read_csv(shap_samples_path)
+    X_samples = X_samples.astype(np.float64).fillna(0.0)
+    logger.info(f"Loaded SHAP samples from {shap_samples_path} with shape {X_samples.shape}")
 
-def predict_treatment_scenarios(patient_data: dict, trained_path: str, valid_treatment_combinations: dict, settings: Settings) -> dict:
+    explainer = shap.Explainer(model.predict, X_samples)
+    logger.info(f"Created SHAP explainer with {X_samples.shape[0]} samples")
+
+    return explainer
+
+def get_shap_values(explainer: shap.Explainer, X: pd.DataFrame):
+
+    X = X.astype(np.float64).fillna(0.0)
+
+    shap_values = explainer(X)
+    logger.info(f"Computed SHAP values with shape {shap_values.shape}")
+    shap.plots.bar(shap_values[0])
+
+    result_dict = {
+        feature_short_names.get(shap_values.feature_names[j], shap_values.feature_names[j]): {
+            "featureValue": shap_values.data[0][j],
+            "shapValue": shap_values.values[0][j]
+        }
+        for j in range(len(shap_values.feature_names))
+    }
+    return result_dict
+
+
+def predict_treatment_scenarios(patient_data: dict, trained_path: str, shap_samples_path: str, valid_treatment_combinations: dict, settings: Settings) -> list:
     
     with open(f"{trained_path}/tnm_stage_medians.json", "r") as f:
         tnm_stage_medians = json.load(f)
@@ -138,7 +171,9 @@ def predict_treatment_scenarios(patient_data: dict, trained_path: str, valid_tre
 
     treatment_cols = [c for c in X_base.columns if c.startswith("systemicTreatmentPlan")]
 
-    survival_dict = {}
+    shap_explainer = build_shap_explainer(model, shap_samples_path)
+
+    survival_prediction = []
     for idx, (label, mapping) in enumerate(valid_treatment_combinations.items()):
         for col, val in mapping.items():
             if col in X_base.columns:
@@ -150,11 +185,13 @@ def predict_treatment_scenarios(patient_data: dict, trained_path: str, valid_tre
 
         sf = surv_fns[0]
 
-        survival_dict[label] = {
-            "survival_probs": sf.y.astype(float).tolist()
-        }
+        survival_prediction.append({
+            "treatment": label,
+            "survivalProbs": sf.y.astype(float).tolist(),
+            "shapValues": get_shap_values(shap_explainer, X_base)
+        })
 
-    return survival_dict
+    return survival_prediction
 
 
 def get_stage_median(tnm_stage_medians, stage_type: str, stage: str, key: str):
