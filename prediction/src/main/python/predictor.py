@@ -167,7 +167,7 @@ def convert_patient_dict_to_processed_df(patient_data: dict, trained_path, setti
     return processed_df
 
 def get_patient_like_me(patient_data: dict, trained_path, settings: Settings):
-    model = PatientsLikeMeModel()
+    model = PatientsLikeMeModel(settings)
     processed_df = convert_patient_dict_to_processed_df(patient_data, trained_path, settings)
     treatment_distribution_df = model.find_similar_patients(processed_df)
     return treatment_distribution_df.to_dict()

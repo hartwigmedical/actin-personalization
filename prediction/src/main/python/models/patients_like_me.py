@@ -4,6 +4,7 @@ from data.data_processing import DataSplitter, DataPreprocessor
 from sklearn.preprocessing import StandardScaler
 from sklearn.neighbors import NearestNeighbors
 import pandas as pd
+from utils.settings import Settings
 from utils.treatment_combinations import treatment_combinations
 
 
@@ -29,8 +30,8 @@ class PatientsLikeMeModel:
         # 'hasRasMutation'
     ]
 
-    def __init__(self):
-        pass
+    def __init__(self, settings: Settings):
+        self.settings = settings
 
     def get_treatment_distribution_of_neighbors(self, treatment_df, indices):
         neighbors_treatments = treatment_df.loc[indices]
@@ -51,7 +52,7 @@ class PatientsLikeMeModel:
 
     def find_similar_patients(self, patient_data):
 
-        preprocessor = DataPreprocessor(fit=True)
+        preprocessor = DataPreprocessor(settings=self.settings, fit=True)
         df_original = preprocessor.load_data()
         df, _, _ = preprocessor.preprocess_data()
 

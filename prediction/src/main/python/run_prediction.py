@@ -17,6 +17,7 @@ def apply_settings_from_args(args):
     settings.normalize = False
     settings.use_gate = True
     settings.save_models = False
+    settings.patient_df_path = args.patient_df_path
 
     settings.configure_data_settings()
     settings.configure_model_settings()
@@ -36,6 +37,7 @@ def main():
     parser.add_argument("output_path", help="Path to output JSON file")
     parser.add_argument("--trained_path", help= "Path to folder that contains trained model + preprocessors")
     parser.add_argument("--treatment_config", help="Path to treatment combination JSON")
+    parser.add_argument("--patient_df_path", help="Path to patient database config file")
     parser.add_argument("--shap_samples_path", help="Path to SHAP samples CSV file")
     args = parser.parse_args()
     
