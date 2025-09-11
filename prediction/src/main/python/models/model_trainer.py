@@ -1,3 +1,4 @@
+# models/model_trainer.py
 import numpy as np
 import pandas as pd
 
@@ -16,9 +17,7 @@ from typing import List, Dict, Tuple, Any, Optional, Callable
 from joblib import Parallel, delayed
 
 from models.models import *
-from utils.metrics import calculate_time_dependent_c_index, calculate_brier_score, calibration_assessment, calculate_time_dependent_auc, compute_c_for_benefit_per_treatment
-from utils.cfb import CForBenefitCovariateMatcher
-cfb_matcher = CForBenefitCovariateMatcher()
+from utils.metrics import evaluate_all_metrics
 
 from utils.settings import config_settings
 
@@ -40,8 +39,6 @@ class ModelTrainer:
         else:
             splitter = KFold(n_splits=self.n_splits, shuffle=True, random_state=self.random_state)
             return list(splitter.split(X))
-        
-        return list(skf.split(X, stratify_labels))
     
     def _initialize_model(self, model_template: BaseSurvivalModel, input_size: Optional[int] = None) -> BaseSurvivalModel:
         model_class = type(model_template)
@@ -121,12 +118,12 @@ class ModelTrainer:
         X_train, X_val = X.iloc[train_idx], X.iloc[val_idx]
 
         y_df = pd.DataFrame({'duration': y[self.settings.duration_col], 'event': y[self.settings.event_col]}, index=X.index)
-        y_train_df, y_val_df = y_df.iloc[train_idx], y_df.iloc[val_idx]
+        y_train_df, y_test_df = y_df.iloc[train_idx], y_df.iloc[val_idx]
 
         y_train_structured = Surv.from_dataframe('event', 'duration', y_train_df)
-        y_val_structured = Surv.from_dataframe('event', 'duration', y_val_df)
+        y_test_structured = Surv.from_dataframe('event', 'duration', y_test_df)
 
-        return X_train, y_train_structured, X_val, y_val_structured, y_val_df
+        return X_train, y_train_structured, X_val, y_test_structured, y_test_df
 
     def _get_survival_metrics(
         self, 
@@ -162,73 +159,23 @@ class ModelTrainer:
                 
         return times, predictions, auc_input
 
-    # models/model_trainer.py (inside _evaluate_model)
-
     def _evaluate_model(
         self, 
         model: BaseSurvivalModel, 
-        X_val: pd.DataFrame, 
-        y_train_structured: pd.DataFrame, 
-        y_val_structured: pd.DataFrame, 
+        X: pd.DataFrame, 
+        y_train: np.ndarray, 
+        y_test: np.ndarray, 
         model_name: str
-    ) -> Dict[str, List[float]]:
-        results = {}
-
-        X_val_with_tgi = X_val.copy()
-        y_val_df = pd.DataFrame({
-            "duration": y_val_structured["duration"],
-            "event": y_val_structured["event"],
-        }, index=X_val_with_tgi.index)
-
-        if isinstance(model, MultiTaskNNSurvivalModel):
-            task_idx_val = X_val_with_tgi['treatment_group_idx'].values.astype(int)
-            X_val_input = X_val_with_tgi.drop(columns=['treatment_group_idx'])
-            surv_funcs = model.predict_survival_function(X_val_input, task_idx_val)
-            risk_scores = model.predict(X_val_input, task_idx=task_idx_val)
-        else:
-            X_val_input = X_val_with_tgi.drop(columns=['treatment_group_idx'], errors="ignore")
-            try:
-                surv_funcs = model.predict_survival_function(X_val_input)
-            except AttributeError:
-                surv_funcs = None
-            risk_scores = model.predict(X_val_input)
-
-
-        times, predictions, auc_input = self._get_survival_metrics(
-            model, model_name, surv_funcs, risk_scores, X_val, y_val_structured
-        )
-
-        results['c_index'] = calculate_time_dependent_c_index(
-            predictions, y_val_structured['duration'], y_val_structured['event'], times
-        )
-        results['ce'] = calibration_assessment(predictions, y_val_structured, times)
-
-        max_train_time = float(y_train_structured["duration"].max()) - 1e-5
-        safe_times = times[times < (max_train_time)]
-        y_val_clipped = y_val_structured.copy()
-        y_val_clipped["duration"] = np.minimum(y_val_clipped["duration"], max_train_time)
-
-        results['ibs'] = calculate_brier_score(y_train_structured, y_val_clipped, predictions, safe_times)
-        _, mean_auc = calculate_time_dependent_auc(y_train_structured, y_val_clipped, auc_input, safe_times)
-        results['auc'] = mean_auc
-
-        # --- C-for-benefit per treatment (uses X_val_with_tgi and y_val_df) ---
-        cfb_df = compute_c_for_benefit_per_treatment(
+    ) -> Dict[str, float]:
+        return evaluate_all_metrics(
             model=model,
-            X_val_with_tgi=X_val_with_tgi,
-            y_df=y_val_df,
-            treatment_groups=self.settings.treatment_groups,
-            feature_cols=self.feature_names,
-            days=self.settings.evaluation_days
+            model_name=model_name,
+            X=X,
+            y_train=y_train,
+            y_test=y_test,
+            settings=self.settings,
+            feature_names=self.feature_names,
         )
-        results['cfb_mean'] = float(cfb_df['c_for_benefit'].mean()) if not cfb_df.empty else float('nan')
-        
-        for _, row in cfb_df.iterrows():
-            t_name = str(row['treatment'])
-            score = float(row['c_for_benefit']) if pd.notnull(row['c_for_benefit']) else float('nan')
-            results[f"cfb_{re.sub(r'[^a-z0-9]+', '_', t_name.lower()).strip('_')}"] = score
-
-        return results
 
     def _run_one_fold(
         self,
@@ -276,7 +223,7 @@ class ModelTrainer:
     
     def train_and_evaluate(
         self, 
-        X_train:  pd.DataFrame, y_train: pd.DataFrame, 
+        X_train: pd.DataFrame, y_train: pd.DataFrame, 
         X_test: pd.DataFrame, y_test: pd.DataFrame, 
         encoded_columns: Dict[str, List[str]], 
     ) -> Tuple[pd.DataFrame, Dict[str, BaseSurvivalModel]]:
@@ -313,19 +260,16 @@ class ModelTrainer:
                 model_template, input_size=X_train.drop(columns=['treatment_group_idx']).shape[1]
             )
 
-            final_model = self._initialize_model(model_template, input_size=X_train.drop(columns=['treatment_group_idx']).shape[1])
-            ModelTrainer._set_attention_indices(final_model,
-                                                    self.feature_names)
-            
+            ModelTrainer._set_attention_indices(final_model, self.feature_names)
+
             y_train_df = pd.DataFrame({'duration': y_train[self.settings.duration_col], 'event': y_train[self.settings.event_col]}, index=X_train.index)
             y_train_structured = Surv.from_dataframe('event', 'duration', y_train_df)
             y_test_df = pd.DataFrame({'duration': y_test[self.settings.duration_col], 'event': y_test[self.settings.event_col]}, index=X_test.index)
             y_test_structured = Surv.from_dataframe('event', 'duration', y_test_df)
-            
-            
+
             task_idx_train = X_train['treatment_group_idx'].values.astype(int)
             X_train_input  = X_train.drop(columns=['treatment_group_idx'])
-            
+
             if isinstance(final_model, NNSurvivalModel):
                 X_train_final, X_val_final, y_train_final, y_val_final = train_test_split(X_train_input, y_train_df, test_size=0.1, random_state=self.random_state)
         

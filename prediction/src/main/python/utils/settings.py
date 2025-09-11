@@ -20,7 +20,11 @@ class Settings:
     
     standardize: bool = True
     
+    #--- settings for evaluation metrics ----------
     evaluation_days: int = 365
+    bins_calibration_benefit: int = 10
+    bin_calibration_strategy: str = "quantile"  # "quantile" or "uniform"
+
     treatment_groups = [
         "No Treatment",
         "5-FU",

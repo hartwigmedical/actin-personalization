@@ -2,12 +2,7 @@ import pytest
 import numpy as np
 import pandas as pd
 
-from utils.metrics import (
-    calculate_time_dependent_c_index,
-    calculate_time_dependent_auc,
-    calculate_brier_score,
-    calibration_assessment
-)
+from utils.test_metrics import *
 
 from sksurv.metrics import cumulative_dynamic_auc, integrated_brier_score, brier_score
 from pycox.evaluation import EvalSurv
@@ -66,7 +61,7 @@ def y_test_df(survival_data):
 
 def test_time_dependent_c_index(survival_data, survival_predictions):
     _, y_test, times = survival_data
-    score = calculate_time_dependent_c_index(survival_predictions, y_test["duration"], y_test["event"], times)
+    score = compute_time_dependent_c_index(survival_predictions, y_test["duration"], y_test["event"], times)
     assert np.isclose(score, 0.61075, atol=1e-6)
 
 def test_time_dependent_auc(survival_data, risk_scores):

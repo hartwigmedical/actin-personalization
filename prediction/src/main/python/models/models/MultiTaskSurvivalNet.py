@@ -105,27 +105,37 @@ class MultiTaskNNSurvivalModel(BaseSurvivalModel):
         super().__init__()
         activation_map = {'relu': nn.ReLU, 'elu': nn.ELU, 'swish': lambda: nn.SiLU()}
         activation_fn = activation_map[activation]
+        
+        self.is_discrete = (model_class in (LogisticHazard, PCHazard, MTLR, DeepHitSingle))
+        out_features = num_durations if self.is_discrete else 1 
 
         self.net = MultiTaskSurvivalNet(
-            input_size,
-            num_nodes,
-            num_durations,
-            num_tasks,
+            input_size=input_size,
+            num_nodes=num_nodes,
+            out_features=out_features,
+            num_tasks=num_tasks,
             activation=activation_fn,
             dropout=dropout,
             batch_norm=batch_norm,
             use_attention=use_attention,
             attn_kwargs=attn_kwargs,
             msi_index=msi_index,
-            ras_index=ras_index
+            ras_index=ras_index,
         )
+        
+        self.task_baselines_: dict[int, dict[str, np.ndarray]] = {}  # {k: {'times': ..., 'cumhaz': ...}}
         self.optimizer = torch.optim.Adam(self.net.parameters(), lr=lr)
         self.model_class = model_class
         self.num_tasks = num_tasks
         self.num_durations = num_durations
         self.epochs = epochs
-        self.model = model_class(self.net, self.optimizer, duration_index=None)
+    
+        if self.is_discrete:
+            self.model = model_class(self.net, self.optimizer, duration_index=None)
+        else:
+            self.model = model_class(self.net, self.optimizer)
         self.loss_fn = self.model.loss
+     
         
         self.kwargs = {
             'model_class': model_class,
@@ -151,59 +161,99 @@ class MultiTaskNNSurvivalModel(BaseSurvivalModel):
         else:
             durations = y['duration'].astype('float32')
             events = y['event'].astype('float32')
+            
         X_tensor = torch.from_numpy(X.values.astype('float32'))
         task_idx_tensor = torch.from_numpy(task_idx.astype('int64'))
 
-        labtrans = LogisticHazard.label_transform(self.num_durations)
-        labtrans.cuts = config_settings.fixed_time_bins
-        y_lab = labtrans.fit_transform(durations, events)
-        y_time_bins = torch.from_numpy(y_lab[0]).long()
-        y_events = torch.from_numpy(y_lab[1]).float()
-        self.labtrans = labtrans
+        if isinstance(self.model, CoxPH):
+            # ---- DeepSurv branch (continuous-time) ----
+            y_dur_t = torch.from_numpy(durations.astype('float32'))
+            y_evt_t = torch.from_numpy(events.astype('float32'))
+            dataset = torch.utils.data.TensorDataset(X_tensor, task_idx_tensor, y_dur_t, y_evt_t)
+            loader = torch.utils.data.DataLoader(dataset, batch_size=128, shuffle=True)
 
-        dataset = torch.utils.data.TensorDataset(X_tensor, task_idx_tensor, y_time_bins, y_events)
-        loader = torch.utils.data.DataLoader(dataset, batch_size=128, shuffle=True)
-        self.net.train()
-        for epoch in range(self.epochs):
-            for xb, tb, yb1, yb2 in loader:
-                pred = self.net(xb, tb)
-                loss = self.loss_fn(pred, yb1, yb2)
-                self.optimizer.zero_grad()
-                loss.backward()
-                self.optimizer.step()
-        self.model.labtrans = labtrans
+            self.net.train()
+            for _ in range(self.epochs):
+                for xb, tb, yb_dur, yb_evt in loader:
+                    log_h = self.net(xb, tb).view(-1, 1)   # shape [B, 1]
+                    loss = self.loss_fn(log_h, yb_dur, yb_evt)
+                    self.optimizer.zero_grad()
+                    loss.backward()
+                    self.optimizer.step()
+        else:
+            # ---- Discrete-time branch (LH/PCH/MTLR/DeepHitSingle) ----
+            labtrans = LogisticHazard.label_transform(self.num_durations)
+            labtrans.cuts = config_settings.fixed_time_bins
+            y_bins, y_evt = labtrans.fit_transform(durations, events)
+            self.labtrans = labtrans
 
-    def predict_survival_function(self, X: pd.DataFrame, task_idx: np.ndarray, times: np.ndarray = None):
-        """
-        Returns: DataFrame [n_times, n_samples]
-        """
+            y_bins_t = torch.from_numpy(y_bins).long()
+            y_evt_t  = torch.from_numpy(y_evt).float()
+            dataset = torch.utils.data.TensorDataset(X_tensor, task_idx_tensor, y_bins_t, y_evt_t)
+            loader = torch.utils.data.DataLoader(dataset, batch_size=128, shuffle=True)
+
+            self.net.train()
+            for _ in range(self.epochs):
+                for xb, tb, yb_bins, yb_evt in loader:
+                    logits = self.net(xb, tb)             
+                    loss = self.loss_fn(logits, yb_bins, yb_evt)
+                    self.optimizer.zero_grad()
+                    loss.backward()
+                    self.optimizer.step()
+
+            self.model.labtrans = labtrans 
+
+    def predict_survival_function(self, X: pd.DataFrame, task_idx: np.ndarray, times: np.ndarray=None):
         self.net.eval()
         with torch.no_grad():
             X_tensor = torch.from_numpy(X.values.astype('float32'))
             task_idx_tensor = torch.from_numpy(task_idx.astype('int64'))
-            logits = self.net(X_tensor, task_idx_tensor)  
-            hazards = torch.sigmoid(logits)
-            surv = torch.cumprod(1 - hazards, dim=1)
-            surv_np = surv.cpu().numpy().T
             
+            if isinstance(self.model, CoxPH):
+                grid = np.asarray(config_settings.fixed_time_bins if times is None else times, dtype=float)
+                n = X.shape[0]
+                S = np.ones((grid.size, n), dtype=float)
+                etas = self.net(X_tensor, task_idx_tensor).squeeze(1).cpu().numpy()
+
+                for k in range(self.num_tasks):
+                    cols = np.where(task_idx == k)[0]
+                    if cols.size == 0:
+                        continue
+                    base = self.task_baselines_.get(k, None)
+                    if base is None or base['times'].size == 0:
+                        continue
+
+                    t0 = base['times']
+                    H0 = base['cumhaz']
+                    H0_grid = np.interp(grid, t0, H0, left=0.0, right=H0[-1])
+
+                    exp_eta = np.exp(etas[cols])
+                    S[:, cols] = np.exp(-np.outer(H0_grid, exp_eta))
+                S = np.clip(S, 1e-10, 1.0)
+                return pd.DataFrame(S, index=grid)
+            
+            logits = self.net(X_tensor, task_idx_tensor)
+            hazards = torch.sigmoid(logits)
+            surv = torch.cumprod(1 - hazards, dim=1).cpu().numpy().T
             time_grid = config_settings.fixed_time_bins
-            surv_df = pd.DataFrame(surv_np, index=time_grid)
+            surv_df = pd.DataFrame(surv, index=time_grid)
             if times is not None:
                 surv_df = surv_df.reindex(times, method='nearest', fill_value='extrapolate')
-        return surv_df
-    
+            return surv_df
+
     def predict(self, X: pd.DataFrame, task_idx: np.ndarray) -> np.ndarray:
-        """
-        Return a 1-D array of risk scores for each patient,
-        by taking the negative log of the 1-year survival (or last available).
-        """
-        surv_df = self.predict_survival_function(X, task_idx)
-        last_t = surv_df.index[-1]
-        surv_last = surv_df.loc[last_t].values
-        surv_last = np.clip(surv_last, 1e-10, 1.0)
-        return -np.log(surv_last)
-
-
+        self.net.eval()
+        with torch.no_grad():
+            X_tensor = torch.from_numpy(X.values.astype('float32'))
+            task_idx_tensor = torch.from_numpy(task_idx.astype('int64'))
+            if isinstance(self.model, CoxPH):
+                log_risk = self.net(X_tensor, task_idx_tensor).squeeze(1).cpu().numpy()
+                return log_risk
+            surv_df = self.predict_survival_function(X, task_idx)
+            last_t = surv_df.index[-1]
+            surv_last = np.clip(surv_df.loc[last_t].values, 1e-10, 1.0)
+            return -np.log(surv_last)
+        
 
 class FeatureAttention(nn.Module):
     def __init__(self, input_size: int):
