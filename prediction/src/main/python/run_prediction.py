@@ -60,9 +60,10 @@ def main():
         failed_status(args.output_path)
         return
     
+    personalized_result = {}
     logger.info("Running predictions...")
     try:
-        result = predict_treatment_scenarios(
+        personalized_result["prediction"] = predict_treatment_scenarios(
             patient_data=patient_data,
             trained_path=args.trained_path,
             shap_samples_path=args.shap_samples_path,
@@ -74,10 +75,21 @@ def main():
         failed_status(args.output_path)
         return
 
+    logger.info("Finding similar patients...")
+    try:
+        personalized_result["similarPatients"] = get_patient_like_me(
+            patient_data=patient_data,
+            trained_path=args.trained_path,
+            settings=settings
+        )
+    except Exception as e:
+        logger.error(f"Finding similar patients failed: {e}")
+        failed_status(args.output_path)
+        return
 
     logger.info(f"Saving results to {args.output_path}")
     with open(args.output_path, 'w') as f:
-        json.dump(result, f)
+        json.dump(personalized_result, f)
         
     logger.info("Prediction script completed successfully")
 
