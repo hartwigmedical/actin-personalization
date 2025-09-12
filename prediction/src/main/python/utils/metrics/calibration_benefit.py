@@ -5,7 +5,6 @@ import numpy as np
 import pandas as pd
 from dataclasses import dataclass
 from typing import List
-from .cfb import CForBenefitCovariateMatcher
 
 @dataclass
 class BenefitCalibrationResult:
@@ -162,6 +161,8 @@ def build_and_calibrate_benefit(
     """
     Build matched pairs for treatments A and B, then compute calibration-for-benefit.
     """
+    from .cfb import CForBenefitCovariateMatcher  # Moved import to avoid circular dependency
+
     matcher = CForBenefitCovariateMatcher()
 
     pairs = matcher.build_pairs(

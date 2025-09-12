@@ -67,6 +67,19 @@ class ModelTrainer:
             torch.save(state, model_file + ".pt")
             print(f"NN Model weights and baseline hazards for {model_name} saved to {model_file}.pt")
 
+        elif isinstance(model, MultiTaskNNSurvivalModel):
+            state = {
+                'net_state': model.model.net.state_dict(),
+                'num_tasks': model.num_tasks,
+                'labtrans': model.labtrans,
+            }
+            if hasattr(model.model, 'baseline_hazards_'):
+                state['baseline_hazards'] = model.model.baseline_hazards_
+                state['baseline_cumulative_hazards'] = model.model.baseline_cumulative_hazards_
+
+            torch.save(state, model_file + ".pt")
+            print(f"MultiTaskNN Model weights and baseline hazards for {model_name} saved to {model_file}.pt")
+
         else:
             with open(model_file + ".pkl", "wb") as f:
                 dill.dump(model, f)
@@ -280,7 +293,7 @@ class ModelTrainer:
                 final_model.fit(X_train_final, y_train_structured_final, val_data=val_data)
                 
             elif isinstance(final_model, MultiTaskNNSurvivalModel):
-                final_model.fit(X_train_input, task_idx_train, y_train_df)
+                final_model.fit(X_train_input, task_idx_train, y_train_structured)
 
             else:
                 final_model.fit(X_train_input, y_train_structured)
@@ -299,4 +312,3 @@ class ModelTrainer:
             self.results[model_name]['holdout'] = holdout_metrics
 
         return self.results, self.trained_models
-

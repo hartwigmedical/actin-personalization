@@ -8,6 +8,35 @@ from sksurv.util import Surv
 
 from .base_metrics import compute_time_dependent_c_index, compute_integrated_brier_score, compute_time_dependent_auc, compute_c_for_benefit, build_and_calibrate_benefit
 from .counterfactuals import apply_treatment_components, predict_survival_probabilities
+from .cfb import _CFB_MATCHER, _coerce_pair_label_dtype, compute_cfb_for_treatment_pair
+from .calibration_benefit import compute_benefit_calibration
+
+def counterfactual_S_tau_by_treatment(
+    model,
+    X: pd.DataFrame,
+    feature_columns: List[str],
+    treatment_groups: List[str],
+    tau_days: int,
+) -> Dict[str, pd.Series]:
+    """
+    Returns a dict: treatment label -> Series of S_i(tau) for all i in X (counterfactual).
+    """
+    X_base = X[[c for c in feature_columns if c != "treatment_group_idx"]].copy()
+    n = len(X_base)
+
+    is_multitask = hasattr(model, "predict_survival_function") and hasattr(model, "num_tasks")
+
+    out: Dict[str, pd.Series] = {}
+    for t in treatment_groups:
+        X_t = apply_treatment_components(X_base.copy(), t)
+        if is_multitask:
+            t_idx = treatment_groups.index(t)
+            task_idx = np.full(n, t_idx, dtype=int)
+            out[t] = predict_survival_probabilities(model, X_t, tau_days, task_indices=task_idx)
+        else:
+            out[t] = predict_survival_probabilities(model, X_t, tau_days, task_indices=None)
+    return out
+
 
 def generate_evaluation_time_grid(
     y: np.ndarray, max_time: int, fixed_time_bins: List[int]
@@ -105,49 +134,54 @@ def evaluate_all_metrics(
     )
     results['auc'] = mean_auc
 
-    cfb_results = compute_c_for_benefit(
+    tau = settings.evaluation_days
+    y_test_df = pd.DataFrame({"duration": y_test["duration"], "event": y_test["event"]}, index=X.index)
+    alive_tau = (y_test_df["duration"] > tau) & (~(y_test_df["event"].astype(bool) & (y_test_df["duration"] <= tau)))
+
+    # Counterfactual S_tau per treatment for everyone
+    S_tau = counterfactual_S_tau_by_treatment(
         model=model,
         X=X,
-        y=y_test_df,
-        treatment_groups=settings.treatment_groups,
         feature_columns=feature_names,
-        evaluation_days=settings.evaluation_days
+        treatment_groups=settings.treatment_groups,
+        tau_days=tau,
     )
-    results['cfb_mean'] = cfb_results['c_for_benefit'].mean() if not cfb_results.empty else float('nan')
-    for _, row in cfb_results.iterrows():
-        t_name = str(row['treatment'])
-        key = re.sub(r'[^a-z0-9]+', '_', t_name.lower()).strip('_')
-        results[f"cfb_{key}"] = float(row['c_for_benefit']) if pd.notnull(row['c_for_benefit']) else float('nan')
+
+    # Build matching features (baseline only) once
+    match_cols = [c for c in feature_names if c not in {
+        "systemicTreatmentPlan_5-FU","systemicTreatmentPlan_oxaliplatin","systemicTreatmentPlan_irinotecan",
+        "systemicTreatmentPlan_bevacizumab","systemicTreatmentPlan_panitumumab",
+        "systemicTreatmentPlan_pembrolizumab","systemicTreatmentPlan_nivolumab",
+        "hasTreatment","treatment_group_idx",
+    }]
+    X_match = X[match_cols + ["treatment_group_idx"]].copy()
+
+    # For CFB mean aggregation
+    cfb_values = []
 
     for treat in settings.treatment_groups:
         if treat == "No Treatment":
             continue
         key = re.sub(r'[^a-z0-9]+', '_', treat.lower()).strip('_')
-        try:
-            prob_no = pd.Series(predictions[:, 0], index=X.index)
-            prob_t = pd.Series(predictions[:, -1], index=X.index)
 
-            calibration_benefit = build_and_calibrate_benefit(
-                validation_data=X,
-                treatment_groups=settings.treatment_groups,
-                treatment_A="No Treatment",
-                treatment_B=treat,
-                feature_columns=feature_names,
-                predicted_prob_A=prob_no,
-                predicted_prob_B=prob_t,
-                survival_durations=y_test_df['duration'],
-                survival_events=y_test_df['event'],
-                evaluation_days=settings.evaluation_days,
-                num_bins=settings.bins_calibration_benefit,
-                binning_strategy=settings.bin_calibration_strategy
-            )
+        # Delegate CFB computation to cfb.py
+        cfb_result = compute_cfb_for_treatment_pair(
+            X_match=X_match,
+            S_tau=S_tau,
+            alive_tau=alive_tau,
+            treatment_groups=settings.treatment_groups,
+            treat_A="No Treatment",
+            treat_B=treat,
+            match_cols=match_cols,
+            y_test_df=y_test_df,
+            tau=tau,
+            settings=settings
+        )
 
-            results[f"cfbcal_ece_{key}"] = float(calibration_benefit.expected_calibration_error)
-            results[f"cfbcal_slope_{key}"] = float(calibration_benefit.regression_slope)
-            results[f"cfbcal_intercept_{key}"] = float(calibration_benefit.regression_intercept)
-        except ValueError:
-            results[f"cfbcal_ece_{key}"] = float('nan')
-            results[f"cfbcal_slope_{key}"] = float('nan')
-            results[f"cfbcal_intercept_{key}"] = float('nan')
+        results.update(cfb_result)
+        if np.isfinite(cfb_result.get(f"cfb_{key}", float('nan'))):
+            cfb_values.append(cfb_result[f"cfb_{key}"])
+
+    results["cfb_mean"] = float(np.mean(cfb_values)) if len(cfb_values) else float('nan')
 
     return results

@@ -54,7 +54,7 @@ class MultiTaskSurvivalNet(nn.Module):
 
         self.heads = nn.ModuleList([nn.Linear(prev, out_features) 
                                      for _ in range(num_tasks)])
-
+    
     def forward(self, x: torch.Tensor, task_idx: torch.Tensor):
         x_raw = x
         if self.use_attention:
@@ -152,7 +152,34 @@ class MultiTaskNNSurvivalModel(BaseSurvivalModel):
             'ras_index': ras_index, 
             **kwargs
         }
+        
+    @staticmethod
+    def _breslow_baseline(durations: np.ndarray, events: np.ndarray, eta: np.ndarray):
+        """
+        Breslow baseline cumulative hazard H0(t).
+        durations: (n,) float
+        events:    (n,) {0,1}
+        eta:       (n,) linear predictor
+        Returns: times_event (ascending), H0_cum (same length)
+        """
+        order = np.argsort(durations)
+        t = durations[order].astype(float)
+        e = events[order].astype(int)
+        r = np.exp(eta[order].astype(float))
 
+        risk_tail = np.cumsum(r[::-1])[::-1]
+        uniq, first_idx, counts = np.unique(t[e == 1], return_index=False, return_counts=True), None, None
+        _, first_pos = np.unique(t, return_index=True)
+        first_pos_map = dict(zip(t[first_pos], first_pos))
+
+        event_times = np.unique(t[e == 1])
+        d_at = np.array([np.sum((t == tt) & (e == 1)) for tt in event_times], dtype=float)
+        R_at = np.array([risk_tail[first_pos_map[tt]] for tt in event_times], dtype=float)
+        dH = d_at / np.clip(R_at, 1e-12, None)
+        H0 = np.cumsum(dH)
+
+        return event_times, H0
+    
     def fit(self, X: pd.DataFrame, task_idx: np.ndarray, y: pd.DataFrame, val_data=None):
    
         if isinstance(y, np.ndarray) and y.dtype.names:
@@ -180,6 +207,26 @@ class MultiTaskNNSurvivalModel(BaseSurvivalModel):
                     self.optimizer.zero_grad()
                     loss.backward()
                     self.optimizer.step()
+
+            self.net.eval()
+            with torch.no_grad():
+                etas = self.net(X_tensor, task_idx_tensor).squeeze(1).cpu().numpy()
+            self.task_baselines_.clear()
+            for k in range(self.num_tasks):
+                m = (task_idx == k)
+                if not np.any(m):
+                    self.task_baselines_[k] = {'times': np.array([], dtype=float),
+                                            'cumhaz': np.array([], dtype=float)}
+                    continue
+                t_k = durations[m].astype(float)
+                e_k = events[m].astype(int)
+                eta_k = etas[m].astype(float)
+                if (e_k.sum() == 0):
+                    self.task_baselines_[k] = {'times': np.array([], dtype=float),
+                                            'cumhaz': np.array([], dtype=float)}
+                    continue
+                times_k, H0_k = self._breslow_baseline(t_k, e_k, eta_k)
+                self.task_baselines_[k] = {'times': times_k, 'cumhaz': H0_k}
         else:
             # ---- Discrete-time branch (LH/PCH/MTLR/DeepHitSingle) ----
             labtrans = LogisticHazard.label_transform(self.num_durations)

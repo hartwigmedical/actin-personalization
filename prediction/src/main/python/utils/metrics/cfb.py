@@ -4,35 +4,30 @@ from __future__ import annotations
 
 import numpy as np
 import pandas as pd
-from typing import Dict, List, Optional, Tuple
+import re
+from typing import Any, Dict, List, Optional, Tuple
 from sklearn.preprocessing import StandardScaler
 from scipy.spatial.distance import cdist
+from .calibration_benefit import compute_benefit_calibration
+from utils.metrics.calibration_benefit import BenefitCalibrationResult
 
   
 def _coerce_pair_label_dtype(pairs: pd.DataFrame, target_index: pd.Index) -> pd.DataFrame:
     """
     Ensure A_idx/B_idx have the same dtype and canonical form as target_index.
-    Handles common pitfalls: float->int, str->int, categorical, etc.
     """
     pairs = pairs.copy()
 
     def _coerce_col(col: pd.Series) -> pd.Series:
-        # If target index is integer-like, convert strings/floats cleanly
         if pd.api.types.is_integer_dtype(target_index.dtype):
-            # First try numeric
             c = pd.to_numeric(col, errors="coerce")
-            # Drop .0 for float-like integers
-            c = c.astype("Int64")  # nullable int
-            # Convert to plain numpy int64 where possible
+            c = c.astype("Int64") 
             if c.isna().any():
-                # Fall back: attempt string cast then numeric
                 c2 = pd.to_numeric(col.astype(str).str.replace(r"\.0$", "", regex=True), errors="coerce").astype("Int64")
                 c = c.fillna(c2)
             return c.astype("int64", errors="ignore")
-        # If target is string-like
         if pd.api.types.is_string_dtype(target_index.dtype):
             return col.astype(str)
-        # Otherwise, align exact dtype when possible
         try:
             return col.astype(target_index.dtype)
         except Exception:
@@ -83,7 +78,6 @@ class CForBenefitCovariateMatcher:
             rows = [(idx_A[i], idx_B[j], float(D[i, j])) for i, j in enumerate(js)]
 
         return pd.DataFrame(rows, columns=["A_idx", "B_idx", "distance"])
-  
 
     def build_pairs(
         self,
@@ -139,28 +133,18 @@ class CForBenefitCovariateMatcher:
         obs_pairwise_effect: pd.Series | None = None,
         pred_pairwise_effect: pd.Series | None = None,
     ) -> float:
-        """
-        C-for-benefit from fixed A<->B pairs.
-
-        Discrete mode uses Harrell-style handling:
-          - Denominator = observed non-ties only (pairs with y_obs != 0).
-          - Predicted ties receive 0.5 credit.
-        """
-
         if pairs.empty:
             return float("nan")
 
-        # ----- CONTINUOUS mode (unchanged) -----
+        # ----- CONTINUOUS mode -----
         if (obs_pairwise_effect is not None) and (pred_pairwise_effect is not None):
             df = pairs.copy()
             df["obs"] = pd.Series(obs_pairwise_effect).values
             df["pred"] = pd.Series(pred_pairwise_effect).values
 
-            # Ensure obs and pred columns are numeric
             df["obs"] = pd.to_numeric(df["obs"], errors="coerce")
             df["pred"] = pd.to_numeric(df["pred"], errors="coerce")
 
-            # Drop rows with NaN values in obs or pred
             df = df.dropna(subset=["obs", "pred"])
 
             idxs = df.index.to_list()
@@ -172,7 +156,6 @@ class CForBenefitCovariateMatcher:
                     oj = df.loc[idxs[j], "obs"]
                     pj = df.loc[idxs[j], "pred"]
 
-                    # Skip if any value is not numeric
                     if not all(isinstance(val, (int, float)) for val in [oi, oj, pi, pj]):
                         continue
 
@@ -200,7 +183,7 @@ class CForBenefitCovariateMatcher:
         dur = observed_survival if isinstance(observed_survival, pd.Series) else pd.Series(observed_survival, index=prA.index)
         evt = observed_event    if isinstance(observed_event,    pd.Series) else pd.Series(observed_event,    index=prA.index)
         evt = evt.astype(bool)
-        surv = (dur > days) & (~(evt & (dur <= days)))  # 1 if alive at tau
+        surv = (dur > days) & (~(evt & (dur <= days))) 
 
         df = pairs.copy()
         surv_d = surv.to_dict()
@@ -229,5 +212,102 @@ class CForBenefitCovariateMatcher:
         concordant = int(signs_match.sum())
         half_credit = 0.5 * float(pred_tie_nt.sum())
         return float((concordant + half_credit) / denom)
+
+def compute_cfb_for_treatment_pair(
+    *,
+    X_match: pd.DataFrame,
+    S_tau: Dict[str, pd.Series],
+    alive_tau: pd.Series,
+    treatment_groups: List[str],
+    treat_A: str,
+    treat_B: str,
+    match_cols: List[str],
+    y_test_df: pd.DataFrame,
+    tau: int,
+    settings
+) -> Dict[str, Any]:
+    """
+    Compute C-for-benefit for a given treatment pair.
+    """
+    key = re.sub(r'[^a-z0-9]+', '_', treat_B.lower()).strip('_')
+
+    pairs = _CFB_MATCHER.build_pairs(
+        X_val=X_match,
+        treatment_groups=treatment_groups,
+        treat_A=treat_A,
+        treat_B=treat_B,
+        feature_cols=match_cols,
+    )
+    pairs = _coerce_pair_label_dtype(pairs, target_index=X_match.index)
+
+    if pairs.empty:
+        return {
+            f"cfb_{key}": float('nan'),
+            f"cfbcal_ece_{key}": float('nan'),
+            f"cfbcal_slope_{key}": float('nan'),
+            f"cfbcal_intercept_{key}": float('nan')
+        }
+
+    prA = S_tau[treat_A]
+    prB = S_tau[treat_B]
+
+    dfp = pairs[["A_idx", "B_idx"]].copy()
+
+    a_obs = alive_tau.reindex(dfp["A_idx"]).to_numpy(dtype=float)
+    b_obs = alive_tau.reindex(dfp["B_idx"]).to_numpy(dtype=float)
+    dfp["y_pair"] = b_obs - a_obs
+
+    delta_A = (prB.reindex(dfp["A_idx"]).to_numpy(dtype=float)
+            -  prA.reindex(dfp["A_idx"]).to_numpy(dtype=float))
+    delta_B = (prB.reindex(dfp["B_idx"]).to_numpy(dtype=float)
+            -  prA.reindex(dfp["B_idx"]).to_numpy(dtype=float))
+
+    dfp["s_pair"] = delta_B - delta_A
+
+    dfp = dfp.dropna(subset=["y_pair", "s_pair"])
+    y_pair = dfp["y_pair"].to_numpy(dtype=int)
+    s_pair = dfp["s_pair"].to_numpy(dtype=float)
+
+    keep = (y_pair != 0) & np.isfinite(s_pair)
+    y_pair = y_pair[keep]
+    s_pair = s_pair[keep]
+
+    m = len(y_pair)
+    if m >= 2:
+        conc = 0.0; info = 0
+        for i in range(m):
+            for j in range(i + 1, m):
+                dy = y_pair[i] - y_pair[j]
+                if dy == 0:
+                    continue
+                ds = s_pair[i] - s_pair[j]
+                info += 1
+                if ds == 0:
+                    conc += 0.5
+                elif np.sign(ds) == np.sign(dy):
+                    conc += 1.0
+        cfb = conc / info if info > 0 else float("nan")
+    else:
+        cfb = float("nan")
+
+    calib = compute_benefit_calibration(
+        pairs=pairs,
+        predicted_prob_A=prA,
+        predicted_prob_B=prB,
+        survival_durations=y_test_df["duration"],
+        survival_events=y_test_df["event"],
+        evaluation_days=tau,
+        num_bins=settings.bins_calibration_benefit,
+        binning_strategy=settings.bin_calibration_strategy,
+        treatment_A=treat_A,
+        treatment_B=treat_B,
+    )
+
+    return {
+        f"cfb_{key}": float(cfb),
+        f"cfbcal_ece_{key}": float(calib.expected_calibration_error),
+        f"cfbcal_slope_{key}": float(calib.regression_slope),
+        f"cfbcal_intercept_{key}": float(calib.regression_intercept)
+    }
 
 _CFB_MATCHER = CForBenefitCovariateMatcher()

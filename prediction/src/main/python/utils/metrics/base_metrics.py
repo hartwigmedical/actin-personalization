@@ -3,6 +3,7 @@ import numpy as np
 import pandas as pd
 from sksurv.metrics import integrated_brier_score, brier_score, cumulative_dynamic_auc
 from typing import Tuple, Dict, Any, Optional, List
+from sksurv.util import Surv  
 
 from sksurv.metrics import concordance_index_ipcw
 from .counterfactuals import (
