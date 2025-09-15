@@ -6,10 +6,9 @@ import re
 from typing import Any, Dict, List, Tuple
 from sksurv.util import Surv
 
-from .base_metrics import compute_time_dependent_c_index, compute_integrated_brier_score, compute_time_dependent_auc, compute_c_for_benefit, build_and_calibrate_benefit
+from .base_metrics import compute_time_dependent_c_index, compute_integrated_brier_score, compute_time_dependent_auc
 from .counterfactuals import apply_treatment_components, predict_survival_probabilities
-from .cfb import _CFB_MATCHER, _coerce_pair_label_dtype, compute_cfb_for_treatment_pair
-from .calibration_benefit import compute_benefit_calibration
+from utils.metrics.base_metrics import compute_cfb_for_treatment_pair
 
 def counterfactual_S_tau_by_treatment(
     model,
