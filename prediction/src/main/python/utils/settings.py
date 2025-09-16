@@ -10,8 +10,8 @@ class Settings:
     outcome: str = 'OS'                          # "OS" or "PFS"
     
     cross_val_n_splits: int = 5
-    hyperparam_tuning_optimization_metric: str = 'auc'  # c_index, IBS, CE, auc
-    hyperparam_tuning_number_combinations: int = 5
+    hyperparam_tuning_optimization_metric: str = 'cfb_mean'  # c_index, IBS, CE, auc, cfb_mean
+    hyperparam_tuning_number_combinations: int = 10
     save_models: bool = True
     json_config_file: str = 'src/main/python/models/configs/model_hyperparams.json'
     db_name: str = 'actin_personalization'

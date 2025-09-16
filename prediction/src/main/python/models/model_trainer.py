@@ -71,8 +71,9 @@ class ModelTrainer:
             state = {
                 'net_state': model.model.net.state_dict(),
                 'num_tasks': model.num_tasks,
-                'labtrans': model.labtrans,
             }
+            if hasattr(model, 'labtrans'):
+                state['labtrans'] = model.labtrans
             if hasattr(model.model, 'baseline_hazards_'):
                 state['baseline_hazards'] = model.model.baseline_hazards_
                 state['baseline_cumulative_hazards'] = model.model.baseline_cumulative_hazards_
@@ -261,8 +262,9 @@ class ModelTrainer:
                 metric: np.mean([fold[metric] for fold in cv_fold_results])
                 for metric in cv_fold_results[0]
             }
-            self.results[model_name] = mean_results
-            print(f"{model_name} CV Results: {mean_results}")
+            cv_keys = cv_fold_results[0].keys()
+            cv_means = {f"cv_{k}": float(np.mean([fold[k] for fold in cv_fold_results])) for k in cv_keys}
+            print(f"{model_name} CV Results: {cv_means}")
             
             print("training final model")
             num_tasks_final = int(max(X_train['treatment_group_idx'].max(), X_test['treatment_group_idx'].max())) + 1
@@ -309,6 +311,12 @@ class ModelTrainer:
             print(f"{model_name} Hold-Out Results: {holdout_metrics}")
 
             self.trained_models[model_name] = final_model
-            self.results[model_name]['holdout'] = holdout_metrics
 
-        return self.results, self.trained_models
+            result = dict(cv_means)
+            result.update({k: float(v) for k, v in holdout_metrics.items()})  
+
+            self.results[model_name] = result
+
+        results_df = pd.DataFrame.from_dict(self.results, orient='index')
+        return results_df, self.trained_models
+

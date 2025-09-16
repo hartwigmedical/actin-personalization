@@ -58,7 +58,7 @@ class CForBenefitCovariateMatcher:
         Xb_s = scaler.transform(Xb)
 
         cov = np.cov(X_all, rowvar=False)
-        VI = np.linalg.pinv(cov)
+        VI = np.linalg.pinv(cov + 1e-8*np.eye(cov.shape[0]))
         D = cdist(Xa_s, Xb_s, metric="mahalanobis", VI=VI)
 
         rows = []
@@ -115,8 +115,10 @@ class CForBenefitCovariateMatcher:
             self._pair_cache[key] = pairs
         
             return pairs
+        
+        raw = self._greedy_mahalanobis_pairs(X_val, idx_B, idx_A, feature_cols, one_to_one=False)
+        pairs = raw.rename(columns={"A_idx": "B_idx", "B_idx": "A_idx"})[["A_idx", "B_idx", "distance"]]
 
-        pairs = self._greedy_mahalanobis_pairs(X_val, idx_A, idx_B, feature_cols, one_to_one=False)
         self._pair_cache[key] = pairs
         return pairs
 

@@ -651,7 +651,7 @@
         }
     },
     "treatment_drug_OS": {
-        "DeepSurv": {
+           "DeepSurv": {
             "class": "models.models.NNSurvivalModel.DeepSurv",
             "kwargs": {
                 "num_nodes": [
@@ -769,7 +769,7 @@
                 "batch_size": 32,
                 "epochs": 500,
                 "early_stopping_patience": 50,
-                "input_size": 102,
+                "input_size": 101,
                 "use_attention": true
             }
         },
@@ -872,7 +872,6 @@
         "MultiTaskNN_LogisticHazard": {
             "class": "models.models.MultiTaskSurvivalNet.MultiTaskNNSurvivalModel",
             "kwargs": {
-                "model_class": "<class 'pycox.models.logistic_hazard.LogisticHazard'>",
                 "num_nodes": [
                     128,
                     64
@@ -884,13 +883,14 @@
                 "activation": "relu",
                 "batch_norm": false,
                 "lr": 0.001,
-                "input_size": 102
+                "input_size": 101,
+                "model_class": "pycox.models.logistic_hazard.LogisticHazard"
             }
         },
         "MultiTaskNN_DeepSurv": {
             "class": "models.models.MultiTaskSurvivalNet.MultiTaskNNSurvivalModel",
             "kwargs": {
-                "model_class": "<class 'pycox.models.cox.CoxPH'>",
+                "model_class": "pycox.models.cox.CoxPH",
                 "num_nodes": [
                     128,
                     64
@@ -902,13 +902,13 @@
                 "batch_norm": true,
                 "lr": 0.001,
                 "weight_decay": 0.0001,
-                "input_size": 102
+                "input_size": 101
             }
         },
         "MultiTaskNN_MTLR": {
             "class": "models.models.MultiTaskSurvivalNet.MultiTaskNNSurvivalModel",
             "kwargs": {
-                "model_class": "<class 'pycox.models.mtlr.MTLR'>",
+                "model_class": "pycox.models.mtlr.MTLR",
                 "num_nodes": [
                     64
                 ],
@@ -918,7 +918,62 @@
                 "activation": "relu",
                 "lr": 0.0005,
                 "batch_norm": false,
-                "input_size": 102
+                "input_size": 101
+            }
+        },
+        "MultiTaskNN_CoxPH": {
+            "class": "models.models.MultiTaskSurvivalNet.MultiTaskNNSurvivalModel",
+            "kwargs": {
+                "model_class": "pycox.models.cox.CoxPH",
+                "num_nodes": [
+                    128,
+                    64
+                ],
+                "num_tasks": 10,
+                "dropout": 0.15,
+                "epochs": 75,
+                "activation": "elu",
+                "batch_norm": true,
+                "lr": 0.0008,
+                "weight_decay": 0.0002,
+                "input_size": 101
+            }
+        },
+        "MultiTaskNN_DeepHit": {
+            "class": "models.models.MultiTaskSurvivalNet.MultiTaskNNSurvivalModel",
+            "kwargs": {
+                "model_class": "pycox.models.deephit.DeepHitSingle",
+                "num_nodes": [
+                    256,
+                    128,
+                    64
+                ],
+                "num_tasks": 10,
+                "dropout": 0.2,
+                "epochs": 100,
+                "activation": "swish",
+                "batch_norm": true,
+                "lr": 0.0005,
+                "weight_decay": 0.0001,
+                "input_size": 101
+            }
+        },
+        "MultiTaskNN_PCHazard": {
+            "class": "models.models.MultiTaskSurvivalNet.MultiTaskNNSurvivalModel",
+            "kwargs": {
+                "model_class": "pycox.models.pchazard.PCHazard",
+                "num_nodes": [
+                    64,
+                    32
+                ],
+                "num_tasks": 10,
+                "num_durations": 120,
+                "dropout": 0.1,
+                "epochs": 150,
+                "activation": "relu",
+                "batch_norm": false,
+                "lr": 0.001,
+                "input_size": 101
             }
         }
     }

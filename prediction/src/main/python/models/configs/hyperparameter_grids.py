@@ -59,7 +59,20 @@ curve_param_grids = {
             'batch_size': [32, 64, 128],
             'epochs': [50, 100, 200, 500],
             'early_stopping_patience': [20, 30, 50]
-            
+        }
+    ],
+    'MultiTaskNN': [
+        {
+            'num_nodes': [[256, 128, 64], [128, 64, 32], [128, 64], [64, 32], [64], [32]],
+            'num_tasks': [5, 10, 15],
+            'num_durations': [60, 80, 100],
+            'dropout': [0.1, 0.2, 0.3],
+            'lr': [0.001, 0.0005, 0.01],
+            'batch_norm': [True, False],
+            'activation': ['relu', 'elu'],
+            'epochs': [50, 100, 200],
+            'batch_size': [32, 64, 128],
+            'early_stopping_patience': [20, 30, 50]
         }
     ],
     'AalenAdditive': [

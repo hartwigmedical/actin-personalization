@@ -90,7 +90,7 @@ class MultiTaskNNSurvivalModel(BaseSurvivalModel):
         input_size,
         num_nodes=[128, 64],
         num_tasks=10,
-        num_durations=60,
+        num_durations=len(config_settings.fixed_time_bins),
         dropout=0.1,
         lr=1e-3,
         batch_norm=False,
@@ -230,7 +230,6 @@ class MultiTaskNNSurvivalModel(BaseSurvivalModel):
         else:
             # ---- Discrete-time branch (LH/PCH/MTLR/DeepHitSingle) ----
             labtrans = LogisticHazard.label_transform(self.num_durations)
-            labtrans.cuts = config_settings.fixed_time_bins
             y_bins, y_evt = labtrans.fit_transform(durations, events)
             self.labtrans = labtrans
 
@@ -282,11 +281,26 @@ class MultiTaskNNSurvivalModel(BaseSurvivalModel):
             logits = self.net(X_tensor, task_idx_tensor)
             hazards = torch.sigmoid(logits)
             surv = torch.cumprod(1 - hazards, dim=1).cpu().numpy().T
-            time_grid = config_settings.fixed_time_bins
-            surv_df = pd.DataFrame(surv, index=time_grid)
-            if times is not None:
-                surv_df = surv_df.reindex(times, method='nearest', fill_value='extrapolate')
-            return surv_df
+            if hasattr(self, "labtrans") and getattr(self.labtrans, "cuts", None) is not None:
+                src_times = np.asarray(self.labtrans.cuts, dtype=float)
+            else:
+                src_times = np.asarray(config_settings.fixed_time_bins, dtype=float)  # fallback
+
+            surv_df = pd.DataFrame(surv, index=src_times)
+
+            if times is None:
+                target = np.asarray(config_settings.fixed_time_bins, dtype=float)
+            else:
+                target = np.asarray(times, dtype=float)
+
+            # Resample to target grid (no extrapolation beyond edges)
+            out = np.empty((target.size, surv_df.shape[1]), dtype=float)
+            for j in range(surv_df.shape[1]):
+                out[:, j] = np.interp(target, surv_df.index.values, surv_df.iloc[:, j].values,
+                                    left=surv_df.iloc[0, j], right=surv_df.iloc[-1, j])
+
+            out = np.clip(out, 1e-10, 1.0)
+            return pd.DataFrame(out, index=target)
 
     def predict(self, X: pd.DataFrame, task_idx: np.ndarray) -> np.ndarray:
         self.net.eval()
