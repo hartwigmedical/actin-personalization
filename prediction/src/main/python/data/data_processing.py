@@ -77,11 +77,11 @@ class DataPreprocessor:
     def preprocess_data(self, features = lookup_manager.features, df = None) -> Tuple[pd.DataFrame, List[str], Dict[str, List[str]]]:
         if df is None:
             df = self.load_data()
-                            
+
         df = df[features + [self.settings.duration_col, self.settings.event_col]]
 
         df = df[~df["firstSystemicTreatmentAfterMetastaticDiagnosis"].str.upper().str.contains("NIVOLUMAB", na=False)]
-        
+
         df = df[~df[lookup_manager.features].isna().all(axis=1)].copy()
 
         if self.settings.experiment_type == 'treatment_vs_no':
@@ -91,12 +91,11 @@ class DataPreprocessor:
 
         if len(df) > 1:
             df = self.impute_knn(df, ['whoAssessmentAtMetastaticDiagnosis'], k=7)
-        
         df = self.numerize(df, lookup_manager.lookup_dictionary)
         
         df = self.auto_cast_object_columns(df)
         df = self.handle_missing_values(df)
-        
+
         df = self.encode_categorical(df) 
 
         updated_features = [col for col in df.columns if col not in [self.settings.duration_col, self.settings.event_col]]
@@ -106,8 +105,7 @@ class DataPreprocessor:
        
         return df, updated_features, self.encoded_columns
 
-    
-    def load_data(self) -> pd.DataFrame:
+    def _load_data_from_db(self) -> pd.DataFrame:
         db_connection = pymysql.connect(
             read_default_file=self.db_config_path,
             read_default_group='RAnalysis',
@@ -117,6 +115,13 @@ class DataPreprocessor:
         df = pd.read_sql(f"SELECT * FROM {self.settings.view_name}", db_connection)
     
         db_connection.close()
+        return df
+ 
+    def load_data(self) -> pd.DataFrame:
+        if self.settings.patient_df_path:
+            df = pd.read_pickle(self.settings.patient_df_path)
+        else:
+            df = self._load_data_from_db()
         
         return df.dropna(subset=[self.settings.duration_col, self.settings.event_col]).copy()
 

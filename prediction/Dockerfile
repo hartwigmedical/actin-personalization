@@ -6,4 +6,4 @@ RUN pip install --no-cache-dir -r /src/main/python/requirements.txt
 
 ADD src /src
 
-ENTRYPOINT [ "python3", "/src/main/python/run_prediction.py" ]
+ENTRYPOINT [ "python3.11", "/src/main/python/run_prediction.py" ]

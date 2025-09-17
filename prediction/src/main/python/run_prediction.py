@@ -17,6 +17,7 @@ def apply_settings_from_args(args):
     settings.normalize = False
     settings.use_gate = True
     settings.save_models = False
+    settings.patient_df_path = args.patient_df_path
 
     settings.configure_data_settings()
     settings.configure_model_settings()
@@ -36,6 +37,7 @@ def main():
     parser.add_argument("output_path", help="Path to output JSON file")
     parser.add_argument("--trained_path", help= "Path to folder that contains trained model + preprocessors")
     parser.add_argument("--treatment_config", help="Path to treatment combination JSON")
+    parser.add_argument("--patient_df_path", help="Path to patient database config file")
     parser.add_argument("--shap_samples_path", help="Path to SHAP samples CSV file")
     args = parser.parse_args()
     
@@ -60,9 +62,10 @@ def main():
         failed_status(args.output_path)
         return
     
+    personalized_result = {}
     logger.info("Running predictions...")
     try:
-        result = predict_treatment_scenarios(
+        personalized_result["predictions"] = predict_treatment_scenarios(
             patient_data=patient_data,
             trained_path=args.trained_path,
             shap_samples_path=args.shap_samples_path,
@@ -74,10 +77,21 @@ def main():
         failed_status(args.output_path)
         return
 
+    logger.info("Finding similar patients...")
+    try:
+        personalized_result["similarPatientsSummary"] = get_patient_like_me(
+            patient_data=patient_data,
+            trained_path=args.trained_path,
+            settings=settings
+        )
+    except Exception as e:
+        logger.error(f"Finding similar patients failed: {e}")
+        failed_status(args.output_path)
+        return
 
     logger.info(f"Saving results to {args.output_path}")
     with open(args.output_path, 'w') as f:
-        json.dump(result, f)
+        json.dump(personalized_result, f)
         
     logger.info("Prediction script completed successfully")
 

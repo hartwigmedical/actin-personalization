@@ -16,6 +16,7 @@ class Settings:
     db_name: str = 'actin_personalization'
     view_name: str = 'knownPalliativeTreatedReference'
     db_config_path: str = '/home/jupyter/.my.cnf'
+    patient_df_path: Optional[str] = None  # If None, data is loaded from the database.
     
     standardize: bool = True
     #--------------------------------------------------------------------------------------------
