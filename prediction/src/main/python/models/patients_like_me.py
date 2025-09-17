@@ -36,7 +36,7 @@ class PatientsLikeMeModel:
     def get_treatment_distribution_of_neighbors(self, treatment_df, indices):
         neighbors_treatments = treatment_df.loc[indices]
         overall_distribution = treatment_df.value_counts(normalize=True).rename("overallTreatmentProportion")
-        neighbors_distribution = neighbors_treatments.value_counts(normalize=True).rename("neighborTreatmentProportion")
+        neighbors_distribution = neighbors_treatments.value_counts(normalize=True).rename("similarPatientsTreatmentProportion")
         return pd.concat([overall_distribution, neighbors_distribution], axis=1)
         
 
@@ -66,7 +66,6 @@ class PatientsLikeMeModel:
         knn = NearestNeighbors(n_neighbors=25, metric="euclidean")
         knn.fit(df_scaled)
 
-        # TODO: incorperate tumor regression into the data preprocessing, and remove this condition.
         patient_data.drop(columns=["tumorRegression"], inplace=True)
         patient_data = patient_data.drop(columns=self.exclude)
 

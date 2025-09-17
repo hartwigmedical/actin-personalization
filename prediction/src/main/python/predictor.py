@@ -120,7 +120,6 @@ def load_patient_df(patient, tnm_stage_medians, settings: Settings) -> pd.DataFr
         "hasBrafV600EMutation": "BRAF" in variant_genes and "V600E" in variant_genes["BRAF"].get("event", ""),
         "hasRasMutation": any(gene in variant_genes for gene in ["KRAS", "NRAS", "HRAS"]),
         "hasKrasG12CMutation": "KRAS" in variant_genes and "G12C" in variant_genes["KRAS"].get("event", ""),
-        "tumorRegression": tumor.get("tumorRegression", 0)
     }
     
     features = lookup_manager.features + [settings.event_col, settings.duration_col]
@@ -170,7 +169,13 @@ def get_patient_like_me(patient_data: dict, trained_path, settings: Settings):
     model = PatientsLikeMeModel(settings)
     processed_df = convert_patient_dict_to_processed_df(patient_data, trained_path, settings)
     treatment_distribution_df = model.find_similar_patients(processed_df)
-    return treatment_distribution_df.to_dict()
+
+    def process_treatment_distribution(d: dict):
+        return [{"treatment": k, "proportion": v} for k, v in d.items()]
+    return {
+        "overallTreatmentProportion": process_treatment_distribution(treatment_distribution_df["overallTreatmentProportion"].to_dict()),
+        "similarPatientsTreatmentProportion": process_treatment_distribution(treatment_distribution_df["similarPatientsTreatmentProportion"].to_dict())
+    }
 
 
 def predict_treatment_scenarios(patient_data: dict, trained_path: str, shap_samples_path: str, valid_treatment_combinations: dict, settings: Settings) -> list:

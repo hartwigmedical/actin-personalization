@@ -65,7 +65,7 @@ def main():
     personalized_result = {}
     logger.info("Running predictions...")
     try:
-        personalized_result["prediction"] = predict_treatment_scenarios(
+        personalized_result["predictions"] = predict_treatment_scenarios(
             patient_data=patient_data,
             trained_path=args.trained_path,
             shap_samples_path=args.shap_samples_path,
@@ -79,7 +79,7 @@ def main():
 
     logger.info("Finding similar patients...")
     try:
-        personalized_result["similarPatients"] = get_patient_like_me(
+        personalized_result["similarPatientsSummary"] = get_patient_like_me(
             patient_data=patient_data,
             trained_path=args.trained_path,
             settings=settings
