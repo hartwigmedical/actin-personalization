@@ -18,15 +18,48 @@ class BenefitCalibrationResult:
 
 def weighted_linear_regression(y: np.ndarray, x: np.ndarray, weights: np.ndarray) -> tuple[float, float]:
     """
-    Perform weighted least squares regression of y ~ intercept + slope * x.
+    Robust weighted least squares fit of y ~ intercept + slope * x.
     Returns (slope, intercept).
+    Handles degenerate/ill-conditioned cases gracefully.
     """
-    design_matrix = np.column_stack([np.ones_like(x), x])
-    weight_matrix = np.diag(weights)
-    weighted_design = design_matrix.T @ weight_matrix
-    coefficients = np.linalg.pinv(weighted_design @ design_matrix) @ (weighted_design @ y)
-    intercept, slope = coefficients[0], coefficients[1]
-    return slope, intercept
+    # coerce and mask finites
+    x = np.asarray(x, dtype=float)
+    y = np.asarray(y, dtype=float)
+    w = np.asarray(weights, dtype=float)
+
+    mask = np.isfinite(x) & np.isfinite(y) & np.isfinite(w) & (w > 0)
+    if mask.sum() < 2:
+        return 0.0, float(np.nanmean(y))  
+
+    x, y, w = x[mask], y[mask], w[mask]
+
+    # normalize weights to avoid scale issues
+    w_sum = w.sum()
+    if w_sum == 0:
+        return 0.0, float(np.nanmean(y))
+    w = w / w_sum
+
+    xbar = np.sum(w * x)
+    ybar = np.sum(w * y)
+
+    x_c = x - xbar
+    y_c = y - ybar
+    Sxx = np.sum(w * x_c * x_c)
+    Sxy = np.sum(w * x_c * y_c)
+
+    # if x has (almost) no spread, slope is undefined → set slope 0
+    eps = 1e-12
+    if not np.isfinite(Sxx) or Sxx < eps:
+        slope = 0.0
+        intercept = ybar
+        return float(slope), float(intercept)
+
+    slope = Sxy / Sxx
+    if not np.isfinite(slope):
+        slope = 0.0
+    intercept = ybar - slope * xbar
+    return float(slope), float(intercept)
+
 
 def align_pair_labels_with_index(pairs: pd.DataFrame, target_index: pd.Index) -> pd.DataFrame:
     """

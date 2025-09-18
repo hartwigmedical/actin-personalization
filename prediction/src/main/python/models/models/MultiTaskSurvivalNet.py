@@ -191,7 +191,7 @@ class MultiTaskNNSurvivalModel(BaseSurvivalModel):
             
         X_tensor = torch.from_numpy(X.values.astype('float32'))
         task_idx_tensor = torch.from_numpy(task_idx.astype('int64'))
-
+  
         if isinstance(self.model, CoxPH):
             # ---- DeepSurv branch (continuous-time) ----
             y_dur_t = torch.from_numpy(durations.astype('float32'))
@@ -229,20 +229,52 @@ class MultiTaskNNSurvivalModel(BaseSurvivalModel):
                 self.task_baselines_[k] = {'times': times_k, 'cumhaz': H0_k}
         else:
             # ---- Discrete-time branch (LH/PCH/MTLR/DeepHitSingle) ----
-            labtrans = LogisticHazard.label_transform(self.num_durations)
-            y_bins, y_evt = labtrans.fit_transform(durations, events)
+            labtrans = self.model.label_transform(self.num_durations)
             self.labtrans = labtrans
 
-            y_bins_t = torch.from_numpy(y_bins).long()
-            y_evt_t  = torch.from_numpy(y_evt).float()
-            dataset = torch.utils.data.TensorDataset(X_tensor, task_idx_tensor, y_bins_t, y_evt_t)
-            loader = torch.utils.data.DataLoader(dataset, batch_size=128, shuffle=True)
+            if isinstance(self.model, PCHazard):
+                y_bins, y_evt, y_rho = labtrans.fit_transform(durations, events)
+                y_bins_t = torch.as_tensor(y_bins, dtype=torch.long)
+                y_evt_t  = torch.as_tensor(y_evt , dtype=torch.float32)
+                y_rho_t  = torch.as_tensor(y_rho , dtype=torch.float32)
+
+                dataset = torch.utils.data.TensorDataset(X_tensor, task_idx_tensor, y_bins_t, y_evt_t, y_rho_t)
+            else:
+                # LH / MTLR / DeepHitSingle
+                y_bins, y_evt = labtrans.fit_transform(durations, events)
+                y_bins_t = torch.as_tensor(y_bins, dtype=torch.long)
+                y_evt_t  = torch.as_tensor(y_evt , dtype=torch.float32)
+
+                dataset = torch.utils.data.TensorDataset(X_tensor, task_idx_tensor, y_bins_t, y_evt_t)
+                
+            loader = torch.utils.data.DataLoader(dataset, batch_size=128, shuffle=True) 
 
             self.net.train()
             for _ in range(self.epochs):
-                for xb, tb, yb_bins, yb_evt in loader:
-                    logits = self.net(xb, tb)             
-                    loss = self.loss_fn(logits, yb_bins, yb_evt)
+                for batch in loader:
+                    logits = None
+                    if isinstance(self.model, PCHazard):
+                        xb, tb, yb_bins, yb_evt, yb_rho = batch
+                        logits = self.net(xb, tb)
+                        loss = self.loss_fn(logits, yb_bins, yb_evt, yb_rho)
+                    elif isinstance(self.model, DeepHitSingle):
+                        xb, tb, yb_bins, yb_evt = batch
+                        logits = self.net(xb, tb)
+                        if hasattr(self.loss_fn, "rank_mat"):
+                            rank_mat = self.loss_fn.rank_mat((yb_bins, yb_evt))
+                        else:
+                            with torch.no_grad():
+                                B = yb_bins.shape[0]
+                                rank_mat = torch.zeros(B, B, device=yb_bins.device)
+                                for i in range(B):
+                                    if yb_evt[i] > 0:
+                                        rank_mat[i] = (yb_bins[i] < yb_bins).float()
+                        loss = self.loss_fn(logits, yb_bins, yb_evt, rank_mat)
+                    else:
+                        xb, tb, yb_bins, yb_evt = batch
+                        logits = self.net(xb, tb)
+                        loss = self.loss_fn(logits, yb_bins, yb_evt)
+
                     self.optimizer.zero_grad()
                     loss.backward()
                     self.optimizer.step()
@@ -279,12 +311,32 @@ class MultiTaskNNSurvivalModel(BaseSurvivalModel):
                 return pd.DataFrame(S, index=grid)
             
             logits = self.net(X_tensor, task_idx_tensor)
-            hazards = torch.sigmoid(logits)
-            surv = torch.cumprod(1 - hazards, dim=1).cpu().numpy().T
-            if hasattr(self, "labtrans") and getattr(self.labtrans, "cuts", None) is not None:
-                src_times = np.asarray(self.labtrans.cuts, dtype=float)
+            if isinstance(self.model, DeepHitSingle):
+                pmf = torch.softmax(logits, dim=1)
+                surv = (1 - torch.cumsum(pmf, dim=1)).cpu().numpy()  # [N, T]
+                src_times = np.asarray(getattr(self.labtrans, "cuts", config_settings.fixed_time_bins), dtype=float)
+
+            elif isinstance(self.model, PCHazard):
+                # Convert network output to positive hazard rates per interval
+                rates = nn.functional.softplus(logits)  # [N, T]
+                cuts_np = np.asarray(self.labtrans.cuts, dtype=float)
+                cuts_t  = torch.as_tensor(cuts_np, dtype=torch.float32, device=logits.device)
+
+                dt = torch.diff(cuts_t)                        # [T]
+                time_index = cuts_np[1:]                       # length T
+                cumhaz = torch.cumsum(rates * dt, dim=1)    # [N, T]
+                surv   = torch.exp(-cumhaz).cpu().numpy()   # [N, T]
+                surv   = np.clip(surv, 1e-10, 1.0).T       # [T, N]
+                src_times = time_index             
+
             else:
-                src_times = np.asarray(config_settings.fixed_time_bins, dtype=float)  # fallback
+                # LogisticHazard / MTLR 
+                hazards = torch.sigmoid(logits)
+                surv = torch.cumprod(1 - hazards, dim=1).cpu().numpy()
+                src_times = np.asarray(getattr(self.labtrans, "cuts", config_settings.fixed_time_bins), dtype=float)
+
+            surv = np.clip(surv, 1e-10, 1.0)
+            surv = surv.T  
 
             surv_df = pd.DataFrame(surv, index=src_times)
 
