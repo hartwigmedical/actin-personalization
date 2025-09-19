@@ -651,6 +651,37 @@
         }
     },
     "treatment_drug_OS": {
+        "CoxPH": {
+            "class": "models.models.survival_models.CoxPHModel",
+            "kwargs": {
+                "alpha": 1.0,
+                "ties": "breslow",
+                "n_iter": 500,
+                "tol": 1e-05
+            }
+        },
+        "RandomSurvivalForest": {
+            "class": "models.models.survival_models.RandomSurvivalForestModel",
+            "kwargs": {
+                "n_estimators": 200,
+                "max_depth": 20,
+                "min_samples_split": 100,
+                "min_samples_leaf": 20,
+                "max_features": "sqrt"
+            }
+        },
+        "GradientBoosting": {
+            "class": "models.models.survival_models.GradientBoostingSurvivalModel",
+            "kwargs": {
+                "learning_rate": 0.1,
+                "n_estimators": 300,
+                "max_depth": 10,
+                "subsample": 0.8,
+                "min_samples_leaf": 20,
+                "min_samples_split": 10,
+                "max_features": "log2"
+            }
+        },
         "DeepSurv": {
             "class": "models.models.NNSurvivalModel.DeepSurv",
             "kwargs": {
@@ -744,15 +775,6 @@
                 "use_attention": false
             }
         },
-        "CoxPH": {
-            "class": "models.models.survival_models.CoxPHModel",
-            "kwargs": {
-                "alpha": 1.0,
-                "ties": "breslow",
-                "n_iter": 500,
-                "tol": 1e-05
-            }
-        },
         "DeepSurv_attention": {
             "class": "models.models.NNSurvivalModel.DeepSurv",
             "kwargs": {
@@ -769,7 +791,7 @@
                 "batch_size": 32,
                 "epochs": 500,
                 "early_stopping_patience": 50,
-                "input_size": 101,
+                "input_size": 102,
                 "use_attention": true
             }
         },
@@ -847,31 +869,10 @@
                 "use_attention": true
             }
         },
-        "RandomSurvivalForest": {
-            "class": "models.models.survival_models.RandomSurvivalForestModel",
-            "kwargs": {
-                "n_estimators": 200,
-                "max_depth": 20,
-                "min_samples_split": 100,
-                "min_samples_leaf": 20,
-                "max_features": "sqrt"
-            }
-        },
-        "GradientBoosting": {
-            "class": "models.models.survival_models.GradientBoostingSurvivalModel",
-            "kwargs": {
-                "learning_rate": 0.1,
-                "n_estimators": 300,
-                "max_depth": 10,
-                "subsample": 0.8,
-                "min_samples_leaf": 20,
-                "min_samples_split": 10,
-                "max_features": "log2"
-            }
-        },
         "MultiTaskNN_LogisticHazard": {
             "class": "models.models.MultiTaskSurvivalNet.MultiTaskNNSurvivalModel",
             "kwargs": {
+                "model_class": "pycox.models.logistic_hazard.LogisticHazard",
                 "num_nodes": [
                     256,
                     128,
@@ -910,6 +911,7 @@
         "MultiTaskNN_MTLR": {
             "class": "models.models.MultiTaskSurvivalNet.MultiTaskNNSurvivalModel",
             "kwargs": {
+                "model_class": "pycox.models.mtlr.MTLR",
                 "num_nodes": [
                     32
                 ],
@@ -925,22 +927,25 @@
                 "use_attention": false
             }
         },
-        "MultiTaskNN_CoxPH": {
+        "MultiTaskNN_DeepHit": {
             "class": "models.models.MultiTaskSurvivalNet.MultiTaskNNSurvivalModel",
             "kwargs": {
-                "model_class": "pycox.models.cox.CoxPH",
+                "model_class": "pycox.models.deephit.DeepHit",
                 "num_nodes": [
                     128,
-                    64
+                    64,
+                    32
                 ],
-                "num_tasks": 10,
-                "dropout": 0.15,
-                "epochs": 75,
-                "activation": "elu",
+                "num_tasks": 15,
+                "num_durations": 60,
+                "dropout": 0.1,
+                "lr": 0.001,
                 "batch_norm": true,
-                "lr": 0.0008,
-                "weight_decay": 0.0002,
-                "input_size": 101
+                "activation": "elu",
+                "epochs": 200,
+                "batch_size": 64,
+                "early_stopping_patience": 20,
+                "use_attention": false
             }
         }
     }

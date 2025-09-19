@@ -82,20 +82,27 @@ def predict_survival_probabilities(
     if isinstance(survival_function, (list, tuple)):
         probabilities = np.array([float(func(evaluation_days)) for func in survival_function], dtype=float)
         return pd.Series(probabilities, index=X.index)
+    
+    try:
+        arr = np.asarray(survival_function)
+        if arr.dtype == object and arr.size > 0:
+            first = arr[0]
+            if callable(first) or (hasattr(first, "x") and hasattr(first, "y")):
+                probs = np.array([float(fn(float(evaluation_days))) for fn in list(arr)], dtype=float)
+                return pd.Series(probs, index=X.index)
+    except Exception:
+        survival_array = np.asarray(survival_function)
+        if survival_array.ndim == 2:
+            time_grid = None
+            label_transform = getattr(model, "labtrans", None)
+            if label_transform is not None and hasattr(label_transform, "cuts"):
+                time_grid = np.asarray(label_transform.cuts, dtype=float)
+            elif hasattr(model, "times_"):
+                time_grid = np.asarray(getattr(model, "times_"), dtype=float)
+            if time_grid is None:
+                raise ValueError("Survival function returned 2D array but no time grid found on model.")
+            survival_df = pd.DataFrame(survival_array, index=time_grid)
+            probabilities = interpolate_survival_probabilities_at_days(survival_df, evaluation_days)
+            return pd.Series(probabilities, index=X.index)
 
-    survival_array = np.asarray(survival_function)
-    if survival_array.ndim == 2:
-        time_grid = None
-        label_transform = getattr(model, "labtrans", None)
-        if label_transform is not None and hasattr(label_transform, "cuts"):
-            time_grid = np.asarray(label_transform.cuts, dtype=float)
-        elif hasattr(model, "times_"):
-            time_grid = np.asarray(getattr(model, "times_"), dtype=float)
-        if time_grid is None:
-            raise ValueError("Survival function returned 2D array but no time grid found on model.")
-        survival_df = pd.DataFrame(survival_array, index=time_grid)
-        probabilities = interpolate_survival_probabilities_at_days(survival_df, evaluation_days)
-        return pd.Series(probabilities, index=X.index)
-
-    raise ValueError("Unsupported output from predict_survival_function.")
 

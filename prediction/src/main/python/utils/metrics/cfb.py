@@ -57,9 +57,11 @@ class CForBenefitCovariateMatcher:
         Xa_s = scaler.transform(Xa)
         Xb_s = scaler.transform(Xb)
 
-        cov = np.cov(X_all, rowvar=False)
-        VI = np.linalg.pinv(cov + 1e-8*np.eye(cov.shape[0]))
+        X_all_s = np.vstack([Xa_s, Xb_s])
+        cov_s = np.cov(X_all_s, rowvar=False)
+        VI = np.linalg.pinv(cov_s + 1e-8*np.eye(cov_s.shape[0]))
         D = cdist(Xa_s, Xb_s, metric="mahalanobis", VI=VI)
+
 
         rows = []
         if one_to_one:

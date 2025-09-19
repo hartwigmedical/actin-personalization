@@ -316,7 +316,6 @@ class ModelTrainer:
             result.update({k: float(v) for k, v in holdout_metrics.items()})  
 
             self.results[model_name] = result
-
-        results_df = pd.DataFrame.from_dict(self.results, orient='index')
-        return results_df, self.trained_models
+        
+        return self.results, self.trained_models
 

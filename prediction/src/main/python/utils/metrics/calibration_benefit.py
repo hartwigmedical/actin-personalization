@@ -143,7 +143,7 @@ def compute_benefit_calibration(
         raise ValueError("binning_strategy must be 'quantile' or 'uniform'")
 
     calibration_curve = (
-        pairs.groupby("predicted_bin")
+        pairs.groupby("predicted_bin", observed=False)
         .agg(
             count=("predicted_benefit", "size"),
             predicted_mean=("predicted_benefit", "mean"),

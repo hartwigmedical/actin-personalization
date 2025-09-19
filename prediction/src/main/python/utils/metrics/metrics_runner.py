@@ -6,7 +6,7 @@ import re
 from typing import Any, Dict, List, Tuple
 from sksurv.util import Surv
 
-from .base_metrics import compute_time_dependent_c_index, compute_integrated_brier_score, compute_time_dependent_auc
+from .base_metrics import compute_time_dependent_c_index, compute_integrated_brier_score, compute_time_dependent_auc, calibration_assessment
 from .counterfactuals import apply_treatment_components, predict_survival_probabilities
 from utils.metrics.base_metrics import compute_cfb_for_treatment_pair
 
@@ -72,6 +72,11 @@ def evaluate_model_predictions(
     else:
         sf = model.predict_survival_function(input_features)
 
+    if isinstance(sf, np.ndarray) and sf.dtype == object and sf.size > 0:
+        first = sf[0]
+        if callable(first) or (hasattr(first, "x") and hasattr(first, "y")):
+            sf = list(sf)
+
     if isinstance(sf, pd.DataFrame):
         df = sf.reindex(evaluation_times, method='nearest', fill_value='extrapolate')
         predictions = df.values.T  # -> [n_samples, len(times)]
@@ -90,8 +95,61 @@ def evaluate_model_predictions(
                 raise ValueError("Survival function returned 2D array but no time grid found on model.")
             df = pd.DataFrame(arr, index=tgrid).reindex(evaluation_times, method='nearest', fill_value='extrapolate')
             predictions = df.values.T
+
+        elif arr.ndim == 1:
+                # --- COX HANDLING (1-D numeric outputs) ---
+                eta_or_ph = arr.astype(float)
+                exp_eta = eta_or_ph if np.all(eta_or_ph >= 0) else np.exp(eta_or_ph)
+
+                def _extract_baseline(obj, is_cumhaz=False):
+                    if obj is None:
+                        return None, None
+                    if isinstance(obj, (pd.Series, pd.DataFrame)):
+                        ser = obj if isinstance(obj, pd.Series) else obj.iloc[:, 0]
+                        times = np.asarray(ser.index, dtype=float)
+                        vals = np.asarray(ser.values, dtype=float)
+                        if is_cumhaz:
+                            vals = np.exp(-vals)
+                        return times, vals
+                    if hasattr(obj, "x") and hasattr(obj, "y"):
+                        times = np.asarray(obj.x, dtype=float)
+                        vals = np.asarray(obj.y, dtype=float)
+                        if is_cumhaz:
+                            vals = np.exp(-vals)
+                        return times, vals
+                    try:
+                        times, vals = obj
+                        times = np.asarray(times, dtype=float)
+                        vals = np.asarray(vals, dtype=float)
+                        if is_cumhaz:
+                            vals = np.exp(-vals)
+                        return times, vals
+                    except Exception:
+                        return None, None
+
+                baseS = getattr(model, "baseline_survival_", None) or getattr(model, "baseline_survival", None)
+                baseH = getattr(model, "baseline_cumulative_hazard_", None) or getattr(model, "baseline_cumulative_hazard", None)
+
+                S0_times, S0_vals = _extract_baseline(baseS, is_cumhaz=False)
+                if S0_vals is None:
+                    S0_times, S0_vals = _extract_baseline(baseH, is_cumhaz=True)
+
+                if S0_vals is None or S0_times is None:
+                    raise ValueError(
+                        "Unsupported output from predict_survival_function: 1-D array detected, "
+                        "but no usable baseline survival/cumulative hazard found to reconstruct Cox survival."
+                    )
+
+                S0_on_grid = np.interp(
+                    evaluation_times, S0_times, S0_vals,
+                    left=S0_vals[0], right=S0_vals[-1]
+                )
+                predictions = np.power(S0_on_grid[None, :], exp_eta[:, None])
+
+
         else:
             raise ValueError("Unsupported output from predict_survival_function.")
+
 
     risk_scores = -predictions
     return evaluation_times, predictions, risk_scores
@@ -124,10 +182,14 @@ def evaluate_all_metrics(
         predictions, y_test['duration'], y_test['event'], evaluation_times
     )
 
-    results['calibration_error'] = compute_integrated_brier_score(
+    results['ibs'] = compute_integrated_brier_score(
         y_train, y_test, predictions, evaluation_times
     )
 
+    results['ce'] = calibration_assessment(
+        predictions, y_test_df, evaluation_times, n_bins=10
+    )
+    
     auc_times, mean_auc = compute_time_dependent_auc(
         y_train, y_test, risk_scores, evaluation_times
     )
